@@ -1,4 +1,7 @@
+'use client'
+
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { signup } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,9 +32,9 @@ const countries = [
     "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
 
-export default async function SignupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-    const params = await searchParams
-    const error = params.error
+export default function SignupPage() {
+    const searchParams = useSearchParams()
+    const error = searchParams.get('error')
 
     return (
         <div className="space-y-6">

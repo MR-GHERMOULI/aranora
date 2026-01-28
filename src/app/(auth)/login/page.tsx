@@ -1,4 +1,7 @@
+'use client'
+
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { login } from "../actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,9 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Lock, ArrowRight } from "lucide-react"
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-    const params = await searchParams
-    const error = params.error
+export default function LoginPage() {
+    const searchParams = useSearchParams()
+    const error = searchParams.get('error')
 
     return (
         <div className="space-y-6">
