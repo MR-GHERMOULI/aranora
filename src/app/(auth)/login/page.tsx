@@ -11,7 +11,7 @@ import { Mail, Lock, ArrowRight } from "lucide-react"
 
 export default function LoginPage() {
     const searchParams = useSearchParams()
-    const error = searchParams.get('error')
+    const success = searchParams.get('success')
 
     return (
         <div className="space-y-6">
@@ -19,6 +19,12 @@ export default function LoginPage() {
                 <h1 className="text-3xl font-bold text-slate-900">Welcome back</h1>
                 <p className="text-slate-500">Enter your credentials to access your account</p>
             </div>
+
+            {success === 'check_email' && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                    Account created! Please check your email to verify your account.
+                </div>
+            )}
 
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">

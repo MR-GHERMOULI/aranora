@@ -33,7 +33,7 @@ export async function signup(formData: FormData) {
     const phone = formData.get('phone') as string
     const country = formData.get('country') as string
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -48,6 +48,10 @@ export async function signup(formData: FormData) {
     if (error) {
         console.error('Signup error:', error)
         redirect(`/signup?error=${encodeURIComponent(error.message)}`)
+    }
+
+    if (!data.session) {
+        redirect('/login?success=check_email')
     }
 
     revalidatePath('/', 'layout')

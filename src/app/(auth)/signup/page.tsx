@@ -50,7 +50,7 @@ export default function SignupPage() {
             )}
 
             <Card className="shadow-xl shadow-slate-200/50 border-slate-200">
-                <form>
+                <form autoComplete="off">
                     <CardContent className="pt-6 space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="fullName" className="text-slate-700">Full Name</Label>
@@ -63,6 +63,8 @@ export default function SignupPage() {
                                     placeholder="John Doe"
                                     className="pl-10"
                                     required
+                                    autoComplete="off"
+                                    defaultValue=""
                                 />
                             </div>
                         </div>
@@ -77,6 +79,8 @@ export default function SignupPage() {
                                     placeholder="you@example.com"
                                     className="pl-10"
                                     required
+                                    autoComplete="off"
+                                    defaultValue=""
                                 />
                             </div>
                         </div>
@@ -91,6 +95,8 @@ export default function SignupPage() {
                                     placeholder="+213 555 123 456"
                                     className="pl-10"
                                     required
+                                    autoComplete="off"
+                                    defaultValue=""
                                 />
                             </div>
                         </div>
@@ -103,6 +109,8 @@ export default function SignupPage() {
                                     name="country"
                                     className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring appearance-none"
                                     required
+                                    autoComplete="off"
+                                    defaultValue=""
                                 >
                                     <option value="">Select your country</option>
                                     {countries.map((country) => (
@@ -122,6 +130,8 @@ export default function SignupPage() {
                                     placeholder="••••••••"
                                     className="pl-10"
                                     required
+                                    autoComplete="off"
+                                    defaultValue=""
                                 />
                             </div>
                             <p className="text-xs text-slate-500">Must be at least 8 characters</p>
