@@ -29,13 +29,22 @@ const countries = [
     "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
 
-export default function SignupPage() {
+export default async function SignupPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+    const params = await searchParams
+    const error = params.error
+
     return (
         <div className="space-y-6">
             <div className="text-center space-y-2">
                 <h1 className="text-3xl font-bold text-slate-900">Create your account</h1>
                 <p className="text-slate-500">Join Aranora — it's completely free!</p>
             </div>
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                    {error}
+                </div>
+            )}
 
             <Card className="shadow-xl shadow-slate-200/50 border-slate-200">
                 <form>
