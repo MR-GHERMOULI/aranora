@@ -39,37 +39,37 @@ export function Sidebar({ className }: SidebarProps) {
         {
             label: "Tasks",
             icon: ListTodo,
-            href: "/dashboard/tasks",
+            href: "/tasks",
             color: "text-indigo-500",
         },
         {
             label: "Clients",
             icon: Users,
-            href: "/dashboard/clients",
+            href: "/clients",
             color: "text-violet-500",
         },
         {
             label: "Projects",
             icon: Briefcase,
-            href: "/dashboard/projects",
+            href: "/projects",
             color: "text-pink-700",
         },
         {
             label: "Invoices",
             icon: FileText,
-            href: "/dashboard/invoices",
+            href: "/invoices",
             color: "text-orange-700",
         },
         {
             label: "Calendar",
             icon: Calendar,
-            href: "/dashboard/calendar",
+            href: "/calendar",
             color: "text-emerald-500",
         },
         {
             label: "Reports",
             icon: BarChart,
-            href: "/dashboard/reports",
+            href: "/reports",
             color: "text-green-700",
         },
     ]
