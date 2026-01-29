@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Lock, ArrowRight } from "lucide-react"
 
-export default function LoginPage() {
+import { Suspense } from "react"
+
+function LoginContent() {
     const searchParams = useSearchParams()
     const success = searchParams.get('success')
     const error = searchParams.get('error')
@@ -112,5 +114,13 @@ export default function LoginPage() {
                 </Link>
             </p>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginContent />
+        </Suspense>
     )
 }

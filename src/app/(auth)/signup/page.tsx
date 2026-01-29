@@ -32,7 +32,9 @@ const countries = [
     "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
 ];
 
-export default function SignupPage() {
+import { Suspense } from "react"
+
+function SignupContent() {
     const searchParams = useSearchParams()
     const error = searchParams.get('error')
 
@@ -173,5 +175,13 @@ export default function SignupPage() {
                 </Link>
             </p>
         </div>
+    )
+}
+
+export default function SignupPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <SignupContent />
+        </Suspense>
     )
 }
