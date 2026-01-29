@@ -12,6 +12,7 @@ import { Mail, Lock, ArrowRight } from "lucide-react"
 export default function LoginPage() {
     const searchParams = useSearchParams()
     const success = searchParams.get('success')
+    const error = searchParams.get('error')
 
     return (
         <div className="space-y-6">
