@@ -143,8 +143,8 @@ export async function createInvoice(formData: FormData) {
     // For MVP we assume success.
   }
 
-  revalidatePath('/dashboard/invoices');
-  redirect(`/dashboard/invoices/${invoice.id}`);
+  revalidatePath('/invoices');
+  redirect(`/invoices/${invoice.id}`);
 }
 
 export async function updateInvoice(formData: FormData) {
@@ -217,9 +217,9 @@ export async function updateInvoice(formData: FormData) {
     console.error('Error inserting new items:', itemsError);
   }
 
-  revalidatePath('/dashboard/invoices');
-  revalidatePath(`/dashboard/invoices/${id}`);
-  redirect(`/dashboard/invoices/${id}`);
+  revalidatePath('/invoices');
+  revalidatePath(`/invoices/${id}`);
+  redirect(`/invoices/${id}`);
 }
 
 
@@ -242,6 +242,6 @@ export async function deleteInvoice(invoiceId: string) {
     throw new Error('Failed to delete invoice');
   }
 
-  revalidatePath('/dashboard/invoices');
+  revalidatePath('/invoices');
 }
 

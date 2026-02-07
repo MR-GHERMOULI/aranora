@@ -100,8 +100,8 @@ export async function createTask(formData: FormData) {
         return { error: error.message };
     }
 
-    revalidatePath('/dashboard/tasks');
-    revalidatePath('/dashboard/dashboard');
+    revalidatePath('/tasks');
+    revalidatePath('/dashboard');
     return { success: true };
 }
 
@@ -124,8 +124,8 @@ export async function updateTask(taskId: string, data: any) {
         return { error: error.message };
     }
 
-    revalidatePath('/dashboard/tasks');
-    revalidatePath('/dashboard/dashboard');
+    revalidatePath('/tasks');
+    revalidatePath('/dashboard');
     return { success: true };
 }
 
@@ -148,7 +148,7 @@ export async function deleteTask(taskId: string) {
         return { error: error.message };
     }
 
-    revalidatePath('/dashboard/tasks');
-    revalidatePath('/dashboard/dashboard');
+    revalidatePath('/tasks');
+    revalidatePath('/dashboard');
     return { success: true };
 }

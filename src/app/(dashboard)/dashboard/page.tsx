@@ -43,7 +43,7 @@ export default async function DashboardPage() {
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h1 className="text-3xl font-bold mb-1">
-                                {greeting()}, {stats.profile.full_name?.split(' ')[0] || 'Owner'}! 👋
+                                {greeting()}, {stats.profile.full_name?.split(' ')[0] || stats.profile.username || 'User'}! 👋
                             </h1>
                             <p className="text-white/80">
                                 Here's what's happening with your business today.

@@ -57,7 +57,7 @@ export async function createClient(formData: FormData) {
         throw new Error('Failed to create client');
     }
 
-    revalidatePath('/dashboard/clients');
+    revalidatePath('/clients');
 }
 
 
@@ -93,8 +93,8 @@ export async function updateClient(formData: FormData) {
         throw new Error('Failed to update client');
     }
 
-    revalidatePath('/dashboard/clients');
-    revalidatePath(`/dashboard/clients/${id}`);
+    revalidatePath('/clients');
+    revalidatePath(`/clients/${id}`);
 }
 
 export async function deleteClient(clientId: string) {
@@ -116,5 +116,5 @@ export async function deleteClient(clientId: string) {
         throw new Error('Failed to delete client');
     }
 
-    revalidatePath('/dashboard/clients');
+    revalidatePath('/clients');
 }

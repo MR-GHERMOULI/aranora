@@ -23,7 +23,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
     return (
         <div className="h-[350px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={data}>
                     <XAxis
                         dataKey="name"

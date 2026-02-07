@@ -77,7 +77,7 @@ export async function createProject(formData: FormData) {
     throw new Error('Failed to create project');
   }
 
-  revalidatePath('/dashboard/projects');
+  revalidatePath('/projects');
 }
 
 
@@ -116,8 +116,8 @@ export async function updateProject(formData: FormData) {
     throw new Error('Failed to update project');
   }
 
-  revalidatePath('/dashboard/projects');
-  revalidatePath(`/dashboard/projects/${id}`);
+  revalidatePath('/projects');
+  revalidatePath(`/projects/${id}`);
 }
 
 export async function deleteProject(projectId: string) {
@@ -139,5 +139,5 @@ export async function deleteProject(projectId: string) {
     throw new Error('Failed to delete project');
   }
 
-  revalidatePath('/dashboard/projects');
+  revalidatePath('/projects');
 }
