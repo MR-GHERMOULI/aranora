@@ -6,18 +6,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { createTask } from "@/app/(dashboard)/tasks/actions";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, CalendarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function CreateTaskDialog({ projects }: { projects: any[] }) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [date, setDate] = useState<Date>();
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
         await createTask(formData);
         setIsLoading(false);
         setOpen(false);
+        setDate(undefined); // Reset date
     }
 
     return (
@@ -70,7 +80,29 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="dueDate">Due Date</Label>
-                            <Input id="dueDate" name="dueDate" type="date" />
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !date && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={date}
+                                        onSelect={setDate}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                            <input type="hidden" name="dueDate" value={date ? format(date, "yyyy-MM-dd") : ""} />
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="projectId">Project</Label>

@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus, Loader2, CalendarIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -20,12 +20,27 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createTask } from "@/app/(dashboard)/calendar/actions"
 import { Project } from "@/types"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 const taskSchema = z.object({
     title: z.string().min(2, "Title is required"),
     description: z.string().optional(),
     projectId: z.string().optional(),
-    dueDate: z.string().optional(),
+    dueDate: z.date().optional(),
 })
 
 type TaskFormValues = z.infer<typeof taskSchema>
@@ -42,6 +57,7 @@ export function AddTaskDialog({ projects }: AddTaskDialogProps) {
         register,
         handleSubmit,
         reset,
+        control,
         formState: { errors },
     } = useForm<TaskFormValues>({
         resolver: zodResolver(taskSchema),
@@ -54,7 +70,7 @@ export function AddTaskDialog({ projects }: AddTaskDialogProps) {
             formData.append("title", data.title)
             if (data.description) formData.append("description", data.description)
             if (data.projectId) formData.append("projectId", data.projectId)
-            if (data.dueDate) formData.append("dueDate", data.dueDate)
+            if (data.dueDate) formData.append("dueDate", format(data.dueDate, "yyyy-MM-dd"))
 
             await createTask(formData)
             setOpen(false)
@@ -97,24 +113,53 @@ export function AddTaskDialog({ projects }: AddTaskDialogProps) {
 
                         <div className="grid gap-2">
                             <Label htmlFor="projectId">Project (Optional)</Label>
-                            <select
-                                id="projectId"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                {...register("projectId")}
-                            >
-                                <option value="">Select a project...</option>
-                                {projects.map(p => (
-                                    <option key={p.id} value={p.id}>{p.title}</option>
-                                ))}
-                            </select>
+                            <Controller
+                                name="projectId"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a project..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {projects.map(p => (
+                                                <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="dueDate">Due Date</Label>
-                            <Input
-                                id="dueDate"
-                                type="date"
-                                {...register("dueDate")}
+                            <Label>Due Date</Label>
+                            <Controller
+                                name="dueDate"
+                                control={control}
+                                render={({ field }) => (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
                             />
                         </div>
 

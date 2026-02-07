@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
-import * as z from "zod"
-import { Loader2, Plus, Trash2 } from "lucide-react"
+import { Loader2, Plus, Trash2, CalendarIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +9,21 @@ import { Label } from "@/components/ui/label"
 import { createInvoice, updateInvoice } from "@/app/(dashboard)/invoices/actions"
 import { Client, Project, Invoice } from "@/types"
 import { useRouter } from "next/navigation"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface InvoiceFormProps {
     clients: Client[];
@@ -25,16 +38,16 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
     const [items, setItems] = useState<{ description: string, quantity: number, unitPrice: number }[]>([{ description: "", quantity: 1, unitPrice: 0 }])
     const [selectedClient, setSelectedClient] = useState("")
     const [selectedProject, setSelectedProject] = useState("")
-    const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0])
-    const [dueDate, setDueDate] = useState("")
+    const [issueDate, setIssueDate] = useState<Date | undefined>(new Date())
+    const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
     const [status, setStatus] = useState("Draft")
 
     useEffect(() => {
         if (invoice) {
             setSelectedClient(invoice.client_id || "")
             setSelectedProject(invoice.project_id || "")
-            setIssueDate(invoice.issue_date.split('T')[0])
-            setDueDate(invoice.due_date ? invoice.due_date.split('T')[0] : "")
+            setIssueDate(invoice.issue_date ? new Date(invoice.issue_date) : new Date())
+            setDueDate(invoice.due_date ? new Date(invoice.due_date) : undefined)
             setStatus(invoice.status)
 
             if (invoice.items && invoice.items.length > 0) {
@@ -75,9 +88,9 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             }
             formData.append("clientId", selectedClient);
             if (selectedProject) formData.append("projectId", selectedProject);
-            formData.append("issueDate", issueDate);
-            formData.append("dueDate", dueDate);
-            formData.append("status", status); // Pass status only for updates usually, but safe to pass always/ignored by create logic if hardcoded there. Wait, create hardcodes Draft.
+            if (issueDate) formData.append("issueDate", format(issueDate, "yyyy-MM-dd"));
+            if (dueDate) formData.append("dueDate", format(dueDate, "yyyy-MM-dd"));
+            formData.append("status", status);
             formData.append("items", JSON.stringify(items));
 
             if (invoice) {
@@ -85,6 +98,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             } else {
                 await createInvoice(formData);
             }
+            router.refresh(); // Refresh to show new data
         } catch (error) {
             console.error(error);
             alert(`Failed to ${invoice ? 'update' : 'create'} invoice`);
@@ -97,50 +111,92 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label>Client</Label>
-                    <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={selectedClient}
-                        onChange={(e) => setSelectedClient(e.target.value)}
-                        required
-                    >
-                        <option value="">Select Client...</option>
-                        {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
+                    <Select value={selectedClient} onValueChange={setSelectedClient} required>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Client..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="space-y-2">
                     <Label>Project (Optional)</Label>
-                    <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={selectedProject}
-                        onChange={(e) => setSelectedProject(e.target.value)}
-                    >
-                        <option value="">Select Project...</option>
-                        {projects.filter(p => !selectedClient || p.client_id === selectedClient).map(p => (
-                            <option key={p.id} value={p.id}>{p.title}</option>
-                        ))}
-                    </select>
+                    <Select value={selectedProject} onValueChange={setSelectedProject}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Project..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {projects.filter(p => !selectedClient || p.client_id === selectedClient).map(p => (
+                                <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="space-y-2">
                     <Label>Issue Date</Label>
-                    <Input type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} required />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !issueDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {issueDate ? format(issueDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={issueDate}
+                                onSelect={setIssueDate}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 <div className="space-y-2">
                     <Label>Due Date</Label>
-                    <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !dueDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={dueDate}
+                                onSelect={setDueDate}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
                 </div>
                 {invoice && (
                     <div className="space-y-2">
                         <Label>Status</Label>
-                        <select
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                        >
-                            <option value="Draft">Draft</option>
-                            <option value="Sent">Sent</option>
-                            <option value="Paid">Paid</option>
-                            <option value="Overdue">Overdue</option>
-                        </select>
+                        <Select value={status} onValueChange={setStatus}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Draft">Draft</SelectItem>
+                                <SelectItem value="Sent">Sent</SelectItem>
+                                <SelectItem value="Paid">Paid</SelectItem>
+                                <SelectItem value="Overdue">Overdue</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 )}
             </div>
@@ -171,7 +227,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
                                     type="number"
                                     min="1"
                                     value={item.quantity}
-                                    onChange={e => updateItem(index, 'quantity', parseInt(e.target.value))}
+                                    onChange={e => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
                                     required
                                 />
                             </div>
@@ -182,7 +238,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
                                     min="0"
                                     step="0.01"
                                     value={item.unitPrice}
-                                    onChange={e => updateItem(index, 'unitPrice', parseFloat(e.target.value))}
+                                    onChange={e => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
                                     required
                                 />
                             </div>

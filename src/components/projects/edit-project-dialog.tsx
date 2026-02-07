@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Pencil, Loader2 } from "lucide-react"
+import { Pencil, Loader2, CalendarIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,14 +21,29 @@ import { Label } from "@/components/ui/label"
 import { updateProject } from "@/app/(dashboard)/projects/actions"
 import { Project } from "@/types"
 import { useRouter } from "next/navigation"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
 const projectSchema = z.object({
     title: z.string().min(2, "Title must be at least 2 characters"),
     status: z.enum(["Pending", "In Progress", "Completed"]),
     budget: z.string().optional(),
     description: z.string().optional().or(z.literal("")),
-    startDate: z.string().optional().or(z.literal("")),
-    endDate: z.string().optional().or(z.literal("")),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
 })
 
 type ProjectFormValues = z.infer<typeof projectSchema>
@@ -45,6 +60,7 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<ProjectFormValues>({
         resolver: zodResolver(projectSchema),
@@ -53,8 +69,8 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             status: project.status as "Pending" | "In Progress" | "Completed",
             budget: project.budget?.toString() || "",
             description: project.description || "",
-            startDate: project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : "",
-            endDate: project.end_date ? new Date(project.end_date).toISOString().split('T')[0] : "",
+            startDate: project.start_date ? new Date(project.start_date) : undefined,
+            endDate: project.end_date ? new Date(project.end_date) : undefined,
         },
     })
 
@@ -67,8 +83,8 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             formData.append("status", data.status)
             if (data.budget) formData.append("budget", data.budget)
             if (data.description) formData.append("description", data.description)
-            if (data.startDate) formData.append("startDate", data.startDate)
-            if (data.endDate) formData.append("endDate", data.endDate)
+            if (data.startDate) formData.append("startDate", format(data.startDate, "yyyy-MM-dd"))
+            if (data.endDate) formData.append("endDate", format(data.endDate, "yyyy-MM-dd"))
 
             await updateProject(formData)
             setOpen(false)
@@ -112,15 +128,22 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="status">Status</Label>
-                                <select
-                                    id="status"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...register("status")}
-                                >
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option>
-                                </select>
+                                <Controller
+                                    name="status"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Pending">Pending</SelectItem>
+                                                <SelectItem value="In Progress">In Progress</SelectItem>
+                                                <SelectItem value="Completed">Completed</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="budget">Budget ($)</Label>
@@ -135,19 +158,65 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="startDate">Start Date</Label>
-                                <Input
-                                    id="startDate"
-                                    type="date"
-                                    {...register("startDate")}
+                                <Label>Start Date</Label>
+                                <Controller
+                                    name="startDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
                                 />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="endDate">End Date</Label>
-                                <Input
-                                    id="endDate"
-                                    type="date"
-                                    {...register("endDate")}
+                                <Label>End Date</Label>
+                                <Controller
+                                    name="endDate"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full justify-start text-left font-normal",
+                                                        !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
                                 />
                             </div>
                         </div>

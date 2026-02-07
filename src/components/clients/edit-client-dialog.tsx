@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Pencil, Loader2 } from "lucide-react"
@@ -21,6 +21,13 @@ import { Label } from "@/components/ui/label"
 import { updateClient } from "@/app/(dashboard)/clients/actions"
 import { Client } from "@/types"
 import { useRouter } from "next/navigation"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 const clientSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -44,6 +51,7 @@ export function EditClientDialog({ client }: EditClientDialogProps) {
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<ClientFormValues>({
         resolver: zodResolver(clientSchema),
@@ -130,15 +138,22 @@ export function EditClientDialog({ client }: EditClientDialogProps) {
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="status">Status</Label>
-                            <select
-                                id="status"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                {...register("status")}
-                            >
-                                <option value="Potential">Potential</option>
-                                <option value="Active">Active</option>
-                                <option value="Completed">Completed</option>
-                            </select>
+                            <Controller
+                                name="status"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Potential">Potential</SelectItem>
+                                            <SelectItem value="Active">Active</SelectItem>
+                                            <SelectItem value="Completed">Completed</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
                         </div>
                         <div className="grid gap-2">
                             <Label htmlFor="notes">Notes</Label>

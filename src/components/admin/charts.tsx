@@ -43,7 +43,7 @@ interface UserGrowthChartProps {
 
 export function UserGrowthChart({ data }: UserGrowthChartProps) {
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data}>
                 <defs>
                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
@@ -100,7 +100,7 @@ interface ProjectsChartProps {
 
 export function ProjectsChart({ data }: ProjectsChartProps) {
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis type="number" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
@@ -135,7 +135,7 @@ const COLORS = ["#1E3A5F", "#2E5A8F", "#4ADE80", "#22C55E", "#F59E0B", "#EF4444"
 
 export function GeoChart({ data }: GeoChartProps) {
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={300}>
             <PieChart>
                 <Pie
                     data={data}
@@ -177,7 +177,7 @@ interface InvoicesChartProps {
 
 export function InvoicesChart({ data }: InvoicesChartProps) {
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis
