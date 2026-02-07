@@ -96,8 +96,8 @@ export async function getDashboardStats() {
 
     // Process Recent Activity (Only projects and invoices for now, removed clients for query optimization)
     const activities = [
-        ...(recentProjects || []).map(p => ({ type: 'project', id: p.id, title: `Project created: ${p.title}`, date: p.created_at, link: `/dashboard/projects/${p.id}` })),
-        ...(recentInvoices || []).map(i => ({ type: 'invoice', id: i.id, title: `Invoice generated: ${i.invoice_number}`, date: i.created_at, link: `/dashboard/invoices/${i.id}` }))
+        ...(recentProjects || []).map(p => ({ type: 'project', id: p.id, title: `Project created: ${p.title}`, date: p.created_at, link: `/projects/${p.id}` })),
+        ...(recentInvoices || []).map(i => ({ type: 'invoice', id: i.id, title: `Invoice generated: ${i.invoice_number}`, date: i.created_at, link: `/invoices/${i.id}` }))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
     return {
@@ -191,7 +191,7 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
             description: `${inv.client?.name || 'Client'} owes $${inv.total}`,
             severity: 'high',
             actionLabel: 'Send Reminder',
-            actionLink: `/dashboard/invoices/${inv.id}`,
+            actionLink: `/invoices/${inv.id}`,
             date: inv.due_date
         });
     });
@@ -205,7 +205,7 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
             description: task.project?.title ? `Project: ${task.project.title}` : 'General Task',
             severity: 'medium',
             actionLabel: 'Complete Task',
-            actionLink: `/dashboard/calendar`,
+            actionLink: `/calendar`,
             date: task.due_date
         });
     });
@@ -219,7 +219,7 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
             description: `Sent to ${contract.client?.name} over 3 days ago`,
             severity: 'medium',
             actionLabel: 'Follow Up',
-            actionLink: `/dashboard/contracts/${contract.id}`,
+            actionLink: `/contracts/${contract.id}`,
             date: contract.created_at
         });
     });
@@ -233,7 +233,7 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
                 description: 'Client inactive for 30+ days. Pitch a new project?',
                 severity: 'low',
                 actionLabel: 'View Profile',
-                actionLink: `/dashboard/clients/${client.id}`
+                actionLink: `/clients/${client.id}`
             });
         });
     }

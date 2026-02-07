@@ -28,7 +28,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href="/dashboard/clients">
+                    <Link href="/clients">
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
@@ -104,7 +104,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                             No projects found for this client.
                                             <div className="mt-4">
                                                 <Button variant="outline" size="sm" asChild>
-                                                    <Link href="/dashboard/projects">Create Project</Link>
+                                                    <Link href="/projects">Create Project</Link>
                                                 </Button>
                                             </div>
                                         </div>
@@ -140,7 +140,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                         </CardContent>
                                         <CardFooter className="justify-end py-3">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/dashboard/projects/${project.id}`}>View Details</Link>
+                                                <Link href={`/projects/${project.id}`}>View Details</Link>
                                             </Button>
                                         </CardFooter>
                                     </Card>
@@ -156,7 +156,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                             No invoices found for this client.
                                             <div className="mt-4">
                                                 <Button variant="outline" size="sm" asChild>
-                                                    <Link href="/dashboard/invoices/new">Create Invoice</Link>
+                                                    <Link href="/invoices/new">Create Invoice</Link>
                                                 </Button>
                                             </div>
                                         </div>
@@ -191,7 +191,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                         </CardContent>
                                         <CardFooter className="justify-end py-3">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/dashboard/invoices/${invoice.id}`}>View Details</Link>
+                                                <Link href={`/invoices/${invoice.id}`}>View Details</Link>
                                             </Button>
                                         </CardFooter>
                                     </Card>

@@ -36,7 +36,7 @@ export default async function ProjectPage({
 
     // Redirect if slug is wrong (SEO maintenance)
     if (project.slug !== slug) {
-        redirect(`/dashboard/projects/${id}/${project.slug}`);
+        redirect(`/projects/${id}/${project.slug}`);
     }
 
     return (
@@ -44,7 +44,7 @@ export default async function ProjectPage({
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href="/dashboard/projects">
+                    <Link href="/projects">
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
@@ -83,7 +83,7 @@ export default async function ProjectPage({
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">Client</p>
-                                        <Link href={`/dashboard/clients/${project.client_id}`} className="text-sm text-brand-primary hover:underline">
+                                        <Link href={`/clients/${project.client_id}`} className="text-sm text-brand-primary hover:underline">
                                             {project.client.name}
                                         </Link>
                                     </div>
@@ -171,7 +171,7 @@ export default async function ProjectPage({
                                             No invoices found.
                                             <div className="mt-4">
                                                 <Button variant="outline" size="sm" asChild>
-                                                    <Link href="/dashboard/invoices/new">Create Invoice</Link>
+                                                    <Link href="/invoices/new">Create Invoice</Link>
                                                 </Button>
                                             </div>
                                         </div>
@@ -206,7 +206,7 @@ export default async function ProjectPage({
                                         </CardContent>
                                         <CardFooter className="justify-end py-3">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/dashboard/invoices/${invoice.id}`}>View Details</Link>
+                                                <Link href={`/invoices/${invoice.id}`}>View Details</Link>
                                             </Button>
                                         </CardFooter>
                                     </Card>

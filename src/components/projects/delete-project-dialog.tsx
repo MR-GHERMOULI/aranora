@@ -30,7 +30,7 @@ export function DeleteProjectDialog({ projectId, projectTitle }: DeleteProjectDi
             setIsDeleting(true)
             await deleteProject(projectId)
             setOpen(false)
-            router.push('/dashboard/projects')
+            router.push('/projects')
         } catch (error) {
             console.error("Failed to delete project", error)
             setIsDeleting(false)

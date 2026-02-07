@@ -60,7 +60,7 @@ export default async function ClientsPage() {
                             </CardContent>
                             <CardFooter className="justify-end">
                                 <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/dashboard/clients/${client.id}`}>View Details</Link>
+                                    <Link href={`/clients/${client.id}`}>View Details</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

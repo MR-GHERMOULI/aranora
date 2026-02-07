@@ -152,7 +152,7 @@ export default async function ReportsPage() {
                                 {clientAnalytics.slice(0, 5).map((client) => (
                                     <tr key={client.id} className="border-b transition-colors hover:bg-muted/50">
                                         <td className="p-4 align-middle">
-                                            <Link href={`/dashboard/clients/${client.id}`} className="font-medium text-brand-primary hover:underline">
+                                            <Link href={`/clients/${client.id}`} className="font-medium text-brand-primary hover:underline">
                                                 {client.name}
                                             </Link>
                                         </td>

@@ -17,5 +17,5 @@ export default async function ProjectIdPage({
     }
 
     // Redirect to the full URL with slug
-    redirect(`/dashboard/projects/${id}/${project.slug}`);
+    redirect(`/projects/${id}/${project.slug}`);
 }

@@ -66,7 +66,7 @@ export default async function ProjectsPage() {
                             </CardContent>
                             <CardFooter className="justify-end">
                                 <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/dashboard/projects/${project.id}/${project.slug}`}>View Details</Link>
+                                    <Link href={`/projects/${project.id}/${project.slug}`}>View Details</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

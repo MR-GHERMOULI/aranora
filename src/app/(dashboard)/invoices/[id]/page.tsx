@@ -24,7 +24,7 @@ export default async function InvoicePage({ params }: { params: { id: string } }
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href="/dashboard/invoices">
+                    <Link href="/invoices">
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
@@ -44,7 +44,7 @@ export default async function InvoicePage({ params }: { params: { id: string } }
                 <div className="flex gap-2">
                     {invoice.client && <DownloadInvoiceButton invoice={invoice as any} profile={profile} />}
                     <Button variant="outline" asChild>
-                        <Link href={`/dashboard/invoices/${invoice.id}/edit`}>Edit Invoice</Link>
+                        <Link href={`/invoices/${invoice.id}/edit`}>Edit Invoice</Link>
                     </Button>
                     <Button variant="default">
                         <Send className="mr-2 h-4 w-4" /> Send Invoice
@@ -68,7 +68,7 @@ export default async function InvoicePage({ params }: { params: { id: string } }
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">Bill To</p>
-                                        <Link href={`/dashboard/clients/${invoice.client_id}`} className="text-sm text-brand-primary hover:underline">
+                                        <Link href={`/clients/${invoice.client_id}`} className="text-sm text-brand-primary hover:underline">
                                             {invoice.client.name}
                                         </Link>
                                     </div>

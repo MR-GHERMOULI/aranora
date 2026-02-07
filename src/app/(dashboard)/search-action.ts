@@ -51,7 +51,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             type: 'client' as const,
             title: c.name,
             subtitle: 'Client',
-            href: `/dashboard/clients/${c.id}`
+            href: `/clients/${c.id}`
         })),
         ...(projects || []).map(p => ({
             id: p.id,
@@ -59,7 +59,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             title: p.title,
             // @ts-ignore
             subtitle: `Project • ${p.client?.name || ''}`,
-            href: `/dashboard/projects/${p.id}`
+            href: `/projects/${p.id}`
         })),
         ...(invoices || []).map(i => ({
             id: i.id,
@@ -67,7 +67,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             title: i.invoice_number,
             // @ts-ignore
             subtitle: `Invoice • ${i.client?.name || ''}`,
-            href: `/dashboard/invoices/${i.id}`
+            href: `/invoices/${i.id}`
         }))
     ];
 

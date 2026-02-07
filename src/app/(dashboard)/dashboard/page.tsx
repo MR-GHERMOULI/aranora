@@ -51,17 +51,17 @@ export default async function DashboardPage() {
                         </div>
                         <div className="flex flex-wrap gap-3">
                             <Button variant="secondary" asChild>
-                                <Link href="/dashboard/clients/new">
+                                <Link href="/clients/new">
                                     <Plus className="mr-2 h-4 w-4" /> New Client
                                 </Link>
                             </Button>
                             <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
-                                <Link href="/dashboard/projects/new">
+                                <Link href="/projects/new">
                                     <Plus className="mr-2 h-4 w-4" /> New Project
                                 </Link>
                             </Button>
                             <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
-                                <Link href="/dashboard/invoices/new">
+                                <Link href="/invoices/new">
                                     <Plus className="mr-2 h-4 w-4" /> New Invoice
                                 </Link>
                             </Button>
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
                                 <CardDescription>Your earnings over the last 6 months</CardDescription>
                             </div>
                             <Button variant="ghost" size="sm" asChild>
-                                <Link href="/dashboard/reports">View Reports <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                                <Link href="/reports">View Reports <ArrowRight className="ml-1 h-4 w-4" /></Link>
                             </Button>
                         </CardHeader>
                         <CardContent>
@@ -197,7 +197,7 @@ export default async function DashboardPage() {
                                 <CardDescription>Your latest project activities</CardDescription>
                             </div>
                             <Button variant="ghost" size="sm" asChild>
-                                <Link href="/dashboard/projects">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                                <Link href="/projects">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
                             </Button>
                         </CardHeader>
                         <CardContent>
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
                             ) : (
                                 <div className="space-y-4">
                                     {stats.recentProjects.map((project: any) => (
-                                        <Link key={project.id} href={`/dashboard/projects/${project.id}`} className="flex items-center justify-between p-3 rounded-lg border hover:bg-slate-50 transition-colors group">
+                                        <Link key={project.id} href={`/projects/${project.id}`} className="flex items-center justify-between p-3 rounded-lg border hover:bg-slate-50 transition-colors group">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 rounded-full bg-violet-100 flex items-center justify-center">
                                                     <Briefcase className="h-5 w-5 text-violet-600" />
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
                                 <CardDescription>Tasks requiring your attention</CardDescription>
                             </div>
                             <Button variant="ghost" size="sm" asChild>
-                                <Link href="/dashboard/calendar">View Calendar <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                                <Link href="/calendar">View Calendar <ArrowRight className="ml-1 h-4 w-4" /></Link>
                             </Button>
                         </CardHeader>
                         <CardContent>
@@ -287,7 +287,7 @@ export default async function DashboardPage() {
                             <CardDescription>Latest billing activity</CardDescription>
                         </div>
                         <Button variant="ghost" size="sm" asChild>
-                            <Link href="/dashboard/invoices">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                            <Link href="/invoices">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
                         </Button>
                     </CardHeader>
                     <CardContent>
@@ -321,7 +321,7 @@ export default async function DashboardPage() {
                                                 </td>
                                                 <td className="py-3 text-right">
                                                     <Button variant="ghost" size="sm" asChild>
-                                                        <Link href={`/dashboard/invoices/${invoice.id}`}>View</Link>
+                                                        <Link href={`/invoices/${invoice.id}`}>View</Link>
                                                     </Button>
                                                 </td>
                                             </tr>

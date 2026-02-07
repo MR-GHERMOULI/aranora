@@ -30,7 +30,7 @@ export function DeleteInvoiceDialog({ invoiceId, invoiceNumber }: DeleteInvoiceD
             setIsDeleting(true)
             await deleteInvoice(invoiceId)
             setOpen(false)
-            router.push('/dashboard/invoices')
+            router.push('/invoices')
         } catch (error) {
             console.error("Failed to delete invoice", error)
             setIsDeleting(false)

@@ -24,7 +24,7 @@ export async function acceptInvite(token: string) {
     }
 
     if (invite.status === 'active') {
-        redirect(`/dashboard/projects/${invite.project_id}`);
+        redirect(`/projects/${invite.project_id}`);
     }
 
     // 2. Accept it
@@ -42,7 +42,7 @@ export async function acceptInvite(token: string) {
         throw new Error('Failed to accept invitation');
     }
 
-    redirect(`/dashboard/projects/${invite.project_id}`);
+    redirect(`/projects/${invite.project_id}`);
 }
 
 export async function getInviteDetails(token: string) {

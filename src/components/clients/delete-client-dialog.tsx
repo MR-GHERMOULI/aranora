@@ -30,7 +30,7 @@ export function DeleteClientDialog({ clientId, clientName }: DeleteClientDialogP
             setIsDeleting(true)
             await deleteClient(clientId)
             setOpen(false)
-            router.push('/dashboard/clients')
+            router.push('/clients')
         } catch (error) {
             console.error("Failed to delete client", error)
             setIsDeleting(false)

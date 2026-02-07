@@ -30,7 +30,7 @@ export default async function ContractPage({ params }: { params: { id: string } 
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href="/dashboard/contracts">
+                    <Link href="/contracts">
                         <ArrowLeft className="h-4 w-4" />
                     </Link>
                 </Button>
@@ -75,7 +75,7 @@ export default async function ContractPage({ params }: { params: { id: string } 
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">Client</p>
-                                        <Link href={`/dashboard/clients/${contract.client_id}`} className="text-sm text-brand-primary hover:underline">
+                                        <Link href={`/clients/${contract.client_id}`} className="text-sm text-brand-primary hover:underline">
                                             {contract.client.name}
                                         </Link>
                                     </div>
@@ -89,7 +89,7 @@ export default async function ContractPage({ params }: { params: { id: string } 
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">Project</p>
-                                        <Link href={`/dashboard/projects/${contract.project_id}`} className="text-sm text-brand-primary hover:underline">
+                                        <Link href={`/projects/${contract.project_id}`} className="text-sm text-brand-primary hover:underline">
                                             {contract.project.title}
                                         </Link>
                                     </div>

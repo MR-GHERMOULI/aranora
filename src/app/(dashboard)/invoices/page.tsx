@@ -18,7 +18,7 @@ export default async function InvoicesPage() {
                     </p>
                 </div>
                 <Button asChild>
-                    <Link href="/dashboard/invoices/new">
+                    <Link href="/invoices/new">
                         <Plus className="mr-2 h-4 w-4" /> Create Invoice
                     </Link>
                 </Button>
@@ -64,7 +64,7 @@ export default async function InvoicesPage() {
                             </CardContent>
                             <CardFooter className="justify-end">
                                 <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/dashboard/invoices/${invoice.id}`}>View Details</Link>
+                                    <Link href={`/invoices/${invoice.id}`}>View Details</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

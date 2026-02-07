@@ -29,7 +29,7 @@ export function NotificationsPopover() {
         if (n.type === 'invite') {
             await acceptNotificationInvite(n.id, n.payload.collaboratorId)
             setNotifications(prev => prev.filter(item => item.id !== n.id))
-            router.push(`/dashboard/projects/${n.payload.projectId}`)
+            router.push(`/projects/${n.payload.projectId}`)
         }
     }
 
