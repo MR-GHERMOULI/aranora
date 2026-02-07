@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { Briefcase } from "lucide-react"
 import { StatsCard } from "@/components/admin/stats-card"
 import { ProjectsTable } from "./projects-table"
 
@@ -35,7 +34,7 @@ export default async function AdminProjectsPage() {
         supabase.from("projects").select("budget"),
     ])
 
-    const totalBudget = (budgetData || []).reduce((sum, p) => sum + (p.budget || 0), 0)
+    const totalBudget = (budgetData || []).reduce((sum: number, p: { budget?: number }) => sum + (p.budget || 0), 0)
 
     return (
         <div className="space-y-8">
@@ -52,24 +51,24 @@ export default async function AdminProjectsPage() {
                 <StatsCard
                     title="Total Projects"
                     value={totalProjects || 0}
-                    icon={Briefcase}
+                    iconName="Briefcase"
                 />
                 <StatsCard
                     title="Active"
                     value={activeProjects || 0}
-                    icon={Briefcase}
+                    iconName="Briefcase"
                     description="in progress"
                 />
                 <StatsCard
                     title="Completed"
                     value={completedProjects || 0}
-                    icon={Briefcase}
+                    iconName="Briefcase"
                     description="finished"
                 />
                 <StatsCard
                     title="Total Budget"
                     value={`$${totalBudget.toLocaleString()}`}
-                    icon={Briefcase}
+                    iconName="Briefcase"
                     description="across all projects"
                 />
             </div>

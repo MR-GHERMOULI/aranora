@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { Radio } from "lucide-react"
 import { StatsCard } from "@/components/admin/stats-card"
 import { BroadcastsClient } from "./broadcasts-client"
 
@@ -13,7 +12,7 @@ export default async function AdminBroadcastsPage() {
         .order("created_at", { ascending: false })
 
     // Total sent count (sum of sent_count)
-    const totalSent = (broadcasts || []).reduce((sum, b) => sum + (b.sent_count || 0), 0)
+    const totalSent = (broadcasts || []).reduce((sum: number, b: { sent_count?: number }) => sum + (b.sent_count || 0), 0)
 
     return (
         <div className="space-y-8">
@@ -30,12 +29,12 @@ export default async function AdminBroadcastsPage() {
                 <StatsCard
                     title="Total Broadcasts"
                     value={broadcasts?.length || 0}
-                    icon={Radio}
+                    iconName="Radio"
                 />
                 <StatsCard
                     title="Total Messages Sent"
                     value={totalSent}
-                    icon={Radio}
+                    iconName="Radio"
                     description="to stats users"
                 />
             </div>

@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { FileText, DollarSign } from "lucide-react"
 import { StatsCard } from "@/components/admin/stats-card"
 import { InvoicesTable } from "./invoices-table"
 
@@ -36,7 +35,7 @@ export default async function AdminInvoicesPage() {
         supabase.from("invoices").select("total").eq("status", "Paid"),
     ])
 
-    const totalRevenue = (revenueData || []).reduce((sum, inv) => sum + (inv.total || 0), 0)
+    const totalRevenue = (revenueData || []).reduce((sum: number, inv: { total?: number }) => sum + (inv.total || 0), 0)
 
     return (
         <div className="space-y-8">
@@ -53,24 +52,24 @@ export default async function AdminInvoicesPage() {
                 <StatsCard
                     title="Total Invoices"
                     value={totalInvoices || 0}
-                    icon={FileText}
+                    iconName="FileText"
                 />
                 <StatsCard
                     title="Paid"
                     value={paidInvoices || 0}
-                    icon={FileText}
+                    iconName="FileText"
                     description={`${totalInvoices ? Math.round(((paidInvoices || 0) / totalInvoices) * 100) : 0}% rate`}
                 />
                 <StatsCard
                     title="Pending"
                     value={pendingInvoices || 0}
-                    icon={FileText}
+                    iconName="FileText"
                     description="draft or sent"
                 />
                 <StatsCard
                     title="Total Revenue"
                     value={`$${totalRevenue.toLocaleString()}`}
-                    icon={DollarSign}
+                    iconName="DollarSign"
                     description="from paid invoices"
                 />
             </div>

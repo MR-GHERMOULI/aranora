@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { Users } from "lucide-react"
 import { UsersTable } from "@/components/admin/users-table"
 import { StatsCard } from "@/components/admin/stats-card"
 
@@ -38,18 +37,18 @@ export default async function AdminUsersPage() {
                 <StatsCard
                     title="Total Users"
                     value={totalUsers || 0}
-                    icon={Users}
+                    iconName="Users"
                 />
                 <StatsCard
                     title="Active Users"
                     value={activeUsers || 0}
-                    icon={Users}
+                    iconName="Users"
                     description="currently active"
                 />
                 <StatsCard
                     title="Suspended"
                     value={suspendedUsers || 0}
-                    icon={Users}
+                    iconName="Users"
                     description="accounts suspended"
                 />
             </div>

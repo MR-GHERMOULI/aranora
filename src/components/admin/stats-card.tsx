@@ -1,13 +1,40 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { LucideIcon } from "lucide-react"
+import {
+    Users,
+    Briefcase,
+    FileText,
+    DollarSign,
+    Mail,
+    MailOpen,
+    Radio,
+    TrendingUp,
+    Activity,
+    BarChart
+} from "lucide-react"
+
+// Map of icon names to components - add more as needed
+const iconMap = {
+    Users,
+    Briefcase,
+    FileText,
+    DollarSign,
+    Mail,
+    MailOpen,
+    Radio,
+    TrendingUp,
+    Activity,
+    BarChart,
+} as const
+
+type IconName = keyof typeof iconMap
 
 interface StatsCardProps {
     title: string
     value: string | number
     description?: string
-    icon: LucideIcon
+    iconName: IconName
     trend?: {
         value: number
         isPositive: boolean
@@ -19,10 +46,11 @@ export function StatsCard({
     title,
     value,
     description,
-    icon: Icon,
+    iconName,
     trend,
     className,
 }: StatsCardProps) {
+    const Icon = iconMap[iconName]
     return (
         <div
             className={cn(

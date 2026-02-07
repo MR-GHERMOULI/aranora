@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { Mail, MailOpen } from "lucide-react"
 import { StatsCard } from "@/components/admin/stats-card"
 import { MessagesTable } from "./messages-table"
 
@@ -14,7 +13,7 @@ export default async function AdminMessagesPage() {
 
     // Stats
     const total = messages?.length || 0
-    const unread = messages?.filter(m => !m.is_read).length || 0
+    const unread = messages?.filter((m: { is_read?: boolean }) => !m.is_read).length || 0
 
     return (
         <div className="space-y-8">
@@ -31,14 +30,14 @@ export default async function AdminMessagesPage() {
                 <StatsCard
                     title="Unread Messages"
                     value={unread}
-                    icon={Mail}
+                    iconName="Mail"
                     description="requiring attention"
                     className="border-primary/20 bg-primary/5"
                 />
                 <StatsCard
                     title="Total Messages"
                     value={total}
-                    icon={MailOpen}
+                    iconName="MailOpen"
                     description="all time"
                 />
             </div>
