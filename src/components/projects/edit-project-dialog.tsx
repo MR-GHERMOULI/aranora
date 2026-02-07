@@ -50,7 +50,7 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
         resolver: zodResolver(projectSchema),
         defaultValues: {
             title: project.title,
-            status: project.status,
+            status: project.status as "Pending" | "In Progress" | "Completed",
             budget: project.budget?.toString() || "",
             description: project.description || "",
             startDate: project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : "",

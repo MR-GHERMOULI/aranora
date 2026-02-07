@@ -51,7 +51,7 @@ export function EditClientDialog({ client }: EditClientDialogProps) {
             name: client.name,
             email: client.email || "",
             phone: client.phone || "",
-            status: client.status,
+            status: client.status as "Potential" | "Active" | "Completed",
             notes: client.notes || "",
         },
     })

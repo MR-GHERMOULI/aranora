@@ -64,7 +64,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                 </div>
                                 <div className="overflow-hidden">
                                     <p className="text-sm font-medium">Email</p>
-                                    <p className="text-sm text-muted-foreground truncate" title={client.email}>{client.email || '-'}</p>
+                                    <p className="text-sm text-muted-foreground truncate" title={client.email || undefined}>{client.email || '-'}</p>
                                 </div>
                             </div>
 

@@ -52,3 +52,33 @@ export interface Invoice {
     project?: { title: string }
     items?: any[]
 }
+
+export interface Contract {
+    id: string
+    user_id: string
+    client_id: string
+    project_id?: string | null
+    title: string
+    content: string
+    status: string
+    signed_at?: string | null
+    created_at: string
+    client?: { name: string }
+    project?: { title: string }
+}
+
+export interface Task {
+    id: string
+    user_id: string
+    project_id?: string | null
+    title: string
+    description?: string | null
+    status: string
+    priority: string
+    due_date?: string | null
+    is_personal: boolean
+    recurrence?: any
+    category: string
+    created_at: string
+    project?: { title: string }
+}
