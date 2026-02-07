@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { Activity } from "lucide-react"
 import { StatsCard } from "@/components/admin/stats-card"
 import { ActivityLogTable } from "./activity-table"
 
@@ -18,8 +17,8 @@ export default async function AdminActivityPage() {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    const todayLogs = logs?.filter((l) => new Date(l.created_at) >= today).length || 0
-    const weekLogs = logs?.filter((l) => new Date(l.created_at) >= thisWeek).length || 0
+    const todayLogs = logs?.filter((l: { created_at: string }) => new Date(l.created_at) >= today).length || 0
+    const weekLogs = logs?.filter((l: { created_at: string }) => new Date(l.created_at) >= thisWeek).length || 0
 
     return (
         <div className="space-y-8">
@@ -36,19 +35,19 @@ export default async function AdminActivityPage() {
                 <StatsCard
                     title="Total Actions"
                     value={logs?.length || 0}
-                    icon={Activity}
+                    iconName="Activity"
                     description="all time"
                 />
                 <StatsCard
                     title="Today"
                     value={todayLogs}
-                    icon={Activity}
+                    iconName="Activity"
                     description="actions today"
                 />
                 <StatsCard
                     title="This Week"
                     value={weekLogs}
-                    icon={Activity}
+                    iconName="Activity"
                     description="last 7 days"
                 />
             </div>

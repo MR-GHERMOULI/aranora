@@ -1,6 +1,5 @@
 "use client"
 
-import { Users, Briefcase, FileText, TrendingUp, Activity, DollarSign } from "lucide-react"
 import { StatsCard } from "@/components/admin/stats-card"
 import {
     ChartCard,
@@ -44,38 +43,38 @@ export function AdminDashboardClient({ stats, charts }: AdminDashboardClientProp
                 <StatsCard
                     title="Total Users"
                     value={stats.totalUsers}
-                    icon={Users}
+                    iconName="Users"
                     trend={{ value: stats.growthRate, isPositive: stats.growthRate > 0 }}
                     description="all time"
                 />
                 <StatsCard
                     title="Active Users (MAU)"
                     value={stats.mau}
-                    icon={Activity}
+                    iconName="Activity"
                     description="last 30 days"
                 />
                 <StatsCard
                     title="Active Projects"
                     value={stats.activeProjects}
-                    icon={Briefcase}
+                    iconName="Briefcase"
                     description={`of ${stats.totalProjects} total`}
                 />
                 <StatsCard
                     title="Total Invoices"
                     value={stats.totalInvoices}
-                    icon={FileText}
+                    iconName="FileText"
                     description="generated"
                 />
                 <StatsCard
                     title="Paid Invoices"
                     value={stats.paidInvoices}
-                    icon={DollarSign}
+                    iconName="DollarSign"
                     description={`${stats.totalInvoices > 0 ? Math.round((stats.paidInvoices / stats.totalInvoices) * 100) : 0}% rate`}
                 />
                 <StatsCard
                     title="Growth Rate"
                     value={`${stats.growthRate}%`}
-                    icon={TrendingUp}
+                    iconName="TrendingUp"
                     trend={{ value: stats.growthRate, isPositive: stats.growthRate > 0 }}
                     description="monthly"
                 />
