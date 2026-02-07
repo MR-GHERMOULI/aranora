@@ -19,14 +19,22 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
-import { ModeToggle } from "@/components/ui/mode-toggle"
 import { createClient } from "@/lib/supabase/client"
+import { useTheme } from "next-themes"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Moon, Sun } from "lucide-react"
 
 interface AdminSidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function AdminSidebar({ className }: AdminSidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
+    const { setTheme } = useTheme()
 
     const [unreadCount, setUnreadCount] = useState(0)
 
@@ -153,7 +161,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
                     {routes.map((route) => {
                         const isActive = pathname === route.href ||
                             (route.href !== "/admin" && pathname.startsWith(route.href))
@@ -187,7 +195,26 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 {/* Footer */}
                 <div className="p-4 border-t border-slate-700/50">
                     <div className="flex items-center justify-between mb-4">
-                        <ModeToggle />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white hover:bg-slate-800/50">
+                                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                                    <span className="sr-only">Toggle theme</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 text-slate-200">
+                                <DropdownMenuItem onClick={() => setTheme("light")} className="focus:bg-slate-800 focus:text-white cursor-pointer">
+                                    Light
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTheme("dark")} className="focus:bg-slate-800 focus:text-white cursor-pointer">
+                                    Dark
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTheme("system")} className="focus:bg-slate-800 focus:text-white cursor-pointer">
+                                    System
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <Link
                             href="/dashboard"
                             className="text-xs text-slate-400 hover:text-white transition-colors"
