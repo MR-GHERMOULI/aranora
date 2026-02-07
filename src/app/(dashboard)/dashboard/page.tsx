@@ -55,12 +55,12 @@ export default async function DashboardPage() {
                                     <Plus className="mr-2 h-4 w-4" /> New Client
                                 </Link>
                             </Button>
-                            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
+                            <Button variant="secondary" asChild>
                                 <Link href="/projects">
                                     <Plus className="mr-2 h-4 w-4" /> New Project
                                 </Link>
                             </Button>
-                            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" asChild>
+                            <Button variant="secondary" asChild>
                                 <Link href="/invoices/new">
                                     <Plus className="mr-2 h-4 w-4" /> New Invoice
                                 </Link>
