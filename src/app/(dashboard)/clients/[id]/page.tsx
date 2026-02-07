@@ -111,7 +111,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                     </CardContent>
                                 </Card>
                             ) : (
-                                projects.map((project) => (
+                                projects.map((project: any) => (
                                     <Card key={project.id} className="hover:shadow-sm transition-shadow">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                             <CardTitle className="text-md font-semibold truncate">
@@ -163,7 +163,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
                                     </CardContent>
                                 </Card>
                             ) : (
-                                invoices.map((invoice) => (
+                                invoices.map((invoice: any) => (
                                     <Card key={invoice.id} className="hover:shadow-sm transition-shadow">
                                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                             <CardTitle className="text-md font-semibold truncate">

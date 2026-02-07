@@ -1,62 +1,54 @@
-export type ClientStatus = 'Potential' | 'Active' | 'Completed';
+export interface ContactMessage {
+    id: string
+    name: string
+    email: string
+    subject: string | null
+    message: string
+    is_read: boolean
+    created_at: string
+}
 
 export interface Client {
-    id: string;
-    user_id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-    status: ClientStatus;
-    notes?: string;
-    created_at: string;
-    // Computed fields
-    total_projects?: number;
-    total_revenue?: number;
+    id: string
+    user_id: string
+    name: string
+    email?: string | null
+    phone?: string | null
+    status: string
+    notes?: string | null
+    created_at: string
 }
 
 export interface Project {
-    id: string;
-    user_id: string;
-    client_id: string;
-    title: string;
-    slug: string;
-    description?: string;
-    status: 'Pending' | 'In Progress' | 'Completed';
-    budget?: number;
-    start_date?: string;
-    end_date?: string;
-    created_at: string;
-    client?: Client;
+    id: string
+    user_id: string
+    client_id: string
+    title: string
+    slug: string
+    description?: string | null
+    status: string
+    budget?: number | null
+    start_date?: string | null
+    end_date?: string | null
+    created_at: string
+    client?: { name: string }
 }
 
 export interface Invoice {
-    id: string;
-    user_id: string;
-    project_id?: string;
-    client_id?: string;
-    invoice_number: string;
-    status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
-    issue_date: string;
-    due_date?: string;
-    subtotal: number;
-    tax_rate: number;
-    tax_amount: number;
-    total: number;
-    created_at: string;
-    client?: Client;
-    project?: Project;
-}
-
-export interface Contract {
-    id: string;
-    user_id: string;
-    client_id: string;
-    project_id?: string;
-    title: string;
-    content?: string;
-    status: 'Draft' | 'Sent' | 'Signed';
-    signed_at?: string;
-    created_at: string;
-    client?: Client;
-    project?: Project;
+    id: string
+    user_id: string
+    client_id: string
+    project_id?: string | null
+    invoice_number: string
+    status: string
+    issue_date: string
+    due_date: string
+    subtotal: number
+    tax_rate: number
+    tax_amount: number
+    total: number
+    created_at: string
+    client?: { name: string }
+    project?: { title: string }
+    items?: any[]
 }

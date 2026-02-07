@@ -21,25 +21,18 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
-interface Message {
-    id: string
-    name: string
-    email: string
-    subject: string | null
-    message: string
-    is_read: boolean
-    created_at: string
-}
+import { toast } from "sonner"
+import type { ContactMessage } from "@/types"
 
 interface MessagesTableProps {
-    initialMessages: Message[]
+    initialMessages: ContactMessage[]
 }
 
 export function MessagesTable({ initialMessages }: MessagesTableProps) {
-    const [messages, setMessages] = useState<Message[]>(initialMessages)
+    const [messages, setMessages] = useState<ContactMessage[]>(initialMessages)
     const [searchQuery, setSearchQuery] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
-    const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+    const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const supabase = createClient()
@@ -65,12 +58,18 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
         setMessages(messages.map(m => m.id === id ? { ...m, is_read: true } : m))
 
         // Background update
-        await supabase
+        const { error } = await supabase
             .from("contact_messages")
             .update({ is_read: true })
             .eq("id", id)
 
-        router.refresh()
+        if (error) {
+            toast.error("Failed to mark message as read")
+            // Revert optimistic update
+            setMessages(messages.map(m => m.id === id ? { ...m, is_read: false } : m))
+        } else {
+            router.refresh()
+        }
     }
 
     async function deleteMessage(id: string) {
@@ -87,12 +86,15 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
             if (selectedMessage?.id === id) {
                 setIsDetailsOpen(false)
             }
+            toast.success("Message deleted successfully")
             router.refresh()
+        } else {
+            toast.error("Failed to delete message")
         }
         setIsLoading(false)
     }
 
-    function viewMessage(msg: Message) {
+    function viewMessage(msg: ContactMessage) {
         setSelectedMessage(msg)
         setIsDetailsOpen(true)
         if (!msg.is_read) {
@@ -225,7 +227,9 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
                             Close
                         </Button>
                         <Button asChild>
-                            <a href={`mailto:${selectedMessage?.email}`}>Reply via Email</a>
+                            <a href={`mailto:${selectedMessage?.email}?subject=${encodeURIComponent(`Re: ${selectedMessage?.subject || "Inquiry"}`)}&body=${encodeURIComponent(`\n\n-------------------\nOriginal Message:\n${selectedMessage?.message}`)}`}>
+                                Reply via Email
+                            </a>
                         </Button>
                     </div>
                 </DialogContent>
