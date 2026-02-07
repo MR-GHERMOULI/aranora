@@ -12,8 +12,48 @@ import {
   Star,
   ChevronRight
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
-export default function LandingPage() {
+interface HomepageContent {
+  hero_title: string;
+  hero_subtitle: string;
+  hero_cta_text: string;
+  features_title: string;
+  features_subtitle: string;
+  pricing_title: string;
+  pricing_subtitle: string;
+  testimonials_title: string;
+  testimonials_subtitle: string;
+  cta_title: string;
+  cta_subtitle: string;
+}
+
+const defaultContent: HomepageContent = {
+  hero_title: "Manage Your Freelance Business Like a Pro",
+  hero_subtitle: "All-in-one platform to manage clients, projects, invoices, contracts, and team collaboration. Focus on what you do best — we handle the rest.",
+  hero_cta_text: "Start Free Trial",
+  features_title: "Everything You Need to Succeed",
+  features_subtitle: "Powerful features designed specifically for freelancers and independent professionals.",
+  pricing_title: "No Pricing Plans. Just Free.",
+  pricing_subtitle: "Aranora is completely free for all freelancers. No hidden fees, no credit card required, no limits.",
+  testimonials_title: "Loved by Freelancers",
+  testimonials_subtitle: "See what our users have to say.",
+  cta_title: "Ready to Level Up Your Freelance Game?",
+  cta_subtitle: "Join thousands of freelancers who trust Aranora to run their business.",
+};
+
+export default async function LandingPage() {
+  const supabase = await createClient();
+
+  // Fetch homepage content from settings
+  const { data: homepageSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "homepage")
+    .single();
+
+  const content: HomepageContent = homepageSetting?.value || defaultContent;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Navigation */}
@@ -54,17 +94,22 @@ export default function LandingPage() {
               The #1 Platform for Freelancers
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight mb-6">
-              Manage Your Freelance Business
-              <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent"> Like a Pro</span>
+              {content.hero_title.includes("Like a Pro") ? (
+                <>
+                  {content.hero_title.split("Like a Pro")[0]}
+                  <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent"> Like a Pro</span>
+                </>
+              ) : (
+                content.hero_title
+              )}
             </h1>
             <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
-              All-in-one platform to manage clients, projects, invoices, contracts, and team collaboration.
-              Focus on what you do best — we handle the rest.
+              {content.hero_subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild className="bg-brand-primary hover:bg-brand-primary-light text-lg px-8 py-6">
                 <Link href="/signup">
-                  Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+                  {content.hero_cta_text} <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8 py-6">
@@ -117,9 +162,9 @@ export default function LandingPage() {
       <section id="features" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Everything You Need to Succeed</h2>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.features_title}</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Powerful features designed specifically for freelancers and independent professionals.
+              {content.features_subtitle}
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -150,9 +195,9 @@ export default function LandingPage() {
             <Zap className="h-4 w-4" />
             100% Free Forever
           </div>
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">No Pricing Plans. Just Free.</h2>
+          <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.pricing_title}</h2>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Aranora is completely free for all freelancers. No hidden fees, no credit card required, no limits.
+            {content.pricing_subtitle}
           </p>
           <div className="bg-white rounded-2xl border-2 border-brand-primary shadow-xl shadow-brand-primary/10 p-8 max-w-md mx-auto">
             <div className="mb-6">
@@ -187,8 +232,8 @@ export default function LandingPage() {
       <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Loved by Freelancers</h2>
-            <p className="text-lg text-slate-600">See what our users have to say.</p>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.testimonials_title}</h2>
+            <p className="text-lg text-slate-600">{content.testimonials_subtitle}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -202,7 +247,7 @@ export default function LandingPage() {
                     <Star key={j} className="h-5 w-5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-slate-600 mb-6 italic">"{testimonial.quote}"</p>
+                <p className="text-slate-600 mb-6 italic">&quot;{testimonial.quote}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white font-medium text-sm">
                     {testimonial.avatar}
@@ -221,8 +266,8 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-primary to-brand-primary-light rounded-3xl p-12 text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Level Up Your Freelance Game?</h2>
-          <p className="text-xl text-white/80 mb-8">Join thousands of freelancers who trust Aranora to run their business.</p>
+          <h2 className="text-4xl font-bold mb-4">{content.cta_title}</h2>
+          <p className="text-xl text-white/80 mb-8">{content.cta_subtitle}</p>
           <Button size="lg" variant="secondary" asChild className="text-lg px-8 py-6">
             <Link href="/signup">
               Get Started Free <ChevronRight className="ml-2 h-5 w-5" />
