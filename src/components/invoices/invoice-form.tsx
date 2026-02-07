@@ -41,6 +41,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
     const [issueDate, setIssueDate] = useState<Date | undefined>(new Date())
     const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
     const [status, setStatus] = useState("Draft")
+    const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>('A4')
 
     useEffect(() => {
         if (invoice) {
@@ -199,6 +200,18 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
                         </Select>
                     </div>
                 )}
+                <div className="space-y-2">
+                    <Label>Paper Size</Label>
+                    <Select value={paperSize} onValueChange={(v) => setPaperSize(v as 'A4' | 'LETTER')}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select paper size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                            <SelectItem value="LETTER">Letter (8.5 × 11 in)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -254,7 +267,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
 
             <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} variant="secondary">
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {invoice ? "Update Invoice" : "Create Invoice"}
                 </Button>

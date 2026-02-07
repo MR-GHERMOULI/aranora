@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 import { Invoice } from '@/types';
 import { format } from 'date-fns';
 
@@ -19,7 +19,17 @@ const styles = StyleSheet.create({
         borderBottomColor: '#E2E8F0',
         paddingBottom: 10,
         flexDirection: 'row',
-        justifyCallback: 'space-between',
+        justifyContent: 'space-between',
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    logo: {
+        width: 60,
+        height: 60,
+        objectFit: 'contain',
     },
     title: {
         fontSize: 24,
@@ -114,16 +124,22 @@ const styles = StyleSheet.create({
 interface InvoicePDFProps {
     invoice: Invoice & { items: any[]; client: any };
     profile: any;
+    paperSize?: 'A4' | 'LETTER';
 }
 
-export const InvoicePDF = ({ invoice, profile }: InvoicePDFProps) => (
+export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFProps) => (
     <Document>
-        <Page size="A4" style={styles.page}>
+        <Page size={paperSize} style={styles.page}>
             {/* Header */}
             <View style={styles.header}>
-                <View>
-                    <Text style={styles.title}>INVOICE</Text>
-                    <Text style={styles.brand}>{profile?.company_name || profile?.full_name || 'Aranora'}</Text>
+                <View style={styles.headerLeft}>
+                    {profile?.logo_url && (
+                        <Image src={profile.logo_url} style={styles.logo} />
+                    )}
+                    <View>
+                        <Text style={styles.title}>INVOICE</Text>
+                        <Text style={styles.brand}>{profile?.company_name || profile?.full_name || 'Aranora'}</Text>
+                    </View>
                 </View>
                 <View>
                     <Text style={styles.value}>#{invoice.invoice_number}</Text>

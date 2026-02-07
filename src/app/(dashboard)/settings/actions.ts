@@ -34,7 +34,8 @@ export async function getProfile() {
         company_name: data?.company_name || '',
         company_email: data?.company_email || user.email || '',
         address: data?.address || '',
-        currency: data?.currency || 'USD'
+        currency: data?.currency || 'USD',
+        logo_url: data?.logo_url || null
     };
 }
 
@@ -88,6 +89,27 @@ export async function updateProfile(formData: FormData) {
     if (error) {
         console.error('Error updating profile:', error);
         throw new Error('Failed to update profile');
+    }
+
+    revalidatePath('/dashboard/settings');
+}
+
+export async function updateLogo(logoUrl: string | null) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({ logo_url: logoUrl, updated_at: new Date().toISOString() })
+        .eq('id', user.id);
+
+    if (error) {
+        console.error('Error updating logo:', error);
+        throw new Error('Failed to update logo');
     }
 
     revalidatePath('/dashboard/settings');
