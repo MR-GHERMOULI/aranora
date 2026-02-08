@@ -114,7 +114,8 @@ export async function createInvoice(formData: FormData) {
       subtotal,
       tax_rate: taxRate,
       tax_amount: taxAmount,
-      total
+      total,
+      paper_size: formData.get('paperSize') as string || 'A4'
     })
     .select()
     .single();
@@ -179,7 +180,8 @@ export async function updateInvoice(formData: FormData) {
       issue_date: issueDate,
       due_date: dueDate,
       subtotal,
-      total
+      total,
+      paper_size: formData.get('paperSize') as string || 'A4'
     })
     .eq('id', id)
     .eq('user_id', user.id);

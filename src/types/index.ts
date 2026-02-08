@@ -47,6 +47,7 @@ export interface Invoice {
     tax_rate: number
     tax_amount: number
     total: number
+    paper_size?: 'A4' | 'LETTER'
     created_at: string
     client?: { name: string }
     project?: { title: string }

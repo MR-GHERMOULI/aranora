@@ -92,6 +92,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             if (issueDate) formData.append("issueDate", format(issueDate, "yyyy-MM-dd"));
             if (dueDate) formData.append("dueDate", format(dueDate, "yyyy-MM-dd"));
             formData.append("status", status);
+            formData.append("paperSize", paperSize);
             formData.append("items", JSON.stringify(items));
 
             if (invoice) {

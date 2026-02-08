@@ -24,12 +24,12 @@ const styles = StyleSheet.create({
     headerLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
     },
     logo: {
         width: 60,
         height: 60,
         objectFit: 'contain',
+        marginRight: 12,
     },
     title: {
         fontSize: 24,

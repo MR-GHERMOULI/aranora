@@ -14,7 +14,7 @@ interface DownloadInvoiceButtonProps {
 export function DownloadInvoiceButton({ invoice, profile }: DownloadInvoiceButtonProps) {
     return (
         <PDFDownloadLink
-            document={<InvoicePDF invoice={invoice} profile={profile} />}
+            document={<InvoicePDF invoice={invoice} profile={profile} paperSize={invoice.paper_size || 'A4'} />}
             fileName={`${invoice.invoice_number}.pdf`}
         >
             {/* @ts-ignore - render prop type mismatch in library sometimes, safe to ignore for mvp */}
