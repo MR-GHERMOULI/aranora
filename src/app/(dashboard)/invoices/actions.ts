@@ -43,22 +43,21 @@ export async function getInvoice(id: string) {
     redirect('/login');
   }
 
-  // Fetch invoice with client and project
+  // Fetch invoice with relational data
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
-    .select('*, client:clients(*), project:projects(title)')
+    .select('*, client:clients(name), project:projects(title)')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
   if (invoiceError) {
-    console.error(`Error fetching invoice ${id}:`, invoiceError.message);
-    return null;
+    console.error(`Error fetching invoice ${id}:`, invoiceError);
+    return { data: null, error: invoiceError };
   }
 
   if (!invoice) {
-    console.warn(`Invoice ${id} not found for user ${user.id}`);
-    return null;
+    return { data: null, error: { message: 'Invoice not found in database', code: 'NOT_FOUND' } };
   }
 
   // Fetch invoice items
@@ -69,10 +68,9 @@ export async function getInvoice(id: string) {
 
   if (itemsError) {
     console.error('Error fetching invoice items:', itemsError);
-    return null;
   }
 
-  return { ...invoice, items } as Invoice & { items: any[] };
+  return { data: { ...invoice, items: items || [] } as Invoice & { items: any[] }, error: null };
 }
 
 

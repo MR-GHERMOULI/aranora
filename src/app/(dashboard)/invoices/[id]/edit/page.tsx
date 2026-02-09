@@ -7,13 +7,13 @@ import { notFound } from "next/navigation";
 
 export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const [invoice, clients, projects] = await Promise.all([
+    const [{ data: invoice, error: invoiceError }, clients, projects] = await Promise.all([
         getInvoice(id),
         getClients(),
         getProjects()
     ]);
 
-    if (!invoice) {
+    if (invoiceError || !invoice) {
         notFound();
     }
 

@@ -18,11 +18,10 @@ import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog
 export default async function ProjectPage({
     params
 }: {
-    params: { id: string; slug: string }
+    params: Promise<{ id: string; slug: string }>
 }) {
     // Resolve params for Next.js 15+
-    const resolvedParams = await params;
-    const { id, slug } = resolvedParams;
+    const { id, slug } = await params;
 
     const [project, invoices, collaborators] = await Promise.all([
         getProject(id),
