@@ -41,7 +41,13 @@ export function RevenueChart({ data }: RevenueChartProps) {
                     />
                     <Tooltip
                         cursor={{ fill: 'transparent' }}
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                        contentStyle={{
+                            borderRadius: '8px',
+                            border: '1px solid rgba(128, 128, 128, 0.2)',
+                            backgroundColor: 'var(--card)',
+                            color: 'var(--foreground)'
+                        }}
+                        itemStyle={{ color: 'var(--foreground)' }}
                         formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
                     />
                     <Bar

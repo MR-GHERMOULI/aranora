@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Lightbulb, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { format, isPast } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export async function SmartRemindersWidget() {
     const reminders = await getSmartReminders();
@@ -28,9 +29,11 @@ export async function SmartRemindersWidget() {
                 {reminders.map((reminder) => (
                     <div
                         key={reminder.id}
-                        className={`flex items-start gap-4 p-3 rounded-lg border transition-colors hover:bg-accent/50
-                            ${reminder.severity === 'high' ? 'bg-red-50 border-red-200' :
-                                reminder.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' : 'bg-card'}`}
+                        className={cn(
+                            "flex items-start gap-4 p-3 rounded-lg border transition-colors hover:bg-accent/50",
+                            reminder.severity === 'high' ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50" :
+                                reminder.severity === 'medium' ? "bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800/30" : "bg-card"
+                        )}
                     >
                         <div className="mt-1">
                             {reminder.severity === 'high' ? (
