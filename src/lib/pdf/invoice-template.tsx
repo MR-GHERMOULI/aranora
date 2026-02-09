@@ -168,7 +168,7 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                     <Text style={styles.label}>Dates:</Text>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
                         <Text style={styles.label}>Issued:</Text>
-                        <Text style={styles.value}>{format(new Date(invoice.issue_date), 'MMM d, yyyy')}</Text>
+                        <Text style={styles.value}>{invoice.issue_date ? format(new Date(invoice.issue_date), 'MMM d, yyyy') : 'N/A'}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={styles.label}>Due:</Text>
@@ -187,25 +187,31 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                     <Text style={styles.colPrice}>Unit Price</Text>
                     <Text style={styles.colTotal}>Total</Text>
                 </View>
-                {invoice.items.map((item, i) => (
-                    <View key={i} style={styles.tableRow}>
-                        <Text style={styles.colDesc}>{item.description}</Text>
-                        <Text style={styles.colQty}>{item.quantity}</Text>
-                        <Text style={styles.colPrice}>${item.unit_price.toFixed(2)}</Text>
-                        <Text style={styles.colTotal}>${(item.quantity * item.unit_price).toFixed(2)}</Text>
+                {invoice.items && invoice.items.length > 0 ? (
+                    invoice.items.map((item, i) => (
+                        <View key={i} style={styles.tableRow}>
+                            <Text style={styles.colDesc}>{item.description || 'Item'}</Text>
+                            <Text style={styles.colQty}>{item.quantity || 0}</Text>
+                            <Text style={styles.colPrice}>${(item.unit_price || 0).toFixed(2)}</Text>
+                            <Text style={styles.colTotal}>${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</Text>
+                        </View>
+                    ))
+                ) : (
+                    <View style={styles.tableRow}>
+                        <Text style={styles.colDesc}>No items</Text>
                     </View>
-                ))}
+                )}
             </View>
 
             {/* Summary */}
             <View style={styles.summary}>
                 <View style={styles.summaryRow}>
                     <Text style={styles.summaryLabel}>Subtotal</Text>
-                    <Text style={styles.summaryValue}>${invoice.subtotal.toLocaleString()}</Text>
+                    <Text style={styles.summaryValue}>${(invoice.subtotal || 0).toLocaleString()}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                     <Text style={styles.summaryLabel}>Total</Text>
-                    <Text style={[styles.summaryValue, { fontSize: 14, color: '#1E3A5F' }]}>${invoice.total.toLocaleString()}</Text>
+                    <Text style={[styles.summaryValue, { fontSize: 14, color: '#1E3A5F' }]}>${(invoice.total || 0).toLocaleString()}</Text>
                 </View>
             </View>
 
