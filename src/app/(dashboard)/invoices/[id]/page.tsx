@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ArrowLeft, Calendar, User, DollarSign, Download, Send } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/invoices/download-button";
 import { DeleteInvoiceDialog } from "@/components/invoices/delete-invoice-dialog";
 
@@ -22,26 +24,28 @@ export default async function InvoicePage({ params }: { params: { id: string } }
     return (
         <div className="px-4 lg:px-8 space-y-6 pt-8 pb-10">
             {/* Header */}
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href="/invoices">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Link>
-                </Button>
-                <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold tracking-tight text-brand-primary">{invoice.invoice_number}</h1>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium 
-                  ${invoice.status === 'Paid' ? 'bg-green-100 text-green-700' :
-                                invoice.status === 'Sent' ? 'bg-blue-100 text-blue-700' :
-                                    invoice.status === 'Overdue' ? 'bg-red-100 text-red-700' :
-                                        'bg-gray-100 text-gray-700'}`}>
-                            {invoice.status}
-                        </span>
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex items-center gap-4 flex-1">
+                    <Button variant="ghost" size="icon" asChild className="rounded-full">
+                        <Link href="/invoices">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold tracking-tight text-brand-primary">{invoice.invoice_number}</h1>
+                            <Badge variant={
+                                invoice.status === 'Paid' ? 'default' :
+                                    invoice.status === 'Sent' ? 'secondary' :
+                                        invoice.status === 'Overdue' ? 'destructive' : 'outline'
+                            }>
+                                {invoice.status}
+                            </Badge>
+                        </div>
+                        <p className="text-muted-foreground mt-1">Issued on {format(new Date(invoice.issue_date), 'MMM d, yyyy')}</p>
                     </div>
-                    <p className="text-muted-foreground mt-1">Issued on {format(new Date(invoice.issue_date), 'MMM d, yyyy')}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     {invoice.client && <DownloadInvoiceButton invoice={invoice as any} profile={profile} />}
                     <Button variant="outline" asChild>
                         <Link href={`/invoices/${invoice.id}/edit`}>Edit Invoice</Link>
@@ -63,8 +67,8 @@ export default async function InvoicePage({ params }: { params: { id: string } }
                         <CardContent className="space-y-4">
                             {invoice.client && (
                                 <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-full bg-violet-50 flex items-center justify-center">
-                                        <User className="h-4 w-4 text-violet-600" />
+                                    <div className="h-8 w-8 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center">
+                                        <User className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">Bill To</p>
@@ -76,8 +80,8 @@ export default async function InvoicePage({ params }: { params: { id: string } }
                             )}
 
                             <div className="flex items-center gap-3">
-                                <div className="h-8 w-8 rounded-full bg-orange-50 flex items-center justify-center">
-                                    <Calendar className="h-4 w-4 text-orange-600" />
+                                <div className="h-8 w-8 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
+                                    <Calendar className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium">Due Date</p>

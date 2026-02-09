@@ -51,8 +51,13 @@ export async function getInvoice(id: string) {
     .eq('user_id', user.id)
     .single();
 
-  if (invoiceError || !invoice) {
-    console.error('Error fetching invoice:', invoiceError);
+  if (invoiceError) {
+    console.error(`Error fetching invoice ${id}:`, invoiceError.message);
+    return null;
+  }
+
+  if (!invoice) {
+    console.warn(`Invoice ${id} not found for user ${user.id}`);
     return null;
   }
 

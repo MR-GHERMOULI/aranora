@@ -225,7 +225,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
 
                 <div className="space-y-4">
                     {items.map((item, index) => (
-                        <div key={index} className="grid gap-4 md:grid-cols-12 items-end border p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                        <div key={index} className="grid gap-4 md:grid-cols-12 items-end border p-4 rounded-lg bg-slate-50 dark:bg-slate-900/50">
                             <div className="md:col-span-6 space-y-2">
                                 <Label>Description</Label>
                                 <Input
@@ -268,7 +268,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
 
             <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                <Button type="submit" disabled={loading} variant="secondary">
+                <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {invoice ? "Update Invoice" : "Create Invoice"}
                 </Button>

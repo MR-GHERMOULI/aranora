@@ -1,15 +1,17 @@
 import { getInvoices } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, User, Calendar, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default async function InvoicesPage() {
     const invoices = await getInvoices();
 
     return (
-        <div className="px-4 lg:px-8 space-y-4 pt-8">
+        <div className="px-4 lg:px-8 space-y-4 pt-8 pb-10">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-brand-primary">Invoices</h2>
@@ -31,18 +33,18 @@ export default async function InvoicesPage() {
                     </div>
                 ) : (
                     invoices.map((invoice) => (
-                        <Card key={invoice.id} className="hover:shadow-md transition-shadow">
+                        <Card key={invoice.id} className="hover:shadow-md transition-shadow dark:bg-card dark:border-border">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-lg font-semibold truncate">
                                     {invoice.invoice_number}
                                 </CardTitle>
-                                <div className={`px-2 py-1 rounded-full text-xs font-medium 
-                  ${invoice.status === 'Paid' ? 'bg-green-100 text-green-700' :
-                                        invoice.status === 'Sent' ? 'bg-blue-100 text-blue-700' :
-                                            invoice.status === 'Overdue' ? 'bg-red-100 text-red-700' :
-                                                'bg-gray-100 text-gray-700'}`}>
+                                <Badge variant={
+                                    invoice.status === 'Paid' ? 'default' :
+                                        invoice.status === 'Sent' ? 'secondary' :
+                                            invoice.status === 'Overdue' ? 'destructive' : 'outline'
+                                }>
                                     {invoice.status}
-                                </div>
+                                </Badge>
                             </CardHeader>
                             <CardContent className="space-y-2 mt-2">
                                 {invoice.client && (
@@ -53,7 +55,7 @@ export default async function InvoicesPage() {
                                 )}
                                 <div className="flex items-center text-sm text-muted-foreground">
                                     <DollarSign className="mr-2 h-4 w-4" />
-                                    ${invoice.total.toLocaleString()}
+                                    ${(invoice.total || 0).toLocaleString()}
                                 </div>
                                 {invoice.due_date && (
                                     <div className="flex items-center text-sm text-muted-foreground">
@@ -62,7 +64,7 @@ export default async function InvoicesPage() {
                                     </div>
                                 )}
                             </CardContent>
-                            <CardFooter className="justify-end">
+                            <CardFooter className="justify-end border-t pt-4 mt-2">
                                 <Button variant="ghost" size="sm" asChild>
                                     <Link href={`/invoices/${invoice.id}`}>View Details</Link>
                                 </Button>

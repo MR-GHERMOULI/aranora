@@ -72,6 +72,10 @@
   --border: #334155;
   --input: #334155;
   --ring: #4ADE80;
+
+  /* Brand Colors - Dark Mode Adjustments */
+  --brand-primary: #60A5FA; /* Lighter blue for dark mode */
+  --brand-primary-light: #93C5FD;
 }
 
 @theme inline {
