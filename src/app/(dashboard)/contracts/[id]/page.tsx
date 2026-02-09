@@ -13,9 +13,10 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { SignContractButton } from "@/components/contracts/sign-button";
 
-export default async function ContractPage({ params }: { params: { id: string } }) {
+export default async function ContractPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const [contract, clients, projects, profile] = await Promise.all([
-        getContract(params.id),
+        getContract(id),
         getClients(),
         getProjects(),
         getProfile()

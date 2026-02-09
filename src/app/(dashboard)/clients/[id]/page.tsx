@@ -11,12 +11,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 
-export default async function ClientPage({ params }: { params: { id: string } }) {
+export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     // Parallel fetching
     const [client, projects, invoices] = await Promise.all([
-        getClient(params.id),
-        getProjects(params.id),
-        getInvoices(params.id)
+        getClient(id),
+        getProjects(id),
+        getInvoices(id)
     ]);
 
     if (!client) {

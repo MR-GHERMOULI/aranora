@@ -5,9 +5,10 @@ import { InvoiceForm } from "@/components/invoices/invoice-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 
-export default async function EditInvoicePage({ params }: { params: { id: string } }) {
+export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const [invoice, clients, projects] = await Promise.all([
-        getInvoice(params.id),
+        getInvoice(id),
         getClients(),
         getProjects()
     ]);

@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/invoices/download-button";
 import { DeleteInvoiceDialog } from "@/components/invoices/delete-invoice-dialog";
 
-export default async function InvoicePage({ params }: { params: { id: string } }) {
+export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const [invoice, profile] = await Promise.all([
-        getInvoice(params.id),
+        getInvoice(id),
         getProfile()
     ]);
 

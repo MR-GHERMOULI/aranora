@@ -5,8 +5,8 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function InvitePage({ params }: { params: { id: string, token: string } }) { // params usually match the folder name [token]
-    const token = params.token;
+export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) { // params usually match the folder name [token]
+    const { token } = await params;
     const { invite, error } = await getInviteDetails(token);
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
