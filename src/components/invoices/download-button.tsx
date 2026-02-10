@@ -18,12 +18,23 @@ export function DownloadInvoiceButton({ invoice, profile }: DownloadInvoiceButto
             fileName={`${invoice.invoice_number}.pdf`}
         >
             {/* @ts-ignore - render prop type mismatch in library sometimes, safe to ignore for mvp */}
-            {({ blob, url, loading, error }) => (
-                <Button variant="outline" disabled={loading}>
-                    <Download className="mr-2 h-4 w-4" />
-                    {loading ? "Generating PDF..." : "Download PDF"}
-                </Button>
-            )}
+            {({ blob, url, loading, error }) => {
+                if (error) {
+                    console.error("PDF Generation Error:", error);
+                }
+                return (
+                    <Button
+                        variant="outline"
+                        disabled={loading || !!error}
+                        onClick={() => {
+                            if (error) alert("Failed to generate PDF. Please try again.");
+                        }}
+                    >
+                        <Download className="mr-2 h-4 w-4" />
+                        {loading ? "Generating PDF..." : error ? "Error Generating PDF" : "Download PDF"}
+                    </Button>
+                );
+            }}
         </PDFDownloadLink>
     );
 }

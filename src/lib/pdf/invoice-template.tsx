@@ -142,8 +142,8 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                     </View>
                 </View>
                 <View>
-                    <Text style={styles.value}>#{invoice.invoice_number}</Text>
-                    <Text style={[styles.label, { marginTop: 4, textAlign: 'right' }]}>{invoice.status}</Text>
+                    <Text style={styles.value}>#{invoice.invoice_number || '---'}</Text>
+                    <Text style={[styles.label, { marginTop: 4, textAlign: 'right' }]}>{invoice.status || 'Draft'}</Text>
                 </View>
             </View>
 
@@ -157,9 +157,9 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                 </View>
                 <View style={styles.col}>
                     <Text style={styles.label}>Bill To:</Text>
-                    <Text style={[styles.value, { fontWeight: 'bold' }]}>{invoice.client.name}</Text>
-                    <Text style={styles.value}>{invoice.client.email}</Text>
-                    <Text style={styles.value}>{invoice.client.phone}</Text>
+                    <Text style={[styles.value, { fontWeight: 'bold' }]}>{invoice?.client?.name || 'Valued Client'}</Text>
+                    <Text style={styles.value}>{invoice?.client?.email || ''}</Text>
+                    <Text style={styles.value}>{invoice?.client?.phone || ''}</Text>
                 </View>
             </View>
 

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/invoices/download-button";
+import { SendInvoiceButton } from "@/components/invoices/send-invoice-button";
 import { DeleteInvoiceDialog } from "@/components/invoices/delete-invoice-dialog";
 
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
@@ -79,9 +80,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                         <Button variant="outline" asChild>
                             <Link href={`/invoices/${invoice.id}/edit`}>Edit Invoice</Link>
                         </Button>
-                        <Button variant="default">
-                            <Send className="mr-2 h-4 w-4" /> Send Invoice
-                        </Button>
+                        {invoice.client && <SendInvoiceButton invoice={invoice as any} profile={profile} />}
                         <DeleteInvoiceDialog invoiceId={invoice.id} invoiceNumber={invoice.invoice_number} />
                     </div>
                 </div>
