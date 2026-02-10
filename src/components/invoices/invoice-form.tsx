@@ -45,11 +45,14 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
 
     useEffect(() => {
         if (invoice) {
-            setSelectedClient(invoice.client_id || "")
-            setSelectedProject(invoice.project_id || "")
+            setSelectedClient(String(invoice.client_id || ""))
+            setSelectedProject(String(invoice.project_id || ""))
             setIssueDate(invoice.issue_date ? new Date(invoice.issue_date) : new Date())
             setDueDate(invoice.due_date ? new Date(invoice.due_date) : undefined)
             setStatus(invoice.status)
+            if (invoice.paper_size) {
+                setPaperSize(invoice.paper_size as 'A4' | 'LETTER')
+            }
 
             if (invoice.items && invoice.items.length > 0) {
                 setItems(invoice.items.map(item => ({

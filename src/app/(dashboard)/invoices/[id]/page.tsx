@@ -160,7 +160,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                                                     <tr key={i} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                                                         <td className="p-4 align-middle">{item.description}</td>
                                                         <td className="p-4 align-middle text-right">{item.quantity}</td>
-                                                        <td className="p-4 align-middle text-right">${item.unit_price}</td>
+                                                        <td className="p-4 align-middle text-right">${(item.unit_price || 0).toFixed(2)}</td>
                                                         <td className="p-4 align-middle text-right font-medium">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
                                                     </tr>
                                                 ))}

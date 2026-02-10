@@ -127,6 +127,15 @@ interface InvoicePDFProps {
     paperSize?: 'A4' | 'LETTER';
 }
 
+const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    try {
+        return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (e) {
+        return 'Invalid Date';
+    }
+};
+
 export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFProps) => (
     <Document>
         <Page size={paperSize} style={styles.page}>
@@ -168,11 +177,11 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                     <Text style={styles.label}>Dates:</Text>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
                         <Text style={styles.label}>Issued:</Text>
-                        <Text style={styles.value}>{invoice.issue_date ? format(new Date(invoice.issue_date), 'MMM d, yyyy') : 'N/A'}</Text>
+                        <Text style={styles.value}>{formatDate(invoice.issue_date)}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={styles.label}>Due:</Text>
-                        <Text style={styles.value}>{invoice.due_date ? format(new Date(invoice.due_date), 'MMM d, yyyy') : 'On Receipt'}</Text>
+                        <Text style={styles.value}>{formatDate(invoice.due_date)}</Text>
                     </View>
                 </View>
                 <View style={styles.col}>

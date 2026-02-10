@@ -46,7 +46,7 @@ export async function getInvoice(id: string) {
   // Fetch invoice with relational data
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
-    .select('*, client:clients(name), project:projects(title)')
+    .select('*, client:clients(name, email, phone), project:projects(title)')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();

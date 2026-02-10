@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react";
+
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { InvoicePDF } from "@/lib/pdf/invoice-template";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,21 @@ interface DownloadInvoiceButtonProps {
 }
 
 export function DownloadInvoiceButton({ invoice, profile }: DownloadInvoiceButtonProps) {
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <Button variant="outline" disabled>
+                <Download className="mr-2 h-4 w-4" />
+                Loading PDF...
+            </Button>
+        );
+    }
+
     return (
         <PDFDownloadLink
             document={<InvoicePDF invoice={invoice} profile={profile} paperSize={invoice.paper_size || 'A4'} />}

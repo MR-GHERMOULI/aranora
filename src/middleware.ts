@@ -7,12 +7,13 @@ export async function middleware(request: NextRequest) {
 
     // 2. Add Security Headers
     const cspHeader = `
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com;
+        default-src 'self' blob: data:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         img-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com;
-        font-src 'self' https://fonts.gstatic.com;
-        connect-src 'self' https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com;
+        font-src 'self' data: https://fonts.gstatic.com;
+        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com;
+        worker-src 'self' blob:;
         object-src 'none';
         base-uri 'self';
         form-action 'self';
