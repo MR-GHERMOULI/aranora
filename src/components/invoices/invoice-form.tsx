@@ -35,34 +35,29 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    const [items, setItems] = useState<{ description: string, quantity: number, unitPrice: number }[]>([{ description: "", quantity: 1, unitPrice: 0 }])
-    const [selectedClient, setSelectedClient] = useState("")
-    const [selectedProject, setSelectedProject] = useState("")
-    const [issueDate, setIssueDate] = useState<Date | undefined>(new Date())
-    const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
-    const [status, setStatus] = useState("Draft")
-    const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>('A4')
+    const [items, setItems] = useState<{ description: string, quantity: number, unitPrice: number }[]>(
+        invoice?.items && invoice.items.length > 0
+            ? invoice.items.map(item => ({
+                description: item.description,
+                quantity: item.quantity,
+                unitPrice: Number(item.unit_price)
+            }))
+            : [{ description: "", quantity: 1, unitPrice: 0 }]
+    )
 
-    useEffect(() => {
-        if (invoice) {
-            setSelectedClient(String(invoice.client_id || ""))
-            setSelectedProject(String(invoice.project_id || ""))
-            setIssueDate(invoice.issue_date ? new Date(invoice.issue_date) : new Date())
-            setDueDate(invoice.due_date ? new Date(invoice.due_date) : undefined)
-            setStatus(invoice.status)
-            if (invoice.paper_size) {
-                setPaperSize(invoice.paper_size as 'A4' | 'LETTER')
-            }
+    // Initialize state from props directly
+    const [selectedClient, setSelectedClient] = useState(invoice?.client_id || "")
+    const [selectedProject, setSelectedProject] = useState(invoice?.project_id || "")
+    const [issueDate, setIssueDate] = useState<Date | undefined>(
+        invoice?.issue_date ? new Date(invoice.issue_date) : new Date()
+    )
+    const [dueDate, setDueDate] = useState<Date | undefined>(
+        invoice?.due_date ? new Date(invoice.due_date) : undefined
+    )
+    const [status, setStatus] = useState(invoice?.status || "Draft")
+    const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>(invoice?.paper_size || 'A4')
 
-            if (invoice.items && invoice.items.length > 0) {
-                setItems(invoice.items.map(item => ({
-                    description: item.description,
-                    quantity: item.quantity,
-                    unitPrice: Number(item.unit_price) // Ensure number
-                })))
-            }
-        }
-    }, [invoice])
+    // No need for useEffect anymore since we initialize from props directly
 
     const addItem = () => {
         setItems([...items, { description: "", quantity: 1, unitPrice: 0 }]);
