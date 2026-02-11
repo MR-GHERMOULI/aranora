@@ -43,13 +43,22 @@ export async function getInvoice(id: string) {
     redirect('/login');
   }
 
+  // Check if ID is a UUID
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
   // Fetch invoice with relational data
-  const { data: invoice, error: invoiceError } = await supabase
+  let query = supabase
     .from('invoices')
     .select('*, client:clients(name, email, phone), project:projects(title)')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single();
+    .eq('user_id', user.id);
+
+  if (isUUID) {
+    query = query.eq('id', id);
+  } else {
+    query = query.eq('invoice_number', id);
+  }
+
+  const { data: invoice, error: invoiceError } = await query.single();
 
   if (invoiceError) {
     console.error(`Error fetching invoice ${id}:`, invoiceError);
@@ -64,7 +73,7 @@ export async function getInvoice(id: string) {
   const { data: items, error: itemsError } = await supabase
     .from('invoice_items')
     .select('*')
-    .eq('invoice_id', id);
+    .eq('invoice_id', invoice.id); // Use the underlying UUID for joining
 
   if (itemsError) {
     console.error('Error fetching invoice items:', itemsError);
@@ -170,7 +179,7 @@ export async function createInvoice(formData: FormData) {
   }
 
   revalidatePath('/invoices');
-  redirect(`/invoices/${invoice.id}`);
+  redirect(`/invoices/${invoice.invoice_number}`);
 }
 
 export async function updateInvoice(formData: FormData) {
@@ -196,7 +205,7 @@ export async function updateInvoice(formData: FormData) {
   const total = subtotal; // Tax placeholder
 
   // Update Invoice
-  const { error: invoiceError } = await supabase
+  const { data: updatedInvoice, error: invoiceError } = await supabase
     .from('invoices')
     .update({
       client_id: clientId,
@@ -209,7 +218,9 @@ export async function updateInvoice(formData: FormData) {
       paper_size: formData.get('paperSize') as string || 'A4'
     })
     .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .select('invoice_number')
+    .single();
 
   if (invoiceError) {
     console.error('Error updating invoice:', invoiceError);
@@ -245,8 +256,8 @@ export async function updateInvoice(formData: FormData) {
   }
 
   revalidatePath('/invoices');
-  revalidatePath(`/invoices/${id}`);
-  redirect(`/invoices/${id}`);
+  revalidatePath(`/invoices/${updatedInvoice.invoice_number}`);
+  redirect(`/invoices/${updatedInvoice.invoice_number}`);
 }
 
 

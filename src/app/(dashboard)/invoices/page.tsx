@@ -73,7 +73,7 @@ export default async function InvoicesPage() {
                             </CardContent>
                             <CardFooter className="justify-end border-t pt-4 mt-2">
                                 <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/invoices/${invoice.id}`}>View Details</Link>
+                                    <Link href={`/invoices/${invoice.invoice_number}`}>View Details</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

@@ -59,7 +59,7 @@ export default async function DownloadHistoryPage() {
                                         <TableCell className="text-right">${(log.invoice?.total || 0).toLocaleString()}</TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/invoices/${log.invoice_id}`}>
+                                                <Link href={`/invoices/${log.invoice?.invoice_number || log.invoice_id}`}>
                                                     View Invoice
                                                 </Link>
                                             </Button>
