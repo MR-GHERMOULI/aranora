@@ -94,8 +94,30 @@ export async function createInvoice(formData: FormData) {
   const itemsJson = formData.get('items') as string;
   const items = JSON.parse(itemsJson);
 
-  // Generate a random invoice number (simple version)
-  const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
+  // Generate sequential invoice number
+  // 1. Fetch existing invoice numbers for user
+  const { data: existingInvoices } = await supabase
+    .from('invoices')
+    .select('invoice_number')
+    .eq('user_id', user.id);
+
+  // 2. Find max sequence number (ignore legacy timestamps > 100000)
+  let nextSeq = 1;
+  if (existingInvoices && existingInvoices.length > 0) {
+    const numbers = existingInvoices
+      .map(inv => {
+        const match = inv.invoice_number.match(/^INV-(\d+)$/);
+        if (!match) return 0;
+        return parseInt(match[1], 10);
+      })
+      .filter(n => !isNaN(n) && n < 100000); // Filter out potential timestamps or legacy large numbers
+
+    if (numbers.length > 0) {
+      nextSeq = Math.max(...numbers) + 1;
+    }
+  }
+
+  const invoiceNumber = `INV-${nextSeq.toString().padStart(3, '0')}`;
 
   // Calculate totals
   const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0);
