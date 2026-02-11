@@ -2,7 +2,7 @@ import { getInvoices } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, FileText, User, Calendar, DollarSign } from "lucide-react";
+import { Plus, FileText, User, Calendar, DollarSign, History } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -19,11 +19,18 @@ export default async function InvoicesPage() {
                         Manage your billing and track payments.
                     </p>
                 </div>
-                <Button asChild>
-                    <Link href="/invoices/new">
-                        <Plus className="mr-2 h-4 w-4" /> Create Invoice
-                    </Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" asChild>
+                        <Link href="/invoices/history">
+                            <History className="mr-2 h-4 w-4" /> History
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/invoices/new">
+                            <Plus className="mr-2 h-4 w-4" /> Create Invoice
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

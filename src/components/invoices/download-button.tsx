@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { Invoice } from "@/types";
 import { cn } from "@/lib/utils";
+import { logDownload } from "@/app/(dashboard)/invoices/actions";
 
 interface DownloadInvoiceButtonProps {
     invoice: Invoice & { items: any[]; client: any };
@@ -35,6 +36,9 @@ export function DownloadInvoiceButton({ invoice, profile }: DownloadInvoiceButto
             document={<InvoicePDF invoice={invoice} profile={profile} paperSize={invoice.paper_size || 'A4'} />}
             fileName={`${invoice.invoice_number}.pdf`}
             className={buttonVariants({ variant: "outline" })}
+            onClick={() => {
+                logDownload(invoice.id);
+            }}
         >
             {/* @ts-ignore */}
             {({ blob, url, loading, error }) => (

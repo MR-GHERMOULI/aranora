@@ -250,3 +250,39 @@ export async function deleteInvoice(invoiceId: string) {
   revalidatePath('/invoices');
 }
 
+
+export async function logDownload(invoiceId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  await supabase
+    .from('invoice_downloads')
+    .insert({
+      user_id: user.id,
+      invoice_id: invoiceId
+    });
+}
+
+export async function getDownloadHistory() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data, error } = await supabase
+    .from('invoice_downloads')
+    .select('*, invoice:invoices(invoice_number, client:clients(name), total)')
+    .eq('user_id', user.id)
+    .order('downloaded_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching download history:', error);
+    return [];
+  }
+
+  return data;
+}
