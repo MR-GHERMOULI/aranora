@@ -9,14 +9,24 @@ export async function getNotifications() {
 
     if (!user) return [];
 
-    const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('read', false)
-        .order('created_at', { ascending: false });
+    try {
+        const { data, error } = await supabase
+            .from('notifications')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('read', false)
+            .order('created_at', { ascending: false });
 
-    return data || [];
+        if (error) {
+            console.error('Error fetching notifications:', error);
+            return [];
+        }
+
+        return data || [];
+    } catch (error) {
+        console.error('Unexpected error fetching notifications:', error);
+        return [];
+    }
 }
 
 export async function markAsRead(notificationId: string) {
