@@ -290,4 +290,34 @@ BEGIN
 END; $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 11. Subscriptions Table
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  price NUMERIC(10,2) NOT NULL,
+  currency TEXT DEFAULT 'USD',
+  billing_cycle TEXT CHECK (billing_cycle IN ('monthly', 'yearly')),
+  start_date DATE NOT NULL,
+  next_renewal_date DATE NOT NULL,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'expired')),
+  icon TEXT,
+  category TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_renewal ON subscriptions(next_renewal_date);
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own subscriptions" ON subscriptions;
+DROP POLICY IF EXISTS "Users can create own subscriptions" ON subscriptions;
+DROP POLICY IF EXISTS "Users can update own subscriptions" ON subscriptions;
+DROP POLICY IF EXISTS "Users can delete own subscriptions" ON subscriptions;
+CREATE POLICY "Users can view own subscriptions" ON subscriptions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can create own subscriptions" ON subscriptions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own subscriptions" ON subscriptions FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own subscriptions" ON subscriptions FOR DELETE USING (auth.uid() = user_id);
+
+CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON subscriptions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+

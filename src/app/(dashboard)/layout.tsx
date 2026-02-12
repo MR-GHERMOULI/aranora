@@ -1,10 +1,14 @@
 import { Sidebar } from "@/components/layout/sidebar";
+import { getUpcomingRenewals } from "./subscriptions/actions";
+import { SubscriptionNotifier } from "@/components/subscriptions/subscription-notifier";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const upcomingRenewals = await getUpcomingRenewals();
+
   return (
     <div className="h-full relative">
       <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-40 bg-gray-900">
@@ -13,6 +17,7 @@ export default function DashboardLayout({
       <main className="md:pl-72 pb-10">
         {children}
       </main>
+      <SubscriptionNotifier renewingSubs={upcomingRenewals} />
     </div>
   );
 }

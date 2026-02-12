@@ -83,3 +83,20 @@ export interface Task {
     created_at: string
     project?: { title: string }
 }
+
+export interface Subscription {
+    id: string;
+    user_id: string;
+    name: string;
+    price: number;
+    currency: string;
+    billing_cycle: 'monthly' | 'yearly';
+    start_date: string;
+    next_renewal_date: string;
+    status: 'active' | 'cancelled' | 'expired';
+    icon?: string;
+    category?: string;
+    created_at: string;
+    updated_at: string;
+}
+

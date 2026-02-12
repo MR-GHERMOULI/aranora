@@ -14,7 +14,8 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    CreditCard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -59,6 +60,12 @@ export function Sidebar({ className }: SidebarProps) {
             icon: FileText,
             href: "/invoices",
             color: "text-orange-700",
+        },
+        {
+            label: "Subscriptions",
+            icon: CreditCard,
+            href: "/subscriptions",
+            color: "text-blue-500",
         },
         {
             label: "Calendar",
