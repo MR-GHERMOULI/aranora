@@ -16,12 +16,14 @@ import { useRouter } from "next/navigation";
 
 const subscriptionSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    price: z.coerce.number().min(0, "Price must be at least 0"),
-    currency: z.string().default("USD"),
+    price: z.number().min(0, "Price must be at least 0"),
+    currency: z.string(),
     billing_cycle: z.enum(["monthly", "yearly"]),
     start_date: z.string().min(1, "Start date is required"),
-    status: z.enum(["active", "cancelled", "expired"]).default("active"),
+    status: z.enum(["active", "cancelled", "expired"]),
 });
+
+type SubscriptionFormValues = z.infer<typeof subscriptionSchema>;
 
 interface SubscriptionDialogProps {
     subscription?: Subscription;
@@ -34,11 +36,11 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
 
-    const form = useForm<z.infer<typeof subscriptionSchema>>({
+    const form = useForm<SubscriptionFormValues>({
         resolver: zodResolver(subscriptionSchema),
         defaultValues: {
             name: subscription?.name || "",
-            price: subscription?.price || 0,
+            price: subscription ? Number(subscription.price) : 0,
             currency: subscription?.currency || "USD",
             billing_cycle: subscription?.billing_cycle || "monthly",
             start_date: subscription?.start_date || new Date().toISOString().split("T")[0],
@@ -105,7 +107,7 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
                         <Label htmlFor="price" className="text-right">
                             Price
                         </Label>
-                        <Input id="price" type="number" step="0.01" className="col-span-3" {...form.register("price")} />
+                        <Input id="price" type="number" step="0.01" className="col-span-3" {...form.register("price", { valueAsNumber: true })} />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="billing_cycle" className="text-right">Cycle</Label>
