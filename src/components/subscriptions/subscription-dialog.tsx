@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 
 const subscriptionSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    price: z.string().transform((val) => Number(val)),
+    price: z.coerce.number().min(0, "Price must be at least 0"),
     currency: z.string().default("USD"),
     billing_cycle: z.enum(["monthly", "yearly"]),
     start_date: z.string().min(1, "Start date is required"),
@@ -38,7 +38,7 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
         resolver: zodResolver(subscriptionSchema),
         defaultValues: {
             name: subscription?.name || "",
-            price: subscription?.price?.toString() || "",
+            price: subscription?.price || 0,
             currency: subscription?.currency || "USD",
             billing_cycle: subscription?.billing_cycle || "monthly",
             start_date: subscription?.start_date || new Date().toISOString().split("T")[0],
