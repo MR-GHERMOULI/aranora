@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { addProjectFileRecord, deleteProjectFile } from "@/app/(dashboard)/projects/file-actions"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,7 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
     const [downloadingId, setDownloadingId] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
+    const pathname = usePathname()
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -84,6 +85,7 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
                 fileSize: file.size,
                 fileType: file.type,
                 storagePath,
+                pathToRevalidate: pathname,
             })
 
             toast.success("File uploaded successfully")
@@ -101,20 +103,22 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
         setDownloadingId(file.id)
         try {
             const supabase = createClient()
+            const storagePath = file.storage_path || `${projectId}/${file.file_name}`
+
             const { data, error } = await supabase.storage
                 .from('project-files')
-                .download(file.storage_path || `${projectId}/${file.file_name}`)
+                .createSignedUrl(storagePath, 60, {
+                    download: true,
+                })
 
             if (error) throw error
 
-            const url = window.URL.createObjectURL(data)
             const link = document.createElement('a')
-            link.href = url
+            link.href = data.signedUrl
             link.setAttribute('download', file.file_name)
             document.body.appendChild(link)
             link.click()
             link.remove()
-            window.URL.revokeObjectURL(url)
         } catch (err) {
             console.error('Download error:', err)
             toast.error("Failed to download file")
@@ -127,7 +131,7 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
         if (!confirm(`Delete "${file.file_name}"?`)) return
         setDeletingId(file.id)
         try {
-            await deleteProjectFile(file.id, file.storage_path || `${projectId}/${file.file_name}`)
+            await deleteProjectFile(file.id, file.storage_path || `${projectId}/${file.file_name}`, pathname)
             toast.success("File deleted")
             router.refresh()
         } catch {

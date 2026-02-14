@@ -27,7 +27,7 @@ export async function getProjectFiles(projectId: string) {
     return data;
 }
 
-export async function deleteProjectFile(fileId: string, filePath: string) {
+export async function deleteProjectFile(fileId: string, filePath: string, pathToRevalidate: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -56,7 +56,7 @@ export async function deleteProjectFile(fileId: string, filePath: string) {
         throw new Error('Failed to delete file');
     }
 
-    revalidatePath('/projects');
+    revalidatePath(pathToRevalidate);
 }
 
 export async function addProjectFileRecord(data: {
@@ -66,6 +66,7 @@ export async function addProjectFileRecord(data: {
     fileSize: number;
     fileType: string;
     storagePath: string;
+    pathToRevalidate: string;
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -91,5 +92,5 @@ export async function addProjectFileRecord(data: {
         throw new Error('Failed to save file record');
     }
 
-    revalidatePath('/projects', 'page');
+    revalidatePath(data.pathToRevalidate);
 }
