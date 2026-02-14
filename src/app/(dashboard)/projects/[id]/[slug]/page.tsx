@@ -1,6 +1,10 @@
 import { getProject } from "../../get-project-action";
 import { getInvoices } from "../../../invoices/actions";
 import { getProjectCollaborators } from "../../collaborator-actions";
+import { getTasks } from "../../../tasks/actions";
+import { getProjectFiles } from "../../file-actions";
+import { ProjectTaskList } from "@/components/projects/project-task-list";
+import { ProjectFileList } from "@/components/projects/project-file-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,10 +27,12 @@ export default async function ProjectPage({
     // Resolve params for Next.js 15+
     const { id, slug } = await params;
 
-    const [project, invoices, collaborators] = await Promise.all([
+    const [project, invoices, collaborators, tasks, files] = await Promise.all([
         getProject(id),
         getInvoices(undefined, id),
-        getProjectCollaborators(id)
+        getProjectCollaborators(id),
+        getTasks({ projectId: id }),
+        getProjectFiles(id)
     ]);
 
     if (!project) {
@@ -129,40 +135,10 @@ export default async function ProjectPage({
                             <TabsTrigger value="collaborators">Collaborators</TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                        <CheckSquare className="h-4 w-4" /> Project Tasks
-                                    </CardTitle>
-                                    <CardDescription>Manage tasks and milestones for this project.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        No tasks added yet. <br /> (Task management coming in Intermediate Features)
-                                        <div className="mt-4">
-                                            <Button variant="outline" size="sm" disabled>Add Task</Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <ProjectTaskList tasks={tasks} projectId={id} />
                         </TabsContent>
                         <TabsContent value="files" className="mt-4">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                        <File className="h-4 w-4" /> Files
-                                    </CardTitle>
-                                    <CardDescription>Upload and manage project documents.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        No files uploaded.
-                                        <div className="mt-4">
-                                            <Button variant="outline" size="sm">Upload File</Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <ProjectFileList files={files} projectId={id} />
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (
