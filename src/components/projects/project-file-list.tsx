@@ -50,6 +50,12 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
         const file = e.target.files?.[0]
         if (!file) return
 
+        if (file.type.startsWith('video/')) {
+            toast.error("Video uploads are not allowed")
+            if (fileInputRef.current) fileInputRef.current.value = ""
+            return
+        }
+
         setIsUploading(true)
         try {
             const supabase = createClient()
