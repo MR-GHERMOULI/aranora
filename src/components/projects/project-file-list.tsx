@@ -96,6 +96,29 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
         }
     }
 
+    const handleDownload = async (file: ProjectFile) => {
+        try {
+            const supabase = createClient()
+            const { data, error } = await supabase.storage
+                .from('project-files')
+                .download(file.storage_path || `${projectId}/${file.file_name}`)
+
+            if (error) throw error
+
+            const url = window.URL.createObjectURL(data)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', file.file_name)
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+        } catch (err) {
+            console.error('Download error:', err)
+            toast.error("Failed to download file")
+        }
+    }
+
     const handleDelete = async (file: ProjectFile) => {
         if (!confirm(`Delete "${file.file_name}"?`)) return
         setDeletingId(file.id)
@@ -169,24 +192,22 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8"
-                                        asChild
+                                        className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                                        onClick={() => handleDownload(file)}
                                     >
-                                        <a href={file.file_url} target="_blank" rel="noopener noreferrer" download>
-                                            <Download className="h-4 w-4" />
-                                        </a>
+                                        <Download className="h-4 w-4" />
                                     </Button>
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                         onClick={() => handleDelete(file)}
                                         disabled={deletingId === file.id}
                                     >
                                         {deletingId === file.id ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (
-                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                            <Trash2 className="h-4 w-4" />
                                         )}
                                     </Button>
                                 </div>

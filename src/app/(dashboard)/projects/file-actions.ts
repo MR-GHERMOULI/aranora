@@ -91,5 +91,5 @@ export async function addProjectFileRecord(data: {
         throw new Error('Failed to save file record');
     }
 
-    revalidatePath('/projects');
+    revalidatePath('/projects', 'layout');
 }
