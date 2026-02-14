@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { UserPlus, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -74,7 +75,7 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
             }
         } catch (error) {
             console.error(error)
-            alert("Failed to add collaborator")
+            toast.error("Failed to add collaborator")
         } finally {
             setLoading(false)
         }
@@ -83,7 +84,7 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
     const copyLink = () => {
         if (result?.inviteLink) {
             navigator.clipboard.writeText(result.inviteLink)
-            alert("Link copied!")
+            toast.success("Link copied!")
         }
     }
 

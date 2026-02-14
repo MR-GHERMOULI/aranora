@@ -21,19 +21,6 @@ export async function getProjectCollaborators(projectId: string) {
         redirect('/login');
     }
 
-    const { data, error } = await supabase
-        .from('project_collaborators')
-        .select(`
-            *,
-            profile:profiles!inner(username, full_name)
-        `)
-        // This inner join only works if they have a profile. 
-        // For external/unregistered, we need a left join or separate fetch.
-        // Actually the current project_collaborators doesn't have a direct FK to profiles.
-        // We'll fetch them separately or use a join if we can.
-        .eq('project_id', projectId);
-
-    // Alternative: Fetch collaborators then fetch profiles by email
     const { data: collaborators, error: collError } = await supabase
         .from('project_collaborators')
         .select('*')

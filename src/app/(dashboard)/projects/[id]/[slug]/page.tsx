@@ -53,7 +53,9 @@ export default async function ProjectPage({
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium 
                   ${project.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
                                 project.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                                    'bg-yellow-100 text-yellow-700'}`}>
+                                    project.status === 'On Hold' ? 'bg-yellow-100 text-yellow-700' :
+                                        project.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                            'bg-gray-100 text-gray-700'}`}>
                             {project.status}
                         </span>
                     </div>
@@ -93,7 +95,7 @@ export default async function ProjectPage({
                                 <div className="h-8 w-8 rounded-full bg-green-50 flex items-center justify-center">
                                     <DollarSign className="h-4 w-4 text-green-600" />
                                 </div>
-                                jewelry
+
                                 <div>
                                     <p className="text-sm font-medium">Budget</p>
                                     <p className="text-sm text-muted-foreground">{project.budget ? `$${project.budget.toLocaleString()}` : 'Not set'}</p>

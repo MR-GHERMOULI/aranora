@@ -1,6 +1,7 @@
 "use client"
 
 import { Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { removeCollaborator } from "@/app/(dashboard)/projects/collaborator-actions"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -22,7 +23,7 @@ export function RemoveCollaboratorButton({ collaboratorId, projectId, email }: R
             router.refresh()
         } catch (error) {
             console.error(error)
-            alert("Failed to remove collaborator")
+            toast.error("Failed to remove collaborator")
         }
     }
 
