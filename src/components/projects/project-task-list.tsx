@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckSquare, Plus, Loader2, Trash2, Circle, CheckCircle2, Calendar } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { CheckSquare, Loader2, Trash2, Circle, CheckCircle2, Calendar, LayoutList } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { Progress } from "@/components/ui/progress"
+import { AddProjectTaskDialog } from "./add-project-task-dialog"
 
 interface Task {
     id: string
@@ -28,38 +31,17 @@ interface ProjectTaskListProps {
 }
 
 export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
-    const [isAdding, setIsAdding] = useState(false)
     const [newTitle, setNewTitle] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isAdding, setIsAdding] = useState(false)
     const [togglingId, setTogglingId] = useState<string | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const router = useRouter()
 
-    const handleAddTask = async () => {
-        if (!newTitle.trim()) return
-        setIsSubmitting(true)
-        try {
-            const formData = new FormData()
-            formData.append("title", newTitle.trim())
-            formData.append("status", "Todo")
-            formData.append("projectId", projectId)
-            formData.append("priority", "Medium")
+    const completedCount = tasks.filter(t => t.status === "Done").length
+    const progress = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0
 
-            const result = await createTask(formData)
-            if (result?.error) {
-                toast.error("Failed to create task")
-            } else {
-                toast.success("Task created")
-                setNewTitle("")
-                setIsAdding(false)
-                router.refresh()
-            }
-        } catch {
-            toast.error("Failed to create task")
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
+    // Remove the old handleAddTask as we now use the dialog
 
     const handleToggle = async (task: Task) => {
         setTogglingId(task.id)
@@ -112,88 +94,86 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                         <CheckSquare className="h-4 w-4" /> Project Tasks
                     </CardTitle>
                     <CardDescription>
-                        {tasks.length} task{tasks.length !== 1 ? 's' : ''} · {doneTasks.length} completed
+                        {completedCount} of {tasks.length} tasks completed
                     </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setIsAdding(!isAdding)}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Task
-                </Button>
+                <AddProjectTaskDialog projectId={projectId} />
             </CardHeader>
-            <CardContent className="space-y-3">
-                {/* Add Task Form */}
-                {isAdding && (
-                    <div className="flex gap-2 pb-3 border-b">
-                        <Input
-                            placeholder="Task title..."
-                            value={newTitle}
-                            onChange={(e) => setNewTitle(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") handleAddTask() }}
-                            autoFocus
-                        />
-                        <Button size="sm" onClick={handleAddTask} disabled={isSubmitting || !newTitle.trim()}>
-                            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => { setIsAdding(false); setNewTitle("") }}>
-                            Cancel
-                        </Button>
+            <CardContent className="space-y-6">
+                {/* Progress Bar */}
+                {tasks.length > 0 && (
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Progress</span>
+                            <span>{Math.round(progress)}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
                     </div>
                 )}
 
+
                 {/* Task List */}
-                {tasks.length === 0 && !isAdding ? (
+                {tasks.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         No tasks yet. Click "Add Task" to get started.
                     </div>
                 ) : (
                     <>
                         {/* Active Tasks */}
-                        {todoTasks.map((task) => (
-                            <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors group">
-                                <button
-                                    onClick={() => handleToggle(task)}
-                                    disabled={togglingId === task.id}
-                                    className="text-muted-foreground hover:text-brand-primary transition-colors shrink-0"
-                                >
-                                    {togglingId === task.id ? (
-                                        <Loader2 className="h-5 w-5 animate-spin" />
-                                    ) : (
-                                        <Circle className="h-5 w-5" />
-                                    )}
-                                </button>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{task.title}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        {task.priority && (
-                                            <Badge variant="secondary" className={`text-xs ${priorityColors[task.priority] || ''}`}>
-                                                {task.priority}
+                        <div className="space-y-3">
+                            {todoTasks.map((task) => (
+                                <div key={task.id} className="flex items-start gap-3 p-4 rounded-xl border bg-card hover:bg-muted/50 transition-colors group">
+                                    <button
+                                        onClick={() => handleToggle(task)}
+                                        disabled={togglingId === task.id}
+                                        className="mt-0.5 text-muted-foreground hover:text-primary transition-colors shrink-0"
+                                    >
+                                        {togglingId === task.id ? (
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        ) : (
+                                            <Circle className="h-5 w-5" />
+                                        )}
+                                    </button>
+                                    <div className="flex-1 min-w-0 space-y-1">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <p className="font-medium leading-none">{task.title}</p>
+                                            {task.priority && (
+                                                <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 ${priorityColors[task.priority] || ''}`}>
+                                                    {task.priority}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        {task.description && (
+                                            <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
+                                        )}
+                                        <div className="flex items-center gap-3 pt-1">
+                                            {task.due_date && (
+                                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {format(new Date(task.due_date), 'MMM d')}
+                                                </span>
+                                            )}
+                                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+                                                {task.status}
                                             </Badge>
-                                        )}
-                                        {task.due_date && (
-                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                <Calendar className="h-3 w-3" />
-                                                {format(new Date(task.due_date), 'MMM d')}
-                                            </span>
-                                        )}
-                                        <Badge variant="outline" className="text-xs">
-                                            {task.status}
-                                        </Badge>
+                                        </div>
                                     </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity -mr-2"
+                                        onClick={() => handleDelete(task.id)}
+                                        disabled={deletingId === task.id}
+                                    >
+                                        {deletingId === task.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                        )}
+                                    </Button>
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => handleDelete(task.id)}
-                                    disabled={deletingId === task.id}
-                                >
-                                    {deletingId === task.id ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                    )}
-                                </Button>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
 
                         {/* Done Tasks */}
                         {doneTasks.length > 0 && (
@@ -202,7 +182,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                     Completed ({doneTasks.length})
                                 </div>
                                 {doneTasks.map((task) => (
-                                    <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg border border-dashed opacity-60 hover:opacity-100 transition-opacity group">
+                                    <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg border border-dashed hover:bg-muted/30 transition-colors group opacity-75">
                                         <button
                                             onClick={() => handleToggle(task)}
                                             disabled={togglingId === task.id}
