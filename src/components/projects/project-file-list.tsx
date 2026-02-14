@@ -6,6 +6,14 @@ import { createClient } from "@/lib/supabase/client"
 import { addProjectFileRecord, deleteProjectFile } from "@/app/(dashboard)/projects/file-actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { File, Upload, Trash2, Download, Loader2, FileText, FileImage, FileArchive } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
@@ -42,7 +50,8 @@ function getFileIcon(type: string) {
 
 export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
     const [isUploading, setIsUploading] = useState(false)
-    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [fileToDelete, setFileToDelete] = useState<ProjectFile | null>(null)
+    const [isDeleting, setIsDeleting] = useState(false)
     const [downloadingId, setDownloadingId] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
@@ -127,17 +136,28 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
         }
     }
 
-    const handleDelete = async (file: ProjectFile) => {
-        if (!confirm(`Delete "${file.file_name}"?`)) return
-        setDeletingId(file.id)
+    const handleDeleteClick = (e: React.MouseEvent, file: ProjectFile) => {
+        e.stopPropagation()
+        setFileToDelete(file)
+    }
+
+    const confirmDelete = async () => {
+        if (!fileToDelete) return
+
+        setIsDeleting(true)
         try {
-            await deleteProjectFile(file.id, file.storage_path || `${projectId}/${file.file_name}`, pathname)
+            await deleteProjectFile(
+                fileToDelete.id,
+                fileToDelete.storage_path || `${projectId}/${fileToDelete.file_name}`,
+                pathname
+            )
             toast.success("File deleted")
             router.refresh()
+            setFileToDelete(null)
         } catch {
             toast.error("Failed to delete file")
         } finally {
-            setDeletingId(null)
+            setIsDeleting(false)
         }
     }
 
@@ -211,17 +231,14 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
                                         )}
                                     </Button>
                                     <Button
+                                        type="button"
                                         variant="ghost"
                                         size="icon"
                                         className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                        onClick={() => handleDelete(file)}
-                                        disabled={deletingId === file.id || downloadingId === file.id}
+                                        onClick={(e) => handleDeleteClick(e, file)}
+                                        disabled={isDeleting || downloadingId === file.id}
                                     >
-                                        {deletingId === file.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Trash2 className="h-4 w-4" />
-                                        )}
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
                             </div>
@@ -229,6 +246,40 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
                     </div>
                 )}
             </CardContent>
+
+            <Dialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete File</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete "{fileToDelete?.file_name}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setFileToDelete(null)}
+                            disabled={isDeleting}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting...
+                                </>
+                            ) : (
+                                "Delete File"
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Card>
     )
 }
