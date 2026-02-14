@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { createTask } from "@/app/(dashboard)/tasks/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,7 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const router = useRouter()
+    const pathname = usePathname()
 
     // Form state
     const [title, setTitle] = useState("")
@@ -63,7 +64,7 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
                 formData.append("dueDate", format(dueDate, "yyyy-MM-dd"))
             }
 
-            const result = await createTask(formData)
+            const result = await createTask(formData, pathname)
 
             if (result?.error) {
                 toast.error("Failed to create task")

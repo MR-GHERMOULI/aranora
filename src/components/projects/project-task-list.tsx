@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { createTask, updateTask, deleteTask } from "@/app/(dashboard)/tasks/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,6 +36,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
     const [togglingId, setTogglingId] = useState<string | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const router = useRouter()
+    const pathname = usePathname()
 
     const completedCount = tasks.filter(t => t.status === "Done").length
     const progress = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0
@@ -46,7 +47,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
         setTogglingId(task.id)
         try {
             const newStatus = task.status === "Done" ? "Todo" : "Done"
-            const result = await updateTask(task.id, { status: newStatus })
+            const result = await updateTask(task.id, { status: newStatus }, pathname)
             if (result?.error) {
                 toast.error("Failed to update task")
             } else {
@@ -62,7 +63,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
     const handleDelete = async (taskId: string) => {
         setDeletingId(taskId)
         try {
-            const result = await deleteTask(taskId)
+            const result = await deleteTask(taskId, pathname)
             if (result?.error) {
                 toast.error("Failed to delete task")
             } else {
@@ -130,7 +131,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                         {togglingId === task.id ? (
                                             <Loader2 className="h-5 w-5 animate-spin" />
                                         ) : (
-                                            <Circle className="h-5 w-5" />
+                                            <Circle className="h-5 w-5 group-hover:text-green-500 transition-colors" />
                                         )}
                                     </button>
                                     <div className="flex-1 min-w-0 space-y-1">
@@ -190,7 +191,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                             {togglingId === task.id ? (
                                                 <Loader2 className="h-5 w-5 animate-spin" />
                                             ) : (
-                                                <CheckCircle2 className="h-5 w-5" />
+                                                <CheckCircle2 className="h-5 w-5 fill-current" />
                                             )}
                                         </button>
                                         <div className="flex-1 min-w-0">

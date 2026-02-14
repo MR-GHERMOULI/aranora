@@ -68,7 +68,7 @@ export async function getTasks(filters?: {
     return data;
 }
 
-export async function createTask(formData: FormData) {
+export async function createTask(formData: FormData, pathToRevalidate?: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -105,12 +105,15 @@ export async function createTask(formData: FormData) {
         return { error: error.message };
     }
 
+    if (pathToRevalidate) {
+        revalidatePath(pathToRevalidate);
+    }
     revalidatePath('/tasks');
     revalidatePath('/dashboard');
     return { success: true };
 }
 
-export async function updateTask(taskId: string, data: any) {
+export async function updateTask(taskId: string, data: any, pathToRevalidate?: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -129,12 +132,15 @@ export async function updateTask(taskId: string, data: any) {
         return { error: error.message };
     }
 
+    if (pathToRevalidate) {
+        revalidatePath(pathToRevalidate);
+    }
     revalidatePath('/tasks');
     revalidatePath('/dashboard');
     return { success: true };
 }
 
-export async function deleteTask(taskId: string) {
+export async function deleteTask(taskId: string, pathToRevalidate?: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -153,6 +159,9 @@ export async function deleteTask(taskId: string) {
         return { error: error.message };
     }
 
+    if (pathToRevalidate) {
+        revalidatePath(pathToRevalidate);
+    }
     revalidatePath('/tasks');
     revalidatePath('/dashboard');
     return { success: true };
