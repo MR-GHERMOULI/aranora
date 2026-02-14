@@ -20,6 +20,8 @@ interface DeleteProjectDialogProps {
     projectTitle: string
 }
 
+import { toast } from "sonner"
+
 export function DeleteProjectDialog({ projectId, projectTitle }: DeleteProjectDialogProps) {
     const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -29,10 +31,12 @@ export function DeleteProjectDialog({ projectId, projectTitle }: DeleteProjectDi
         try {
             setIsDeleting(true)
             await deleteProject(projectId)
+            toast.success("Project deleted successfully")
             setOpen(false)
             router.push('/projects')
         } catch (error) {
             console.error("Failed to delete project", error)
+            toast.error("Failed to delete project")
             setIsDeleting(false)
         }
     }

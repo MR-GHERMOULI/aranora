@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS projects (
   user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
   client_id UUID REFERENCES clients ON DELETE SET NULL,
   title TEXT NOT NULL,
+  slug TEXT,
   description TEXT,
   status TEXT DEFAULT 'Planning' CHECK (status IN ('Planning', 'In Progress', 'On Hold', 'Completed', 'Cancelled')),
   budget NUMERIC(12,2),
@@ -86,6 +87,7 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_projects_slug ON projects(slug);
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_client_id ON projects(client_id);
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;

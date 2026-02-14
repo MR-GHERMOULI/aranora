@@ -40,7 +40,9 @@ export default async function ProjectsPage() {
                                 <div className={`px-2 py-1 rounded-full text-xs font-medium 
                   ${project.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
                                         project.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                                            'bg-yellow-100 text-yellow-700'}`}>
+                                            project.status === 'On Hold' ? 'bg-yellow-100 text-yellow-700' :
+                                                project.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
+                                                    'bg-gray-100 text-gray-700'}`}>
                                     {project.status}
                                 </div>
                             </CardHeader>

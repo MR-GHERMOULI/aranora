@@ -37,9 +37,11 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
+import { toast } from "sonner"
+
 const projectSchema = z.object({
     title: z.string().min(2, "Title must be at least 2 characters"),
-    status: z.enum(["Pending", "In Progress", "Completed"]),
+    status: z.enum(["Planning", "In Progress", "On Hold", "Completed", "Cancelled"]),
     budget: z.string().optional(),
     description: z.string().optional().or(z.literal("")),
     startDate: z.date().optional(),
@@ -66,7 +68,9 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
         resolver: zodResolver(projectSchema),
         defaultValues: {
             title: project.title,
-            status: project.status as "Pending" | "In Progress" | "Completed",
+            status: (['Planning', 'In Progress', 'On Hold', 'Completed', 'Cancelled'].includes(project.status)
+                ? project.status
+                : "Planning") as any,
             budget: project.budget?.toString() || "",
             description: project.description || "",
             startDate: project.start_date ? new Date(project.start_date) : undefined,
@@ -87,11 +91,12 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             if (data.endDate) formData.append("endDate", format(data.endDate, "yyyy-MM-dd"))
 
             await updateProject(formData)
+            toast.success("Project updated successfully")
             setOpen(false)
             router.refresh()
         } catch (error) {
             console.error(error)
-            alert("Failed to update project")
+            toast.error("Failed to update project")
         } finally {
             setLoading(false)
         }
@@ -137,9 +142,11 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
                                                 <SelectValue placeholder="Status" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Pending">Pending</SelectItem>
+                                                <SelectItem value="Planning">Planning</SelectItem>
                                                 <SelectItem value="In Progress">In Progress</SelectItem>
+                                                <SelectItem value="On Hold">On Hold</SelectItem>
                                                 <SelectItem value="Completed">Completed</SelectItem>
+                                                <SelectItem value="Cancelled">Cancelled</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     )}

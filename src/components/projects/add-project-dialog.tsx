@@ -36,10 +36,12 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
+import { toast } from "sonner"
+
 const projectSchema = z.object({
     clientId: z.string().min(1, "Client is required"),
     title: z.string().min(2, "Title must be at least 2 characters"),
-    status: z.enum(["Pending", "In Progress", "Completed"]),
+    status: z.enum(["Planning", "In Progress", "On Hold", "Completed", "Cancelled"]),
     budget: z.string().optional(),
     description: z.string().optional(),
     startDate: z.date().optional(),
@@ -65,7 +67,7 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
     } = useForm<ProjectFormValues>({
         resolver: zodResolver(projectSchema),
         defaultValues: {
-            status: "Pending",
+            status: "Planning",
         },
     })
 
@@ -82,11 +84,12 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
             if (data.endDate) formData.append("endDate", format(data.endDate, "yyyy-MM-dd"))
 
             await createProject(formData)
+            toast.success("Project created successfully")
             setOpen(false)
             reset()
         } catch (error) {
             console.error(error)
-            alert("Failed to create project")
+            toast.error("Failed to create project")
         } finally {
             setLoading(false)
         }
@@ -158,9 +161,11 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
                                                 <SelectValue placeholder="Status" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="Pending">Pending</SelectItem>
+                                                <SelectItem value="Planning">Planning</SelectItem>
                                                 <SelectItem value="In Progress">In Progress</SelectItem>
+                                                <SelectItem value="On Hold">On Hold</SelectItem>
                                                 <SelectItem value="Completed">Completed</SelectItem>
+                                                <SelectItem value="Cancelled">Cancelled</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     )}
