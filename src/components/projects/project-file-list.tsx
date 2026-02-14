@@ -43,6 +43,7 @@ function getFileIcon(type: string) {
 export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
     const [isUploading, setIsUploading] = useState(false)
     const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [downloadingId, setDownloadingId] = useState<string | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
@@ -97,6 +98,7 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
     }
 
     const handleDownload = async (file: ProjectFile) => {
+        setDownloadingId(file.id)
         try {
             const supabase = createClient()
             const { data, error } = await supabase.storage
@@ -116,6 +118,8 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
         } catch (err) {
             console.error('Download error:', err)
             toast.error("Failed to download file")
+        } finally {
+            setDownloadingId(null)
         }
     }
 
@@ -194,15 +198,20 @@ export function ProjectFileList({ files, projectId }: ProjectFileListProps) {
                                         size="icon"
                                         className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
                                         onClick={() => handleDownload(file)}
+                                        disabled={downloadingId === file.id}
                                     >
-                                        <Download className="h-4 w-4" />
+                                        {downloadingId === file.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Download className="h-4 w-4" />
+                                        )}
                                     </Button>
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                         onClick={() => handleDelete(file)}
-                                        disabled={deletingId === file.id}
+                                        disabled={deletingId === file.id || downloadingId === file.id}
                                     >
                                         {deletingId === file.id ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
