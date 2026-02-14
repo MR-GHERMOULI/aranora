@@ -9,6 +9,7 @@ export async function getTasks(filters?: {
     projectId?: string;
     isPersonal?: boolean;
     dateRange?: { start: string; end: string };
+    excludeProjectTasks?: boolean;
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -26,6 +27,10 @@ export async function getTasks(filters?: {
         .eq('user_id', user.id)
         .order('due_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
+
+    if (filters?.excludeProjectTasks) {
+        query = query.is('project_id', null);
+    }
 
     if (filters?.status) {
         query = query.eq('status', filters.status);

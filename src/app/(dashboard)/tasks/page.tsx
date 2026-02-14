@@ -8,7 +8,7 @@ import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function TasksPage() {
-    const tasks = await getTasks();
+    const tasks = await getTasks({ excludeProjectTasks: true });
 
     // Fetch projects for the dropdown
     const supabase = await createClient();
