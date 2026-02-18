@@ -1,12 +1,12 @@
 'use client';
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { createTask } from "@/app/(dashboard)/tasks/actions";
-import { Plus, Loader2, CalendarIcon } from "lucide-react";
+import { updateTask, deleteTask } from "@/app/(dashboard)/tasks/actions";
+import { Loader2, CalendarIcon, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,17 +19,26 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
+interface EditTaskDialogProps {
+    task: any;
+    projects: any[];
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
 const LABEL_OPTIONS = ['Bug', 'Feature', 'Design', 'Research', 'Meeting', 'Urgent', 'Review'];
 
-export function CreateTaskDialog({ projects }: { projects: any[] }) {
-    const [open, setOpen] = useState(false);
+export function EditTaskDialog({ task, projects, open, onOpenChange }: EditTaskDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const [date, setDate] = useState<Date>();
-    const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-    const [status, setStatus] = useState('Todo');
-    const [priority, setPriority] = useState('Medium');
-    const [projectId, setProjectId] = useState('none');
-    const [recurrence, setRecurrence] = useState('none');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [date, setDate] = useState<Date | undefined>(task.due_date ? new Date(task.due_date) : undefined);
+    const [title, setTitle] = useState(task.title);
+    const [description, setDescription] = useState(task.description || '');
+    const [status, setStatus] = useState(task.status);
+    const [priority, setPriority] = useState(task.priority || 'Medium');
+    const [projectId, setProjectId] = useState(task.project_id || 'none');
+    const [selectedLabels, setSelectedLabels] = useState<string[]>(task.labels || []);
+    const [recurrence, setRecurrence] = useState(task.recurrence?.type || 'none');
 
     const toggleLabel = (label: string) => {
         setSelectedLabels(prev =>
@@ -37,64 +46,67 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
         );
     };
 
-    const resetForm = () => {
-        setDate(undefined);
-        setSelectedLabels([]);
-        setStatus('Todo');
-        setPriority('Medium');
-        setProjectId('none');
-        setRecurrence('none');
-    };
-
-    async function handleSubmit(formData: FormData) {
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
         setIsLoading(true);
-        formData.set('status', status);
-        formData.set('priority', priority);
-        if (date) formData.set('dueDate', format(date, 'yyyy-MM-dd'));
-        if (projectId !== 'none') formData.set('projectId', projectId);
-        if (selectedLabels.length > 0) formData.set('labels', selectedLabels.join(','));
-        if (recurrence !== 'none') formData.set('recurrenceType', recurrence);
-        formData.set('isPersonal', projectId === 'none' ? 'true' : 'false');
 
-        await createTask(formData);
+        await updateTask(task.id, {
+            title,
+            description,
+            status,
+            priority,
+            due_date: date ? format(date, 'yyyy-MM-dd') : null,
+            project_id: projectId === 'none' ? null : projectId,
+            labels: selectedLabels,
+            recurrence: recurrence !== 'none' ? { type: recurrence } : null,
+        });
+
         setIsLoading(false);
-        setOpen(false);
-        resetForm();
+        onOpenChange(false);
+    }
+
+    async function handleDelete() {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        setIsDeleting(true);
+        await deleteTask(task.id);
+        setIsDeleting(false);
+        onOpenChange(false);
     }
 
     return (
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
-            <DialogTrigger asChild>
-                <Button className="gap-2 shadow-md hover:shadow-lg transition-shadow">
-                    <Plus className="h-4 w-4" /> Add Task
-                </Button>
-            </DialogTrigger>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="text-xl">Create New Task</DialogTitle>
+                    <DialogTitle>Edit Task</DialogTitle>
                     <DialogDescription>
-                        Add a new task to your to-do list.
+                        Update the task details below.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={handleSubmit} className="space-y-4 py-2">
+                <form onSubmit={handleSubmit} className="space-y-4 py-2">
                     {/* Title */}
                     <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-medium">Title <span className="text-red-500">*</span></Label>
-                        <Input id="title" name="title" placeholder="What needs to be done?" required className="h-10" />
+                        <Label htmlFor="edit-title">Title</Label>
+                        <Input
+                            id="edit-title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                        />
                     </div>
 
                     {/* Description */}
                     <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
+                        <Label htmlFor="edit-description">Description</Label>
                         <textarea
-                            id="description"
-                            name="description"
+                            id="edit-description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                             className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                            placeholder="Add some details..."
+                            placeholder="Add details..."
                         />
                     </div>
 
-                    {/* Status + Priority */}
+                    {/* Status + Priority row */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Status</Label>
@@ -113,15 +125,15 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                             <Select value={priority} onValueChange={setPriority}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Low">🟢 Low</SelectItem>
-                                    <SelectItem value="Medium">🟡 Medium</SelectItem>
-                                    <SelectItem value="High">🔴 High</SelectItem>
+                                    <SelectItem value="Low">Low</SelectItem>
+                                    <SelectItem value="Medium">Medium</SelectItem>
+                                    <SelectItem value="High">High</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    {/* Due Date + Project */}
+                    {/* Due Date + Project row */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Due Date</Label>
@@ -191,11 +203,21 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                         </div>
                     </div>
 
-                    <DialogFooter className="pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isLoading} className="gap-2">
-                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                            Create Task
+                    <DialogFooter className="flex !justify-between items-center pt-2">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                            Delete
+                        </Button>
+                        <Button type="submit" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Changes
                         </Button>
                     </DialogFooter>
                 </form>
