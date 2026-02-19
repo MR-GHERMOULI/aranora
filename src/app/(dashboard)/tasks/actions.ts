@@ -243,15 +243,20 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
         data.completed_at = null;
     }
 
-    const { error } = await supabase
+    const { data: updatedTask, error } = await supabase
         .from('tasks')
         .update(data)
         .eq('id', taskId)
-        .eq('user_id', user.id);
+        .select()
+        .single();
 
     if (error) {
         console.error('Error updating task:', error);
         return { error: error.message };
+    }
+
+    if (!updatedTask) {
+        return { error: 'Task not found or access denied' };
     }
 
     revalidateAll(pathToRevalidate);
@@ -262,15 +267,20 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
 export async function deleteTask(taskId: string, pathToRevalidate?: string) {
     const { supabase, user } = await getAuthUser();
 
-    const { error } = await supabase
+    const { data: deletedTask, error } = await supabase
         .from('tasks')
         .delete()
         .eq('id', taskId)
-        .eq('user_id', user.id);
+        .select()
+        .single();
 
     if (error) {
         console.error('Error deleting task:', error);
         return { error: error.message };
+    }
+
+    if (!deletedTask) {
+        return { error: 'Task not found or access denied' };
     }
 
     revalidateAll(pathToRevalidate);
