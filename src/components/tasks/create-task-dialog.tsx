@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const LABEL_OPTIONS = ['Bug', 'Feature', 'Design', 'Research', 'Meeting', 'Urgent', 'Review'];
 
@@ -56,10 +57,17 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
         if (recurrence !== 'none') formData.set('recurrenceType', recurrence);
         formData.set('isPersonal', projectId === 'none' ? 'true' : 'false');
 
-        await createTask(formData);
+        const result = await createTask(formData);
+
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Task created successfully");
+            setOpen(false);
+            resetForm();
+        }
+
         setIsLoading(false);
-        setOpen(false);
-        resetForm();
     }
 
     return (

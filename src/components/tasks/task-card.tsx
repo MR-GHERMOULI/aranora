@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { updateTask, deleteTask, createTask } from "@/app/(dashboard)/tasks/actions";
 import { EditTaskDialog } from "./edit-task-dialog";
+import { toast } from "sonner";
 
 interface TaskProps {
     task: any;
@@ -48,42 +49,63 @@ function getSmartDate(dateStr: string, status: string) {
 }
 
 export function TaskCard({ task, projects = [], onOpenDetail }: TaskProps) {
-    const [isCompleting, setIsCompleting] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
+    const [isDoneState, setIsDoneState] = useState(task.status === 'Done'); // Local state for optimistic update
 
-    const isDone = task.status === 'Done';
+    const isDone = isDoneState; // Use local state for rendering
     const priority = priorityConfig[task.priority as keyof typeof priorityConfig] || priorityConfig.Medium;
     const isOverdue = task.due_date && isPast(parseISO(task.due_date)) && !isDone;
 
     const handleToggleComplete = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        setIsCompleting(true);
         const newStatus = isDone ? 'Todo' : 'Done';
-        await updateTask(task.id, { status: newStatus });
-        setIsCompleting(false);
+        setIsDoneState(!isDone); // Optimistic UI update
+
+        const result = await updateTask(task.id, { status: newStatus });
+        if (result?.error) {
+            toast.error(result.error);
+            setIsDoneState(isDone); // Revert on error
+        } else {
+            toast.success(isDone ? "Task marked as todo" : "Task completed! 🎉");
+        }
     };
 
     const handleDelete = async () => {
-        setIsDeleting(true);
-        await deleteTask(task.id);
-        setIsDeleting(false);
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        const result = await deleteTask(task.id);
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Task deleted");
+        }
     };
 
     const handleDuplicate = async () => {
         const formData = new FormData();
-        formData.append('title', `${task.title} (copy)`);
-        if (task.description) formData.append('description', task.description);
-        formData.append('status', 'Todo');
-        formData.append('priority', task.priority || 'Medium');
+        formData.append('title', `${task.title} (Copy)`);
+        formData.append('description', task.description || '');
+        formData.append('status', task.status);
+        formData.append('priority', task.priority);
         if (task.due_date) formData.append('dueDate', task.due_date);
         if (task.project_id) formData.append('projectId', task.project_id);
-        if (task.labels?.length) formData.append('labels', task.labels.join(','));
-        await createTask(formData);
+        if (task.labels) formData.append('labels', task.labels.join(','));
+        formData.append('isPersonal', task.is_personal ? 'true' : 'false');
+
+        const result = await createTask(formData);
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Task duplicated");
+        }
     };
 
     const handleStatusChange = async (newStatus: string) => {
-        await updateTask(task.id, { status: newStatus });
+        const result = await updateTask(task.id, { status: newStatus });
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success(`Status updated to ${newStatus}`);
+        }
     };
 
     return (
@@ -98,11 +120,10 @@ export function TaskCard({ task, projects = [], onOpenDetail }: TaskProps) {
                         {/* Checkbox */}
                         <button
                             onClick={handleToggleComplete}
-                            disabled={isCompleting}
                             className={`mt-0.5 flex-shrink-0 h-[18px] w-[18px] rounded-full border-2 transition-all duration-300 flex items-center justify-center ${isDone
                                 ? 'bg-emerald-500 border-emerald-500 text-white'
                                 : 'border-muted-foreground/40 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
-                                } ${isCompleting ? 'animate-pulse' : ''}`}
+                                }`}
                         >
                             {isDone && <CheckCircle2 className="h-3 w-3" />}
                         </button>

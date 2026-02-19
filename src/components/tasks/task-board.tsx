@@ -6,6 +6,7 @@ import { updateTask } from '@/app/(dashboard)/tasks/actions';
 import { Input } from '@/components/ui/input';
 import { createTask } from '@/app/(dashboard)/tasks/actions';
 import { Plus, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TaskBoardProps {
     tasks: any[];
@@ -86,7 +87,13 @@ export function TaskBoard({ tasks, projects = [] }: TaskBoardProps) {
         setDragOverColumn(null);
 
         // Server Action
-        await updateTask(taskId, { status });
+        const result = await updateTask(taskId, { status });
+        if (result?.error) {
+            toast.error(result.error);
+            setLocalTasks(localTasks); // Revert
+        } else {
+            toast.success(`Task moved to ${status}`);
+        }
     };
 
     return (
@@ -174,10 +181,16 @@ function QuickAdd({ columnStatus }: { columnStatus: string }) {
         formData.append('status', columnStatus);
         formData.append('priority', 'Medium');
         formData.append('isPersonal', 'true');
-        await createTask(formData);
-        setTitle('');
+        const result = await createTask(formData);
+
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Task added");
+            setTitle('');
+            setIsAdding(false);
+        }
         setLoading(false);
-        setIsAdding(false);
     };
 
     if (!isAdding) {

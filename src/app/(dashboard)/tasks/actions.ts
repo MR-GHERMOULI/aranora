@@ -33,6 +33,24 @@ async function getAuthUser() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
+
+    // Ensure profile exists (Proactive check to prevent FK errors)
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile) {
+        console.log('Profile missing for user, creating one...');
+        await supabase.from('profiles').insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+            created_at: new Date().toISOString(),
+        });
+    }
+
     return { supabase, user };
 }
 

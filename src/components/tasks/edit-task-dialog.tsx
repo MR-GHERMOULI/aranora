@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface EditTaskDialogProps {
     task: any;
@@ -50,7 +51,7 @@ export function EditTaskDialog({ task, projects, open, onOpenChange }: EditTaskD
         e.preventDefault();
         setIsLoading(true);
 
-        await updateTask(task.id, {
+        const result = await updateTask(task.id, {
             title,
             description,
             status,
@@ -61,16 +62,29 @@ export function EditTaskDialog({ task, projects, open, onOpenChange }: EditTaskD
             recurrence: recurrence !== 'none' ? { type: recurrence } : null,
         });
 
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Task updated successfully");
+            onOpenChange(false);
+        }
+
         setIsLoading(false);
-        onOpenChange(false);
     }
 
     async function handleDelete() {
         if (!confirm('Are you sure you want to delete this task?')) return;
         setIsDeleting(true);
-        await deleteTask(task.id);
+        const result = await deleteTask(task.id);
+
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
+            toast.success("Task deleted");
+            onOpenChange(false);
+        }
+
         setIsDeleting(false);
-        onOpenChange(false);
     }
 
     return (
