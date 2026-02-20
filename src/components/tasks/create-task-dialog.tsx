@@ -77,136 +77,170 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                     <Plus className="h-4 w-4" /> Add Task
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                    <DialogTitle className="text-xl">Create New Task</DialogTitle>
+            <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden gap-0">
+                <DialogHeader className="p-6 pb-2">
+                    <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        Create New Task
+                    </DialogTitle>
                     <DialogDescription>
-                        Add a new task to your to-do list.
+                        Fill in the details below to organize your next task.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={handleSubmit} className="space-y-4 py-2">
-                    {/* Title */}
-                    <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-medium">Title <span className="text-red-500">*</span></Label>
-                        <Input id="title" name="title" placeholder="What needs to be done?" required className="h-10" />
-                    </div>
 
-                    {/* Description */}
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                            placeholder="Add some details..."
-                        />
-                    </div>
+                <div className="max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar px-6">
+                    <form action={handleSubmit} id="create-task-form" className="space-y-6 py-4">
+                        {/* Title & Description Section */}
+                        <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/50">
+                            <div className="space-y-2">
+                                <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+                                    Title <span className="text-primary">*</span>
+                                </Label>
+                                <Input
+                                    id="title"
+                                    name="title"
+                                    placeholder="e.g., Design new landing page"
+                                    required
+                                    className="h-11 bg-background border-border/60 focus:border-primary/50 transition-colors text-base"
+                                />
+                            </div>
 
-                    {/* Status + Priority */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Status</Label>
-                            <Select value={status} onValueChange={setStatus}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Todo">To Do</SelectItem>
-                                    <SelectItem value="In Progress">In Progress</SelectItem>
-                                    <SelectItem value="Done">Done</SelectItem>
-                                    <SelectItem value="Postponed">Postponed</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="space-y-2">
+                                <Label htmlFor="description" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Description</Label>
+                                <textarea
+                                    id="description"
+                                    name="description"
+                                    className="flex min-h-[90px] w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all"
+                                    placeholder="Add context or notes..."
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Priority</Label>
-                            <Select value={priority} onValueChange={setPriority}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Low">🟢 Low</SelectItem>
-                                    <SelectItem value="Medium">🟡 Medium</SelectItem>
-                                    <SelectItem value="High">🔴 High</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
 
-                    {/* Due Date + Project */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Due Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
+                        {/* Settings Grid */}
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Status</Label>
+                                <Select value={status} onValueChange={setStatus}>
+                                    <SelectTrigger className="h-10 bg-background/50">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Todo">To Do</SelectItem>
+                                        <SelectItem value="In Progress">In Progress</SelectItem>
+                                        <SelectItem value="Done">Done</SelectItem>
+                                        <SelectItem value="Postponed">Postponed</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Priority</Label>
+                                <Select value={priority} onValueChange={setPriority}>
+                                    <SelectTrigger className="h-10 bg-background/50">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Low">🟢 Low</SelectItem>
+                                        <SelectItem value="Medium">🟡 Medium</SelectItem>
+                                        <SelectItem value="High">🔴 High</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Due Date</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            className={cn(
+                                                "w-full justify-start text-left font-normal h-10 bg-background/50 border-border/60",
+                                                !date && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4 text-primary/70" />
+                                            {date ? format(date, "PPP") : <span>No date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Project</Label>
+                                <Select value={projectId} onValueChange={setProjectId}>
+                                    <SelectTrigger className="h-10 bg-background/50">
+                                        <SelectValue placeholder="Personal" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">None (Personal)</SelectItem>
+                                        {projects.map((p: any) => (
+                                            <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2 col-span-2">
+                                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Repeat</Label>
+                                <Select value={recurrence} onValueChange={setRecurrence}>
+                                    <SelectTrigger className="h-10 bg-background/50">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">No repeat</SelectItem>
+                                        <SelectItem value="daily">Daily</SelectItem>
+                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                        <SelectItem value="monthly">Monthly</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {/* Labels Section */}
+                        <div className="space-y-3">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Labels</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {LABEL_OPTIONS.map(label => (
+                                    <button
+                                        key={label}
+                                        type="button"
+                                        onClick={() => toggleLabel(label)}
                                         className={cn(
-                                            "w-full justify-start text-left font-normal",
-                                            !date && "text-muted-foreground"
+                                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all border",
+                                            selectedLabels.includes(label)
+                                                ? 'bg-primary/15 text-primary border-primary/30 shadow-sm ring-1 ring-primary/20'
+                                                : 'bg-background text-muted-foreground border-border/60 hover:border-primary/30 hover:bg-primary/5'
                                         )}
                                     >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {date ? format(date, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Project</Label>
-                            <Select value={projectId} onValueChange={setProjectId}>
-                                <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="none">None (Personal)</SelectItem>
-                                    {projects.map((p: any) => (
-                                        <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
+                    </form>
+                </div>
 
-                    {/* Recurrence */}
-                    <div className="space-y-2">
-                        <Label>Repeat</Label>
-                        <Select value={recurrence} onValueChange={setRecurrence}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">No repeat</SelectItem>
-                                <SelectItem value="daily">Daily</SelectItem>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Labels */}
-                    <div className="space-y-2">
-                        <Label>Labels</Label>
-                        <div className="flex flex-wrap gap-1.5">
-                            {LABEL_OPTIONS.map(label => (
-                                <button
-                                    key={label}
-                                    type="button"
-                                    onClick={() => toggleLabel(label)}
-                                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all border ${selectedLabels.includes(label)
-                                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                                        : 'bg-muted/50 text-muted-foreground border-border hover:bg-accent hover:text-foreground'
-                                        }`}
-                                >
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <DialogFooter className="pt-2">
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isLoading} className="gap-2">
-                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                            Create Task
-                        </Button>
-                    </DialogFooter>
-                </form>
+                <DialogFooter className="p-6 pt-4 bg-muted/20 border-t border-border/40">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => setOpen(false)}
+                        className="hover:bg-background"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="submit"
+                        form="create-task-form"
+                        disabled={isLoading}
+                        className="gap-2 px-6 shadow-md hover:shadow-lg transition-all"
+                    >
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                        Create Task
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
