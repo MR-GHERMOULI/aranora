@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Footer } from "@/components/layout/footer";
 
 export default function PrivacyPage() {
     return (
@@ -84,9 +85,7 @@ export default function PrivacyPage() {
                 </div>
             </main>
 
-            <footer className="border-t py-8 text-center text-sm text-slate-500">
-                © {new Date().getFullYear()} Aranora. All rights reserved.
-            </footer>
+            <Footer simple />
         </div>
     );
 }

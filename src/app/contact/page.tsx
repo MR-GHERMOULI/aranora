@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Mail, MapPin, Phone, Send, Loader2, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Footer } from "@/components/layout/footer";
 
 export default function ContactPage() {
     const [isLoading, setIsLoading] = useState(false)
@@ -201,9 +202,7 @@ export default function ContactPage() {
                 </div>
             </main>
 
-            <footer className="border-t py-8 text-center text-sm text-slate-500">
-                © {new Date().getFullYear()} Aranora. All rights reserved.
-            </footer>
+            <Footer simple />
         </div>
     );
 }

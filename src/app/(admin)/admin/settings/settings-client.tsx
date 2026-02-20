@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { createClient } from "@/lib/supabase/client"
 import { TestimonialsManager } from "@/components/admin/testimonials-manager"
 import { PlatformLinksManager } from "@/components/admin/platform-links-manager"
+import { FooterLinksManager } from "@/components/admin/footer-links-manager"
 
 interface SettingsClientProps {
     initialSettings: {
@@ -148,7 +149,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
             </div>
 
             <Tabs defaultValue="branding" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:w-[900px]">
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:grid-cols-9 lg:w-full">
                     <TabsTrigger value="branding" className="gap-2">
                         <Palette className="h-4 w-4" />
                         Branding
@@ -180,6 +181,10 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                     <TabsTrigger value="platforms" className="gap-2">
                         <Globe className="h-4 w-4" />
                         Platforms
+                    </TabsTrigger>
+                    <TabsTrigger value="footer" className="gap-2">
+                        <LinkIcon className="h-4 w-4" />
+                        Footer
                     </TabsTrigger>
                 </TabsList>
 
@@ -794,6 +799,13 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                 <TabsContent value="platforms">
                     <div className="rounded-xl border bg-card p-6">
                         <PlatformLinksManager />
+                    </div>
+                </TabsContent>
+
+                {/* Footer Tab */}
+                <TabsContent value="footer">
+                    <div className="rounded-xl border bg-card p-6">
+                        <FooterLinksManager />
                     </div>
                 </TabsContent>
             </Tabs>
