@@ -55,8 +55,11 @@ async function getAuthUser() {
 }
 
 function revalidateAll(extra?: string) {
-    revalidatePath('/tasks');
-    revalidatePath('/dashboard');
+    revalidatePath('/tasks', 'page');
+    revalidatePath('/tasks', 'layout');
+    revalidatePath('/dashboard', 'page');
+    revalidatePath('/dashboard', 'layout');
+    revalidatePath('/', 'layout');
     if (extra) revalidatePath(extra);
 }
 
@@ -247,6 +250,7 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
         .from('tasks')
         .update(data)
         .eq('id', taskId)
+        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -271,6 +275,7 @@ export async function deleteTask(taskId: string, pathToRevalidate?: string) {
         .from('tasks')
         .delete()
         .eq('id', taskId)
+        .eq('user_id', user.id)
         .select()
         .single();
 
