@@ -71,7 +71,7 @@ export function TaskCard({ task, projects = [], onOpenDetail }: TaskProps) {
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this task?')) return;
+        // if (!confirm('Are you sure you want to delete this task?')) return;
         const result = await deleteTask(task.id);
         if (result?.error) {
             toast.error(result.error);

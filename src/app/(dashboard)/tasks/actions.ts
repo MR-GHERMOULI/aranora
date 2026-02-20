@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 // ── Types ──────────────────────────────────────────────
@@ -65,6 +65,7 @@ function revalidateAll(extra?: string) {
 
 // ── GET TASKS ──────────────────────────────────────────
 export async function getTasks(filters?: TaskFilters) {
+    noStore();
     const { supabase, user } = await getAuthUser();
 
     let query = supabase
@@ -134,6 +135,7 @@ export async function getTasks(filters?: TaskFilters) {
 
 // ── GET SUBTASKS ───────────────────────────────────────
 export async function getSubtasks(parentId: string) {
+    noStore();
     const { supabase, user } = await getAuthUser();
 
     const { data, error } = await supabase
@@ -152,6 +154,7 @@ export async function getSubtasks(parentId: string) {
 
 // ── GET TASK STATS ─────────────────────────────────────
 export async function getTaskStats(): Promise<TaskStats> {
+    noStore();
     const { supabase, user } = await getAuthUser();
 
     const { data: tasks, error } = await supabase
