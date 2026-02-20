@@ -133,3 +133,81 @@ export async function getExportData() {
     })) || [];
 }
 
+export async function getTaskAnalytics() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    const { data: tasks } = await supabase.from('tasks')
+        .select('id, status, created_at, updated_at')
+        .eq('user_id', user.id);
+
+    const total = tasks?.length || 0;
+    const completed = tasks?.filter(t => t.status === 'Done').length || 0;
+    const inProgress = tasks?.filter(t => t.status === 'In Progress').length || 0;
+    const todo = tasks?.filter(t => t.status === 'Todo').length || 0;
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    return { total, completed, inProgress, todo, completionRate };
+}
+
+export async function getExpenseData() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    const { data: subscriptions } = await supabase.from('subscriptions')
+        .select('id, name, price, billing_cycle, category, status')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+    let totalMonthly = 0;
+    let totalYearly = 0;
+    const byCategory: Record<string, number> = {};
+
+    subscriptions?.forEach((sub: any) => {
+        const monthlyPrice = sub.billing_cycle === 'yearly' ? sub.price / 12 : sub.price;
+        totalMonthly += monthlyPrice;
+        totalYearly += sub.billing_cycle === 'yearly' ? sub.price : sub.price * 12;
+        const cat = sub.category || 'Other';
+        byCategory[cat] = (byCategory[cat] || 0) + monthlyPrice;
+    });
+
+    const categoryBreakdown = Object.entries(byCategory).map(([name, value]) => ({
+        name,
+        value: Math.round(value * 100) / 100,
+    }));
+
+    return { totalMonthly: Math.round(totalMonthly * 100) / 100, totalYearly: Math.round(totalYearly * 100) / 100, categoryBreakdown, count: subscriptions?.length || 0 };
+}
+
+export async function getProjectProfitability() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+
+    const { data: projects } = await supabase.from('projects')
+        .select('id, title, budget, status')
+        .eq('user_id', user.id);
+
+    const { data: invoices } = await supabase.from('invoices')
+        .select('project_id, total, status')
+        .eq('user_id', user.id)
+        .eq('status', 'Paid');
+
+    const invoicesByProject: Record<string, number> = {};
+    invoices?.forEach((inv: any) => {
+        if (inv.project_id) {
+            invoicesByProject[inv.project_id] = (invoicesByProject[inv.project_id] || 0) + Number(inv.total);
+        }
+    });
+
+    return (projects || []).map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        budget: Number(p.budget) || 0,
+        invoiced: invoicesByProject[p.id] || 0,
+        status: p.status,
+        utilization: p.budget ? Math.round(((invoicesByProject[p.id] || 0) / Number(p.budget)) * 100) : 0,
+    })).filter((p: any) => p.budget > 0 || p.invoiced > 0);
+}

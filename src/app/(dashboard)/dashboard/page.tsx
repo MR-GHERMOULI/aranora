@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import {
-    Users, Briefcase, FileText, DollarSign, TrendingUp, Clock,
-    ArrowRight, Plus, Calendar, CheckCircle2, AlertCircle
+    Users, Briefcase, FileText, DollarSign, TrendingUp, TrendingDown, Clock,
+    ArrowRight, Plus, Calendar, CheckCircle2, AlertCircle, Rocket
 } from "lucide-react";
 import { getDashboardStats } from "./actions";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SmartRemindersWidget } from "@/components/dashboard/smart-reminders";
 import { ClientGreeting } from "@/components/dashboard/client-greeting";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -87,8 +88,15 @@ export default async function DashboardPage() {
                         <CardContent>
                             <div className="text-3xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</div>
                             <p className="text-xs text-muted-foreground flex items-center mt-1">
-                                <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
-                                {formatCurrency(stats.monthlyRevenue)} this month
+                                {stats.monthlyRevenue >= stats.prevMonthRevenue ? (
+                                    <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                                ) : (
+                                    <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
+                                )}
+                                <span className={stats.monthlyRevenue >= stats.prevMonthRevenue ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                    {formatCurrency(stats.monthlyRevenue)}
+                                </span>
+                                <span className="ml-1">this month</span>
                             </p>
                         </CardContent>
                     </Card>
@@ -203,8 +211,14 @@ export default async function DashboardPage() {
                         <CardContent>
                             {stats.recentProjects.length === 0 ? (
                                 <div className="text-center py-8 text-muted-foreground">
-                                    <Briefcase className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                                    <p>No projects yet. Create your first one!</p>
+                                    <div className="h-16 w-16 rounded-2xl bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center mx-auto mb-3">
+                                        <Rocket className="h-8 w-8 text-violet-500 dark:text-violet-400" />
+                                    </div>
+                                    <p className="font-medium text-foreground">No projects yet</p>
+                                    <p className="text-sm mt-1 max-w-[240px] mx-auto">Create your first project to start tracking your work and deadlines.</p>
+                                    <Button size="sm" className="mt-4" asChild>
+                                        <Link href="/projects"><Plus className="h-3.5 w-3.5 mr-1" /> Create Project</Link>
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -245,8 +259,14 @@ export default async function DashboardPage() {
                         <CardContent>
                             {stats.upcomingDeadlines.length === 0 ? (
                                 <div className="text-center py-8 text-muted-foreground">
-                                    <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-green-500 opacity-70" />
-                                    <p>All caught up! No pending deadlines.</p>
+                                    <div className="h-16 w-16 rounded-2xl bg-green-100 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-3">
+                                        <CheckCircle2 className="h-8 w-8 text-green-500 dark:text-green-400" />
+                                    </div>
+                                    <p className="font-medium text-foreground">All caught up!</p>
+                                    <p className="text-sm mt-1 max-w-[240px] mx-auto">No pending deadlines. Enjoy your free time or start a new task.</p>
+                                    <Button size="sm" variant="outline" className="mt-4" asChild>
+                                        <Link href="/tasks"><Plus className="h-3.5 w-3.5 mr-1" /> Add Task</Link>
+                                    </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -293,8 +313,14 @@ export default async function DashboardPage() {
                     <CardContent>
                         {stats.recentInvoices.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
-                                <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                                <p>No invoices yet.</p>
+                                <div className="h-16 w-16 rounded-2xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mx-auto mb-3">
+                                    <FileText className="h-8 w-8 text-orange-500 dark:text-orange-400" />
+                                </div>
+                                <p className="font-medium text-foreground">No invoices yet</p>
+                                <p className="text-sm mt-1 max-w-[240px] mx-auto">Create your first invoice to start billing and tracking payments.</p>
+                                <Button size="sm" className="mt-4" asChild>
+                                    <Link href="/invoices/new"><Plus className="h-3.5 w-3.5 mr-1" /> Create Invoice</Link>
+                                </Button>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
@@ -332,6 +358,9 @@ export default async function DashboardPage() {
                         )}
                     </CardContent>
                 </Card>
+
+                {/* Activity Feed */}
+                <ActivityFeed activities={stats.activities} />
             </div>
         </div>
     );

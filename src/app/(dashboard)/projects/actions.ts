@@ -39,7 +39,26 @@ export async function getProjects(clientId?: string) {
     return [];
   }
 
-  return data as Project[];
+  // Fetch task counts per project
+  const { data: tasks } = await supabase
+    .from('tasks')
+    .select('project_id, status')
+    .eq('user_id', user.id);
+
+  const taskCounts: Record<string, { total: number; completed: number }> = {};
+  tasks?.forEach(task => {
+    if (task.project_id) {
+      if (!taskCounts[task.project_id]) taskCounts[task.project_id] = { total: 0, completed: 0 };
+      taskCounts[task.project_id].total++;
+      if (task.status === 'Done') taskCounts[task.project_id].completed++;
+    }
+  });
+
+  return (data || []).map(project => ({
+    ...project,
+    task_count: taskCounts[project.id]?.total || 0,
+    completed_task_count: taskCounts[project.id]?.completed || 0,
+  }));
 }
 
 export async function createProject(formData: FormData) {

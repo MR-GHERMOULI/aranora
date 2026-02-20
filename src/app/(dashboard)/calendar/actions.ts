@@ -146,3 +146,92 @@ export async function deleteTask(taskId: string) {
     revalidatePath('/dashboard/calendar');
 }
 
+export interface CalendarEvent {
+    id: string;
+    title: string;
+    date: string;
+    type: 'task' | 'deadline' | 'invoice';
+    status?: string;
+    priority?: string;
+    color: string;
+    link?: string;
+    description?: string;
+    projectTitle?: string;
+}
+
+export async function getCalendarEvents(): Promise<CalendarEvent[]> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    const [
+        { data: tasks },
+        { data: projects },
+        { data: invoices }
+    ] = await Promise.all([
+        supabase.from('tasks')
+            .select('id, title, due_date, status, priority, description, project:projects(title)')
+            .eq('user_id', user.id)
+            .not('due_date', 'is', null),
+        supabase.from('projects')
+            .select('id, title, end_date, status, slug')
+            .eq('user_id', user.id)
+            .not('end_date', 'is', null),
+        supabase.from('invoices')
+            .select('id, invoice_number, due_date, status, total, client:clients(name)')
+            .eq('user_id', user.id)
+            .not('due_date', 'is', null)
+    ]);
+
+    const events: CalendarEvent[] = [];
+
+    tasks?.forEach(task => {
+        const priorityColors: Record<string, string> = {
+            High: '#ef4444',
+            Medium: '#f59e0b',
+            Low: '#3b82f6',
+        };
+        events.push({
+            id: `task-${task.id}`,
+            title: task.title,
+            date: task.due_date,
+            type: 'task',
+            status: task.status,
+            priority: task.priority,
+            color: priorityColors[task.priority] || '#6366f1',
+            description: task.description,
+            // @ts-ignore
+            projectTitle: task.project?.title,
+        });
+    });
+
+    projects?.forEach(project => {
+        events.push({
+            id: `project-${project.id}`,
+            title: `📁 ${project.title} — Deadline`,
+            date: project.end_date,
+            type: 'deadline',
+            status: project.status,
+            color: '#8b5cf6',
+            link: `/projects/${project.id}/${project.slug}`,
+        });
+    });
+
+    invoices?.forEach(invoice => {
+        events.push({
+            id: `invoice-${invoice.id}`,
+            // @ts-ignore
+            title: `💰 ${invoice.invoice_number} — ${invoice.client?.name || 'Invoice'}`,
+            date: invoice.due_date,
+            type: 'invoice',
+            status: invoice.status,
+            color: invoice.status === 'Overdue' ? '#ef4444' : '#f97316',
+            link: `/invoices/${invoice.invoice_number}`,
+        });
+    });
+
+    return events;
+}

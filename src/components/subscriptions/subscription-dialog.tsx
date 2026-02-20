@@ -19,6 +19,7 @@ const subscriptionSchema = z.object({
     price: z.number().min(0, "Price must be at least 0"),
     currency: z.string(),
     billing_cycle: z.enum(["monthly", "yearly"]),
+    category: z.string().optional(),
     start_date: z.string().min(1, "Start date is required"),
     status: z.enum(["active", "cancelled", "expired"]),
 });
@@ -43,6 +44,7 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
             price: subscription ? Number(subscription.price) : 0,
             currency: subscription?.currency || "USD",
             billing_cycle: subscription?.billing_cycle || "monthly",
+            category: subscription?.category || "Other",
             start_date: subscription?.start_date || new Date().toISOString().split("T")[0],
             status: subscription?.status || "active",
         },
@@ -65,10 +67,10 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
             };
 
             if (subscription) {
-                await updateSubscription(subscription.id, payload);
+                await updateSubscription(subscription.id, payload as any);
                 toast.success("Subscription updated");
             } else {
-                await createSubscription(payload);
+                await createSubscription(payload as any);
                 toast.success("Subscription created");
             }
 
@@ -98,25 +100,25 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
                 </DialogHeader>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">
-                            Name
-                        </Label>
-                        <Input id="name" className="col-span-3" {...form.register("name")} />
+                        <Label htmlFor="name" className="text-right text-xs">Name</Label>
+                        <Input id="name" className="col-span-3 h-9" {...form.register("name")} />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="price" className="text-right">
-                            Price
-                        </Label>
-                        <Input id="price" type="number" step="0.01" className="col-span-3" {...form.register("price", { valueAsNumber: true })} />
+                        <Label htmlFor="price" className="text-right text-xs">Price</Label>
+                        <Input id="price" type="number" step="0.01" className="col-span-3 h-9" {...form.register("price", { valueAsNumber: true })} />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="billing_cycle" className="text-right">Cycle</Label>
+                        <Label htmlFor="category" className="text-right text-xs">Category</Label>
+                        <Input id="category" placeholder="E.g. SaaS, Softwares..." className="col-span-3 h-9" {...form.register("category")} />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="billing_cycle" className="text-right text-xs">Cycle</Label>
                         <div className="col-span-3">
                             <Select
                                 onValueChange={(val) => form.setValue("billing_cycle", val as "monthly" | "yearly")}
                                 defaultValue={form.getValues("billing_cycle")}
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="h-9">
                                     <SelectValue placeholder="Select cycle" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -127,16 +129,15 @@ export function SubscriptionDialog({ subscription, trigger, open, onOpenChange }
                         </div>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="start_date" className="text-right">
-                            Start Date
-                        </Label>
-                        <Input id="start_date" type="date" className="col-span-3" {...form.register("start_date")} />
+                        <Label htmlFor="start_date" className="text-right text-xs">Start Date</Label>
+                        <Input id="start_date" type="date" className="col-span-3 h-9" {...form.register("start_date")} />
                     </div>
-                    <div className="flex justify-end">
-                        <Button type="submit">Save</Button>
+                    <div className="flex justify-end pt-2">
+                        <Button type="submit" className="bg-brand-primary hover:bg-brand-primary/90">Save</Button>
                     </div>
                 </form>
             </DialogContent>
         </Dialog>
     );
 }
+

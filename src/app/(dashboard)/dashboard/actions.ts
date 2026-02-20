@@ -16,6 +16,9 @@ export async function getDashboardStats() {
     const now = new Date();
     const startOfCurrentMonth = startOfMonth(now).toISOString();
     const endOfCurrentMonth = endOfMonth(now).toISOString();
+    const prevMonth = subMonths(now, 1);
+    const startOfPrevMonth = startOfMonth(prevMonth).toISOString();
+    const endOfPrevMonth = endOfMonth(prevMonth).toISOString();
     const sixMonthsAgo = startOfMonth(subMonths(now, 5)).toISOString();
 
     const [
@@ -29,7 +32,8 @@ export async function getDashboardStats() {
         { data: recentProjects },
         { data: recentInvoices },
         { data: allProjects },
-        { data: upcomingDeadlines }
+        { data: upcomingDeadlines },
+        { data: prevMonthPaidInvoices }
     ] = await Promise.all([
         // Cache profile data as it rarely changes
         unstable_cache(
@@ -61,11 +65,17 @@ export async function getDashboardStats() {
             .neq('status', 'Done')
             .gte('due_date', now.toISOString())
             .order('due_date', { ascending: true })
-            .limit(5)
+            .limit(5),
+        supabase.from('invoices').select('total')
+            .eq('user_id', user.id)
+            .eq('status', 'Paid')
+            .gte('issue_date', startOfPrevMonth)
+            .lte('issue_date', endOfPrevMonth)
     ]);
 
     const monthlyRevenue = montlyPaidInvoices?.reduce((sum, invoice) => sum + (Number(invoice.total) || 0), 0) || 0;
     const totalRevenue = allPaidInvoices?.reduce((sum, invoice) => sum + (Number(invoice.total) || 0), 0) || 0;
+    const prevMonthRevenue = prevMonthPaidInvoices?.reduce((sum, invoice) => sum + (Number(invoice.total) || 0), 0) || 0;
 
     // Project Status Distribution
     const projectStatusCounts = {
@@ -106,6 +116,7 @@ export async function getDashboardStats() {
         activeProjects: activeProjects || 0,
         pendingInvoices: pendingInvoices || 0,
         monthlyRevenue,
+        prevMonthRevenue,
         totalRevenue,
         revenueChartData,
         projectStatusCounts,

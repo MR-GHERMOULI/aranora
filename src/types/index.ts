@@ -14,6 +14,7 @@ export interface Client {
     name: string
     email?: string | null
     phone?: string | null
+    company?: string | null
     status: string
     notes?: string | null
     created_at: string
