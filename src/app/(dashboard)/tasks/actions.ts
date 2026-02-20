@@ -274,7 +274,7 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
 export async function deleteTask(taskId: string, pathToRevalidate?: string) {
     const { supabase, user } = await getAuthUser();
 
-    const { data: deletedTask, error } = await supabase
+    const result = await supabase
         .from('tasks')
         .delete()
         .eq('id', taskId)
@@ -282,13 +282,15 @@ export async function deleteTask(taskId: string, pathToRevalidate?: string) {
         .select()
         .single();
 
-    if (error) {
-        console.error('Error deleting task:', error);
-        return { error: error.message };
+    console.log(`[deleteTask] ID: ${taskId}, User: ${user.id}, Result:`, JSON.stringify(result));
+
+    if (result.error) {
+        console.error('Error deleting task:', result.error);
+        return { error: result.error.message };
     }
 
-    if (!deletedTask) {
-        return { error: 'Task not found or access denied' };
+    if (!result.data) {
+        return { error: 'Task not found or access denied (No row affected)' };
     }
 
     revalidateAll(pathToRevalidate);
