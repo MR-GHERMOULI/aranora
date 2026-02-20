@@ -34,7 +34,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             .ilike('name', searchTerm)
             .limit(5),
         supabase.from('projects')
-            .select('id, title, client:clients(name)')
+            .select('id, title, slug, client:clients(name)')
             .eq('user_id', user.id)
             .ilike('title', searchTerm)
             .limit(5),
@@ -59,7 +59,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             title: p.title,
             // @ts-ignore
             subtitle: `Project • ${p.client?.name || ''}`,
-            href: `/projects/${p.id}`
+            href: `/projects/${p.slug || p.id}`
         })),
         ...(invoices || []).map(i => ({
             id: i.id,
@@ -67,7 +67,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             title: i.invoice_number,
             // @ts-ignore
             subtitle: `Invoice • ${i.client?.name || ''}`,
-            href: `/invoices/${i.id}`
+            href: `/invoices/${i.invoice_number}`
         }))
     ];
 

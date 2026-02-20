@@ -1,8 +1,8 @@
-import { getProject } from "../../get-project-action";
-import { getInvoices } from "../../../invoices/actions";
-import { getProjectCollaborators } from "../../collaborator-actions";
-import { getTasks } from "../../../tasks/actions";
-import { getProjectFiles } from "../../file-actions";
+import { getProject } from "../get-project-action";
+import { getInvoices } from "../../invoices/actions";
+import { getProjectCollaborators } from "../collaborator-actions";
+import { getTasks } from "../../tasks/actions";
+import { getProjectFiles } from "../file-actions";
 import { ProjectTaskList } from "@/components/projects/project-task-list";
 import { ProjectFileList } from "@/components/projects/project-file-list";
 import { Button } from "@/components/ui/button";
@@ -22,27 +22,29 @@ import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog
 export default async function ProjectPage({
     params
 }: {
-    params: Promise<{ id: string; slug: string }>
+    params: Promise<{ slug: string }>
 }) {
     // Resolve params for Next.js 15+
-    const { id, slug } = await params;
+    const { slug } = await params;
 
-    const [project, invoices, collaborators, tasks, files] = await Promise.all([
-        getProject(id),
-        getInvoices(undefined, id),
-        getProjectCollaborators(id),
-        getTasks({ projectId: id }),
-        getProjectFiles(id)
-    ]);
+    const project = await getProject(slug);
 
     if (!project) {
         notFound();
     }
 
-    // Redirect if slug is wrong (SEO maintenance)
-    if (project.slug !== slug) {
-        redirect(`/projects/${id}/${project.slug}`);
+    // Redirect to slug-only URL if UUID was passed as the slug
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(slug);
+    if (isUUID && project.slug) {
+        redirect(`/projects/${project.slug}`);
     }
+
+    const [invoices, collaborators, tasks, files] = await Promise.all([
+        getInvoices(undefined, project.id),
+        getProjectCollaborators(project.id),
+        getTasks({ projectId: project.id }),
+        getProjectFiles(project.id)
+    ]);
 
     return (
         <div className="px-4 lg:px-8 space-y-6 pt-8 pb-10">
@@ -135,10 +137,10 @@ export default async function ProjectPage({
                             <TabsTrigger value="collaborators">Collaborators</TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
-                            <ProjectTaskList tasks={tasks} projectId={id} />
+                            <ProjectTaskList tasks={tasks} projectId={project.id} />
                         </TabsContent>
                         <TabsContent value="files" className="mt-4">
-                            <ProjectFileList files={files} projectId={id} />
+                            <ProjectFileList files={files} projectId={project.id} />
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (
@@ -183,7 +185,7 @@ export default async function ProjectPage({
                                         </CardContent>
                                         <CardFooter className="justify-end py-3">
                                             <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/invoices/${invoice.id}`}>View Details</Link>
+                                                <Link href={`/invoices/${invoice.invoice_number}`}>View Details</Link>
                                             </Button>
                                         </CardFooter>
                                     </Card>

@@ -137,6 +137,10 @@ export async function updateProject(formData: FormData) {
 
   revalidatePath('/projects');
   revalidatePath(`/projects/${id}`);
+  const { data: updatedProject } = await supabase.from('projects').select('slug').eq('id', id).single();
+  if (updatedProject?.slug) {
+    revalidatePath(`/projects/${updatedProject.slug}`);
+  }
 }
 
 export async function deleteProject(projectId: string) {

@@ -169,7 +169,7 @@ export function ProjectsClient({ projects, clients }: ProjectsClientProps) {
                             : 0;
 
                         return (
-                            <Link key={project.id} href={`/projects/${project.id}/${project.slug || ''}`}>
+                            <Link key={project.id} href={`/projects/${project.slug || project.id}`}>
                                 <Card className="group hover:shadow-md transition-all duration-200 hover:border-brand-primary/30 cursor-pointer h-full">
                                     <CardContent className="p-5 flex flex-col h-full">
                                         {/* Header */}

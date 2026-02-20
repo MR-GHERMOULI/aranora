@@ -223,7 +223,7 @@ export default async function DashboardPage() {
                             ) : (
                                 <div className="space-y-4">
                                     {stats.recentProjects.map((project: any) => (
-                                        <Link key={project.id} href={`/projects/${project.id}`} className="flex items-center justify-between p-3 rounded-lg border hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                                        <Link key={project.id} href={`/projects/${project.slug || project.id}`} className="flex items-center justify-between p-3 rounded-lg border hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center">
                                                     <Briefcase className="h-5 w-5 text-violet-600 dark:text-violet-400" />
@@ -347,7 +347,7 @@ export default async function DashboardPage() {
                                                 </td>
                                                 <td className="py-3 text-right">
                                                     <Button variant="ghost" size="sm" asChild>
-                                                        <Link href={`/invoices/${invoice.id}`}>View</Link>
+                                                        <Link href={`/invoices/${invoice.invoice_number}`}>View</Link>
                                                     </Button>
                                                 </td>
                                             </tr>
