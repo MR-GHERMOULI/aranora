@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { createClient } from "@/lib/supabase/client"
+import { TestimonialsManager } from "@/components/admin/testimonials-manager"
+import { PlatformLinksManager } from "@/components/admin/platform-links-manager"
 
 interface SettingsClientProps {
     initialSettings: {
@@ -146,7 +148,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
             </div>
 
             <Tabs defaultValue="branding" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-6 lg:w-[700px]">
+                <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:w-[900px]">
                     <TabsTrigger value="branding" className="gap-2">
                         <Palette className="h-4 w-4" />
                         Branding
@@ -170,6 +172,14 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                     <TabsTrigger value="security" className="gap-2">
                         <Shield className="h-4 w-4" />
                         Security
+                    </TabsTrigger>
+                    <TabsTrigger value="testimonials" className="gap-2">
+                        <Quote className="h-4 w-4" />
+                        Testimonials
+                    </TabsTrigger>
+                    <TabsTrigger value="platforms" className="gap-2">
+                        <Globe className="h-4 w-4" />
+                        Platforms
                     </TabsTrigger>
                 </TabsList>
 
@@ -770,6 +780,20 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                 in the <code className="bg-muted px-1 rounded">profiles</code> table directly in Supabase.
                             </p>
                         </div>
+                    </div>
+                </TabsContent>
+
+                {/* Testimonials Tab */}
+                <TabsContent value="testimonials">
+                    <div className="rounded-xl border bg-card p-6">
+                        <TestimonialsManager />
+                    </div>
+                </TabsContent>
+
+                {/* Platforms Tab */}
+                <TabsContent value="platforms">
+                    <div className="rounded-xl border bg-card p-6">
+                        <PlatformLinksManager />
                     </div>
                 </TabsContent>
             </Tabs>
