@@ -82,6 +82,7 @@ export interface Task {
     is_personal: boolean
     recurrence?: any
     category: string
+    estimated_hours?: number | null
     created_at: string
     project?: { title: string }
 }

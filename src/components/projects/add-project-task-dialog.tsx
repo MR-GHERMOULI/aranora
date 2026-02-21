@@ -45,6 +45,7 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
     const [priority, setPriority] = useState("Medium")
     const [status, setStatus] = useState("Todo")
     const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
+    const [estimatedHours, setEstimatedHours] = useState("")
 
     const handleSubmit = async () => {
         if (!title.trim()) {
@@ -62,6 +63,9 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
             formData.append("projectId", projectId)
             if (dueDate) {
                 formData.append("dueDate", format(dueDate, "yyyy-MM-dd"))
+            }
+            if (estimatedHours) {
+                formData.append("estimatedHours", estimatedHours)
             }
 
             const result = await createTask(formData, pathname)
@@ -88,6 +92,7 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
         setPriority("Medium")
         setStatus("Todo")
         setDueDate(undefined)
+        setEstimatedHours("")
     }
 
     return (
@@ -185,6 +190,20 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
                                 />
                             </PopoverContent>
                         </Popover>
+                    </div>
+
+                    <div className="grid gap-2">
+                        <label htmlFor="estimatedHours" className="text-sm font-medium">
+                            Estimated Hours
+                        </label>
+                        <Input
+                            id="estimatedHours"
+                            type="number"
+                            step="0.1"
+                            placeholder="e.g., 5.5"
+                            value={estimatedHours}
+                            onChange={(e) => setEstimatedHours(e.target.value)}
+                        />
                     </div>
                 </div>
 

@@ -209,6 +209,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
     const recurrenceType = formData.get('recurrenceType') as string;
     const labelsStr = formData.get('labels') as string;
     const subtaskOf = formData.get('subtaskOf') as string;
+    const estimatedHours = formData.get('estimatedHours') ? parseFloat(formData.get('estimatedHours') as string) : null;
 
     const recurrence = recurrenceType ? { type: recurrenceType } : null;
     const labels = labelsStr ? labelsStr.split(',').filter(Boolean) : [];
@@ -226,6 +227,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         category: isPersonal ? 'Personal' : 'Work',
         labels,
         subtask_of: subtaskOf || null,
+        estimated_hours: estimatedHours,
         completed_at: status === 'Done' ? new Date().toISOString() : null,
     });
 

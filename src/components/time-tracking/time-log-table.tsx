@@ -73,8 +73,10 @@ export function TimeLogTable({ entries }: TimeLogTableProps) {
                                             <TableRow key={entry.id}>
                                                 <TableCell className="font-medium">
                                                     {entry.description}
-                                                    {entry.is_billable && (
-                                                        <Badge variant="outline" className="ml-2 text-[10px] h-4">Billable</Badge>
+                                                    {entry.is_billable ? (
+                                                        <Badge variant="outline" className="ml-2 text-[10px] h-4 bg-green-50 text-green-700 border-green-200">Billable</Badge>
+                                                    ) : (
+                                                        <Badge variant="outline" className="ml-2 text-[10px] h-4 bg-gray-50 text-gray-700 border-gray-200">Non-billable</Badge>
                                                     )}
                                                 </TableCell>
                                                 <TableCell>

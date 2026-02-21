@@ -12,6 +12,7 @@ import { format } from "date-fns"
 import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
 import { AddProjectTaskDialog } from "./add-project-task-dialog"
+import { cn } from "@/lib/utils"
 import { TaskTimerButton } from "@/components/time-tracking/task-timer-button"
 import { getTaskTotalTime } from "@/app/(dashboard)/time-tracking/actions"
 
@@ -23,6 +24,7 @@ interface Task {
     priority?: string
     due_date?: string
     project_id?: string
+    estimated_hours?: number | null
     created_at: string
 }
 
@@ -179,8 +181,26 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                                 {task.status}
                                             </Badge>
                                             {taskTimes[task.id] > 0 && (
-                                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-blue-50 text-blue-700 border-blue-200">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className={cn(
+                                                        "text-[10px] px-1.5 py-0 h-5",
+                                                        task.estimated_hours && (taskTimes[task.id] / 3600) > task.estimated_hours
+                                                            ? "bg-red-50 text-red-700 border-red-200"
+                                                            : "bg-blue-50 text-blue-700 border-blue-200"
+                                                    )}
+                                                >
                                                     {formatSeconds(taskTimes[task.id])}
+                                                    {task.estimated_hours && (
+                                                        <span className="ml-1 opacity-70">
+                                                            / {task.estimated_hours}h
+                                                        </span>
+                                                    )}
+                                                </Badge>
+                                            )}
+                                            {task.estimated_hours && (taskTimes[task.id] / 3600) > task.estimated_hours && (
+                                                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-5 animate-pulse">
+                                                    Scope Creep!
                                                 </Badge>
                                             )}
                                         </div>
