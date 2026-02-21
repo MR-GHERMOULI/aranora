@@ -51,6 +51,12 @@ export function Sidebar({ className }: SidebarProps) {
             color: "text-violet-500",
         },
         {
+            label: "Collaborators",
+            icon: Users,
+            href: "/collaborators",
+            color: "text-cyan-500",
+        },
+        {
             label: "Projects",
             icon: Briefcase,
             href: "/projects",

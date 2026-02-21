@@ -119,3 +119,30 @@ export interface TimeEntry {
     project?: { title: string };
     task?: { title: string };
 }
+
+export interface CollaboratorCRM {
+    id: string;
+    user_id: string;
+    full_name: string;
+    email?: string | null;
+    phone?: string | null;
+    whatsapp?: string | null;
+    platform_profile_link?: string | null;
+    country?: string | null;
+    date_of_birth?: string | null;
+    rating?: number | null;
+    notes?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CollaboratorPayment {
+    id: string;
+    user_id: string;
+    collaborator_id: string;
+    amount: number;
+    currency: string;
+    payment_date: string;
+    description?: string | null;
+    created_at: string;
+}
