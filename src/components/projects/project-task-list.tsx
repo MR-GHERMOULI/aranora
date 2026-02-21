@@ -13,6 +13,7 @@ import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
 import { AddProjectTaskDialog } from "./add-project-task-dialog"
 import { TaskTimerButton } from "@/components/time-tracking/task-timer-button"
+import { getTaskTotalTime } from "@/app/(dashboard)/time-tracking/actions"
 
 interface Task {
     id: string
@@ -35,9 +36,28 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isAdding, setIsAdding] = useState(false)
     const [togglingId, setTogglingId] = useState<string | null>(null)
-    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [taskTimes, setTaskTimes] = useState<Record<string, number>>({})
     const router = useRouter()
     const pathname = usePathname()
+
+    useEffect(() => {
+        const fetchTimes = async () => {
+            const times: Record<string, number> = {}
+            for (const task of tasks) {
+                const totalSeconds = await getTaskTotalTime(task.id)
+                times[task.id] = totalSeconds
+            }
+            setTaskTimes(times)
+        }
+        fetchTimes()
+    }, [tasks])
+
+    const formatSeconds = (seconds: number) => {
+        if (!seconds) return "0h"
+        const h = Math.floor(seconds / 3600)
+        const m = Math.floor((seconds % 3600) / 60)
+        return `${h}h ${m}m`
+    }
 
     const completedCount = tasks.filter(t => t.status === "Done").length
     const progress = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0
@@ -157,6 +177,11 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
                                                 {task.status}
                                             </Badge>
+                                            {taskTimes[task.id] > 0 && (
+                                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-blue-50 text-blue-700 border-blue-200">
+                                                    {formatSeconds(taskTimes[task.id])}
+                                                </Badge>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 -mr-2">

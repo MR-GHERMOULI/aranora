@@ -31,6 +31,7 @@ export interface Project {
     budget?: number | null
     start_date?: string | null
     end_date?: string | null
+    hourly_rate?: number | null
     created_at: string
     client?: { name: string }
 }
@@ -111,6 +112,7 @@ export interface TimeEntry {
     end_time?: string | null;
     is_billable: boolean;
     hourly_rate?: number | null;
+    invoice_id?: string | null;
     created_at: string;
     updated_at: string;
     project?: { title: string };

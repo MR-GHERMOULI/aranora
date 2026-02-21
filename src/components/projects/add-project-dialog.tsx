@@ -46,6 +46,7 @@ const projectSchema = z.object({
     description: z.string().optional(),
     startDate: z.date().optional(),
     endDate: z.date().optional(),
+    hourlyRate: z.string().optional(),
 })
 
 type ProjectFormValues = z.infer<typeof projectSchema>
@@ -82,6 +83,7 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
             if (data.description) formData.append("description", data.description)
             if (data.startDate) formData.append("startDate", format(data.startDate, "yyyy-MM-dd"))
             if (data.endDate) formData.append("endDate", format(data.endDate, "yyyy-MM-dd"))
+            if (data.hourlyRate) formData.append("hourlyRate", data.hourlyRate)
 
             await createProject(formData)
             toast.success("Project created successfully")
@@ -178,6 +180,19 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
                                     type="number"
                                     placeholder="5000"
                                     {...register("budget")}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="hourlyRate">Default Hourly Rate ($)</Label>
+                                <Input
+                                    id="hourlyRate"
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="100.00"
+                                    {...register("hourlyRate")}
                                 />
                             </div>
                         </div>

@@ -179,7 +179,7 @@ export async function createInvoice(formData: FormData) {
   }
 
   revalidatePath('/invoices');
-  redirect(`/invoices/${invoice.invoice_number}`);
+  return invoice;
 }
 
 export async function updateInvoice(formData: FormData) {
@@ -257,7 +257,7 @@ export async function updateInvoice(formData: FormData) {
 
   revalidatePath('/invoices');
   revalidatePath(`/invoices/${updatedInvoice.invoice_number}`);
-  redirect(`/invoices/${updatedInvoice.invoice_number}`);
+  return updatedInvoice;
 }
 
 

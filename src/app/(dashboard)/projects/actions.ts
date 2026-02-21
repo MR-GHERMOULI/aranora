@@ -76,6 +76,7 @@ export async function createProject(formData: FormData) {
   const budget = formData.get('budget') ? parseFloat(formData.get('budget') as string) : null;
   const startDate = formData.get('startDate') as string || null;
   const endDate = formData.get('endDate') as string || null;
+  const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
 
   const { error } = await supabase
     .from('projects')
@@ -88,7 +89,8 @@ export async function createProject(formData: FormData) {
       status,
       budget,
       start_date: startDate,
-      end_date: endDate
+      end_date: endDate,
+      hourly_rate: hourlyRate
     });
 
   if (error) {
@@ -115,6 +117,7 @@ export async function updateProject(formData: FormData) {
   const budget = formData.get('budget') ? parseFloat(formData.get('budget') as string) : null;
   const startDate = formData.get('startDate') as string || null;
   const endDate = formData.get('endDate') as string || null;
+  const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
 
   const { error } = await supabase
     .from('projects')
@@ -125,7 +128,8 @@ export async function updateProject(formData: FormData) {
       status,
       budget,
       start_date: startDate,
-      end_date: endDate
+      end_date: endDate,
+      hourly_rate: hourlyRate
     })
     .eq('id', id)
     .eq('user_id', user.id);

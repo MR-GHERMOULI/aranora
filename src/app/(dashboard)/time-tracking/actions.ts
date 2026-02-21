@@ -19,11 +19,13 @@ export async function getTimeEntries(filters?: {
         .from("time_entries")
         .select(`
             *,
-            project:projects(title),
+            project:projects(title, user_id),
             task:tasks(title)
         `)
-        .eq("user_id", user.id)
         .order("start_time", { ascending: false });
+
+    // RLS handles the filtering, but we can be explicit if we want for performance
+    // or to allow a "View All" for projects where I am a collaborator.
 
     if (filters?.projectId) query = query.eq("project_id", filters.projectId);
     if (filters?.taskId) query = query.eq("task_id", filters.taskId);
@@ -83,13 +85,28 @@ export async function startTimeEntry(data: {
         await stopTimeEntry(activeTimer.id);
     }
 
+    let hourlyRate = data.hourlyRate;
+
+    // If no hourly rate provided, try to fetch project default
+    if (hourlyRate === undefined && data.projectId) {
+        const { data: project } = await supabase
+            .from("projects")
+            .select("hourly_rate")
+            .eq("id", data.projectId)
+            .single();
+
+        if (project?.hourly_rate) {
+            hourlyRate = project.hourly_rate;
+        }
+    }
+
     const { error } = await supabase.from("time_entries").insert({
         user_id: user.id,
         project_id: data.projectId,
         task_id: data.taskId,
         description: data.description,
         is_billable: data.isBillable ?? true,
-        hourly_rate: data.hourlyRate,
+        hourly_rate: hourlyRate,
         start_time: new Date().toISOString(),
     });
 
@@ -194,5 +211,80 @@ export async function createTimeEntry(data: {
     }
 
     revalidatePath("/time-tracking");
+}
+
+export async function bulkLinkToInvoice(timeEntryIds: string[], invoiceId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    const { error } = await supabase
+        .from("time_entries")
+        .update({ invoice_id: invoiceId })
+        .in("id", timeEntryIds);
+
+    if (error) {
+        console.error("Error linking time entries to invoice:", error);
+        throw new Error("Failed to link time entries to invoice");
+    }
+
+    revalidatePath("/invoices");
+    revalidatePath("/time-tracking");
+}
+
+export async function getUnbilledEntries(projectId?: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    let query = supabase
+        .from("time_entries")
+        .select(`
+            *,
+            project:projects(title),
+            task:tasks(title)
+        `)
+        .is("invoice_id", null)
+        .eq("is_billable", true)
+        .not("end_time", "is", null);
+
+    if (projectId) {
+        query = query.eq("project_id", projectId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        console.error("Error fetching unbilled entries:", error);
+        return [];
+    }
+
+    return data as TimeEntry[];
+}
+
+export async function getTaskTotalTime(taskId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return 0;
+
+    const { data, error } = await supabase
+        .from("time_entries")
+        .select("start_time, end_time")
+        .eq("task_id", taskId)
+        .not("end_time", "is", null);
+
+    if (error) {
+        console.error("Error fetching task time:", error);
+        return 0;
+    }
+
+    return (data || []).reduce((total, entry) => {
+        const start = new Date(entry.start_time).getTime();
+        const end = new Date(entry.end_time!).getTime();
+        return total + (end - start) / 1000;
+    }, 0);
 }
 

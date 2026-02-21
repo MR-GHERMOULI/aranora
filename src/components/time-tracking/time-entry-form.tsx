@@ -22,6 +22,7 @@ const formSchema = z.object({
     startTime: z.string(),
     endTime: z.string(),
     isBillable: z.boolean(),
+    hourlyRate: z.any().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -53,6 +54,7 @@ export function TimeEntryForm({ initialData, onSubmit, isLoading, buttonText = "
             startTime: initialData?.start_time ? new Date(initialData.start_time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false }) : "09:00",
             endTime: initialData?.end_time ? new Date(initialData.end_time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false }) : "10:00",
             isBillable: initialData?.is_billable ?? true,
+            hourlyRate: initialData?.hourly_rate || undefined,
         },
     });
 
@@ -150,6 +152,41 @@ export function TimeEntryForm({ initialData, onSubmit, isLoading, buttonText = "
                     <Label htmlFor="endTime">End Time</Label>
                     <Input id="endTime" type="time" {...register("endTime")} />
                 </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-slate-50 dark:bg-slate-900/50">
+                <div className="space-y-0.5">
+                    <Label className="text-sm font-medium">Billable</Label>
+                    <p className="text-xs text-muted-foreground">This entry will be available for invoicing.</p>
+                </div>
+                <Controller
+                    name="isBillable"
+                    control={control}
+                    render={({ field }) => (
+                        <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                    )}
+                />
+            </div>
+
+            <div className="grid gap-2">
+                <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                    <Input
+                        id="hourlyRate"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="pl-7"
+                        {...register("hourlyRate")}
+                    />
+                </div>
+                <p className="text-[10px] text-muted-foreground">Leave empty to use project default rate.</p>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : buttonText}

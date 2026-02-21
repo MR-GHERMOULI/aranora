@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createInvoice, updateInvoice } from "@/app/(dashboard)/invoices/actions"
-import { Client, Project, Invoice } from "@/types"
+import { Client, Project, Invoice, TimeEntry } from "@/types"
 import { useRouter } from "next/navigation"
+import { ImportTimeDialog } from "@/components/time-tracking/import-time-dialog"
+import { bulkLinkToInvoice } from "@/app/(dashboard)/time-tracking/actions"
 import {
     Select,
     SelectContent,
@@ -56,6 +58,24 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
     )
     const [status, setStatus] = useState(invoice?.status || "Draft")
     const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>(invoice?.paper_size || 'A4')
+    const [importedTimeEntryIds, setImportedTimeEntryIds] = useState<string[]>([])
+
+    const handleImportTime = (entries: TimeEntry[]) => {
+        const newItems = entries.map(entry => {
+            const start = new Date(entry.start_time).getTime();
+            const end = entry.end_time ? new Date(entry.end_time).getTime() : start;
+            const durationHours = (end - start) / (1000 * 3600);
+
+            return {
+                description: `${entry.description || 'Time Tracking'}${entry.task ? ` - ${entry.task.title}` : ''}`,
+                quantity: parseFloat(durationHours.toFixed(2)),
+                unitPrice: entry.hourly_rate || 0
+            };
+        });
+
+        setItems([...items.filter(item => item.description !== ""), ...newItems]);
+        setImportedTimeEntryIds([...importedTimeEntryIds, ...entries.map(e => e.id)]);
+    }
 
     // No need for useEffect anymore since we initialize from props directly
 
@@ -94,11 +114,21 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             formData.append("items", JSON.stringify(items));
 
             if (invoice) {
-                await updateInvoice(formData);
+                const result = await updateInvoice(formData);
+                if (importedTimeEntryIds.length > 0) {
+                    await bulkLinkToInvoice(importedTimeEntryIds, invoice.id);
+                }
             } else {
-                await createInvoice(formData);
+                // For new invoices, we need the ID. 
+                // Let's modify createInvoice to return the created invoice or its ID.
+                const newInvoice = await createInvoice(formData);
+                if (importedTimeEntryIds.length > 0 && typeof newInvoice === 'object' && 'id' in newInvoice) {
+                    await bulkLinkToInvoice(importedTimeEntryIds, newInvoice.id);
+                }
+                const invoiceData = newInvoice as any;
+                router.push(`/invoices/${invoiceData.invoice_number}`);
             }
-            router.refresh(); // Refresh to show new data
+            router.refresh();
         } catch (error) {
             console.error(error);
             alert(`Failed to ${invoice ? 'update' : 'create'} invoice`);
@@ -127,7 +157,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
                             <SelectValue placeholder="Select Project..." />
                         </SelectTrigger>
                         <SelectContent>
-                            {projects.filter(p => !selectedClient || p.client_id === selectedClient).map(p => (
+                            {projects.filter(p => !selectedClient || p.client_id === selectedClient).map((p: any) => (
                                 <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
                             ))}
                         </SelectContent>
@@ -216,9 +246,15 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium">Invoice Items</h3>
-                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                        <Plus className="mr-2 h-4 w-4" /> Add Item
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <ImportTimeDialog
+                            projectId={selectedProject}
+                            onImport={handleImportTime}
+                        />
+                        <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                            <Plus className="mr-2 h-4 w-4" /> Add Item
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="space-y-4">

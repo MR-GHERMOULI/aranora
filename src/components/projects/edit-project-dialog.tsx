@@ -46,6 +46,7 @@ const projectSchema = z.object({
     description: z.string().optional().or(z.literal("")),
     startDate: z.date().optional(),
     endDate: z.date().optional(),
+    hourlyRate: z.string().optional(),
 })
 
 type ProjectFormValues = z.infer<typeof projectSchema>
@@ -75,6 +76,7 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             description: project.description || "",
             startDate: project.start_date ? new Date(project.start_date) : undefined,
             endDate: project.end_date ? new Date(project.end_date) : undefined,
+            hourlyRate: project.hourly_rate?.toString() || "",
         },
     })
 
@@ -89,6 +91,7 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             if (data.description) formData.append("description", data.description)
             if (data.startDate) formData.append("startDate", format(data.startDate, "yyyy-MM-dd"))
             if (data.endDate) formData.append("endDate", format(data.endDate, "yyyy-MM-dd"))
+            if (data.hourlyRate) formData.append("hourlyRate", data.hourlyRate)
 
             await updateProject(formData)
             toast.success("Project updated successfully")
@@ -159,6 +162,19 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
                                     type="number"
                                     placeholder="5000"
                                     {...register("budget")}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="hourlyRate">Default Hourly Rate ($)</Label>
+                                <Input
+                                    id="hourlyRate"
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="100.00"
+                                    {...register("hourlyRate")}
                                 />
                             </div>
                         </div>
