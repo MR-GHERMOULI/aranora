@@ -64,10 +64,26 @@ export interface Contract {
     title: string
     content: string
     status: string
+    signing_token?: string | null
+    signer_name?: string | null
+    signer_email?: string | null
+    signature_data?: string | null
+    signer_ip?: string | null
+    signer_user_agent?: string | null
     signed_at?: string | null
+    sent_at?: string | null
     created_at: string
-    client?: { name: string }
+    client?: { name: string; email?: string | null }
     project?: { title: string }
+}
+
+export interface ContractTemplate {
+    id: string
+    user_id: string
+    name: string
+    content: string
+    created_at: string
+    updated_at: string
 }
 
 export interface Task {

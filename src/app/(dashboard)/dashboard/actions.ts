@@ -35,6 +35,7 @@ export async function getDashboardStats() {
         { data: upcomingDeadlines },
         { data: prevMonthPaidInvoices },
         { data: pendingInvitations },
+        { data: recentSignedContracts },
         timeEntriesResponse,
         activeTimerResponse
     ] = await Promise.all([
@@ -79,6 +80,11 @@ export async function getDashboardStats() {
             .eq('type', 'invite')
             .eq('read', false)
             .order('created_at', { ascending: false }),
+        supabase.from('contracts').select('id, title, signed_at')
+            .eq('user_id', user.id)
+            .eq('status', 'Signed')
+            .order('signed_at', { ascending: false })
+            .limit(5),
         supabase.from('time_entries').select('start_time, end_time')
             .eq('user_id', user.id)
             .gte('start_time', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()),
@@ -130,7 +136,8 @@ export async function getDashboardStats() {
     // Process Recent Activity (Only projects and invoices for now, removed clients for query optimization)
     const activities = [
         ...(recentProjects || []).map(p => ({ type: 'project', id: p.id, title: `Project created: ${p.title}`, date: p.created_at, link: `/projects/${p.id}` })),
-        ...(recentInvoices || []).map(i => ({ type: 'invoice', id: i.id, title: `Invoice generated: ${i.invoice_number}`, date: i.created_at, link: `/invoices/${i.id}` }))
+        ...(recentInvoices || []).map(i => ({ type: 'invoice', id: i.id, title: `Invoice generated: ${i.invoice_number}`, date: i.created_at, link: `/invoices/${i.id}` })),
+        ...(recentSignedContracts || []).map(c => ({ type: 'contract', id: c.id, title: `Contract signed: ${c.title}`, date: c.signed_at, link: `/contracts/${c.id}` }))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
     return {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/renderer';
 import { Contract } from '@/types';
 import { format } from 'date-fns';
 
@@ -15,22 +15,41 @@ const styles = StyleSheet.create({
         borderBottomWidth: 2,
         borderBottomColor: '#1E3A5F',
         paddingBottom: 15,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    logo: {
+        width: 50,
+        height: 50,
+        objectFit: 'contain',
+        marginRight: 12,
     },
     title: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#1E3A5F',
         marginBottom: 5,
     },
     subtitle: {
-        fontSize: 12,
+        fontSize: 11,
         color: '#64748B',
+    },
+    statusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        fontSize: 9,
     },
     section: {
         marginBottom: 20,
     },
     sectionTitle: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: 'bold',
         color: '#1E3A5F',
         marginBottom: 10,
@@ -88,6 +107,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 10,
     },
+    signatureImage: {
+        width: 180,
+        height: 70,
+        objectFit: 'contain',
+        marginTop: 5,
+    },
+    signatureDetails: {
+        marginTop: 5,
+    },
+    signatureDetailText: {
+        fontSize: 8,
+        color: '#94A3B8',
+    },
     footer: {
         position: 'absolute',
         bottom: 30,
@@ -114,10 +146,30 @@ export const ContractPDF = ({ contract, profile }: ContractPDFProps) => (
         <Page size="A4" style={styles.page}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.title}>{contract.title}</Text>
-                <Text style={styles.subtitle}>
-                    {profile?.company_name || 'Aranora'} • Contract Agreement
-                </Text>
+                <View style={styles.headerLeft}>
+                    {profile?.logo_url && (
+                        <Image src={profile.logo_url} style={styles.logo} />
+                    )}
+                    <View>
+                        <Text style={styles.title}>{contract.title}</Text>
+                        <Text style={styles.subtitle}>
+                            {profile?.company_name || 'Aranora'} • Contract Agreement
+                        </Text>
+                    </View>
+                </View>
+                <View style={[
+                    styles.statusBadge,
+                    {
+                        backgroundColor: contract.status === 'Signed' ? '#D1FAE5' : contract.status === 'Sent' ? '#DBEAFE' : '#F3F4F6',
+                    }
+                ]}>
+                    <Text style={{
+                        fontSize: 9,
+                        color: contract.status === 'Signed' ? '#047857' : contract.status === 'Sent' ? '#1D4ED8' : '#4B5563',
+                    }}>
+                        {contract.status === 'Signed' ? '✓ SIGNED' : contract.status?.toUpperCase()}
+                    </Text>
+                </View>
             </View>
 
             {/* Parties Section */}
@@ -152,10 +204,12 @@ export const ContractPDF = ({ contract, profile }: ContractPDFProps) => (
                     <Text style={styles.label}>Created:</Text>
                     <Text style={styles.value}>{format(new Date(contract.created_at), 'MMMM d, yyyy')}</Text>
                 </View>
-                <View style={styles.row}>
-                    <Text style={styles.label}>Status:</Text>
-                    <Text style={styles.value}>{contract.status}</Text>
-                </View>
+                {contract.sent_at && (
+                    <View style={styles.row}>
+                        <Text style={styles.label}>Sent:</Text>
+                        <Text style={styles.value}>{format(new Date(contract.sent_at), 'MMMM d, yyyy h:mm a')}</Text>
+                    </View>
+                )}
                 {contract.signed_at && (
                     <View style={styles.row}>
                         <Text style={styles.label}>Signed:</Text>
@@ -180,11 +234,30 @@ export const ContractPDF = ({ contract, profile }: ContractPDFProps) => (
                 </View>
                 <View style={styles.signatureBox}>
                     <Text style={styles.signatureLabel}>Client</Text>
-                    <View style={styles.signatureLine}>
-                        <Text style={styles.value}>{contract.client?.name || 'Client Representative'}</Text>
-                    </View>
-                    {contract.status === 'Signed' && (
-                        <Text style={styles.signedBadge}>✓ SIGNED</Text>
+                    {contract.status === 'Signed' && contract.signature_data ? (
+                        <View>
+                            <Image src={contract.signature_data} style={styles.signatureImage} />
+                            <Text style={[styles.value, { marginTop: 5, fontWeight: 'bold' }]}>
+                                {contract.signer_name || contract.client?.name || 'Client Representative'}
+                            </Text>
+                            <View style={styles.signatureDetails}>
+                                {contract.signed_at && (
+                                    <Text style={styles.signatureDetailText}>
+                                        Signed: {format(new Date(contract.signed_at), 'MMM d, yyyy h:mm a')}
+                                    </Text>
+                                )}
+                                {contract.signer_ip && (
+                                    <Text style={styles.signatureDetailText}>
+                                        IP: {contract.signer_ip}
+                                    </Text>
+                                )}
+                            </View>
+                            <Text style={styles.signedBadge}>✓ ELECTRONICALLY SIGNED</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.signatureLine}>
+                            <Text style={styles.value}>{contract.client?.name || 'Client Representative'}</Text>
+                        </View>
                     )}
                 </View>
             </View>
@@ -192,7 +265,7 @@ export const ContractPDF = ({ contract, profile }: ContractPDFProps) => (
             {/* Footer */}
             <View style={styles.footer}>
                 <Text style={styles.footerText}>
-                    This document was generated by {profile?.company_name || 'Aranora'}.
+                    This document was generated by {profile?.company_name || 'Aranora'}. Electronic signatures are legally binding.
                 </Text>
             </View>
         </Page>
