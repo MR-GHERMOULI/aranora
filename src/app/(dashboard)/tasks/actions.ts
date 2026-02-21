@@ -218,9 +218,11 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
     const subtaskOf = formData.get('subtaskOf') as string;
     const estimatedHours = formData.get('estimatedHours') ? parseFloat(formData.get('estimatedHours') as string) : null;
     const assignedTo = formData.get('assignedTo') as string;
+    const visibleToStr = formData.get('visibleTo') as string;
 
     const recurrence = recurrenceType ? { type: recurrenceType } : null;
     const labels = labelsStr ? labelsStr.split(',').filter(Boolean) : [];
+    const visibleTo = visibleToStr ? visibleToStr.split(',').filter(Boolean) : [];
 
     const { error } = await supabase.from('tasks').insert({
         user_id: user.id,
@@ -231,6 +233,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         due_date: dueDate || null,
         project_id: projectId || null,
         assigned_to: assignedTo || user.id, // Default to creator if not specified
+        visible_to: visibleTo,
         is_personal: isPersonal,
         recurrence,
         category: isPersonal ? 'Personal' : 'Work',

@@ -25,7 +25,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon, Loader2, Plus, User, Check } from "lucide-react"
+import { Calendar as CalendarIcon, Loader2, Plus, User, Check, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useEffect } from "react"
@@ -56,12 +56,21 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
     const [estimatedHours, setEstimatedHours] = useState("")
     const [members, setMembers] = useState<Member[]>([])
     const [assignedTo, setAssignedTo] = useState<string>("")
+    const [visibleTo, setVisibleTo] = useState<string[]>([])
 
     useEffect(() => {
         if (open) {
             getProjectMembers(projectId).then(setMembers)
         }
     }, [open, projectId])
+
+    const toggleVisibility = (memberId: string) => {
+        setVisibleTo(prev =>
+            prev.includes(memberId)
+                ? prev.filter(id => id !== memberId)
+                : [...prev, memberId]
+        )
+    }
 
     const handleSubmit = async () => {
         if (!title.trim()) {
@@ -79,6 +88,9 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
             formData.append("projectId", projectId)
             if (assignedTo) {
                 formData.append("assignedTo", assignedTo)
+            }
+            if (visibleTo.length > 0) {
+                formData.append("visibleTo", visibleTo.join(','))
             }
             if (dueDate) {
                 formData.append("dueDate", format(dueDate, "yyyy-MM-dd"))
@@ -113,6 +125,7 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
         setDueDate(undefined)
         setEstimatedHours("")
         setAssignedTo("")
+        setVisibleTo([])
     }
 
     return (
@@ -131,30 +144,58 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <label htmlFor="assignedTo" className="text-sm font-medium flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" /> Assign To
-                        </label>
-                        <Select value={assignedTo} onValueChange={setAssignedTo}>
-                            <SelectTrigger id="assignedTo" className="bg-muted/30 border-muted-foreground/20">
-                                <SelectValue placeholder="Assign to project member..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {members.map((member) => (
-                                    <SelectItem key={member.id} value={member.id} className="cursor-pointer">
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{member.full_name || "Unknown Member"}</span>
-                                            <span className="text-xs text-muted-foreground">{member.company_email}</span>
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                                {members.length === 0 && (
-                                    <div className="p-2 text-xs text-muted-foreground text-center">
-                                        Only you can be assigned (Invite collaborators first)
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <label htmlFor="assignedTo" className="text-sm font-medium flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground" /> Assign To
+                            </label>
+                            <Select value={assignedTo} onValueChange={setAssignedTo}>
+                                <SelectTrigger id="assignedTo" className="bg-muted/30 border-muted-foreground/20">
+                                    <SelectValue placeholder="Assignee..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {members.map((member) => (
+                                        <SelectItem key={member.id} value={member.id}>
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-medium">{member.full_name || "Unknown"}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <Eye className="h-4 w-4 text-muted-foreground" /> Visible To
+                            </label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="justify-start text-xs h-10 bg-muted/30 border-muted-foreground/20">
+                                        {visibleTo.length === 0 ? "Only Assigned members" : `${visibleTo.length} members selected`}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[200px] p-0" align="start">
+                                    <div className="p-2 space-y-1">
+                                        <p className="text-[10px] text-muted-foreground px-2 pb-2 border-b">Select who can see this task</p>
+                                        {members.map((member) => (
+                                            <button
+                                                key={member.id}
+                                                type="button"
+                                                onClick={() => toggleVisibility(member.id)}
+                                                className={cn(
+                                                    "w-full flex items-center justify-between px-2 py-1.5 rounded-sm text-xs hover:bg-muted transition-colors",
+                                                    visibleTo.includes(member.id) && "bg-brand-primary/10 text-brand-primary"
+                                                )}
+                                            >
+                                                <span className="truncate">{member.full_name || member.company_email}</span>
+                                                {visibleTo.includes(member.id) && <Check className="h-3 w-3" />}
+                                            </button>
+                                        ))}
                                     </div>
-                                )}
-                            </SelectContent>
-                        </Select>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                     </div>
 
                     <div className="grid gap-2">
