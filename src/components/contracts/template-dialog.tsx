@@ -113,7 +113,7 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[650px]">
+            <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                     <DialogTitle>{isEdit ? 'Edit Template' : 'Create Template'}</DialogTitle>
                     <DialogDescription>
@@ -144,7 +144,7 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
                                     <Label htmlFor="content">Contract Terms</Label>
                                     <textarea
                                         id="content"
-                                        className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                         placeholder="Enter the default contract terms for this template..."
                                         {...register("content")}
                                     />
@@ -157,8 +157,8 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
                                 </div>
                             </TabsContent>
                             <TabsContent value="defaults" className="grid gap-4 py-4">
-                                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-6">
-                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-2">
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center gap-2">
                                         <ShieldCheck className="h-4 w-4" />
                                         Default Smart Terms
                                     </h3>
@@ -239,32 +239,30 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
                                         </Select>
                                     </div>
 
-                                    <div className="pt-2 flex items-center justify-between border-t border-dashed">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-sm font-semibold">Default Paper Size</Label>
+                                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-dashed">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-[11px] font-semibold">Paper Size</Label>
+                                            <Select value={structuredData.paper_size} onValueChange={(v: any) => updateStructuredData({ paper_size: v })}>
+                                                <SelectTrigger className="w-28 h-8 bg-white text-[10px]">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="A4">A4</SelectItem>
+                                                    <SelectItem value="LETTER">Letter</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
-                                        <Select value={structuredData.paper_size} onValueChange={(v: any) => updateStructuredData({ paper_size: v })}>
-                                            <SelectTrigger className="w-40 h-9 bg-white text-xs">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
-                                                <SelectItem value="LETTER">Letter (8.5 × 11 in)</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
 
-                                    <div className="pt-2 flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-sm font-semibold">Default Tax Rate (%)</Label>
+                                        <div className="flex items-center justify-between pl-4 border-l">
+                                            <Label className="text-[11px] font-semibold">Tax Rate (%)</Label>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                value={structuredData.tax_rate}
+                                                onChange={(e) => updateStructuredData({ tax_rate: Number(e.target.value) })}
+                                                className="w-16 h-8 bg-white text-xs"
+                                            />
                                         </div>
-                                        <Input
-                                            type="number"
-                                            step="0.01"
-                                            value={structuredData.tax_rate}
-                                            onChange={(e) => updateStructuredData({ tax_rate: Number(e.target.value) })}
-                                            className="w-20 h-9 bg-white"
-                                        />
                                     </div>
                                 </div>
                                 <p className="text-[10px] text-muted-foreground text-center italic px-4">

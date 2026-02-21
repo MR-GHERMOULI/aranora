@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Eraser, Undo2 } from "lucide-react"
+import { Eraser, Undo2, PenTool, ShieldCheck } from "lucide-react"
 
 interface SignatureCanvasProps {
     onSignatureChange: (dataUrl: string | null) => void;
@@ -134,13 +134,13 @@ export function SignatureCanvas({ onSignatureChange, width = 500, height = 200 }
     }, [history, onSignatureChange]);
 
     return (
-        <div className="space-y-2">
-            <div className="relative rounded-lg border-2 border-dashed border-gray-300 bg-white overflow-hidden"
+        <div className="space-y-3">
+            <div className={`relative rounded-xl border-2 transition-colors ${hasContent ? 'border-brand-primary bg-white/50' : 'border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-50'} overflow-hidden shadow-inner group`}
                 style={{ touchAction: 'none' }}
             >
                 <canvas
                     ref={canvasRef}
-                    className="w-full cursor-crosshair"
+                    className="w-full cursor-crosshair relative z-10"
                     style={{ maxWidth: `${width}px`, height: `${height}px` }}
                     onMouseDown={startDrawing}
                     onMouseMove={draw}
@@ -150,33 +150,46 @@ export function SignatureCanvas({ onSignatureChange, width = 500, height = 200 }
                     onTouchMove={draw}
                     onTouchEnd={stopDrawing}
                 />
+
+                {/* Visual guidelines for signature */}
+                <div className="absolute inset-x-8 bottom-[25%] border-b border-slate-200 pointer-events-none z-0"></div>
+
                 {!hasContent && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <p className="text-gray-400 text-sm">ارسم توقيعك هنا — Draw your signature here</p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-50 group-hover:opacity-70 transition-opacity">
+                        <PenTool className="h-6 w-6 text-slate-400 mb-2" />
+                        <p className="text-slate-500 text-sm font-medium">Draw your signature here</p>
+                        <p className="text-slate-400 text-xs mt-1">يُرجى رسم توقيعك أعلاه</p>
                     </div>
                 )}
             </div>
-            <div className="flex gap-2">
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={undo}
-                    disabled={history.length === 0}
-                >
-                    <Undo2 className="mr-1 h-3.5 w-3.5" />
-                    Undo
-                </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={clearCanvas}
-                    disabled={!hasContent}
-                >
-                    <Eraser className="mr-1 h-3.5 w-3.5" />
-                    Clear
-                </Button>
+            <div className="flex items-center justify-between">
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" /> Legally Binding
+                </p>
+                <div className="flex gap-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={undo}
+                        disabled={history.length === 0}
+                        className="h-8 text-xs rounded-lg border-slate-200"
+                    >
+                        <Undo2 className="mr-1.5 h-3.5 w-3.5" />
+                        Undo
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={clearCanvas}
+                        disabled={!hasContent}
+                        className="h-8 text-xs rounded-lg border-slate-200 hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                    >
+                        <Eraser className="mr-1.5 h-3.5 w-3.5" />
+                        Clear
+                    </Button>
+                </div>
             </div>
         </div>
     )

@@ -476,24 +476,38 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
 
                                 {currentStep === 4 && (
                                     <div className="flex flex-col h-full space-y-4">
-                                        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3">
+                                        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3 shrink-0">
                                             <Check className="h-5 w-5 text-emerald-600 mt-0.5" />
                                             <div>
-                                                <h4 className="text-sm font-bold text-emerald-900">Contract Ready!</h4>
-                                                <p className="text-xs text-emerald-700">The structured data has been successfully injected into the template. Review the text below before saving.</p>
+                                                <h4 className="text-sm font-bold text-emerald-900">Contract Generated!</h4>
+                                                <p className="text-xs text-emerald-700">The structured data has been securely injected. Review the drafted document below.</p>
                                             </div>
                                         </div>
 
-                                        <div className="flex-1 flex flex-col min-h-0">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Label className="text-xs font-bold uppercase text-slate-500">Document Review</Label>
-                                                <Badge variant="outline" className="text-[10px]">Editable</Badge>
+                                        <div className="flex-1 flex flex-col min-h-0 bg-slate-100/80 rounded-xl overflow-hidden border border-slate-200 relative">
+                                            {/* Toolbar */}
+                                            <div className="h-10 border-b border-slate-200 bg-white/50 flex items-center px-4 justify-between shrink-0">
+                                                <div className="flex items-center gap-2">
+                                                    <FileText className="h-4 w-4 text-brand-primary" />
+                                                    <span className="text-xs font-semibold text-slate-700">Document Review</span>
+                                                </div>
+                                                <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-white">Editable</Badge>
                                             </div>
-                                            <Textarea
-                                                value={content}
-                                                onChange={(e) => setContent(e.target.value)}
-                                                className="flex-1 min-h-0 text-sm font-serif leading-relaxed bg-white border-slate-200 resize-none p-6 shadow-inner"
-                                            />
+
+                                            {/* Document Container */}
+                                            <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center">
+                                                <div className="w-full max-w-[650px] bg-white shadow-xl ring-1 ring-slate-900/5 min-h-[600px] p-8 md:p-12 relative">
+                                                    {/* Binder Top Edge */}
+                                                    <div className="absolute top-0 left-0 right-0 h-1 bg-brand-primary/20"></div>
+
+                                                    <Textarea
+                                                        value={content}
+                                                        onChange={(e) => setContent(e.target.value)}
+                                                        className="w-full h-full min-h-[500px] text-sm font-serif leading-loose border-none focus-visible:ring-0 resize-none p-0 bg-transparent text-slate-800"
+                                                        placeholder="Contract content will appear here..."
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
