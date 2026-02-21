@@ -4,16 +4,12 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Pencil, Loader2 } from "lucide-react"
+import { Pencil, Loader2, FileText, User, Briefcase, Layers } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -21,6 +17,13 @@ import { Label } from "@/components/ui/label"
 import { updateContract } from "@/app/(dashboard)/contracts/actions"
 import { Contract, Client, Project } from "@/types"
 import { useRouter } from "next/navigation"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
 
 const contractSchema = z.object({
     title: z.string().min(2, "Title is required"),
@@ -45,6 +48,7 @@ export function EditContractDialog({ contract, clients, projects }: EditContract
     const {
         register,
         handleSubmit,
+        setValue,
         watch,
         formState: { errors },
     } = useForm<ContractFormValues>({
@@ -86,80 +90,120 @@ export function EditContractDialog({ contract, clients, projects }: EditContract
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">
-                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                <Button variant="outline" className="h-9 px-4 border-slate-200 hover:bg-slate-50 gap-2 font-semibold">
+                    <Pencil className="h-4 w-4 text-slate-400" /> Edit
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                    <DialogTitle>Edit Contract</DialogTitle>
-                    <DialogDescription>
-                        Modify contract details and terms.
-                    </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="title">Contract Title</Label>
+            <DialogContent className="sm:max-w-[640px] p-0 overflow-hidden border-none shadow-2xl gap-0">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col max-h-[90vh]">
+
+                    {/* ── Dark Header ── */}
+                    <div className="bg-slate-900 text-white px-6 pt-6 pb-5 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-xl bg-brand-primary/20 flex items-center justify-center">
+                                <Pencil className="h-5 w-5 text-brand-primary" />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold leading-tight">Edit Contract</h2>
+                                <p className="text-slate-400 text-xs mt-0.5">Modify contract details, participants and terms.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Body ── */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        {/* Title Section */}
+                        <div className="space-y-2">
+                            <Label htmlFor="edit-title" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Contract Title</Label>
                             <Input
-                                id="title"
+                                id="edit-title"
                                 placeholder="Service Agreement - Q1"
+                                className="h-11 border-slate-200 focus-visible:ring-brand-primary/20 focus-visible:border-brand-primary font-medium rounded-xl"
                                 {...register("title")}
                             />
                             {errors.title && (
-                                <p className="text-sm text-red-500">{errors.title.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{errors.title.message}</p>
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="clientId">Client</Label>
-                                <select
-                                    id="clientId"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    {...register("clientId")}
+                        {/* Participants Section */}
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Client Association</Label>
+                                <Select
+                                    value={selectedClientId}
+                                    onValueChange={(v) => setValue("clientId", v)}
                                 >
-                                    <option value="">Select client...</option>
-                                    {clients.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="h-11 border-slate-200 rounded-xl">
+                                        <SelectValue placeholder="Select client..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {clients.map(c => (
+                                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.clientId && (
+                                    <p className="text-xs text-red-500 font-medium">{errors.clientId.message}</p>
+                                )}
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="projectId">Project (Optional)</Label>
-                                <select
-                                    id="projectId"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                                    {...register("projectId")}
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Project (Optional)</Label>
+                                <Select
+                                    value={watch("projectId")}
+                                    onValueChange={(v) => setValue("projectId", v)}
                                     disabled={!selectedClientId}
                                 >
-                                    <option value="">Select project...</option>
-                                    {filteredProjects.map(p => (
-                                        <option key={p.id} value={p.id}>{p.title}</option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger className="h-11 border-slate-200 rounded-xl">
+                                        <SelectValue placeholder="Select project..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">No Project</SelectItem>
+                                        {filteredProjects.map(p => (
+                                            <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="content">Contract Terms</Label>
+                        {/* Content Section */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="edit-content" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Contract Terms</Label>
+                                <Badge variant="outline" className="text-[10px] font-bold text-slate-400">MARKDOWN SUPPORT</Badge>
+                            </div>
                             <textarea
-                                id="content"
-                                className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm "
+                                id="edit-content"
+                                className="flex min-h-[300px] w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-serif leading-relaxed focus-visible:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/40 transition-all"
                                 placeholder="Enter contract terms here..."
                                 {...register("content")}
                             />
                             {errors.content && (
-                                <p className="text-sm text-red-500">{errors.content.message}</p>
+                                <p className="text-xs text-red-500 font-medium">{errors.content.message}</p>
                             )}
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button type="submit" disabled={loading}>
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Changes
+
+                    {/* ── Footer ── */}
+                    <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/80 shrink-0">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setOpen(false)}
+                            className="text-slate-500 font-bold"
+                        >
+                            Cancel
                         </Button>
-                    </DialogFooter>
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold gap-2 min-w-[140px] rounded-xl shadow-lg shadow-brand-primary/10"
+                        >
+                            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                            Update Contract
+                        </Button>
+                    </div>
                 </form>
             </DialogContent>
         </Dialog>

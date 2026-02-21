@@ -2,7 +2,8 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Eraser, Undo2, PenTool, ShieldCheck } from "lucide-react"
+import { Eraser, Undo2, PenTool, ShieldCheck, Check } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface SignatureCanvasProps {
     onSignatureChange: (dataUrl: string | null) => void;
@@ -31,9 +32,9 @@ export function SignatureCanvas({ onSignatureChange, width = 500, height = 200 }
         canvas.style.height = `${height}px`;
         ctx.scale(dpr, dpr);
 
-        // Drawing style
-        ctx.strokeStyle = '#1E293B';
-        ctx.lineWidth = 2.5;
+        // Drawing style - using a slightly richer dark slate for better contrast
+        ctx.strokeStyle = '#0F172A';
+        ctx.lineWidth = 2.8;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
     }, [width, height]);
@@ -134,8 +135,8 @@ export function SignatureCanvas({ onSignatureChange, width = 500, height = 200 }
     }, [history, onSignatureChange]);
 
     return (
-        <div className="space-y-3">
-            <div className={`relative rounded-xl border-2 transition-colors ${hasContent ? 'border-brand-primary bg-white/50' : 'border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-50'} overflow-hidden shadow-inner group`}
+        <div className="space-y-4">
+            <div className={`relative rounded-3xl border-2 transition-all duration-300 ${hasContent ? 'border-brand-primary bg-white shadow-xl shadow-brand-primary/5 ring-4 ring-brand-primary/5' : 'border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'} overflow-hidden group`}
                 style={{ touchAction: 'none' }}
             >
                 <canvas
@@ -152,42 +153,70 @@ export function SignatureCanvas({ onSignatureChange, width = 500, height = 200 }
                 />
 
                 {/* Visual guidelines for signature */}
-                <div className="absolute inset-x-8 bottom-[25%] border-b border-slate-200 pointer-events-none z-0"></div>
+                <div className="absolute inset-x-12 bottom-[22%] border-b-2 border-slate-100 pointer-events-none z-0"></div>
+                <div className="absolute left-10 bottom-[22%] -mb-1 pointer-events-none z-0">
+                    <span className="text-[10px] font-bold text-slate-300 italic">Sign here / وقع هنا</span>
+                </div>
 
-                {!hasContent && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-50 group-hover:opacity-70 transition-opacity">
-                        <PenTool className="h-6 w-6 text-slate-400 mb-2" />
-                        <p className="text-slate-500 text-sm font-medium">Draw your signature here</p>
-                        <p className="text-slate-400 text-xs mt-1">يُرجى رسم توقيعك أعلاه</p>
+                <AnimatePresence>
+                    {!hasContent && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 opacity-40 group-hover:opacity-60 transition-opacity"
+                        >
+                            <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                                <PenTool className="h-6 w-6 text-slate-400" />
+                            </div>
+                            <p className="text-slate-500 text-sm font-bold tracking-tight">Handwritten Signature Required</p>
+                            <p className="text-slate-400 text-xs mt-1 font-medium">Click and drag to draw your sign</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {hasContent && (
+                    <div className="absolute top-4 right-4 z-20">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary/10 text-brand-primary border border-brand-primary/20 scale-90">
+                            <Check className="h-3 w-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-wider">CAPTURED</span>
+                        </div>
                     </div>
                 )}
             </div>
-            <div className="flex items-center justify-between">
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3" /> Legally Binding
-                </p>
+
+            <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase tracking-[0.15em] font-bold">
+                        <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                        <span>Legally Binding</span>
+                    </div>
+                    <div className="hidden sm:block h-3 w-px bg-slate-200" />
+                    <div className="hidden sm:block text-[10px] text-slate-400 font-medium">Digital Timestamp Attached</div>
+                </div>
+
                 <div className="flex gap-2">
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={undo}
                         disabled={history.length === 0}
-                        className="h-8 text-xs rounded-lg border-slate-200"
+                        className="h-8 px-3 text-[11px] font-bold rounded-xl text-slate-500 hover:text-slate-900 transition-all active:scale-95"
                     >
                         <Undo2 className="mr-1.5 h-3.5 w-3.5" />
                         Undo
                     </Button>
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={clearCanvas}
                         disabled={!hasContent}
-                        className="h-8 text-xs rounded-lg border-slate-200 hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                        className="h-8 px-3 text-[11px] font-bold rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-95"
                     >
                         <Eraser className="mr-1.5 h-3.5 w-3.5" />
-                        Clear
+                        Clear Canvas
                     </Button>
                 </div>
             </div>

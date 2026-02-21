@@ -3,7 +3,7 @@
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ContractPDF } from "@/lib/pdf/contract-pdf";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, FileDown, Loader2 } from "lucide-react";
 import { Contract } from "@/types";
 
 interface DownloadContractButtonProps {
@@ -19,8 +19,16 @@ export function DownloadContractButton({ contract, profile }: DownloadContractBu
         >
             {/* @ts-ignore */}
             {({ blob, url, loading, error }) => (
-                <Button variant="outline" disabled={loading}>
-                    <Download className="mr-2 h-4 w-4" />
+                <Button
+                    variant="outline"
+                    disabled={loading}
+                    className="h-9 px-4 border-slate-200 hover:bg-slate-50 gap-2 font-semibold transition-all"
+                >
+                    {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                    ) : (
+                        <FileDown className="h-4 w-4 text-slate-400" />
+                    )}
                     {loading ? "Generating..." : "Download PDF"}
                 </Button>
             )}

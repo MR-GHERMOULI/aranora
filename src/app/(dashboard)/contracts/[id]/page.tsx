@@ -34,13 +34,39 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
         { label: "Signed by Client", date: contract.signed_at, icon: CheckCircle, completed: !!contract.signed_at }
     ];
 
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case 'Signed': return {
+                bg: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+                iconBg: 'bg-emerald-500/20 text-emerald-700',
+                Icon: CheckCircle,
+                desc: 'Fully legally binding.'
+            };
+            case 'Sent': return {
+                bg: 'bg-blue-50 border-blue-200 text-blue-800',
+                iconBg: 'bg-blue-500/20 text-blue-700',
+                Icon: Send,
+                desc: 'Awaiting client action.'
+            };
+            default: return {
+                bg: 'bg-amber-50 border-amber-200 text-amber-800',
+                iconBg: 'bg-amber-500/20 text-amber-700',
+                Icon: PenTool,
+                desc: 'Needs to be sent.'
+            };
+        }
+    };
+
+    const statusStyle = getStatusStyles(contract.status);
+    const StatusIcon = statusStyle.Icon;
+
     return (
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 space-y-6 pt-8 pb-20">
-            {/* Minimal Top Header */}
-            <div className="flex items-center justify-between">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-slate-900" asChild>
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 space-y-8 pt-8 pb-24">
+            {/* ── Top Header ── */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900 group" asChild>
                     <Link href="/contracts">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                         Back to Contracts
                     </Link>
                 </Button>
@@ -61,21 +87,23 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
 
             <div className="flex flex-col lg:flex-row gap-8 xl:gap-12 items-start relative">
 
-                {/* Left Side: Document Viewer (Main Content) */}
+                {/* ── Left Side: Document Viewer ── */}
                 <div className="flex-1 w-full flex flex-col items-center">
-                    <div className="w-full max-w-4xl bg-white border border-slate-200 shadow-xl rounded-sm p-10 sm:p-16 lg:p-24 min-h-[1056px] relative overflow-hidden">
+                    <div className="w-full max-w-4xl bg-white border border-slate-200 shadow-xl rounded-2xl p-10 sm:p-16 lg:p-24 min-h-[1056px] relative overflow-hidden">
                         {/* Decorative top binder edge */}
-                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-slate-200 via-slate-300 to-slate-200"></div>
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-primary via-indigo-500 to-blue-500"></div>
 
-                        {/* Title and Badge IN the Document, optional styling */}
-                        <div className="border-b-2 border-slate-900 pb-8 mb-12 flex justify-between items-end">
-                            <h1 className="text-4xl font-serif text-slate-900 tracking-tight leading-tight max-w-[80%]">{contract.title}</h1>
+                        {/* Title and Badge */}
+                        <div className="border-b-2 border-slate-900 pb-8 mb-12 flex justify-between items-end gap-8">
+                            <h1 className="text-3xl md:text-5xl font-serif text-slate-900 tracking-tight leading-tight max-w-[80%]">
+                                {contract.title}
+                            </h1>
                             {contract.status === 'Signed' && (
-                                <div className="flex flex-col items-center space-y-1 opacity-80 rotate-[-5deg] mb-2">
-                                    <div className="px-3 py-1 border-2 border-emerald-600 rounded text-emerald-600 font-bold uppercase tracking-widest text-xs">
+                                <div className="flex flex-col items-center space-y-1.5 opacity-90 rotate-[-5deg] mb-4 shrink-0">
+                                    <div className="px-4 py-1.5 border-[3px] border-emerald-600 rounded-lg text-emerald-600 font-bold uppercase tracking-widest text-sm shadow-sm bg-emerald-50/50 backdrop-blur-sm">
                                         Fully Executed
                                     </div>
-                                    <span className="text-[10px] text-emerald-600 font-medium">
+                                    <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2 rounded-full">
                                         {format(new Date(contract.signed_at!), 'MM/dd/yyyy')}
                                     </span>
                                 </div>
@@ -83,37 +111,40 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
                         </div>
 
                         {/* Actual Contract Content */}
-                        <div className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary whitespace-pre-wrap">
+                        <div className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary whitespace-pre-wrap text-[15px]">
                             {contract.content}
                         </div>
 
-                        {/* Signature Block Rendering at the bottom if signed */}
+                        {/* Signature Block */}
                         {contract.status === 'Signed' && contract.signature_data && (
-                            <div className="mt-24 pt-8 border-t border-slate-200 grid grid-cols-2 gap-12">
+                            <div className="mt-28 md:mt-36 pt-10 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
                                 <div>
-                                    <p className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-6">Client Signature</p>
-                                    <div className="h-24 w-full flex items-center justify-start mb-2">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Client Signature</p>
+                                    <div className="h-28 w-full flex items-end justify-start mb-3 bg-slate-50/50 rounded-lg p-4 border border-slate-100">
                                         <img src={contract.signature_data} alt="Signature" className="max-h-full max-w-full" />
                                     </div>
-                                    <div className="border-t border-slate-900 pt-2">
-                                        <p className="font-semibold text-slate-900">{contract.signer_name}</p>
-                                        <p className="text-xs text-slate-500">{contract.signer_email}</p>
-                                        <p className="text-xs text-slate-500 mt-1">Signed on {format(new Date(contract.signed_at!), 'MMM d, yyyy')}</p>
+                                    <div className="border-t-2 border-slate-800 pt-3">
+                                        <p className="font-bold text-slate-900 text-lg">{contract.signer_name}</p>
+                                        <p className="text-sm text-slate-500">{contract.signer_email}</p>
+                                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-2 rounded-md bg-slate-100 text-slate-500 text-[10px] font-mono">
+                                            <Shield className="h-3 w-3" />
+                                            Signed {format(new Date(contract.signed_at!), 'MMM d, yyyy HH:mm')}
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
-                                    {/* Freelancer block if needed, but keeping it empty/structured for symmetry */}
-                                    <p className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-6">Service Provider</p>
-                                    <div className="h-24 w-full flex items-center justify-start mb-2">
-                                        {/* Assumed pre-signed or standard text for freelancer */}
-                                        <div className="font-[Signature-Font] italic text-3xl text-slate-800 opacity-70">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Service Provider</p>
+                                    <div className="h-28 w-full flex items-end justify-start mb-3 bg-slate-50/50 rounded-lg p-4 border border-slate-100">
+                                        <div className="font-[Signature-Font] italic text-4xl text-slate-800 opacity-80 pb-2">
                                             {profile.full_name || profile.company_name}
                                         </div>
                                     </div>
-                                    <div className="border-t border-slate-900 pt-2">
-                                        <p className="font-semibold text-slate-900">{profile.full_name || profile.company_name}</p>
-                                        <p className="text-xs text-slate-500">{profile.company_email || "Freelancer"}</p>
-                                        <p className="text-xs text-slate-500 mt-1">Authorized Representative</p>
+                                    <div className="border-t-2 border-slate-800 pt-3">
+                                        <p className="font-bold text-slate-900 text-lg">{profile.full_name || profile.company_name}</p>
+                                        <p className="text-sm text-slate-500">{profile.company_email || "Freelancer"}</p>
+                                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-2 rounded-md bg-slate-100 text-slate-500 text-[10px] uppercase font-bold tracking-wider">
+                                            Authorized Rep.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -121,68 +152,63 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
                     </div>
                 </div>
 
-                {/* Right Side: Sticky Details Sidebar */}
+                {/* ── Right Side: Sticky Details Sidebar ── */}
                 <div className="w-full lg:w-80 xl:w-96 flex flex-col gap-6 lg:sticky lg:top-8 self-start">
 
-                    {/* Status Badge & Actions Card */}
-                    <Card className="border-0 shadow-md ring-1 ring-slate-200/50 bg-white/50 backdrop-blur-xl">
-                        <CardHeader className="pb-4">
-                            <CardTitle className="text-sm text-slate-500 font-medium uppercase tracking-wider">Document Status</CardTitle>
+                    {/* Status Badge Card */}
+                    <Card className="border border-slate-100 shadow-sm bg-white overflow-hidden">
+                        <div className="h-1 w-full bg-gradient-to-r from-slate-200 to-slate-100" />
+                        <CardHeader className="pb-3 pt-5">
+                            <CardTitle className="text-xs text-slate-400 font-bold uppercase tracking-widest">Document Status</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className={`p-4 rounded-xl flex items-center gap-3 w-full border
-                                ${contract.status === 'Signed' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
-                                    contract.status === 'Sent' ? 'bg-blue-50 border-blue-200 text-blue-800' :
-                                        'bg-amber-50 border-amber-200 text-amber-800'}`}>
-                                <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0
-                                    ${contract.status === 'Signed' ? 'bg-emerald-200/50 text-emerald-700' :
-                                        contract.status === 'Sent' ? 'bg-blue-200/50 text-blue-700' :
-                                            'bg-amber-200/50 text-amber-700'}`}>
-                                    {contract.status === 'Signed' && <CheckCircle className="h-5 w-5" />}
-                                    {contract.status === 'Sent' && <Send className="h-5 w-5" />}
-                                    {contract.status === 'Draft' && <PenTool className="h-5 w-5" />}
+                        <CardContent className="pb-5">
+                            <div className={`p-4 rounded-xl flex items-center gap-4 w-full border ${statusStyle.bg}`}>
+                                <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${statusStyle.iconBg}`}>
+                                    <StatusIcon className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <p className="font-bold whitespace-nowrap">{contract.status}</p>
-                                    <p className="text-xs opacity-80">
-                                        {contract.status === 'Signed' ? 'Fully legally binding.' :
-                                            contract.status === 'Sent' ? 'Awaiting client action.' :
-                                                'Needs to be sent.'}
+                                    <p className="font-bold text-lg leading-tight">{contract.status}</p>
+                                    <p className="text-xs font-medium opacity-80 mt-0.5">
+                                        {statusStyle.desc}
                                     </p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Timeline */}
-                    <Card className="border-0 shadow-md ring-1 ring-slate-200/50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <Activity className="h-4 w-4 text-brand-primary" />
+                    {/* Timeline Card */}
+                    <Card className="border border-slate-100 shadow-sm bg-white overflow-hidden">
+                        <div className="h-1 w-full bg-gradient-to-r from-brand-primary to-blue-500" />
+                        <CardHeader className="pb-2 pt-5">
+                            <CardTitle className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                <Activity className="h-3.5 w-3.5 text-brand-primary" />
                                 Contract Activity
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-4">
-                            <div className="relative border-l border-slate-200 ml-3 space-y-6">
+                        <CardContent className="pt-5 pb-6">
+                            <div className="relative border-l-2 border-slate-100 ml-4 space-y-7">
                                 {timeline.map((step, index) => {
                                     const Icon = step.icon;
+                                    const isLastCompleted = step.completed && (index === timeline.length - 1 || !timeline[index + 1].completed);
+
                                     return (
                                         <div key={index} className="relative pl-6">
-                                            <div className={`absolute -left-[14px] top-1 h-7 w-7 rounded-full flex items-center justify-center ring-4 ring-white
-                                                ${step.completed ? 'bg-brand-primary text-white shadow-sm' : 'bg-slate-100 text-slate-300'}`}>
-                                                <Icon className="h-3.5 w-3.5" />
+                                            <div className={`absolute -left-[17px] top-0 h-8 w-8 rounded-full flex items-center justify-center ring-4 ring-white
+                                                ${step.completed ? 'bg-brand-primary text-white shadow-md' : 'bg-slate-100 text-slate-300'}
+                                                ${isLastCompleted ? 'ring-brand-primary/20 scale-110' : ''} transition-all`}>
+                                                <Icon className="h-4 w-4" />
                                             </div>
-                                            <div>
+                                            <div className={`${isLastCompleted ? '-mt-0.5' : 'mt-1'}`}>
                                                 <p className={`text-sm font-semibold ${step.completed ? 'text-slate-900' : 'text-slate-400'}`}>
                                                     {step.label}
                                                 </p>
                                                 {step.completed && step.date && (
-                                                    <p className="text-xs text-slate-500 mt-1">
-                                                        {format(new Date(step.date), 'MMM d, yyyy h:mm a')}
+                                                    <p className="text-xs text-slate-500 mt-1 font-medium">
+                                                        {format(new Date(step.date), 'MMM d, yyyy • h:mm a')}
                                                     </p>
                                                 )}
                                                 {!step.completed && (
-                                                    <p className="text-xs text-slate-400 mt-1 italic">Pending</p>
+                                                    <p className="text-xs text-amber-500 mt-1 font-medium">Pending action</p>
                                                 )}
                                             </div>
                                         </div>
@@ -192,37 +218,38 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
                         </CardContent>
                     </Card>
 
-                    {/* Meta Info */}
+                    {/* Associations Card */}
                     {(contract.client || contract.project) && (
-                        <Card className="border-0 shadow-md ring-1 ring-slate-200/50">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base flex items-center gap-2">
-                                    <Briefcase className="h-4 w-4 text-brand-primary" />
+                        <Card className="border border-slate-100 shadow-sm bg-white overflow-hidden">
+                            <div className="h-1 w-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+                            <CardHeader className="pb-2 pt-5">
+                                <CardTitle className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <Briefcase className="h-3.5 w-3.5 text-violet-500" />
                                     Associations
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4 pt-2">
+                            <CardContent className="space-y-4 pt-4 pb-5">
                                 {contract.client && (
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center border border-violet-100">
+                                    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
+                                        <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center border border-violet-100 shrink-0 group-hover:bg-violet-100 transition-colors">
                                             <User className="h-5 w-5 text-violet-600" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Client</p>
-                                            <Link href={`/clients/${contract.client_id}`} className="text-sm font-medium text-slate-900 hover:text-brand-primary transition-colors">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Client</p>
+                                            <Link href={`/clients/${contract.client_id}`} className="text-sm font-semibold text-slate-900 hover:text-violet-600 transition-colors">
                                                 {contract.client.name}
                                             </Link>
                                         </div>
                                     </div>
                                 )}
                                 {contract.project && (
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100">
+                                    <div className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
+                                        <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-100 shrink-0 group-hover:bg-blue-100 transition-colors">
                                             <FileText className="h-5 w-5 text-blue-600" />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Project</p>
-                                            <Link href={`/projects/${contract.project_id}`} className="text-sm font-medium text-slate-900 hover:text-brand-primary transition-colors">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Project</p>
+                                            <Link href={`/projects/${contract.project_id}`} className="text-sm font-semibold text-slate-900 hover:text-blue-600 transition-colors">
                                                 {contract.project.title}
                                             </Link>
                                         </div>
@@ -232,26 +259,32 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
                         </Card>
                     )}
 
-                    {/* Signature Meta Info for Extra Security Transparency */}
+                    {/* Security Meta Info */}
                     {contract.status === 'Signed' && contract.signer_ip && (
-                        <Card className="border border-emerald-100 bg-emerald-50/30 shadow-none">
-                            <CardContent className="p-4 space-y-2">
-                                <div className="flex items-center gap-2 mb-3">
+                        <Card className="border border-emerald-100 bg-emerald-50/50 shadow-none relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5">
+                                <Shield className="h-24 w-24" />
+                            </div>
+                            <CardContent className="p-5 space-y-4 relative z-10">
+                                <div className="flex items-center gap-2 mb-2">
                                     <Shield className="h-4 w-4 text-emerald-600" />
-                                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Security Meta</span>
+                                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Security Metadata</span>
                                 </div>
-                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="grid grid-cols-2 gap-4 text-xs bg-white/60 p-3 rounded-xl border border-emerald-100/50 backdrop-blur-sm">
                                     <div className="space-y-1">
-                                        <p className="text-emerald-700/70 font-semibold flex items-center gap-1"><User className="h-3 w-3" /> Signer Email</p>
-                                        <p className="text-emerald-900 truncate" title={contract.signer_email!}>{contract.signer_email}</p>
+                                        <p className="text-emerald-700/60 font-bold flex items-center gap-1.5"><User className="h-3 w-3" /> Signer Email</p>
+                                        <p className="text-emerald-950 font-medium truncate" title={contract.signer_email!}>{contract.signer_email}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-emerald-700/70 font-semibold flex items-center gap-1"><Globe className="h-3 w-3" /> Timestamp</p>
-                                        <p className="text-emerald-900">{format(new Date(contract.signed_at!), 'MMM d, yyyy')}</p>
+                                        <p className="text-emerald-700/60 font-bold flex items-center gap-1.5"><Globe className="h-3 w-3" /> Timestamp</p>
+                                        <p className="text-emerald-950 font-medium whitespace-nowrap">{format(new Date(contract.signed_at!), 'MMM d, yyyy')}</p>
                                     </div>
-                                    <div className="space-y-1 col-span-2 pt-2 border-t border-emerald-100">
-                                        <p className="text-emerald-700/70 font-semibold flex items-center gap-1"><Monitor className="h-3 w-3" /> IP Address</p>
-                                        <p className="text-emerald-900 font-mono">{contract.signer_ip}</p>
+                                    <div className="space-y-1 col-span-2 pt-3 border-t border-emerald-100/50">
+                                        <p className="text-emerald-700/60 font-bold flex items-center gap-1.5"><Monitor className="h-3 w-3" /> IP Address Tracker</p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-emerald-950 font-mono font-medium">{contract.signer_ip}</p>
+                                            <span className="px-2 py-0.5 bg-emerald-100 rounded text-[9px] font-bold text-emerald-700 uppercase tracking-widest">Verified</span>
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>

@@ -12,7 +12,14 @@ import {
     Calendar as CalendarIcon,
     DollarSign,
     ShieldCheck,
-    Briefcase
+    Briefcase,
+    Sparkles,
+    CheckCircle2,
+    Layers,
+    Info,
+    ChevronRight,
+    Search,
+    Clock
 } from "lucide-react"
 import { format } from "date-fns"
 
@@ -20,10 +27,6 @@ import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -51,10 +54,10 @@ interface SmartContractWizardProps {
 }
 
 const STEPS = [
-    { id: 1, title: "Context", description: "Select client and template" },
-    { id: 2, title: "Terms", description: "Financial and legal details" },
-    { id: 3, title: "Scope", description: "Define deliverables" },
-    { id: 4, title: "Review", description: "Generate and finalize" },
+    { id: 1, title: "Context", description: "Identity & Base" },
+    { id: 2, title: "Terms", description: "Values & Dates" },
+    { id: 3, title: "Scope", description: "Deliverables" },
+    { id: 4, title: "Review", description: "Final Draft" },
 ]
 
 export function SmartContractWizard({ clients, projects, templates = [], freelancerName }: SmartContractWizardProps) {
@@ -99,7 +102,6 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
             setProjectId("")
             setTemplateId("")
             setContent("")
-            // Reset to defaults
             setStructuredData({
                 currency: "USD",
                 total_amount: 0,
@@ -122,12 +124,9 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
     const handleTemplateSelect = (t: ContractTemplate) => {
         setTemplateId(t.id)
         if (t.contract_data) {
-            // Merge template defaults into structured data
             setStructuredData(prev => ({
                 ...prev,
                 ...t.contract_data,
-                // Preserve deliverables if user already started typing? 
-                // For now, let's keep it simple and overwrite but preserve what's not in template
                 deliverables: (t.contract_data as any).deliverables?.length ? (t.contract_data as any).deliverables : prev.deliverables
             }))
         }
@@ -195,68 +194,105 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold">
-                    <Plus className="mr-2 h-4 w-4" /> Smart Contract Assistant
+                <Button className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold h-11 px-6 shadow-lg shadow-brand-primary/20 gap-2 shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    <Sparkles className="h-4 w-4" />
+                    Smart Contract Assistant
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[750px] p-0 overflow-hidden border-none shadow-2xl">
-                <div className="flex flex-col h-[650px]">
-                    {/* Header with Steps */}
-                    <div className="bg-slate-900 text-white p-6 pb-4">
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h2 className="text-xl font-bold flex items-center gap-2">
-                                    <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                                    Smart Contract Assistant
-                                </h2>
-                                <p className="text-slate-400 text-sm">Building a secure and clear agreement</p>
+            <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden border-none shadow-2xl gap-0">
+                <div className="flex flex-col h-[720px] bg-white">
+                    {/* ── Dark Header ── */}
+                    <div className="bg-slate-900 text-white px-8 pt-8 pb-6 shrink-0 relative overflow-hidden">
+                        {/* Decorative glow */}
+                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-primary/20 rounded-full blur-[80px]" />
+                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/10 rounded-full blur-[60px]" />
+
+                        <div className="relative z-10 flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-2xl bg-brand-primary/20 flex items-center justify-center ring-1 ring-white/10">
+                                    <ShieldCheck className="h-7 w-7 text-brand-primary" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold tracking-tight">Smart Contract Assistant</h2>
+                                    <p className="text-slate-400 text-sm mt-0.5">Generate professional, secure agreements in minutes.</p>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">Step {currentStep} of 4</span>
+                            <div className="text-right hidden sm:block">
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Step {currentStep} of 4</span>
+                                <div className="text-sm font-semibold text-brand-primary mt-1">{STEPS[currentStep - 1].title}</div>
                             </div>
                         </div>
 
-                        <div className="flex gap-2 relative">
-                            {STEPS.map((step) => (
-                                <div key={step.id} className="flex-1 flex flex-col gap-2 relative z-10">
-                                    <div className={`h-1 rounded-full transition-all duration-500 ${currentStep >= step.id ? 'bg-brand-primary' : 'bg-slate-700'}`} />
-                                    <span className={`text-[10px] font-bold uppercase tracking-tight text-center ${currentStep >= step.id ? 'text-brand-primary' : 'text-slate-500'}`}>
-                                        {step.title}
-                                    </span>
-                                </div>
-                            ))}
+                        {/* Progress Steps */}
+                        <div className="relative z-10 flex gap-3">
+                            {STEPS.map((step) => {
+                                const isActive = currentStep === step.id;
+                                const isCompleted = currentStep > step.id;
+                                return (
+                                    <div key={step.id} className="flex-1 group">
+                                        <div className="relative">
+                                            <div className={`h-1.5 rounded-full transition-all duration-700 ${isCompleted ? 'bg-brand-primary' : isActive ? 'bg-brand-primary/40' : 'bg-slate-800'}`} />
+                                            {isActive && (
+                                                <motion.div
+                                                    layoutId="step-glow"
+                                                    className="absolute inset-0 bg-brand-primary rounded-full blur-md opacity-40"
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="mt-3 flex items-center gap-2">
+                                            <div className={`h-4 w-4 rounded-full text-[10px] flex items-center justify-center font-bold transition-colors ${isCompleted ? 'bg-brand-primary text-white' : isActive ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30' : 'bg-slate-800 text-slate-500'}`}>
+                                                {isCompleted ? <Check className="h-2.5 w-2.5" /> : step.id}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-brand-primary' : isCompleted ? 'text-slate-200' : 'text-slate-500'}`}>
+                                                    {step.title}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    {/* Step Content */}
-                    <div className="flex-1 overflow-y-auto p-8 relative">
+                    {/* ── Content Area ── */}
+                    <div className="flex-1 overflow-y-auto bg-slate-50/30">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentStep}
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
-                                transition={{ duration: 0.2 }}
-                                className="h-full"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                className="h-full px-8 py-8"
                             >
                                 {currentStep === 1 && (
-                                    <div className="space-y-6">
-                                        <div className="grid gap-2">
-                                            <Label htmlFor="title" className="text-sm font-semibold">Contract Title</Label>
-                                            <Input
-                                                id="title"
-                                                placeholder="e.g. Website Redesign Agreement"
-                                                value={title}
-                                                onChange={(e) => setTitle(e.target.value)}
-                                                className="h-12 border-slate-200 focus:ring-brand-primary"
-                                            />
-                                        </div>
+                                    <div className="space-y-8 max-w-2xl mx-auto">
+                                        <section className="space-y-4">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="h-6 w-1 bg-brand-primary rounded-full" />
+                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Contract Basics</h3>
+                                            </div>
+                                            <div className="grid gap-3">
+                                                <Label htmlFor="smart-title" className="text-xs font-bold text-slate-600 uppercase">Contract Title</Label>
+                                                <div className="relative group">
+                                                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
+                                                    <Input
+                                                        id="smart-title"
+                                                        placeholder="e.g. Website Design & Development Agreement"
+                                                        value={title}
+                                                        onChange={(e) => setTitle(e.target.value)}
+                                                        className="h-13 pl-12 bg-white border-slate-200 focus-visible:ring-brand-primary/20 focus-visible:border-brand-primary rounded-xl font-medium"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </section>
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="grid gap-2">
-                                                <Label className="text-sm font-semibold">Client</Label>
+                                        <section className="grid sm:grid-cols-2 gap-6">
+                                            <div className="space-y-3">
+                                                <Label className="text-xs font-bold text-slate-600 uppercase">Choose Client</Label>
                                                 <Select value={clientId} onValueChange={setClientId}>
-                                                    <SelectTrigger className="h-12 border-slate-200">
+                                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
                                                         <SelectValue placeholder="Select client..." />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -266,11 +302,11 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <div className="grid gap-2">
-                                                <Label className="text-sm font-semibold">Project (Optional)</Label>
+                                            <div className="space-y-3">
+                                                <Label className="text-xs font-bold text-slate-600 uppercase">Related Project</Label>
                                                 <Select value={projectId} onValueChange={setProjectId} disabled={!clientId}>
-                                                    <SelectTrigger className="h-12 border-slate-200">
-                                                        <SelectValue placeholder="Select project..." />
+                                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                                        <SelectValue placeholder="Select project (Optional)" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         {filteredProjects.map(p => (
@@ -279,233 +315,327 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                        </div>
+                                        </section>
 
-                                        <div className="grid gap-2">
-                                            <Label className="text-sm font-semibold flex items-center gap-2">
-                                                <FileText className="h-4 w-4 text-brand-primary" />
-                                                Template Base
-                                            </Label>
-                                            <div className="grid grid-cols-2 gap-3">
+                                        <section className="space-y-4 pt-2">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="h-6 w-1 bg-violet-500 rounded-full" />
+                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Select Template Base</h3>
+                                                </div>
+                                                <Badge variant="secondary" className="bg-violet-50 text-violet-600 border-violet-100 text-[10px]">
+                                                    {templates.length} AVAILABLE
+                                                </Badge>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {templates.map(t => (
                                                     <div
                                                         key={t.id}
                                                         onClick={() => handleTemplateSelect(t)}
-                                                        className={`p-4 border rounded-xl cursor-pointer transition-all hover:bg-slate-50 flex items-center gap-3 ${templateId === t.id ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary' : 'border-slate-200'}`}
+                                                        className={`group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden ${templateId === t.id ? 'bg-brand-primary/5 border-brand-primary ring-1 ring-brand-primary/20' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md'}`}
                                                     >
-                                                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${templateId === t.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
-                                                            <FileText className="h-4 w-4" />
-                                                        </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-medium">{t.name}</span>
-                                                            {t.contract_data && (
-                                                                <span className="text-[10px] text-brand-primary/60 font-semibold uppercase tracking-tighter">Smart Defaults Active</span>
+                                                        <div className="flex items-center gap-4 relative z-10">
+                                                            <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${templateId === t.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-violet-50 group-hover:text-violet-500'}`}>
+                                                                <Layers className="h-5 w-5" />
+                                                            </div>
+                                                            <div className="flex flex-col min-w-0 pr-4">
+                                                                <span className={`text-sm font-bold truncate ${templateId === t.id ? 'text-slate-900' : 'text-slate-600'}`}>{t.name}</span>
+                                                                <span className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Reusable legally-vetted draft</span>
+                                                            </div>
+                                                            {templateId === t.id && (
+                                                                <div className="absolute right-0 top-1/2 -translate-y-1/2">
+                                                                    <div className="h-5 w-5 rounded-full bg-brand-primary flex items-center justify-center">
+                                                                        <Check className="h-3 w-3 text-white" />
+                                                                    </div>
+                                                                </div>
                                                             )}
                                                         </div>
+                                                        {t.contract_data && (
+                                                            <div className="mt-3 flex items-center gap-1.5 opacity-60">
+                                                                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                                                <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Smart Defaults Injected</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>
-                                        </div>
+                                        </section>
                                     </div>
                                 )}
 
                                 {currentStep === 2 && (
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="grid gap-2">
-                                                <Label className="text-sm font-semibold">Budget & Currency</Label>
-                                                <div className="flex gap-2">
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="Amount"
-                                                        value={structuredData.total_amount || ""}
-                                                        onChange={(e) => updateStructuredData({ total_amount: Number(e.target.value) })}
-                                                        className="h-12"
-                                                    />
-                                                    <Select value={structuredData.currency} onValueChange={(v: string) => updateStructuredData({ currency: v })}>
-                                                        <SelectTrigger className="w-24 h-12">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="USD">USD</SelectItem>
-                                                            <SelectItem value="EUR">EUR</SelectItem>
-                                                            <SelectItem value="GBP">GBP</SelectItem>
-                                                            <SelectItem value="SAR">SAR</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
+                                    <div className="space-y-8 max-w-2xl mx-auto">
+                                        <div className="grid gap-8">
+                                            {/* Financials Row */}
+                                            <section className="bg-slate-900 text-white rounded-[24px] p-6 shadow-xl relative overflow-hidden">
+                                                <div className="absolute top-0 right-0 p-4 opacity-5">
+                                                    <DollarSign className="h-32 w-32" />
                                                 </div>
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <Label className="text-sm font-semibold">Payment Type</Label>
-                                                <Select value={structuredData.payment_type} onValueChange={(v: "Fixed" | "Hourly") => updateStructuredData({ payment_type: v })}>
-                                                    <SelectTrigger className="h-12">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Fixed">Fixed Price</SelectItem>
-                                                        <SelectItem value="Hourly">Hourly Rate</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="grid gap-2">
-                                                <Label className="text-sm font-semibold">Start Date</Label>
-                                                <Input
-                                                    type="date"
-                                                    value={structuredData.start_date}
-                                                    onChange={(e) => updateStructuredData({ start_date: e.target.value })}
-                                                    className="h-12"
-                                                />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <Label className="text-sm font-semibold">End Date</Label>
+                                                <div className="relative z-10 space-y-6">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] uppercase font-bold text-slate-400">Open-ended</span>
-                                                        <Switch
-                                                            checked={structuredData.is_open_ended}
-                                                            onCheckedChange={(v: boolean) => updateStructuredData({ is_open_ended: v, end_date: v ? null : structuredData.end_date })}
-                                                        />
+                                                        <DollarSign className="h-5 w-5 text-emerald-400" />
+                                                        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Financial Terms</h4>
+                                                    </div>
+                                                    <div className="grid sm:grid-cols-2 gap-6">
+                                                        <div className="space-y-3">
+                                                            <Label className="text-xs font-bold text-slate-400 uppercase">Total Contract Value</Label>
+                                                            <div className="flex gap-0 group">
+                                                                <div className="h-12 w-12 rounded-l-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shrink-0">
+                                                                    <DollarSign className="h-5 w-5" />
+                                                                </div>
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="0.00"
+                                                                    value={structuredData.total_amount || ""}
+                                                                    onChange={(e) => updateStructuredData({ total_amount: Number(e.target.value) })}
+                                                                    className="h-12 bg-white border-brand-primary text-slate-900 rounded-none rounded-r-xl border-l-0 text-lg font-bold px-4"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-3">
+                                                            <Label className="text-xs font-bold text-slate-400 uppercase">Currency & Type</Label>
+                                                            <div className="grid grid-cols-2 gap-2">
+                                                                <Select value={structuredData.currency} onValueChange={(v: string) => updateStructuredData({ currency: v })}>
+                                                                    <SelectTrigger className="h-12 bg-slate-800 border-slate-700 rounded-xl text-white">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="USD">USD ($)</SelectItem>
+                                                                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                                                                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                                                                        <SelectItem value="SAR">SAR (﷼)</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <Select value={structuredData.payment_type} onValueChange={(v: "Fixed" | "Hourly") => updateStructuredData({ payment_type: v })}>
+                                                                    <SelectTrigger className="h-12 bg-slate-800 border-slate-700 rounded-xl text-white">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="Fixed">Fixed</SelectItem>
+                                                                        <SelectItem value="Hourly">Hourly</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <Input
-                                                    type="date"
-                                                    disabled={structuredData.is_open_ended}
-                                                    value={structuredData.end_date || ""}
-                                                    onChange={(e) => updateStructuredData({ end_date: e.target.value })}
-                                                    className="h-12"
-                                                />
-                                            </div>
-                                        </div>
+                                            </section>
 
-                                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
-                                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Legal & Clauses</h4>
-                                            <div className="flex items-center justify-between">
-                                                <div className="space-y-0.5">
-                                                    <Label className="text-sm font-semibold">Confidentiality (NDA)</Label>
-                                                    <p className="text-xs text-muted-foreground">Protect your trade secrets and client data</p>
+                                            {/* Timing Details */}
+                                            <section className="space-y-5">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className="h-6 w-1 bg-amber-500 rounded-full" />
+                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Timeline & Duration</h3>
                                                 </div>
-                                                <Switch
-                                                    checked={structuredData.nda_included}
-                                                    onCheckedChange={(v: boolean) => updateStructuredData({ nda_included: v })}
-                                                />
-                                            </div>
-                                            <div className="pt-2 flex items-center justify-between">
-                                                <div className="space-y-0.5">
-                                                    <Label className="text-sm font-semibold">IP Ownership</Label>
-                                                    <p className="text-xs text-muted-foreground">Who owns the final results?</p>
+                                                <div className="grid sm:grid-cols-2 gap-6">
+                                                    <div className="space-y-3">
+                                                        <Label className="text-xs font-bold text-slate-600 uppercase">Commencement Date</Label>
+                                                        <div className="relative">
+                                                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                                            <Input
+                                                                type="date"
+                                                                value={structuredData.start_date}
+                                                                onChange={(e) => updateStructuredData({ start_date: e.target.value })}
+                                                                className="h-12 pl-12 bg-white border-slate-200 rounded-xl font-medium"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between">
+                                                            <Label className="text-xs font-bold text-slate-600 uppercase">Estimated End Date</Label>
+                                                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+                                                                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Open ended</span>
+                                                                <Switch
+                                                                    className="scale-75 origin-right"
+                                                                    checked={structuredData.is_open_ended}
+                                                                    onCheckedChange={(v: boolean) => updateStructuredData({ is_open_ended: v, end_date: v ? null : structuredData.end_date })}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="relative">
+                                                            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                                            <Input
+                                                                type="date"
+                                                                disabled={structuredData.is_open_ended}
+                                                                value={structuredData.end_date || ""}
+                                                                onChange={(e) => updateStructuredData({ end_date: e.target.value })}
+                                                                className="h-12 pl-12 bg-white border-slate-200 rounded-xl font-medium disabled:bg-slate-50"
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <Select value={structuredData.ip_ownership} onValueChange={(v: "Full" | "License" | "After Payment") => updateStructuredData({ ip_ownership: v })}>
-                                                    <SelectTrigger className="w-40 h-10">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Full">Freelancer Full Transfer</SelectItem>
-                                                        <SelectItem value="After Payment">Transfer After Final Payment</SelectItem>
-                                                        <SelectItem value="License">Limited Usage License</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
+                                            </section>
+
+                                            {/* Legal Checks Card */}
+                                            <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 space-y-5">
+                                                <div className="flex items-center gap-2">
+                                                    <ShieldCheck className="h-5 w-5 text-indigo-500" />
+                                                    <h4 className="text-sm font-bold text-slate-800">Legal Provisions</h4>
+                                                </div>
+
+                                                <div className="divide-y divide-slate-50 border-t border-slate-50">
+                                                    <div className="py-4 flex items-center justify-between group">
+                                                        <div>
+                                                            <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">Confidentiality (NDA)</p>
+                                                            <p className="text-xs text-slate-400 mt-0.5">Protect proprietary information & trade secrets</p>
+                                                        </div>
+                                                        <Switch
+                                                            checked={structuredData.nda_included}
+                                                            onCheckedChange={(v: boolean) => updateStructuredData({ nda_included: v })}
+                                                        />
+                                                    </div>
+                                                    <div className="py-4 flex items-center justify-between group">
+                                                        <div>
+                                                            <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">IP Ownership Transfer</p>
+                                                            <p className="text-xs text-slate-400 mt-0.5">Who holds copyright upon total fulfillment?</p>
+                                                        </div>
+                                                        <Select value={structuredData.ip_ownership} onValueChange={(v: "Full" | "License" | "After Payment") => updateStructuredData({ ip_ownership: v })}>
+                                                            <SelectTrigger className="w-48 h-10 bg-slate-50/50 border-slate-200">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="Full">Service Provider Full</SelectItem>
+                                                                <SelectItem value="After Payment">Post Final Payment</SelectItem>
+                                                                <SelectItem value="License">Usage License Only</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                            </section>
                                         </div>
                                     </div>
                                 )}
 
                                 {currentStep === 3 && (
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h3 className="font-bold">Project Deliverables</h3>
-                                                <p className="text-sm text-muted-foreground">List everything you will deliver to the client</p>
+                                    <div className="space-y-8 max-w-2xl mx-auto">
+                                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="h-6 w-1 bg-violet-600 rounded-full" />
+                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Project Deliverables</h3>
+                                                </div>
+                                                <p className="text-sm text-slate-500">Specify exactly what the client will receive.</p>
                                             </div>
-                                            <Button variant="outline" size="sm" onClick={addDeliverable}>
-                                                <Plus className="h-4 w-4 mr-1 text-brand-primary" /> Add Item
+                                            <Button
+                                                onClick={addDeliverable}
+                                                className="bg-violet-50 hover:bg-violet-100 text-violet-700 font-bold h-9 px-4 rounded-lg border border-violet-200 gap-2 shrink-0 transition-all hover:scale-[1.03]"
+                                            >
+                                                <Plus className="h-4 w-4" /> Add Item
                                             </Button>
                                         </div>
 
-                                        <div className="space-y-3">
+                                        <div className="space-y-3 bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm min-h-[300px]">
                                             {structuredData.deliverables?.map((deliverable, index) => (
-                                                <div key={index} className="flex gap-2">
-                                                    <div className="h-10 w-10 shrink-0 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-slate-400 text-xs">
+                                                <motion.div
+                                                    key={index}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    className="flex gap-3 group"
+                                                >
+                                                    <div className={`h-12 w-12 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${deliverable ? 'bg-violet-50 text-violet-600 border border-violet-100' : 'bg-slate-50 text-slate-400'}`}>
                                                         {index + 1}
                                                     </div>
                                                     <Input
-                                                        placeholder="e.g. Homepage UI Mockup (Figma)"
+                                                        placeholder="e.g. Interactive Prototype in Figma / High-fidelity mockup"
                                                         value={deliverable}
                                                         onChange={(e) => updateDeliverable(index, e.target.value)}
-                                                        className="h-10 border-slate-200"
+                                                        className="h-12 flex-1 rounded-xl bg-slate-50 focus:bg-white border-transparent focus:border-violet-200 focus-visible:ring-violet-100/30 transition-all font-medium"
                                                     />
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-10 w-10 text-slate-400 hover:text-red-500"
+                                                        className="h-12 w-12 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         onClick={() => removeDeliverable(index)}
                                                         disabled={structuredData.deliverables!.length === 1}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
-                                                </div>
+                                                </motion.div>
                                             ))}
+                                            {structuredData.deliverables?.length === 0 && (
+                                                <div className="h-40 flex flex-col items-center justify-center text-slate-400 gap-2">
+                                                    <Layers className="h-8 w-8 opacity-20" />
+                                                    <p className="text-sm italic">No deliverables added yet.</p>
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <div className="pt-4 border-t border-dashed">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="grid gap-2">
-                                                    <Label className="text-sm font-semibold">Included Revisions</Label>
-                                                    <Input
-                                                        type="number"
-                                                        value={structuredData.revisions_included}
-                                                        onChange={(e) => updateStructuredData({ revisions_included: Number(e.target.value) })}
-                                                        className="h-10"
-                                                    />
+                                        <section className="grid sm:grid-cols-2 gap-6 pt-2">
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Free Revision Rounds</Label>
+                                                    <Info className="h-3.5 w-3.5 text-slate-300" />
                                                 </div>
-                                                <div className="grid gap-2">
-                                                    <Label className="text-sm font-semibold">Termination Notice (Days)</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={structuredData.revisions_included}
+                                                    onChange={(e) => updateStructuredData({ revisions_included: Number(e.target.value) })}
+                                                    className="h-11 rounded-xl border-slate-200 font-bold text-lg text-slate-800"
+                                                />
+                                            </div>
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Termination Notice (Days)</Label>
+                                                    <ShieldCheck className="h-3.5 w-3.5 text-slate-300" />
+                                                </div>
+                                                <div className="flex gap-2">
                                                     <Input
                                                         type="number"
                                                         value={structuredData.termination_notice_days}
                                                         onChange={(e) => updateStructuredData({ termination_notice_days: Number(e.target.value) })}
-                                                        className="h-10"
+                                                        className="h-11 rounded-xl border-slate-200 font-bold text-lg text-slate-800"
                                                     />
+                                                    <div className="h-11 px-4 flex items-center bg-slate-50 rounded-xl text-[10px] font-bold text-slate-400 tracking-widest uppercase">Days</div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </section>
                                     </div>
                                 )}
 
                                 {currentStep === 4 && (
-                                    <div className="flex flex-col h-full space-y-4">
-                                        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-start gap-3 shrink-0">
-                                            <Check className="h-5 w-5 text-emerald-600 mt-0.5" />
-                                            <div>
-                                                <h4 className="text-sm font-bold text-emerald-900">Contract Generated!</h4>
-                                                <p className="text-xs text-emerald-700">The structured data has been securely injected. Review the drafted document below.</p>
+                                    <div className="flex flex-col h-full space-y-5 max-w-3xl mx-auto">
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="bg-emerald-50/80 backdrop-blur-sm border border-emerald-100 p-5 rounded-2xl flex items-center gap-4 shrink-0 shadow-sm shadow-emerald-500/5"
+                                        >
+                                            <div className="h-12 w-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                                <CheckCircle2 className="h-7 w-7" />
                                             </div>
-                                        </div>
-
-                                        <div className="flex-1 flex flex-col min-h-0 bg-slate-100/80 rounded-xl overflow-hidden border border-slate-200 relative">
-                                            {/* Toolbar */}
-                                            <div className="h-10 border-b border-slate-200 bg-white/50 flex items-center px-4 justify-between shrink-0">
-                                                <div className="flex items-center gap-2">
-                                                    <FileText className="h-4 w-4 text-brand-primary" />
-                                                    <span className="text-xs font-semibold text-slate-700">Document Review</span>
-                                                </div>
-                                                <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-white">Editable</Badge>
+                                            <div className="flex-1">
+                                                <h4 className="text-sm font-bold text-emerald-900">Contract Ready for Review</h4>
+                                                <p className="text-xs text-emerald-700/80 font-medium">Smart data has been successfully injected into your {templates.find(t => t.id === templateId)?.name}.</p>
                                             </div>
+                                            <Badge className="bg-emerald-100 text-emerald-700 border-none px-3 py-1 font-bold text-[10px]">VERIFIED</Badge>
+                                        </motion.div>
 
-                                            {/* Document Container */}
-                                            <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center">
-                                                <div className="w-full max-w-[650px] bg-white shadow-xl ring-1 ring-slate-900/5 min-h-[600px] p-8 md:p-12 relative">
-                                                    {/* Binder Top Edge */}
-                                                    <div className="absolute top-0 left-0 right-0 h-1 bg-brand-primary/20"></div>
+                                        <div className="flex-1 flex flex-col min-h-0 bg-slate-900 rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl relative">
+                                            {/* Scrollable Document */}
+                                            <div className="flex-1 overflow-y-auto p-4 md:p-12 scrollbar-none flex justify-center bg-slate-950/20">
+                                                <div className="w-full max-w-[650px] bg-white shadow-2xl min-h-[850px] p-10 md:p-20 relative rounded-sm">
+                                                    {/* Top Binder Edge */}
+                                                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-primary/40 to-indigo-500/40" />
+
+                                                    {/* Decorative Header */}
+                                                    <div className="border-b border-slate-100 pb-8 mb-10 flex flex-col gap-2">
+                                                        <div className="h-8 w-32 bg-slate-50 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 tracking-[0.3em] uppercase">Document</div>
+                                                        <h5 className="text-2xl font-serif text-slate-900 leading-tight">{title}</h5>
+                                                    </div>
 
                                                     <Textarea
                                                         value={content}
                                                         onChange={(e) => setContent(e.target.value)}
-                                                        className="w-full h-full min-h-[500px] text-sm font-serif leading-loose border-none focus-visible:ring-0 resize-none p-0 bg-transparent text-slate-800"
-                                                        placeholder="Contract content will appear here..."
+                                                        className="w-full h-full min-h-[600px] text-[15px] font-serif leading-loose border-none focus-visible:ring-0 resize-none p-0 bg-transparent text-slate-950 placeholder:italic"
+                                                        placeholder="Loading content..."
                                                     />
+                                                </div>
+                                            </div>
+
+                                            {/* Preview Overlay Label */}
+                                            <div className="absolute top-4 right-4 z-20">
+                                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/40 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white tracking-widest uppercase">
+                                                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                                    Live Preview
                                                 </div>
                                             </div>
                                         </div>
@@ -515,34 +645,51 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                         </AnimatePresence>
                     </div>
 
-                    {/* Footer */}
-                    <DialogFooter className="p-6 bg-slate-50 border-t items-center sm:justify-between flex-row">
-                        <div className="hidden sm:flex items-center gap-4">
+                    {/* ── Footer ── */}
+                    <div className="p-6 bg-slate-50/80 backdrop-blur-xl border-t border-slate-100 shrink-0 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                             {currentStep > 1 && (
-                                <Button variant="ghost" className="text-slate-500" onClick={() => setCurrentStep(currentStep - 1)}>
-                                    <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                                <Button
+                                    variant="ghost"
+                                    className="h-11 px-6 text-slate-500 hover:text-slate-900 font-bold rounded-xl gap-2 transition-all"
+                                    onClick={() => setCurrentStep(currentStep - 1)}
+                                >
+                                    <ArrowLeft className="h-4 w-4" /> Back
                                 </Button>
                             )}
+                            <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-2 block sm:hidden">STEP {currentStep}/4</div>
                         </div>
 
-                        <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex gap-3">
+                            <Button
+                                variant="ghost"
+                                className="h-11 px-6 text-slate-400 font-bold rounded-xl"
+                                onClick={() => setOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+
                             {currentStep < 4 ? (
                                 <Button
-                                    className="w-full sm:w-auto bg-brand-primary"
+                                    className="h-11 px-8 bg-brand-primary text-white font-bold rounded-xl shadow-lg shadow-brand-primary/20 gap-2 transition-all hover:scale-[1.03] active:scale-[0.97]"
                                     disabled={isNextDisabled()}
                                     onClick={() => currentStep === 3 ? handleGenerate() : setCurrentStep(currentStep + 1)}
                                 >
-                                    {currentStep === 3 ? "Generate Draft" : "Next Step"}
-                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                    {currentStep === 3 ? "Generate Final Draft" : "Next Milestone"}
+                                    <ChevronRight className="h-4 w-4" />
                                 </Button>
                             ) : (
-                                <Button className="w-full sm:w-auto bg-brand-primary" disabled={loading} onClick={handleSave}>
-                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Finalize & Save Draft
+                                <Button
+                                    className="h-11 px-10 bg-brand-primary text-white font-bold rounded-xl shadow-xl shadow-brand-primary/25 gap-2 transition-all hover:scale-[1.03] active:scale-[0.97]"
+                                    disabled={loading}
+                                    onClick={handleSave}
+                                >
+                                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                                    Finalize & Secure Agreement
                                 </Button>
                             )}
                         </div>
-                    </DialogFooter>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
