@@ -3,7 +3,7 @@ import { TemplateDialog } from "@/components/contracts/template-dialog";
 import { DeleteTemplateDialog } from "@/components/contracts/delete-template-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Pencil, ArrowLeft, Clock } from "lucide-react";
+import { FileText, Pencil, ArrowLeft, Clock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -59,11 +59,29 @@ export default async function TemplatesPage() {
                                     <DeleteTemplateDialog templateId={template.id} templateName={template.name} />
                                 </div>
                             </CardHeader>
-                            <CardContent className="space-y-2">
+                            <CardContent className="space-y-4">
                                 <p className="text-sm text-muted-foreground line-clamp-3">
                                     {template.content}
                                 </p>
-                                <div className="flex items-center text-xs text-muted-foreground pt-2">
+
+                                {template.contract_data && (
+                                    <div className="flex flex-wrap gap-2 py-2 border-y border-dashed border-slate-100">
+                                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-tight">
+                                            <ShieldCheck className="h-3 w-3" />
+                                            Smart Template
+                                        </div>
+                                        {(template.contract_data as any)?.total_amount > 0 && (
+                                            <div className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-medium">
+                                                {(template.contract_data as any).total_amount} {(template.contract_data as any).currency}
+                                            </div>
+                                        )}
+                                        <div className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-medium uppercase">
+                                            {(template.contract_data as any).payment_type}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center text-xs text-muted-foreground pt-1">
                                     <Clock className="mr-1 h-3 w-3" />
                                     Updated {format(new Date(template.updated_at), 'MMM d, yyyy')}
                                 </div>

@@ -97,8 +97,37 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
             setProjectId("")
             setTemplateId("")
             setContent("")
+            // Reset to defaults
+            setStructuredData({
+                currency: "USD",
+                total_amount: 0,
+                payment_type: "Fixed",
+                payment_schedule: "On Completion",
+                start_date: new Date().toISOString().split('T')[0],
+                is_open_ended: false,
+                revisions_included: 2,
+                termination_notice_days: 14,
+                deliverables: [""],
+                governing_law: "the local jurisdiction",
+                nda_included: true,
+                ip_ownership: "Full",
+            })
         }
     }, [open])
+
+    const handleTemplateSelect = (t: ContractTemplate) => {
+        setTemplateId(t.id)
+        if (t.contract_data) {
+            // Merge template defaults into structured data
+            setStructuredData(prev => ({
+                ...prev,
+                ...t.contract_data,
+                // Preserve deliverables if user already started typing? 
+                // For now, let's keep it simple and overwrite but preserve what's not in template
+                deliverables: (t.contract_data as any).deliverables?.length ? (t.contract_data as any).deliverables : prev.deliverables
+            }))
+        }
+    }
 
     const updateStructuredData = (updates: Partial<ContractStructuredData>) => {
         setStructuredData(prev => ({ ...prev, ...updates }))
@@ -257,13 +286,18 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                 {templates.map(t => (
                                                     <div
                                                         key={t.id}
-                                                        onClick={() => setTemplateId(t.id)}
+                                                        onClick={() => handleTemplateSelect(t)}
                                                         className={`p-4 border rounded-xl cursor-pointer transition-all hover:bg-slate-50 flex items-center gap-3 ${templateId === t.id ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary' : 'border-slate-200'}`}
                                                     >
                                                         <div className={`h-8 w-8 rounded-full flex items-center justify-center ${templateId === t.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
                                                             <FileText className="h-4 w-4" />
                                                         </div>
-                                                        <span className="text-sm font-medium">{t.name}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-medium">{t.name}</span>
+                                                            {t.contract_data && (
+                                                                <span className="text-[10px] text-brand-primary/60 font-semibold uppercase tracking-tighter">Smart Defaults Active</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -284,7 +318,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                         onChange={(e) => updateStructuredData({ total_amount: Number(e.target.value) })}
                                                         className="h-12"
                                                     />
-                                                    <Select value={structuredData.currency} onValueChange={(v) => updateStructuredData({ currency: v })}>
+                                                    <Select value={structuredData.currency} onValueChange={(v: string) => updateStructuredData({ currency: v })}>
                                                         <SelectTrigger className="w-24 h-12">
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -328,7 +362,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                         <span className="text-[10px] uppercase font-bold text-slate-400">Open-ended</span>
                                                         <Switch
                                                             checked={structuredData.is_open_ended}
-                                                            onCheckedChange={(v) => updateStructuredData({ is_open_ended: v, end_date: v ? null : structuredData.end_date })}
+                                                            onCheckedChange={(v: boolean) => updateStructuredData({ is_open_ended: v, end_date: v ? null : structuredData.end_date })}
                                                         />
                                                     </div>
                                                 </div>
@@ -351,7 +385,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                 </div>
                                                 <Switch
                                                     checked={structuredData.nda_included}
-                                                    onCheckedChange={(v) => updateStructuredData({ nda_included: v })}
+                                                    onCheckedChange={(v: boolean) => updateStructuredData({ nda_included: v })}
                                                 />
                                             </div>
                                             <div className="pt-2 flex items-center justify-between">

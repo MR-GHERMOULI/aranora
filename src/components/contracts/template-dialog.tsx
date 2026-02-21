@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Plus, Pencil, Loader2 } from "lucide-react"
+import { Plus, Pencil, Loader2, ShieldCheck, DollarSign, Calendar as CalendarIcon, FileText } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,7 +19,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createTemplate, updateTemplate } from "@/app/(dashboard)/contracts/actions"
-import { ContractTemplate } from "@/types"
+import { ContractTemplate, ContractStructuredData } from "@/types"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
 
 const templateSchema = z.object({
     name: z.string().min(2, "Template name is required"),
@@ -37,6 +46,23 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const isEdit = !!template;
+
+    // Smart Defaults State
+    const [structuredData, setStructuredData] = useState<ContractStructuredData>(template?.contract_data || {
+        currency: "USD",
+        total_amount: 0,
+        payment_type: "Fixed",
+        payment_schedule: "On Completion",
+        revisions_included: 2,
+        termination_notice_days: 14,
+        governing_law: "the local jurisdiction",
+        nda_included: true,
+        ip_ownership: "Full",
+    })
+
+    const updateStructuredData = (updates: Partial<ContractStructuredData>) => {
+        setStructuredData(prev => ({ ...prev, ...updates }))
+    }
 
     const {
         register,
@@ -58,6 +84,7 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
             if (template) formData.append("id", template.id)
             formData.append("name", data.name)
             formData.append("content", data.content)
+            formData.append("contractData", JSON.stringify(structuredData))
 
             if (isEdit) {
                 await updateTemplate(formData)
@@ -105,28 +132,116 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
                             )}
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="content">Contract Terms</Label>
-                            <textarea
-                                id="content"
-                                className="flex min-h-[280px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                placeholder="Enter the default contract terms for this template...
+                        <Tabs defaultValue="content" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="content">Legal Text</TabsTrigger>
+                                <TabsTrigger value="defaults">Smart Defaults</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="content" className="grid gap-4 py-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="content">Contract Terms</Label>
+                                    <textarea
+                                        id="content"
+                                        className="flex min-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        placeholder="Enter the default contract terms for this template..."
+                                        {...register("content")}
+                                    />
+                                    {errors.content && (
+                                        <p className="text-sm text-red-500">{errors.content.message}</p>
+                                    )}
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold text-center tracking-widest mt-1">
+                                        Use {"{{total_amount}}"}, {"{{deliverables}}"}, {"{{start_date}}"} as placeholders
+                                    </p>
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="defaults" className="grid gap-4 py-4">
+                                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-6">
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-2">
+                                        <ShieldCheck className="h-4 w-4" />
+                                        Default Smart Terms
+                                    </h3>
 
-Example:
-1. Scope of Work
-The Service Provider agrees to deliver the following services...
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid gap-2">
+                                            <Label className="text-xs font-semibold">Default Budget</Label>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    type="number"
+                                                    value={structuredData.total_amount || ""}
+                                                    onChange={(e) => updateStructuredData({ total_amount: Number(e.target.value) })}
+                                                    className="bg-white"
+                                                />
+                                                <Select value={structuredData.currency} onValueChange={(v) => updateStructuredData({ currency: v })}>
+                                                    <SelectTrigger className="w-20 bg-white">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="USD">USD</SelectItem>
+                                                        <SelectItem value="EUR">EUR</SelectItem>
+                                                        <SelectItem value="GBP">GBP</SelectItem>
+                                                        <SelectItem value="SAR">SAR</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label className="text-xs font-semibold">Payment Type</Label>
+                                            <Select value={structuredData.payment_type} onValueChange={(v: any) => updateStructuredData({ payment_type: v })}>
+                                                <SelectTrigger className="bg-white">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Fixed">Fixed Price</SelectItem>
+                                                    <SelectItem value="Hourly">Hourly Rate</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
 
-2. Payment Terms
-The Client agrees to pay...
+                                    <div className="flex items-center justify-between border-t pt-4 border-dashed">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-semibold">NDA Included</Label>
+                                            <p className="text-[10px] text-muted-foreground">Default status for confidentiality</p>
+                                        </div>
+                                        <Switch
+                                            checked={structuredData.nda_included}
+                                            onCheckedChange={(v) => updateStructuredData({ nda_included: v })}
+                                        />
+                                    </div>
 
-3. Timeline
-Work will commence on [START_DATE] and be completed by [END_DATE]..."
-                                {...register("content")}
-                            />
-                            {errors.content && (
-                                <p className="text-sm text-red-500">{errors.content.message}</p>
-                            )}
-                        </div>
+                                    <div className="pt-2 flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-semibold">Revisions Included</Label>
+                                        </div>
+                                        <Input
+                                            type="number"
+                                            value={structuredData.revisions_included}
+                                            onChange={(e) => updateStructuredData({ revisions_included: Number(e.target.value) })}
+                                            className="w-20 h-9 bg-white"
+                                        />
+                                    </div>
+
+                                    <div className="pt-2 flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-semibold">IP Ownership</Label>
+                                        </div>
+                                        <Select value={structuredData.ip_ownership} onValueChange={(v: any) => updateStructuredData({ ip_ownership: v })}>
+                                            <SelectTrigger className="w-40 h-9 bg-white text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Full">Full Transfer</SelectItem>
+                                                <SelectItem value="After Payment">Transfer After Payment</SelectItem>
+                                                <SelectItem value="License">Limited License</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground text-center italic px-4">
+                                    These values will automatically populate the Smart Creator when this template is selected.
+                                </p>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
