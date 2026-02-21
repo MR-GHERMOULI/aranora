@@ -56,6 +56,22 @@ export interface Invoice {
     items?: any[]
 }
 
+export interface ContractStructuredData {
+    currency?: string
+    total_amount?: number
+    payment_type?: 'Fixed' | 'Hourly'
+    payment_schedule?: 'Upfront' | 'Milestones' | 'On Completion' | 'Custom'
+    start_date?: string
+    end_date?: string | null
+    is_open_ended?: boolean
+    revisions_included?: number
+    termination_notice_days?: number
+    deliverables?: string[]
+    governing_law?: string
+    nda_included?: boolean
+    ip_ownership?: 'Full' | 'License' | 'After Payment'
+}
+
 export interface Contract {
     id: string
     user_id: string
@@ -64,6 +80,7 @@ export interface Contract {
     title: string
     content: string
     status: string
+    contract_data?: ContractStructuredData | null
     signing_token?: string | null
     signer_name?: string | null
     signer_email?: string | null
@@ -82,9 +99,11 @@ export interface ContractTemplate {
     user_id: string
     name: string
     content: string
+    contract_data?: ContractStructuredData | null
     created_at: string
     updated_at: string
 }
+
 
 export interface Task {
     id: string

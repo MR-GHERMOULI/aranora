@@ -1,10 +1,10 @@
-'use server'
-
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { Contract, ContractTemplate } from "@/types";
+import { Contract, ContractTemplate, ContractStructuredData } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
+// ... (rest of imports)
+
 
 // ============================================
 // CONTRACT CRUD
@@ -87,6 +87,40 @@ export async function createContract(formData: FormData) {
     revalidatePath('/contracts');
 }
 
+export async function createSmartContract(data: {
+    clientId: string;
+    projectId?: string | null;
+    title: string;
+    content: string;
+    contractData: ContractStructuredData;
+}) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    const { error } = await supabase
+        .from('contracts')
+        .insert({
+            user_id: user.id,
+            client_id: data.clientId,
+            project_id: data.projectId,
+            title: data.title,
+            content: data.content,
+            contract_data: data.contractData,
+            status: 'Draft'
+        });
+
+    if (error) {
+        console.error('Error creating smart contract:', error);
+        throw new Error('Failed to create contract');
+    }
+
+    revalidatePath('/contracts');
+}
+
 export async function updateContract(formData: FormData) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -100,6 +134,8 @@ export async function updateContract(formData: FormData) {
     const projectId = formData.get('projectId') as string || null;
     const title = formData.get('title') as string;
     const content = formData.get('content') as string;
+    const contractDataRaw = formData.get('contractData') as string;
+    const contractData = contractDataRaw ? JSON.parse(contractDataRaw) : null;
 
     const { error } = await supabase
         .from('contracts')
@@ -107,7 +143,8 @@ export async function updateContract(formData: FormData) {
             client_id: clientId,
             project_id: projectId,
             title,
-            content
+            content,
+            contract_data: contractData
         })
         .eq('id', id)
         .eq('user_id', user.id);
@@ -120,6 +157,7 @@ export async function updateContract(formData: FormData) {
     revalidatePath('/contracts');
     revalidatePath(`/contracts/${id}`);
 }
+
 
 export async function deleteContract(id: string) {
     const supabase = await createClient();
@@ -271,13 +309,16 @@ export async function createTemplate(formData: FormData) {
 
     const name = formData.get('name') as string;
     const content = formData.get('content') as string;
+    const contractDataRaw = formData.get('contractData') as string;
+    const contractData = contractDataRaw ? JSON.parse(contractDataRaw) : null;
 
     const { error } = await supabase
         .from('contract_templates')
         .insert({
             user_id: user.id,
             name,
-            content
+            content,
+            contract_data: contractData
         });
 
     if (error) {
@@ -299,12 +340,15 @@ export async function updateTemplate(formData: FormData) {
     const id = formData.get('id') as string;
     const name = formData.get('name') as string;
     const content = formData.get('content') as string;
+    const contractDataRaw = formData.get('contractData') as string;
+    const contractData = contractDataRaw ? JSON.parse(contractDataRaw) : null;
 
     const { error } = await supabase
         .from('contract_templates')
         .update({
             name,
             content,
+            contract_data: contractData,
             updated_at: new Date().toISOString()
         })
         .eq('id', id)

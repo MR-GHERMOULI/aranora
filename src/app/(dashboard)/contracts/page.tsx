@@ -1,7 +1,8 @@
 import { getContracts, getTemplates } from "./actions";
 import { getClients } from "../clients/actions";
 import { getProjects } from "../projects/actions";
-import { AddContractDialog } from "@/components/contracts/add-contract-dialog";
+import { getProfile } from "../settings/actions";
+import { SmartContractWizard } from "@/components/contracts/smart-contract-wizard";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, User, CheckCircle, Send, Clock, LayoutTemplate } from "lucide-react";
@@ -9,11 +10,12 @@ import Link from "next/link";
 import { format } from "date-fns";
 
 export default async function ContractsPage() {
-    const [contracts, clients, projects, templates] = await Promise.all([
+    const [contracts, clients, projects, templates, profile] = await Promise.all([
         getContracts(),
         getClients(),
         getProjects(),
-        getTemplates()
+        getTemplates(),
+        getProfile()
     ]);
 
     return (
@@ -32,7 +34,12 @@ export default async function ContractsPage() {
                             Templates
                         </Link>
                     </Button>
-                    <AddContractDialog clients={clients} projects={projects} templates={templates} />
+                    <SmartContractWizard
+                        clients={clients}
+                        projects={projects}
+                        templates={templates}
+                        freelancerName={profile.full_name || profile.company_name || "Freelancer"}
+                    />
                 </div>
             </div>
 

@@ -197,6 +197,44 @@ export const ContractPDF = ({ contract, profile }: ContractPDFProps) => (
                 )}
             </View>
 
+            {/* Structured Summary Section */}
+            {contract.contract_data && (
+                <View style={[styles.section, { backgroundColor: '#F8FAFC', padding: 15, borderRadius: 6, borderLeftWidth: 3, borderLeftColor: '#1E3A5F' }]}>
+                    <Text style={[styles.sectionTitle, { borderBottomWidth: 0 }]}>Summary of Key Terms</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
+                        <View style={{ minWidth: 100 }}>
+                            <Text style={styles.label}>Total Amount:</Text>
+                            <Text style={[styles.value, { fontWeight: 'bold' }]}>{contract.contract_data.total_amount} {contract.contract_data.currency}</Text>
+                        </View>
+                        <View style={{ minWidth: 100 }}>
+                            <Text style={styles.label}>Payment Type:</Text>
+                            <Text style={styles.value}>{contract.contract_data.payment_type}</Text>
+                        </View>
+                        <View style={{ minWidth: 100 }}>
+                            <Text style={styles.label}>Schedule:</Text>
+                            <Text style={styles.value}>{contract.contract_data.payment_schedule}</Text>
+                        </View>
+                    </View>
+
+                    <View style={{ marginTop: 10 }}>
+                        <Text style={styles.label}>Project Period:</Text>
+                        <Text style={styles.value}>
+                            {contract.contract_data.start_date ? format(new Date(contract.contract_data.start_date), 'MMM d, yyyy') : 'N/A'} -
+                            {contract.contract_data.is_open_ended ? ' Open Ended' : (contract.contract_data.end_date ? format(new Date(contract.contract_data.end_date), ' MMM d, yyyy') : ' N/A')}
+                        </Text>
+                    </View>
+
+                    {contract.contract_data.deliverables && contract.contract_data.deliverables.length > 0 && (
+                        <View style={{ marginTop: 10 }}>
+                            <Text style={styles.label}>Deliverables:</Text>
+                            {contract.contract_data.deliverables.map((d: string, i: number) => (
+                                <Text key={i} style={[styles.value, { fontSize: 9, marginLeft: 10, marginBottom: 2 }]}>• {d}</Text>
+                            ))}
+                        </View>
+                    )}
+                </View>
+            )}
+
             {/* Dates Section */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Dates</Text>

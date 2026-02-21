@@ -69,8 +69,53 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-                {/* Sidebar Info */}
                 <div className="md:col-span-1 space-y-6">
+                    {/* Key Terms Summary Card */}
+                    {contract.contract_data && (
+                        <Card className="border-brand-primary/20 bg-brand-primary/5">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-brand-primary" />
+                                    Smart Summary
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-[10px] uppercase font-bold text-slate-500">Budget</p>
+                                        <p className="text-sm font-bold text-brand-primary">
+                                            {contract.contract_data.total_amount} {contract.contract_data.currency}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase font-bold text-slate-500">Pay Type</p>
+                                        <p className="text-sm font-medium">{contract.contract_data.payment_type}</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] uppercase font-bold text-slate-500">Timeline</p>
+                                    <p className="text-xs">
+                                        {contract.contract_data.start_date ? format(new Date(contract.contract_data.start_date), 'MMM d, yyyy') : 'N/A'} -
+                                        {contract.contract_data.is_open_ended ? ' Open Ended' : (contract.contract_data.end_date ? format(new Date(contract.contract_data.end_date), ' MMM d, yyyy') : ' Not specified')}
+                                    </p>
+                                </div>
+                                {contract.contract_data.deliverables && contract.contract_data.deliverables.length > 0 && (
+                                    <div className="space-y-1.5 pt-2 border-t border-brand-primary/10">
+                                        <p className="text-[10px] uppercase font-bold text-slate-500">Deliverables</p>
+                                        <ul className="space-y-1">
+                                            {contract.contract_data.deliverables.map((d: string, i: number) => (
+                                                <li key={i} className="text-xs flex items-start gap-2">
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-brand-primary mt-1 shrink-0" />
+                                                    {d}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Parties Card */}
                     <Card>
                         <CardHeader>
