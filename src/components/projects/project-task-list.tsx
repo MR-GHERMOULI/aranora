@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { createTask, updateTask, deleteTask } from "@/app/(dashboard)/tasks/actions"
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,7 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isAdding, setIsAdding] = useState(false)
     const [togglingId, setTogglingId] = useState<string | null>(null)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
     const [taskTimes, setTaskTimes] = useState<Record<string, number>>({})
     const router = useRouter()
     const pathname = usePathname()
