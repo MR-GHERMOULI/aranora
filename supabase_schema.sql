@@ -10,6 +10,8 @@ create table public.profiles (
   full_name text,
   company_name text,
   avatar_url text,
+  default_paper_size text check (default_paper_size in ('A4', 'LETTER')) default 'A4',
+  default_tax_rate numeric(5, 2) default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -166,8 +168,8 @@ create policy "Users can delete own invoice items" on public.invoice_items
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
-  values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (id, email, full_name, avatar_url, default_paper_size, default_tax_rate)
+  values (new.id, new.email, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url', 'A4', 0);
   return new;
 end;
 $$ language plpgsql security definer;

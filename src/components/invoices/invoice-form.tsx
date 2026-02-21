@@ -31,9 +31,10 @@ interface InvoiceFormProps {
     clients: Client[];
     projects: Project[];
     invoice?: Invoice & { items: any[] };
+    profile?: any;
 }
 
-export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
+export function InvoiceForm({ clients, projects, invoice, profile }: InvoiceFormProps) {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
@@ -57,7 +58,8 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
         invoice?.due_date ? new Date(invoice.due_date) : undefined
     )
     const [status, setStatus] = useState(invoice?.status || "Draft")
-    const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>(invoice?.paper_size || 'A4')
+    const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>(invoice?.paper_size || profile?.default_paper_size || 'A4')
+    const [taxRate, setTaxRate] = useState(invoice?.tax_rate || profile?.default_tax_rate || 0)
     const [importedTimeEntryIds, setImportedTimeEntryIds] = useState<string[]>([])
 
     const handleImportTime = (entries: TimeEntry[]) => {
@@ -77,7 +79,13 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
         setImportedTimeEntryIds([...importedTimeEntryIds, ...entries.map(e => e.id)]);
     }
 
-    // No need for useEffect anymore since we initialize from props directly
+    // Pre-fill from profile of client/project changes
+    useEffect(() => {
+        if (!invoice && profile) {
+            if (!paperSize && profile.default_paper_size) setPaperSize(profile.default_paper_size as 'A4' | 'LETTER');
+            if (!taxRate && profile.default_tax_rate) setTaxRate(profile.default_tax_rate);
+        }
+    }, [profile, invoice]);
 
     const addItem = () => {
         setItems([...items, { description: "", quantity: 1, unitPrice: 0 }]);
@@ -111,6 +119,7 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
             if (dueDate) formData.append("dueDate", format(dueDate, "yyyy-MM-dd"));
             formData.append("status", status);
             formData.append("paperSize", paperSize);
+            formData.append("taxRate", String(taxRate));
             formData.append("items", JSON.stringify(items));
 
             if (invoice) {
@@ -241,6 +250,15 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
                         </SelectContent>
                     </Select>
                 </div>
+                <div className="space-y-2">
+                    <Label>Tax Rate (%)</Label>
+                    <Input
+                        type="number"
+                        step="0.01"
+                        value={taxRate}
+                        onChange={(e) => setTaxRate(Number(e.target.value))}
+                    />
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -297,6 +315,23 @@ export function InvoiceForm({ clients, projects, invoice }: InvoiceFormProps) {
                             </div>
                         </div>
                     ))}
+                </div>
+            </div>
+
+            <div className="flex flex-col items-end space-y-2 pt-6 border-t font-medium">
+                <div className="flex justify-between w-64 text-sm text-muted-foreground">
+                    <span>Subtotal:</span>
+                    <span>${items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0).toLocaleString()}</span>
+                </div>
+                {taxRate > 0 && (
+                    <div className="flex justify-between w-64 text-sm text-muted-foreground">
+                        <span>Tax ({taxRate}%):</span>
+                        <span>${(items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * taxRate / 100).toLocaleString()}</span>
+                    </div>
+                )}
+                <div className="flex justify-between w-64 text-lg font-bold border-t pt-2">
+                    <span>Total:</span>
+                    <span>${(items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * (1 + taxRate / 100)).toLocaleString()}</span>
                 </div>
             </div>
 

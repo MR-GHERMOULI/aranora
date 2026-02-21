@@ -83,6 +83,8 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
         governing_law: "the local jurisdiction",
         nda_included: true,
         ip_ownership: "Full",
+        paper_size: "A4",
+        tax_rate: 0,
     })
 
     const selectedClient = clients.find(c => c.id === clientId)
@@ -111,6 +113,8 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                 governing_law: "the local jurisdiction",
                 nda_included: true,
                 ip_ownership: "Full",
+                paper_size: "A4",
+                tax_rate: 0,
             })
         }
     }, [open])

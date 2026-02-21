@@ -2,11 +2,13 @@ import { getClients } from "../../clients/actions";
 import { getProjects } from "../../projects/actions";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProfile } from "../../settings/actions";
 
 export default async function NewInvoicePage() {
-    const [clients, projects] = await Promise.all([
+    const [clients, projects, profile] = await Promise.all([
         getClients(),
-        getProjects()
+        getProjects(),
+        getProfile()
     ]);
 
     return (
@@ -24,7 +26,7 @@ export default async function NewInvoicePage() {
                     <CardDescription>Enter client information and add line items.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <InvoiceForm clients={clients} projects={projects} />
+                    <InvoiceForm clients={clients} projects={projects} profile={profile} />
                 </CardContent>
             </Card>
         </div>

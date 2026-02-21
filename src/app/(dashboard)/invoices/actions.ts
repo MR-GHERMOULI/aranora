@@ -96,6 +96,8 @@ export async function createInvoice(formData: FormData) {
   const issueDate = formData.get('issueDate') as string;
   const dueDate = formData.get('dueDate') as string;
   const status = 'Draft';
+  const paperSize = formData.get('paperSize') as string || 'A4';
+  const taxRate = Number(formData.get('taxRate')) || 0;
 
   // Parse items from hidden JSON field (simplified for FormData)
   // In a real app, we might use a more robust data structure, 
@@ -130,8 +132,7 @@ export async function createInvoice(formData: FormData) {
 
   // Calculate totals
   const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0);
-  const taxRate = 0; // Default 0 for MVP
-  const taxAmount = 0;
+  const taxAmount = (subtotal * taxRate) / 100;
   const total = subtotal + taxAmount;
 
   // Insert Invoice
@@ -149,7 +150,7 @@ export async function createInvoice(formData: FormData) {
       tax_rate: taxRate,
       tax_amount: taxAmount,
       total,
-      paper_size: formData.get('paperSize') as string || 'A4'
+      paper_size: paperSize
     })
     .select()
     .single();
@@ -202,7 +203,10 @@ export async function updateInvoice(formData: FormData) {
 
   // Calculate totals
   const subtotal = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0);
-  const total = subtotal; // Tax placeholder
+  const taxRate = Number(formData.get('taxRate')) || 0;
+  const taxAmount = (subtotal * taxRate) / 100;
+  const total = subtotal + taxAmount;
+  const paperSize = formData.get('paperSize') as string || 'A4';
 
   // Update Invoice
   const { data: updatedInvoice, error: invoiceError } = await supabase
@@ -214,8 +218,10 @@ export async function updateInvoice(formData: FormData) {
       issue_date: issueDate,
       due_date: dueDate,
       subtotal,
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
       total,
-      paper_size: formData.get('paperSize') as string || 'A4'
+      paper_size: paperSize
     })
     .eq('id', id)
     .eq('user_id', user.id)

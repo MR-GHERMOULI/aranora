@@ -218,6 +218,12 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                     <Text style={styles.summaryLabel}>Subtotal</Text>
                     <Text style={styles.summaryValue}>${(invoice.subtotal || 0).toLocaleString()}</Text>
                 </View>
+                {(invoice.tax_rate || 0) > 0 && (
+                    <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Tax ({invoice.tax_rate}%)</Text>
+                        <Text style={styles.summaryValue}>${(invoice.tax_amount || 0).toLocaleString()}</Text>
+                    </View>
+                )}
                 <View style={styles.summaryRow}>
                     <Text style={styles.summaryLabel}>Total</Text>
                     <Text style={[styles.summaryValue, { fontSize: 14, color: '#1E3A5F' }]}>${(invoice.total || 0).toLocaleString()}</Text>

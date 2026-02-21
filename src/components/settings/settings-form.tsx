@@ -23,6 +23,8 @@ const profileSchema = z.object({
     companyName: z.string().optional(),
     companyEmail: z.string().email("Invalid email").optional().or(z.literal("")),
     address: z.string().optional(),
+    defaultPaperSize: z.enum(["A4", "LETTER"]),
+    defaultTaxRate: z.number().min(0).max(100),
 })
 
 type ProfileFormValues = z.infer<typeof profileSchema>
@@ -37,6 +39,8 @@ interface SettingsFormProps {
         address: string;
         currency: string;
         logo_url: string | null;
+        default_paper_size: string;
+        default_tax_rate: number;
     }
 }
 
@@ -60,6 +64,8 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             companyName: profile.company_name,
             companyEmail: profile.company_email,
             address: profile.address,
+            defaultPaperSize: (profile.default_paper_size as "A4" | "LETTER") || "A4",
+            defaultTaxRate: profile.default_tax_rate || 0,
         },
     })
 
@@ -131,6 +137,8 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             if (data.companyName) formData.append("companyName", data.companyName)
             if (data.companyEmail) formData.append("companyEmail", data.companyEmail)
             if (data.address) formData.append("address", data.address)
+            formData.append("defaultPaperSize", data.defaultPaperSize)
+            formData.append("defaultTaxRate", String(data.defaultTaxRate))
 
             await updateProfile(formData)
             alert("Profile updated successfully")
@@ -277,6 +285,34 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                             placeholder="123 Business St, City, Country"
                             {...register("address")}
                         />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-dashed">
+                        <div className="grid gap-2">
+                            <Label htmlFor="defaultPaperSize">Default Invoice Paper Size</Label>
+                            <select
+                                id="defaultPaperSize"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                {...register("defaultPaperSize")}
+                            >
+                                <option value="A4">A4 (210 × 297 mm)</option>
+                                <option value="LETTER">Letter (8.5 × 11 in)</option>
+                            </select>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="defaultTaxRate">Default Tax Rate (%)</Label>
+                            <Input
+                                id="defaultTaxRate"
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                {...register("defaultTaxRate", { valueAsNumber: true })}
+                            />
+                            {errors.defaultTaxRate && (
+                                <p className="text-sm text-red-500">{errors.defaultTaxRate.message}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
 

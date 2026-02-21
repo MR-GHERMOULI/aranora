@@ -58,6 +58,8 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
         governing_law: "the local jurisdiction",
         nda_included: true,
         ip_ownership: "Full",
+        paper_size: "A4",
+        tax_rate: 0,
     })
 
     const updateStructuredData = (updates: Partial<ContractStructuredData>) => {
@@ -235,6 +237,34 @@ export function TemplateDialog({ template, trigger }: TemplateDialogProps) {
                                                 <SelectItem value="License">Limited License</SelectItem>
                                             </SelectContent>
                                         </Select>
+                                    </div>
+
+                                    <div className="pt-2 flex items-center justify-between border-t border-dashed">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-semibold">Default Paper Size</Label>
+                                        </div>
+                                        <Select value={structuredData.paper_size} onValueChange={(v: any) => updateStructuredData({ paper_size: v })}>
+                                            <SelectTrigger className="w-40 h-9 bg-white text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
+                                                <SelectItem value="LETTER">Letter (8.5 × 11 in)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="pt-2 flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-sm font-semibold">Default Tax Rate (%)</Label>
+                                        </div>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            value={structuredData.tax_rate}
+                                            onChange={(e) => updateStructuredData({ tax_rate: Number(e.target.value) })}
+                                            className="w-20 h-9 bg-white"
+                                        />
                                     </div>
                                 </div>
                                 <p className="text-[10px] text-muted-foreground text-center italic px-4">

@@ -70,6 +70,8 @@ export interface ContractStructuredData {
     governing_law?: string
     nda_included?: boolean
     ip_ownership?: 'Full' | 'License' | 'After Payment'
+    paper_size?: 'A4' | 'LETTER'
+    tax_rate?: number
 }
 
 export interface Contract {

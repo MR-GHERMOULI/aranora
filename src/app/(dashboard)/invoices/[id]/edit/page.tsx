@@ -3,14 +3,16 @@ import { getClients } from "../../../clients/actions";
 import { getProjects } from "../../../projects/actions";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProfile } from "../../../settings/actions";
 import { notFound } from "next/navigation";
 
 export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const [{ data: invoice, error: invoiceError }, clients, projects] = await Promise.all([
+    const [{ data: invoice, error: invoiceError }, clients, projects, profile] = await Promise.all([
         getInvoice(id),
         getClients(),
-        getProjects()
+        getProjects(),
+        getProfile()
     ]);
 
     if (invoiceError || !invoice) {
@@ -36,6 +38,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
                         clients={clients}
                         projects={projects}
                         invoice={invoice as any}
+                        profile={profile}
                     />
                 </CardContent>
             </Card>
