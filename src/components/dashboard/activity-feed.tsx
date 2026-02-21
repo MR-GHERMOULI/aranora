@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { Briefcase, FileText, Users, ArrowRight } from "lucide-react";
+import { Briefcase, FileText, Users, ArrowRight, PenTool } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ const iconMap: Record<string, { icon: typeof Briefcase; color: string; bg: strin
     project: { icon: Briefcase, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-100 dark:bg-violet-900/30" },
     invoice: { icon: FileText, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100 dark:bg-orange-900/30" },
     client: { icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30" },
+    contract: { icon: PenTool, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
 };
 
 export function ActivityFeed({ activities }: { activities: Activity[] }) {

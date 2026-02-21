@@ -89,6 +89,12 @@ export function Sidebar({ className }: SidebarProps) {
             color: "text-pink-700",
         },
         {
+            label: "Contracts",
+            icon: FileText,
+            href: "/contracts",
+            color: "text-emerald-500",
+        },
+        {
             label: "Invoices",
             icon: FileText,
             href: "/invoices",
