@@ -34,6 +34,7 @@ export async function getDashboardStats() {
         { data: allProjects },
         { data: upcomingDeadlines },
         { data: prevMonthPaidInvoices },
+        { data: pendingInvitations },
         timeEntriesResponse,
         activeTimerResponse
     ] = await Promise.all([
@@ -73,6 +74,11 @@ export async function getDashboardStats() {
             .eq('status', 'Paid')
             .gte('issue_date', startOfPrevMonth)
             .lte('issue_date', endOfPrevMonth),
+        supabase.from('notifications').select('*')
+            .eq('user_id', user.id)
+            .eq('type', 'invite')
+            .eq('read', false)
+            .order('created_at', { ascending: false }),
         supabase.from('time_entries').select('start_time, end_time')
             .eq('user_id', user.id)
             .gte('start_time', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()),
@@ -141,6 +147,7 @@ export async function getDashboardStats() {
         recentProjects: recentProjects || [],
         recentInvoices: recentInvoices || [],
         upcomingDeadlines: upcomingDeadlines || [],
+        pendingInvitations: pendingInvitations || [],
         totalSecondsThisWeek,
         hasActiveTimer: !!activeTimer
     };

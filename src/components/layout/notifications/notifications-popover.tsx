@@ -8,12 +8,14 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { getNotifications, markAsRead, acceptNotificationInvite } from "./actions"
+import { getNotifications, markAsRead, acceptNotificationInvite, declineNotificationInvite } from "./actions"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function NotificationsPopover() {
     const [notifications, setNotifications] = useState<any[]>([])
     const [open, setOpen] = useState(false)
+    const [processingId, setProcessingId] = useState<string | null>(null)
     const router = useRouter()
 
     useEffect(() => {
@@ -22,20 +24,38 @@ export function NotificationsPopover() {
             setNotifications(data)
         }
         fetchNotes()
-        // In a real app we'd use realtime subscriptions here
     }, [open])
 
     const handleAccept = async (n: any) => {
         if (n.type === 'invite') {
-            await acceptNotificationInvite(n.id, n.payload.collaboratorId)
-            setNotifications(prev => prev.filter(item => item.id !== n.id))
-            router.push(`/projects/${n.payload.projectId}`)
+            setProcessingId(n.id)
+            try {
+                await acceptNotificationInvite(n.id, n.payload.collaboratorId)
+                setNotifications(prev => prev.filter(item => item.id !== n.id))
+                toast.success(`Joined ${n.payload.projectName}`)
+                router.push(`/projects/${n.payload.projectId}`)
+            } catch (error) {
+                toast.error("Failed to accept")
+            } finally {
+                setProcessingId(null)
+            }
         }
     }
 
-    const handleDismiss = async (id: string) => {
-        await markAsRead(id)
-        setNotifications(prev => prev.filter(item => item.id !== id))
+    const handleDecline = async (n: any) => {
+        setProcessingId(n.id)
+        try {
+            if (n.type === 'invite') {
+                await declineNotificationInvite(n.id, n.payload.collaboratorId)
+            } else {
+                await markAsRead(n.id)
+            }
+            setNotifications(prev => prev.filter(item => item.id !== n.id))
+        } catch (error) {
+            toast.error("Action failed")
+        } finally {
+            setProcessingId(null)
+        }
     }
 
     return (
@@ -75,16 +95,33 @@ export function NotificationsPopover() {
 
                                 {n.type === 'invite' ? (
                                     <div className="flex gap-2">
-                                        <Button size="sm" onClick={() => handleAccept(n)} className="w-full">
+                                        <Button
+                                            size="sm"
+                                            onClick={() => handleAccept(n)}
+                                            className="w-full bg-brand-primary"
+                                            disabled={processingId === n.id}
+                                        >
                                             Accept
                                         </Button>
-                                        <Button size="sm" variant="outline" onClick={() => handleDismiss(n.id)} className="w-full">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleDecline(n)}
+                                            className="w-full"
+                                            disabled={processingId === n.id}
+                                        >
                                             Ignore
                                         </Button>
                                     </div>
                                 ) : (
                                     <div className="flex justify-end">
-                                        <Button variant="ghost" size="sm" onClick={() => handleDismiss(n.id)} className="text-xs h-7">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDecline(n)}
+                                            className="text-xs h-7 hover:bg-brand-primary/10 hover:text-brand-primary"
+                                            disabled={processingId === n.id}
+                                        >
                                             Dismiss
                                         </Button>
                                     </div>

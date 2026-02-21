@@ -12,6 +12,7 @@ import { SmartRemindersWidget } from "@/components/dashboard/smart-reminders";
 import { ClientGreeting } from "@/components/dashboard/client-greeting";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { TimeSummaryWidget } from "@/components/dashboard/time-summary";
+import { InvitationsWidget } from "@/components/dashboard/invitations-widget";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -70,6 +71,9 @@ export default async function DashboardPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Invitations Center */}
+                <InvitationsWidget invitations={stats.pendingInvitations} />
 
                 {/* Smart Reminders */}
                 <Suspense fallback={<Skeleton className="h-[200px] w-full rounded-2xl" />}>

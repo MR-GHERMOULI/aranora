@@ -48,3 +48,17 @@ export async function acceptNotificationInvite(notificationId: string, collabora
 
     revalidatePath('/dashboard');
 }
+
+export async function declineNotificationInvite(notificationId: string, collaboratorId: string) {
+    const supabase = await createClient();
+
+    // Decline invite
+    await supabase.from('project_collaborators')
+        .update({ status: 'declined' })
+        .eq('id', collaboratorId);
+
+    // Mark notification as read
+    await supabase.from('notifications').update({ read: true }).eq('id', notificationId);
+
+    revalidatePath('/dashboard');
+}
