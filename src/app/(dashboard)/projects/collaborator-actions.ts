@@ -9,6 +9,8 @@ export interface Collaborator {
     project_id: string;
     collaborator_email: string;
     revenue_share: number;
+    hourly_rate?: number | null;
+    payment_type: 'revenue_share' | 'hourly';
     status: string;
     created_at: string;
 }
@@ -53,6 +55,8 @@ export async function addCollaborator(formData: FormData) {
     const projectId = formData.get('projectId') as string;
     const email = formData.get('email') as string;
     const revenueShare = parseFloat(formData.get('revenueShare') as string) || 0;
+    const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
+    const paymentType = (formData.get('paymentType') as string) || 'revenue_share';
 
     // Check if user exists
     const { data: existingUser } = await supabase
@@ -80,6 +84,8 @@ export async function addCollaborator(formData: FormData) {
             project_id: projectId,
             collaborator_email: email,
             revenue_share: revenueShare,
+            hourly_rate: hourlyRate,
+            payment_type: paymentType,
             status: status
         })
         .select()
