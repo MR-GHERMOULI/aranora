@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckSquare, Loader2, Trash2, Circle, CheckCircle2, Calendar, LayoutList } from "lucide-react"
+import { CheckSquare, Loader2, Trash2, Circle, CheckCircle2, Calendar, LayoutList, User } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
@@ -18,6 +18,8 @@ import { getTaskTotalTime } from "@/app/(dashboard)/time-tracking/actions"
 
 interface Task {
     id: string
+    user_id: string
+    assigned_to?: string | null
     title: string
     description?: string
     status: string
@@ -26,6 +28,8 @@ interface Task {
     project_id?: string
     estimated_hours?: number | null
     created_at: string
+    creator?: { full_name: string | null; username: string | null }
+    assignee?: { full_name: string | null; username: string | null }
 }
 
 interface ProjectTaskListProps {
@@ -180,6 +184,19 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
                                                 {task.status}
                                             </Badge>
+                                            {task.assignee && (
+                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/50 text-[10px] text-muted-foreground border border-muted-foreground/10">
+                                                    <User className="h-2.5 w-2.5" />
+                                                    <span className="max-w-[80px] truncate">
+                                                        {task.assignee.full_name || `@${task.assignee.username}`}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {task.creator && task.creator.username && task.creator.username !== task.assignee?.username && (
+                                                <span className="text-[10px] text-muted-foreground italic">
+                                                    Added by {task.creator.full_name || `@${task.creator.username}`}
+                                                </span>
+                                            )}
                                             {taskTimes[task.id] > 0 && (
                                                 <Badge
                                                     variant="secondary"

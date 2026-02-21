@@ -147,3 +147,43 @@ export async function removeCollaborator(collaboratorId: string, projectId: stri
 
     revalidatePath(`/dashboard/projects/${projectId}`);
 }
+
+export async function getProjectMembers(projectId: string) {
+    const supabase = await createClient();
+
+    // Get Project Owner
+    const { data: project } = await supabase
+        .from('projects')
+        .select('user_id')
+        .eq('id', projectId)
+        .single();
+
+    if (!project) return [];
+
+    const { data: ownerProfile } = await supabase
+        .from('profiles')
+        .select('id, full_name, company_email')
+        .eq('id', project.user_id)
+        .single();
+
+    // Get Active Collaborators (Status 'active' or 'invited'? Actually active is better for assignment)
+    const { data: collaborators } = await supabase
+        .from('project_collaborators')
+        .select('collaborator_email')
+        .eq('project_id', projectId)
+        .in('status', ['active', 'invited']);
+
+    const emails = collaborators?.map(c => c.collaborator_email) || [];
+
+    const { data: collaboratorProfiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, company_email')
+        .in('company_email', emails);
+
+    const members = [];
+    if (ownerProfile) members.push(ownerProfile);
+    if (collaboratorProfiles) members.push(...collaboratorProfiles);
+
+    // Deduplicate (just in case)
+    return Array.from(new Map(members.map(m => [m.id, m])).values());
+}

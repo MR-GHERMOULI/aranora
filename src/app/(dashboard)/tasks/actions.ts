@@ -72,10 +72,17 @@ export async function getTasks(filters?: TaskFilters) {
         .from('tasks')
         .select(`
             *,
-            project:projects(title)
+            project:projects(title),
+            creator:profiles!tasks_user_id_fkey(full_name, username),
+            assignee:profiles!tasks_assigned_to_fkey(full_name, username)
         `)
-        .eq('user_id', user.id)
         .is('subtask_of', null); // Only top-level tasks by default
+
+    if (filters?.projectId) {
+        query = query.eq('project_id', filters.projectId);
+    } else {
+        query = query.or(`user_id.eq.${user.id},assigned_to.eq.${user.id}`);
+    }
 
     // Filters
     if (filters?.excludeProjectTasks) {
@@ -210,6 +217,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
     const labelsStr = formData.get('labels') as string;
     const subtaskOf = formData.get('subtaskOf') as string;
     const estimatedHours = formData.get('estimatedHours') ? parseFloat(formData.get('estimatedHours') as string) : null;
+    const assignedTo = formData.get('assignedTo') as string;
 
     const recurrence = recurrenceType ? { type: recurrenceType } : null;
     const labels = labelsStr ? labelsStr.split(',').filter(Boolean) : [];
@@ -222,6 +230,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         priority,
         due_date: dueDate || null,
         project_id: projectId || null,
+        assigned_to: assignedTo || user.id, // Default to creator if not specified
         is_personal: isPersonal,
         recurrence,
         category: isPersonal ? 'Personal' : 'Work',
@@ -229,6 +238,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         subtask_of: subtaskOf || null,
         estimated_hours: estimatedHours,
         completed_at: status === 'Done' ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString()
     });
 
     if (error) {

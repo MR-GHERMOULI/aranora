@@ -25,9 +25,17 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon, Loader2, Plus } from "lucide-react"
+import { Calendar as CalendarIcon, Loader2, Plus, User, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useEffect } from "react"
+import { getProjectMembers } from "@/app/(dashboard)/projects/collaborator-actions"
+
+interface Member {
+    id: string;
+    full_name: string | null;
+    company_email: string | null;
+}
 
 interface AddProjectTaskDialogProps {
     projectId: string
@@ -46,6 +54,14 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
     const [status, setStatus] = useState("Todo")
     const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
     const [estimatedHours, setEstimatedHours] = useState("")
+    const [members, setMembers] = useState<Member[]>([])
+    const [assignedTo, setAssignedTo] = useState<string>("")
+
+    useEffect(() => {
+        if (open) {
+            getProjectMembers(projectId).then(setMembers)
+        }
+    }, [open, projectId])
 
     const handleSubmit = async () => {
         if (!title.trim()) {
@@ -61,6 +77,9 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
             formData.append("priority", priority)
             formData.append("status", status)
             formData.append("projectId", projectId)
+            if (assignedTo) {
+                formData.append("assignedTo", assignedTo)
+            }
             if (dueDate) {
                 formData.append("dueDate", format(dueDate, "yyyy-MM-dd"))
             }
@@ -93,6 +112,7 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
         setStatus("Todo")
         setDueDate(undefined)
         setEstimatedHours("")
+        setAssignedTo("")
     }
 
     return (
@@ -111,6 +131,32 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                        <label htmlFor="assignedTo" className="text-sm font-medium flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" /> Assign To
+                        </label>
+                        <Select value={assignedTo} onValueChange={setAssignedTo}>
+                            <SelectTrigger id="assignedTo" className="bg-muted/30 border-muted-foreground/20">
+                                <SelectValue placeholder="Assign to project member..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {members.map((member) => (
+                                    <SelectItem key={member.id} value={member.id} className="cursor-pointer">
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{member.full_name || "Unknown Member"}</span>
+                                            <span className="text-xs text-muted-foreground">{member.company_email}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                                {members.length === 0 && (
+                                    <div className="p-2 text-xs text-muted-foreground text-center">
+                                        Only you can be assigned (Invite collaborators first)
+                                    </div>
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <div className="grid gap-2">
                         <label htmlFor="title" className="text-sm font-medium">
                             Title
