@@ -62,3 +62,24 @@ export async function declineNotificationInvite(notificationId: string, collabor
 
     revalidatePath('/dashboard');
 }
+
+export async function getPendingInvitationsCount() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return 0;
+
+    const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('type', 'invite')
+        .eq('read', false);
+
+    if (error) {
+        console.error('Error fetching invite count:', error);
+        return 0;
+    }
+
+    return count || 0;
+}

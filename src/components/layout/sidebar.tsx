@@ -24,12 +24,24 @@ import { ModeToggle } from "@/components/ui/mode-toggle"
 import { GlobalSearch } from "./search"
 import { LogoutButton } from "./logout-button"
 import { NotificationsPopover } from "./notifications/notifications-popover"
+import { Mail } from "lucide-react"
+import { getPendingInvitationsCount } from "./notifications/actions"
+import { useEffect } from "react"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
+    const [inviteCount, setInviteCount] = useState(0)
+
+    useEffect(() => {
+        const fetchCount = async () => {
+            const count = await getPendingInvitationsCount()
+            setInviteCount(count)
+        }
+        fetchCount()
+    }, [])
 
     const routes = [
         {
@@ -37,6 +49,13 @@ export function Sidebar({ className }: SidebarProps) {
             icon: LayoutDashboard,
             href: "/dashboard",
             color: "text-sky-500",
+        },
+        {
+            label: "Invitations",
+            icon: Mail,
+            href: "/invitations",
+            color: "text-red-500",
+            badge: inviteCount > 0 ? inviteCount : null,
         },
         {
             label: "Tasks",
@@ -160,6 +179,11 @@ export function Sidebar({ className }: SidebarProps) {
                                     <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
                                     {route.label}
                                 </div>
+                                {route.badge && (
+                                    <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto">
+                                        {route.badge}
+                                    </span>
+                                )}
                             </Link>
                         ))}
                     </div>

@@ -11,6 +11,7 @@ import {
 import { getNotifications, markAsRead, acceptNotificationInvite, declineNotificationInvite } from "./actions"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import Link from "next/link"
 
 export function NotificationsPopover() {
     const [notifications, setNotifications] = useState<any[]>([])
@@ -130,6 +131,20 @@ export function NotificationsPopover() {
                         ))
                     )}
                 </div>
+                {notifications.length > 0 && (
+                    <div className="p-2 border-t bg-muted/50">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full text-xs text-brand-primary hover:bg-brand-primary/10"
+                            asChild
+                        >
+                            <Link href="/invitations">
+                                View All Invitations
+                            </Link>
+                        </Button>
+                    </div>
+                )}
             </PopoverContent>
         </Popover>
     )
