@@ -22,6 +22,7 @@ import {
 import { format } from "date-fns"
 import { useState } from "react"
 import { AddPaymentDialog } from "./add-payment-dialog"
+import Link from "next/link"
 
 interface CollaboratorDetailProps {
     collaborator: CollaboratorCRM
