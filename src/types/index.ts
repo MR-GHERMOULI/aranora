@@ -101,3 +101,18 @@ export interface Subscription {
     updated_at: string;
 }
 
+export interface TimeEntry {
+    id: string;
+    user_id: string;
+    project_id?: string | null;
+    task_id?: string | null;
+    description?: string | null;
+    start_time: string;
+    end_time?: string | null;
+    is_billable: boolean;
+    hourly_rate?: number | null;
+    created_at: string;
+    updated_at: string;
+    project?: { title: string };
+    task?: { title: string };
+}

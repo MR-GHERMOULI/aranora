@@ -33,7 +33,9 @@ export async function getDashboardStats() {
         { data: recentInvoices },
         { data: allProjects },
         { data: upcomingDeadlines },
-        { data: prevMonthPaidInvoices }
+        { data: prevMonthPaidInvoices },
+        timeEntriesResponse,
+        activeTimerResponse
     ] = await Promise.all([
         // Cache profile data as it rarely changes
         unstable_cache(
@@ -70,8 +72,23 @@ export async function getDashboardStats() {
             .eq('user_id', user.id)
             .eq('status', 'Paid')
             .gte('issue_date', startOfPrevMonth)
-            .lte('issue_date', endOfPrevMonth)
+            .lte('issue_date', endOfPrevMonth),
+        supabase.from('time_entries').select('start_time, end_time')
+            .eq('user_id', user.id)
+            .gte('start_time', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase.from('time_entries').select('id')
+            .eq('user_id', user.id)
+            .is('end_time', null)
+            .maybeSingle()
     ]);
+
+    const timeEntriesThisWeek = (timeEntriesResponse?.data as any[]) || [];
+    const activeTimer = activeTimerResponse?.data;
+
+    const totalSecondsThisWeek = timeEntriesThisWeek.reduce((sum: number, entry: any) => {
+        if (!entry.start_time || !entry.end_time) return sum;
+        return sum + (new Date(entry.end_time).getTime() - new Date(entry.start_time).getTime()) / 1000;
+    }, 0);
 
     const monthlyRevenue = montlyPaidInvoices?.reduce((sum, invoice) => sum + (Number(invoice.total) || 0), 0) || 0;
     const totalRevenue = allPaidInvoices?.reduce((sum, invoice) => sum + (Number(invoice.total) || 0), 0) || 0;
@@ -123,7 +140,9 @@ export async function getDashboardStats() {
         activities,
         recentProjects: recentProjects || [],
         recentInvoices: recentInvoices || [],
-        upcomingDeadlines: upcomingDeadlines || []
+        upcomingDeadlines: upcomingDeadlines || [],
+        totalSecondsThisWeek,
+        hasActiveTimer: !!activeTimer
     };
 }
 

@@ -15,6 +15,7 @@ import { useState } from "react";
 import { updateTask, deleteTask, createTask } from "@/app/(dashboard)/tasks/actions";
 import { EditTaskDialog } from "./edit-task-dialog";
 import { toast } from "sonner";
+import { TaskTimerButton } from "@/components/time-tracking/task-timer-button";
 
 interface TaskProps {
     task: any;
@@ -139,7 +140,15 @@ export function TaskCard({ task, projects = [], onOpenDetail }: TaskProps) {
                         </div>
 
                         {/* Actions - visible on hover */}
-                        <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {!isDone && (
+                                <TaskTimerButton
+                                    taskId={task.id}
+                                    taskTitle={task.title}
+                                    projectId={task.project_id}
+                                    className="h-7 px-2 text-[10px]"
+                                />
+                            )}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => e.stopPropagation()}>

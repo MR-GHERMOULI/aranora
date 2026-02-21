@@ -15,7 +15,8 @@ import {
     LogOut,
     Menu,
     X,
-    CreditCard
+    CreditCard,
+    Timer
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -72,6 +73,12 @@ export function Sidebar({ className }: SidebarProps) {
             icon: Calendar,
             href: "/calendar",
             color: "text-emerald-500",
+        },
+        {
+            label: "Time Tracking",
+            icon: Timer,
+            href: "/time-tracking",
+            color: "text-amber-500",
         },
         {
             label: "Reports",

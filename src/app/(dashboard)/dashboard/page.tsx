@@ -11,6 +11,7 @@ import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { SmartRemindersWidget } from "@/components/dashboard/smart-reminders";
 import { ClientGreeting } from "@/components/dashboard/client-greeting";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { TimeSummaryWidget } from "@/components/dashboard/time-summary";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -142,6 +143,11 @@ export default async function DashboardPage() {
                             <p className="text-xs text-muted-foreground">Awaiting payment</p>
                         </CardContent>
                     </Card>
+
+                    <TimeSummaryWidget
+                        totalSeconds={stats.totalSecondsThisWeek}
+                        hasActiveTimer={stats.hasActiveTimer}
+                    />
                 </div>
 
                 {/* Main Content Grid */}

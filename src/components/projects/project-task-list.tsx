@@ -12,6 +12,7 @@ import { format } from "date-fns"
 import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
 import { AddProjectTaskDialog } from "./add-project-task-dialog"
+import { TaskTimerButton } from "@/components/time-tracking/task-timer-button"
 
 interface Task {
     id: string
@@ -158,19 +159,26 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
                                             </Badge>
                                         </div>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity -mr-2"
-                                        onClick={() => handleDelete(task.id)}
-                                        disabled={deletingId === task.id}
-                                    >
-                                        {deletingId === task.id ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                        )}
-                                    </Button>
+                                    <div className="flex items-center gap-1 -mr-2">
+                                        <TaskTimerButton
+                                            taskId={task.id}
+                                            taskTitle={task.title}
+                                            projectId={projectId}
+                                        />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => handleDelete(task.id)}
+                                            disabled={deletingId === task.id}
+                                        >
+                                            {deletingId === task.id ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
