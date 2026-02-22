@@ -223,3 +223,38 @@ export async function getShareToken(projectId: string): Promise<string | null> {
 
   return data?.share_token || null;
 }
+
+export async function getProjectByShareToken(token: string) {
+  const supabase = await createClient(); // Will be anonymous if no session
+
+  // Fetch project details
+  const { data: project, error: projectError } = await supabase
+    .from('projects')
+    .select('*, client:clients(name)')
+    .eq('share_token', token)
+    .single();
+
+  if (projectError || !project) {
+    if (projectError?.code === 'PGRST116') {
+      return null; // Not found
+    }
+    console.error('Error fetching shared project:', projectError);
+    return null;
+  }
+
+  // Fetch tasks for the project
+  const { data: tasks, error: tasksError } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('project_id', project.id)
+    .order('created_at', { ascending: false });
+
+  if (tasksError) {
+    console.error('Error fetching shared project tasks:', tasksError);
+  }
+
+  return {
+    ...project,
+    tasks: tasks || []
+  };
+}
