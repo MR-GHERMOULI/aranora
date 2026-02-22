@@ -29,10 +29,21 @@ import { NotificationsPopover } from "./notifications/notifications-popover"
 import { Mail } from "lucide-react"
 import { getPendingInvitationsCount } from "./notifications/actions"
 import { useEffect } from "react"
+import { WorkspaceSwitcher } from "./workspace-switcher"
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface Team {
+    id: string
+    name: string
+    owner_id: string
+    role: string
+}
 
-export function Sidebar({ className }: SidebarProps) {
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
+    teams?: Team[]
+    activeTeamId?: string
+}
+
+export function Sidebar({ className, teams = [], activeTeamId = "" }: SidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const [inviteCount, setInviteCount] = useState(0)
@@ -70,12 +81,6 @@ export function Sidebar({ className }: SidebarProps) {
             icon: ListTodo,
             href: "/tasks",
             color: "text-indigo-500",
-        },
-        {
-            label: "Workspaces",
-            icon: Building2,
-            href: "/teams",
-            color: "text-blue-600",
         },
         {
             label: "Clients",
@@ -167,7 +172,7 @@ export function Sidebar({ className }: SidebarProps) {
                 )}
             >
                 <div className="px-3 py-2 flex-1 flex flex-col min-h-0">
-                    <Link href="/dashboard" className="flex items-center pl-3 mb-8 shrink-0">
+                    <Link href="/dashboard" className="flex items-center pl-3 mb-5 shrink-0">
                         <div className="relative z-20 flex items-center text-xl font-bold">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -184,6 +189,12 @@ export function Sidebar({ className }: SidebarProps) {
                             Aranora
                         </div>
                     </Link>
+
+                    {/* Workspace Switcher */}
+                    <div className="shrink-0 mb-4 px-1">
+                        <WorkspaceSwitcher teams={teams} activeTeamId={activeTeamId} />
+                    </div>
+
                     <div className="shrink-0 mb-4 px-1">
                         <GlobalSearch />
                     </div>

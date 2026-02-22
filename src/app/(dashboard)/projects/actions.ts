@@ -4,28 +4,28 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Project } from "@/types";
+import { getActiveTeamId } from "@/lib/team-helpers";
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w\s\u0621-\u064A-]/g, '') // Keep alphanumeric, space, and Arabic
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .replace(/[^\w\s\u0621-\u064A-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
     .trim();
 }
 
 export async function getProjects(clientId?: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-  if (!user) {
-    redirect('/login');
-  }
+  const teamId = await getActiveTeamId();
 
   let query = supabase
     .from('projects')
     .select('*, client:clients(name)')
-    .eq('user_id', user.id)
+    .eq('team_id', teamId)
     .order('created_at', { ascending: false });
 
   if (clientId) {
@@ -39,11 +39,11 @@ export async function getProjects(clientId?: string) {
     return [];
   }
 
-  // Fetch task counts per project
+  // Fetch task counts per project (team-scoped)
   const { data: tasks } = await supabase
     .from('tasks')
     .select('project_id, status')
-    .eq('user_id', user.id);
+    .eq('team_id', teamId);
 
   const taskCounts: Record<string, { total: number; completed: number }> = {};
   tasks?.forEach(task => {
@@ -64,10 +64,9 @@ export async function getProjects(clientId?: string) {
 export async function createProject(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-  if (!user) {
-    redirect('/login');
-  }
+  const teamId = await getActiveTeamId();
 
   const clientId = formData.get('clientId') as string;
   const title = formData.get('title') as string;
@@ -82,6 +81,7 @@ export async function createProject(formData: FormData) {
     .from('projects')
     .insert({
       user_id: user.id,
+      team_id: teamId,
       client_id: clientId,
       title,
       slug: slugify(title),
@@ -105,10 +105,7 @@ export async function createProject(formData: FormData) {
 export async function updateProject(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
   const id = formData.get('id') as string;
   const title = formData.get('title') as string;
@@ -131,8 +128,7 @@ export async function updateProject(formData: FormData) {
       end_date: endDate,
       hourly_rate: hourlyRate
     })
-    .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('id', id);
 
   if (error) {
     console.error('Error updating project:', error);
@@ -150,16 +146,12 @@ export async function updateProject(formData: FormData) {
 export async function deleteProject(projectId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
   const { error } = await supabase
     .from('projects')
     .delete()
-    .eq('id', projectId)
-    .eq('user_id', user.id);
+    .eq('id', projectId);
 
   if (error) {
     console.error('Error deleting project:', error);
@@ -174,17 +166,12 @@ import { v4 as uuidv4 } from 'uuid';
 export async function toggleShareToken(projectId: string): Promise<{ share_token: string | null }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Check current token
   const { data: project } = await supabase
     .from('projects')
     .select('share_token')
     .eq('id', projectId)
-    .eq('user_id', user.id)
     .single();
 
   if (!project) {
@@ -196,8 +183,7 @@ export async function toggleShareToken(projectId: string): Promise<{ share_token
   const { error } = await supabase
     .from('projects')
     .update({ share_token: newToken })
-    .eq('id', projectId)
-    .eq('user_id', user.id);
+    .eq('id', projectId);
 
   if (error) {
     console.error('Error toggling share token:', error);
@@ -211,25 +197,20 @@ export async function toggleShareToken(projectId: string): Promise<{ share_token
 export async function getShareToken(projectId: string): Promise<string | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
   const { data } = await supabase
     .from('projects')
     .select('share_token')
     .eq('id', projectId)
-    .eq('user_id', user.id)
     .single();
 
   return data?.share_token || null;
 }
 
 export async function getProjectByShareToken(token: string) {
-  const supabase = await createClient(); // Will be anonymous if no session
+  const supabase = await createClient();
 
-  // Fetch project details
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .select('*, client:clients(name)')
@@ -238,13 +219,12 @@ export async function getProjectByShareToken(token: string) {
 
   if (projectError || !project) {
     if (projectError?.code === 'PGRST116') {
-      return null; // Not found
+      return null;
     }
     console.error('Error fetching shared project:', projectError);
     return null;
   }
 
-  // Fetch tasks for the project
   const { data: tasks, error: tasksError } = await supabase
     .from('tasks')
     .select('*')

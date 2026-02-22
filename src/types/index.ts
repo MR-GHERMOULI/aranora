@@ -1,3 +1,35 @@
+// ── Team / Workspace Types ─────────────────────────────
+
+export interface Team {
+    id: string;
+    name: string;
+    owner_id: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface TeamMember {
+    id: string;
+    team_id: string;
+    user_id: string;
+    role: 'owner' | 'admin' | 'member';
+    joined_at: string;
+    profiles?: { id: string; full_name: string; email: string; avatar_url?: string };
+}
+
+export interface TeamInvitation {
+    id: string;
+    team_id: string;
+    email: string;
+    role: 'owner' | 'admin' | 'member';
+    token: string;
+    status: 'pending' | 'accepted' | 'expired';
+    expires_at: string;
+    created_at: string;
+}
+
+// ── Core Entity Types ─────────────────────────────────
+
 export interface ContactMessage {
     id: string
     name: string
@@ -11,6 +43,7 @@ export interface ContactMessage {
 export interface Client {
     id: string
     user_id: string
+    team_id?: string | null
     name: string
     email?: string | null
     phone?: string | null
@@ -23,6 +56,7 @@ export interface Client {
 export interface Project {
     id: string
     user_id: string
+    team_id?: string | null
     client_id: string
     title: string
     slug: string
@@ -40,6 +74,7 @@ export interface Project {
 export interface Invoice {
     id: string
     user_id: string
+    team_id?: string | null
     client_id: string
     project_id?: string | null
     invoice_number: string
@@ -111,7 +146,9 @@ export interface ContractTemplate {
 export interface Task {
     id: string
     user_id: string
+    team_id?: string | null
     project_id?: string | null
+    assigned_to?: string | null
     title: string
     description?: string | null
     status: string
@@ -123,6 +160,8 @@ export interface Task {
     estimated_hours?: number | null
     created_at: string
     project?: { title: string }
+    assignee?: { full_name: string; username?: string; avatar_url?: string }
+    creator?: { full_name: string; username?: string }
 }
 
 export interface Subscription {
@@ -144,6 +183,7 @@ export interface Subscription {
 export interface TimeEntry {
     id: string;
     user_id: string;
+    team_id?: string | null;
     project_id?: string | null;
     task_id?: string | null;
     description?: string | null;

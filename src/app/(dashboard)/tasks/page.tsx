@@ -60,6 +60,7 @@ export default async function TasksPage() {
             projects={projects}
             teamMembers={teamMembers}
             stats={stats}
+            currentUserId={user?.id}
         />
     );
 }

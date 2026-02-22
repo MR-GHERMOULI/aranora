@@ -4,19 +4,19 @@ import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Client } from "@/types";
+import { getActiveTeamId } from "@/lib/team-helpers";
 
 export async function getClients() {
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
 
-    if (!user) {
-        redirect('/login');
-    }
+    const teamId = await getActiveTeamId();
 
     const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('team_id', teamId)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -30,10 +30,9 @@ export async function getClients() {
 export async function createClient(formData: FormData) {
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
 
-    if (!user) {
-        redirect('/login');
-    }
+    const teamId = await getActiveTeamId();
 
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
@@ -45,6 +44,7 @@ export async function createClient(formData: FormData) {
         .from('clients')
         .insert({
             user_id: user.id,
+            team_id: teamId,
             name,
             email,
             phone,
@@ -64,10 +64,7 @@ export async function createClient(formData: FormData) {
 export async function updateClient(formData: FormData) {
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        redirect('/login');
-    }
+    if (!user) redirect('/login');
 
     const id = formData.get('id') as string;
     const name = formData.get('name') as string;
@@ -85,8 +82,7 @@ export async function updateClient(formData: FormData) {
             status,
             notes
         })
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id);
 
     if (error) {
         console.error('Error updating client:', error);
@@ -100,16 +96,12 @@ export async function updateClient(formData: FormData) {
 export async function deleteClient(clientId: string) {
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        redirect('/login');
-    }
+    if (!user) redirect('/login');
 
     const { error } = await supabase
         .from('clients')
         .delete()
-        .eq('id', clientId)
-        .eq('user_id', user.id);
+        .eq('id', clientId);
 
     if (error) {
         console.error('Error deleting client:', error);

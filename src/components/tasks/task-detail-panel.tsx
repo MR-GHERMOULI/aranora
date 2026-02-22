@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { format, parseISO, isPast, isToday } from "date-fns";
 import { Calendar, Clock, Flag, FolderOpen, Tag, Pencil, Trash2, Repeat } from "lucide-react";
 import { useState } from "react";
-import { updateTask, deleteTask } from "@/app/(dashboard)/tasks/actions";
+import { deleteTask, updateTask } from "@/app/(dashboard)/tasks/actions";
 import { EditTaskDialog } from "./edit-task-dialog";
+import { TaskActivity } from "./task-activity";
 
 interface TaskDetailPanelProps {
     task: any | null;
@@ -178,6 +179,9 @@ export function TaskDetailPanel({ task, open, onOpenChange, projects = [], teamM
                                 ))}
                             </div>
                         </div>
+
+                        {/* Activity / Comments */}
+                        <TaskActivity taskId={task.id} />
                     </div>
 
                     {/* Actions */}

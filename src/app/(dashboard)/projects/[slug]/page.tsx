@@ -1,6 +1,6 @@
 import { getProject } from "../get-project-action";
 import { getInvoices } from "../../invoices/actions";
-import { getProjectCollaborators } from "../collaborator-actions";
+import { getTeamMembers } from "@/lib/team-helpers";
 import { getTasks } from "../../tasks/actions";
 import { getProjectFiles } from "../file-actions";
 import { ProjectTaskList } from "@/components/projects/project-task-list";
@@ -41,9 +41,9 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, collaborators, tasks, files] = await Promise.all([
+    const [invoices, teamMembers, tasks, files] = await Promise.all([
         getInvoices(undefined, project.id),
-        getProjectCollaborators(project.id),
+        project.team_id ? getTeamMembers(project.team_id) : Promise.resolve([]),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id)
     ]);
@@ -138,7 +138,7 @@ export default async function ProjectPage({
                             <TabsTrigger value="tasks">Tasks</TabsTrigger>
                             <TabsTrigger value="files">Files & Documents</TabsTrigger>
                             <TabsTrigger value="invoices">Invoices</TabsTrigger>
-                            <TabsTrigger value="collaborators">Collaborators</TabsTrigger>
+                            <TabsTrigger value="team">Team</TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
@@ -196,58 +196,47 @@ export default async function ProjectPage({
                                 ))
                             )}
                         </TabsContent>
-                        <TabsContent value="collaborators" className="mt-4">
+                        <TabsContent value="team" className="mt-4">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
                                         <CardTitle className="text-lg flex items-center gap-2">
-                                            <User className="h-4 w-4" /> Collaborators
+                                            <User className="h-4 w-4" /> Team Members
                                         </CardTitle>
-                                        <CardDescription>Manage freelancers working on this project.</CardDescription>
+                                        <CardDescription>Workspace members who can access this project.</CardDescription>
                                     </div>
-                                    <AddCollaboratorDialog projectId={project.id} />
                                 </CardHeader>
                                 <CardContent>
-                                    {collaborators.length === 0 ? (
+                                    {teamMembers.length === 0 ? (
                                         <div className="text-center py-8 text-muted-foreground">
-                                            No collaborators invited.
+                                            No team members found.
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {collaborators.map((c) => (
-                                                <div key={c.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                            {teamMembers.map((member) => (
+                                                <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center">
-                                                            <Mail className="h-5 w-5 text-pink-600" />
+                                                        <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-lg">
+                                                            {/* @ts-ignore */}
+                                                            {member.profiles?.full_name?.charAt(0) || member.profiles?.email?.charAt(0) || 'U'}
                                                         </div>
                                                         <div>
                                                             <div className="flex items-center gap-2">
                                                                 <p className="font-medium text-sm">
                                                                     {/* @ts-ignore */}
-                                                                    {c.profile?.full_name || c.collaborator_email}
+                                                                    {member.profiles?.full_name || member.profiles?.email}
                                                                 </p>
-                                                                {/* @ts-ignore */}
-                                                                {c.profile?.username && (
-                                                                    <span className="text-xs text-violet-600 font-semibold bg-violet-50 px-1.5 py-0.5 rounded">
-                                                                        @{c.profile.username}
-                                                                    </span>
-                                                                )}
                                                             </div>
                                                             <div className="flex items-center gap-2 mt-1">
-                                                                <Badge variant={c.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                                                                    {c.status}
+                                                                <Badge variant={member.role === 'owner' ? 'default' : member.role === 'admin' ? 'secondary' : 'outline'} className="text-xs">
+                                                                    {member.role}
                                                                 </Badge>
-                                                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                                    <Percent className="h-3 w-3" /> {c.revenue_share}% Share
+                                                                <span className="text-[10px] text-muted-foreground">
+                                                                    Joined {new Date(member.joined_at).toLocaleDateString()}
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <RemoveCollaboratorButton
-                                                        collaboratorId={c.id}
-                                                        projectId={project.id}
-                                                        email={c.collaborator_email}
-                                                    />
                                                 </div>
                                             ))}
                                         </div>

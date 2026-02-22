@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { TimeEntry } from "@/types";
 import { revalidatePath } from "next/cache";
+import { getActiveTeamId } from "@/lib/team-helpers";
 
 export async function getTimeEntries(filters?: {
     projectId?: string;
@@ -15,6 +16,8 @@ export async function getTimeEntries(filters?: {
 
     if (!user) throw new Error("Unauthorized");
 
+    const teamId = await getActiveTeamId();
+
     let query = supabase
         .from("time_entries")
         .select(`
@@ -23,6 +26,7 @@ export async function getTimeEntries(filters?: {
             task:tasks(title),
             profiles:user_id(full_name, avatar_url, email)
         `)
+        .eq("team_id", teamId)
         .order("start_time", { ascending: false });
 
     // RLS handles the filtering, but we can be explicit if we want for performance
@@ -101,21 +105,8 @@ export async function startTimeEntry(data: {
         }
     }
 
-    // Determine team_id based on project or task, or default to user's personal team
-    let teamId = null;
-    if (data.projectId) {
-        const { data: proj } = await supabase.from('projects').select('team_id').eq('id', data.projectId).single();
-        if (proj?.team_id) teamId = proj.team_id;
-    } else if (data.taskId) {
-        const { data: task } = await supabase.from('tasks').select('team_id').eq('id', data.taskId).single();
-        if (task?.team_id) teamId = task.team_id;
-    }
-
-    if (!teamId) {
-        // Fallback to user's personal workspace
-        const { data: team } = await supabase.from('teams').select('id').eq('owner_id', user.id).limit(1).single();
-        if (team) teamId = team.id;
-    }
+    // Use the active workspace's team_id
+    const teamId = await getActiveTeamId();
 
     const { error } = await supabase.from("time_entries").insert({
         user_id: user.id,
@@ -212,20 +203,8 @@ export async function createTimeEntry(data: {
 
     if (!user) throw new Error("Unauthorized");
 
-    // Determine team_id
-    let teamId = null;
-    if (data.projectId) {
-        const { data: proj } = await supabase.from('projects').select('team_id').eq('id', data.projectId).single();
-        if (proj?.team_id) teamId = proj.team_id;
-    } else if (data.taskId) {
-        const { data: task } = await supabase.from('tasks').select('team_id').eq('id', data.taskId).single();
-        if (task?.team_id) teamId = task.team_id;
-    }
-
-    if (!teamId) {
-        const { data: team } = await supabase.from('teams').select('id').eq('owner_id', user.id).limit(1).single();
-        if (team) teamId = team.id;
-    }
+    // Use the active workspace's team_id
+    const teamId = await getActiveTeamId();
 
     const { error } = await supabase.from("time_entries").insert({
         user_id: user.id,

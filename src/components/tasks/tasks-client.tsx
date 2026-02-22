@@ -22,15 +22,17 @@ interface TasksClientProps {
         dueToday: number;
         inProgress: number;
     };
+    currentUserId?: string;
 }
 
 const PRIORITY_ORDER: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
 
-export function TasksClient({ tasks, projects, teamMembers, stats }: TasksClientProps) {
+export function TasksClient({ tasks, projects, teamMembers, stats, currentUserId }: TasksClientProps) {
     const [filters, setFilters] = useState<FilterState>({
         search: '',
         status: 'All',
         priority: 'All',
+        assignee: 'All',
         sortBy: 'due_date',
     });
     const [detailTask, setDetailTask] = useState<any | null>(null);
@@ -57,6 +59,15 @@ export function TasksClient({ tasks, projects, teamMembers, stats }: TasksClient
         // Priority filter
         if (filters.priority !== 'All') {
             result = result.filter(t => t.priority === filters.priority);
+        }
+
+        // Assignee filter
+        if (filters.assignee !== 'All') {
+            if (filters.assignee === 'Me') {
+                result = result.filter(t => t.assigned_to === currentUserId);
+            } else if (filters.assignee === 'Unassigned') {
+                result = result.filter(t => !t.assigned_to);
+            }
         }
 
         // Sort
@@ -125,7 +136,7 @@ export function TasksClient({ tasks, projects, teamMembers, stats }: TasksClient
                     </TabsList>
                     <p className="text-xs text-muted-foreground">
                         {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
-                        {filters.status !== 'All' || filters.priority !== 'All' || filters.search ? ' (filtered)' : ''}
+                        {filters.status !== 'All' || filters.priority !== 'All' || filters.assignee !== 'All' || filters.search ? ' (filtered)' : ''}
                     </p>
                 </div>
 

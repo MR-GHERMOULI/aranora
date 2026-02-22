@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getActiveTeamId } from '@/lib/team-helpers';
 
 // ── Types ──────────────────────────────────────────────
 export interface TaskFilters {
@@ -16,6 +17,7 @@ export interface TaskFilters {
     labels?: string[];
     sortBy?: 'due_date' | 'priority' | 'created_at' | 'title' | 'sort_order';
     sortDirection?: 'asc' | 'desc';
+    assignedToMe?: boolean;
 }
 
 export interface TaskStats {
@@ -63,10 +65,11 @@ function revalidateAll(extra?: string) {
     if (extra) revalidatePath(extra);
 }
 
-// ── GET TASKS ──────────────────────────────────────────
+// ── GET TASKS (Team-scoped) ───────────────────────────
 export async function getTasks(filters?: TaskFilters) {
     noStore();
     const { supabase, user } = await getAuthUser();
+    const teamId = await getActiveTeamId();
 
     let query = supabase
         .from('tasks')
@@ -79,9 +82,16 @@ export async function getTasks(filters?: TaskFilters) {
         .is('subtask_of', null); // Only top-level tasks by default
 
     if (filters?.projectId) {
+        // Project-specific view: show all tasks in project
         query = query.eq('project_id', filters.projectId);
     } else {
-        query = query.or(`user_id.eq.${user.id},assigned_to.eq.${user.id}`);
+        // Team-scoped view: show all tasks in the active workspace
+        query = query.eq('team_id', teamId);
+    }
+
+    // "Assigned to me" filter
+    if (filters?.assignedToMe) {
+        query = query.eq('assigned_to', user.id);
     }
 
     // Filters
@@ -93,9 +103,6 @@ export async function getTasks(filters?: TaskFilters) {
     }
     if (filters?.priority) {
         query = query.eq('priority', filters.priority);
-    }
-    if (filters?.projectId) {
-        query = query.eq('project_id', filters.projectId);
     }
     if (filters?.isPersonal !== undefined && filters.isPersonal) {
         query = query.eq('is_personal', true);
@@ -117,7 +124,6 @@ export async function getTasks(filters?: TaskFilters) {
     const sortDir = filters?.sortDirection || 'asc';
 
     if (sortBy === 'priority') {
-        // Custom priority ordering handled client-side
         query = query
             .order('due_date', { ascending: true, nullsFirst: false })
             .order('created_at', { ascending: false });
@@ -148,7 +154,6 @@ export async function getSubtasks(parentId: string) {
     const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .eq('user_id', user.id)
         .eq('subtask_of', parentId)
         .order('sort_order', { ascending: true });
 
@@ -159,15 +164,16 @@ export async function getSubtasks(parentId: string) {
     return data || [];
 }
 
-// ── GET TASK STATS ─────────────────────────────────────
+// ── GET TASK STATS (Team-scoped) ──────────────────────
 export async function getTaskStats(): Promise<TaskStats> {
     noStore();
     const { supabase, user } = await getAuthUser();
+    const teamId = await getActiveTeamId();
 
     const { data: tasks, error } = await supabase
         .from('tasks')
         .select('status, priority, due_date')
-        .eq('user_id', user.id)
+        .eq('team_id', teamId)
         .is('subtask_of', null);
 
     if (error || !tasks) {
@@ -202,9 +208,10 @@ export async function getTaskStats(): Promise<TaskStats> {
     return stats;
 }
 
-// ── CREATE TASK ────────────────────────────────────────
+// ── CREATE TASK (Team-scoped) ─────────────────────────
 export async function createTask(formData: FormData, pathToRevalidate?: string) {
     const { supabase, user } = await getAuthUser();
+    const teamId = await getActiveTeamId();
 
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
@@ -226,13 +233,14 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
 
     const { error } = await supabase.from('tasks').insert({
         user_id: user.id,
+        team_id: teamId,
         title,
         description,
         status,
         priority,
         due_date: dueDate || null,
         project_id: projectId || null,
-        assigned_to: assignedTo || user.id, // Default to creator if not specified
+        assigned_to: assignedTo || user.id,
         visible_to: visibleTo,
         is_personal: isPersonal,
         recurrence,
@@ -242,7 +250,6 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         estimated_hours: estimatedHours,
         completed_at: status === 'Done' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString(),
-        team_id: projectId !== 'none' ? null : null, // Handle setting team_id based on project if needed in future
     });
 
     if (error) {
@@ -265,11 +272,11 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
         data.completed_at = null;
     }
 
+    // Team members can update tasks they are assigned to or own
     const { data: updatedTask, error } = await supabase
         .from('tasks')
         .update(data)
         .eq('id', taskId)
-        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -294,7 +301,6 @@ export async function deleteTask(taskId: string, pathToRevalidate?: string) {
         .from('tasks')
         .delete()
         .eq('id', taskId)
-        .eq('user_id', user.id)
         .select()
         .single();
 
@@ -324,8 +330,7 @@ export async function bulkUpdateTasks(taskIds: string[], data: any) {
     const { error } = await supabase
         .from('tasks')
         .update(data)
-        .in('id', taskIds)
-        .eq('user_id', user.id);
+        .in('id', taskIds);
 
     if (error) {
         console.error('Error bulk updating tasks:', error);
@@ -343,8 +348,7 @@ export async function bulkDeleteTasks(taskIds: string[]) {
     const { error } = await supabase
         .from('tasks')
         .delete()
-        .in('id', taskIds)
-        .eq('user_id', user.id);
+        .in('id', taskIds);
 
     if (error) {
         console.error('Error bulk deleting tasks:', error);
