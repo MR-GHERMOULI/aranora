@@ -135,6 +135,18 @@ export async function removeTeamMember(teamId: string, memberId: string) {
     return { error: 'Not authenticated' };
   }
 
+  // Authorization: verify the caller is an owner or admin of this team
+  const { data: callerMembership } = await supabase
+    .from('team_members')
+    .select('role')
+    .eq('team_id', teamId)
+    .eq('user_id', userData.user.id)
+    .single();
+
+  if (!callerMembership || !['owner', 'admin'].includes(callerMembership.role)) {
+    return { error: 'Forbidden: only admins and owners can remove members.' };
+  }
+
   const { error } = await supabase
     .from('team_members')
     .delete()
@@ -158,7 +170,17 @@ export async function changeMemberRole(teamId: string, memberId: string, newRole
     return { error: 'Not authenticated' };
   }
 
-  // Additional validation can be done here to ensure the requester is an owner/admin
+  // Authorization: verify the caller is an owner or admin of this team
+  const { data: callerMembership } = await supabase
+    .from('team_members')
+    .select('role')
+    .eq('team_id', teamId)
+    .eq('user_id', userData.user.id)
+    .single();
+
+  if (!callerMembership || !['owner', 'admin'].includes(callerMembership.role)) {
+    return { error: 'Forbidden: only admins and owners can change member roles.' };
+  }
 
   const { error } = await supabase
     .from('team_members')
@@ -204,6 +226,20 @@ export async function acceptInvitation(token: string) {
   // Verify email matches (Optional: you might want to allow them to accept with a different email if they are logged in)
   if (invitation.email.toLowerCase() !== userData.user.email?.toLowerCase()) {
     return { error: 'This invitation was sent to a different email address.' };
+  }
+
+  // Check if user is already a member of this team
+  const { data: existingMembership } = await supabase
+    .from('team_members')
+    .select('id')
+    .eq('team_id', invitation.team_id)
+    .eq('user_id', userData.user.id)
+    .single();
+
+  if (existingMembership) {
+    // Already a member — mark invitation as accepted and redirect gracefully
+    await supabase.from('team_invitations').update({ status: 'accepted' }).eq('id', invitation.id);
+    return { success: true, teamId: invitation.team_id };
   }
 
   // Add to team

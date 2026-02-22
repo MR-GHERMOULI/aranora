@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { UserPlus, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -53,12 +54,13 @@ export function InviteTeamDialog() {
             formData.append("role", data.role)
 
             await inviteTeamMember(formData)
+            toast.success('Invitation sent successfully!')
             setOpen(false)
             reset()
             router.refresh()
-        } catch (error) {
+        } catch (error: any) {
             console.error(error)
-            alert("Failed to invite team member")
+            toast.error(error?.message || "Failed to invite team member")
         } finally {
             setLoading(false)
         }
