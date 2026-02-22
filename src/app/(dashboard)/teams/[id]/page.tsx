@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { inviteTeamMember, removeTeamMember, changeMemberRole } from '@/app/actions/team-actions';
+import { removeTeamMember, changeMemberRole } from '@/app/actions/team-actions';
+import { InviteMemberForm } from '@/components/teams/invite-member-form';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, UserPlus, Trash2, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
@@ -145,31 +146,7 @@ export default async function TeamSettingsPage({ params }: { params: { id: strin
                                 <CardDescription>Send an email invitation to join this workspace.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <form action={async (formData) => {
-                                    "use server"
-                                    await inviteTeamMember(formData);
-                                }} className="space-y-4">
-                                    <input type="hidden" name="teamId" value={teamId} />
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Email Address</Label>
-                                        <Input id="email" name="email" type="email" placeholder="colleague@example.com" required />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="role">Role</Label>
-                                        <Select name="role" defaultValue="member">
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select role" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="member">Member</SelectItem>
-                                                <SelectItem value="admin">Admin</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <Button type="submit" className="w-full">
-                                        Send Invitation
-                                    </Button>
-                                </form>
+                                <InviteMemberForm teamId={teamId} />
                             </CardContent>
                         </Card>
                     )}

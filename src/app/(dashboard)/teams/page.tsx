@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createTeam } from '@/app/actions/team-actions';
+import { CreateWorkspaceForm } from '@/components/teams/create-workspace-form';
 import Link from 'next/link';
 import { Plus, Users } from 'lucide-react';
 
@@ -67,19 +68,7 @@ export default async function TeamsPage() {
                             <CardDescription>Start a new collaborative team</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <form action={async (formData) => {
-                                "use server"
-                                await createTeam(formData);
-                            }} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Workspace Name</Label>
-                                    <Input id="name" name="name" placeholder="e.g. Design Agency" required />
-                                </div>
-                                <Button type="submit" className="w-full">
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Create Workspace
-                                </Button>
-                            </form>
+                            <CreateWorkspaceForm />
                         </CardContent>
                     </Card>
                 </div>
