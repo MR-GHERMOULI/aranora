@@ -169,6 +169,8 @@ export async function deleteProject(projectId: string) {
   revalidatePath('/projects');
 }
 
+import { v4 as uuidv4 } from 'uuid';
+
 export async function toggleShareToken(projectId: string): Promise<{ share_token: string | null }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -189,7 +191,7 @@ export async function toggleShareToken(projectId: string): Promise<{ share_token
     throw new Error('Project not found');
   }
 
-  const newToken = project.share_token ? null : crypto.randomUUID();
+  const newToken = project.share_token ? null : uuidv4();
 
   const { error } = await supabase
     .from('projects')
