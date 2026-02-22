@@ -58,6 +58,7 @@ export function TimeLogTable({ entries }: TimeLogTableProps) {
                                     <TableRow>
                                         <TableHead>Description</TableHead>
                                         <TableHead>Project / Task</TableHead>
+                                        <TableHead>Team Member</TableHead>
                                         <TableHead>Duration</TableHead>
                                         <TableHead>Time</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
@@ -94,6 +95,18 @@ export function TimeLogTable({ entries }: TimeLogTableProps) {
                                                             </div>
                                                         )}
                                                     </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {entry.profiles && (
+                                                        <div className="flex items-center gap-2" title={entry.profiles.full_name || entry.profiles.email}>
+                                                            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary">
+                                                                {entry.profiles.full_name?.charAt(0) || 'U'}
+                                                            </div>
+                                                            <span className="text-xs font-medium max-w-[100px] truncate hidden sm:inline-block">
+                                                                {entry.profiles.full_name?.split(' ')[0] || 'User'}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell className="font-mono">
                                                     {entry.end_time ? formatDuration(duration) : (

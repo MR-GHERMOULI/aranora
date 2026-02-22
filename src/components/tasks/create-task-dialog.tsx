@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 const LABEL_OPTIONS = ['Bug', 'Feature', 'Design', 'Research', 'Meeting', 'Urgent', 'Review'];
 
-export function CreateTaskDialog({ projects }: { projects: any[] }) {
+export function CreateTaskDialog({ projects, teamMembers }: { projects: any[], teamMembers?: any[] }) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [date, setDate] = useState<Date>();
@@ -31,6 +31,7 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
     const [priority, setPriority] = useState('Medium');
     const [projectId, setProjectId] = useState('none');
     const [recurrence, setRecurrence] = useState('none');
+    const [assigneeId, setAssigneeId] = useState('unassigned');
 
     const toggleLabel = (label: string) => {
         setSelectedLabels(prev =>
@@ -45,6 +46,7 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
         setPriority('Medium');
         setProjectId('none');
         setRecurrence('none');
+        setAssigneeId('unassigned');
     };
 
     async function handleSubmit(formData: FormData) {
@@ -55,6 +57,7 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
         if (projectId !== 'none') formData.set('projectId', projectId);
         if (selectedLabels.length > 0) formData.set('labels', selectedLabels.join(','));
         if (recurrence !== 'none') formData.set('recurrenceType', recurrence);
+        if (assigneeId !== 'unassigned') formData.set('assignedTo', assigneeId);
         formData.set('isPersonal', projectId === 'none' ? 'true' : 'false');
 
         const result = await createTask(formData);
@@ -177,6 +180,23 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                                         <SelectItem value="none">None (Personal)</SelectItem>
                                         {projects.map((p: any) => (
                                             <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">Assign To</Label>
+                                <Select value={assigneeId} onValueChange={setAssigneeId}>
+                                    <SelectTrigger className="h-10 bg-background/50">
+                                        <SelectValue placeholder="Unassigned" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="unassigned">Unassigned (Me)</SelectItem>
+                                        {teamMembers?.map((tm: any) => (
+                                            <SelectItem key={tm.user_id} value={tm.user_id}>
+                                                {tm.profiles?.full_name || tm.profiles?.email || 'Unknown User'}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>

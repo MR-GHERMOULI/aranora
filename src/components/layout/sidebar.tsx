@@ -17,7 +17,8 @@ import {
     X,
     CreditCard,
     Timer,
-    Radio
+    Radio,
+    Building2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -69,6 +70,12 @@ export function Sidebar({ className }: SidebarProps) {
             icon: ListTodo,
             href: "/tasks",
             color: "text-indigo-500",
+        },
+        {
+            label: "Workspaces",
+            icon: Building2,
+            href: "/teams",
+            color: "text-blue-600",
         },
         {
             label: "Clients",

@@ -241,7 +241,8 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         subtask_of: subtaskOf || null,
         estimated_hours: estimatedHours,
         completed_at: status === 'Done' ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        team_id: projectId !== 'none' ? null : null, // Handle setting team_id based on project if needed in future
     });
 
     if (error) {

@@ -14,6 +14,7 @@ import { List, LayoutGrid, CalendarDays } from "lucide-react";
 interface TasksClientProps {
     tasks: any[];
     projects: any[];
+    teamMembers: any[];
     stats: {
         total: number;
         completed: number;
@@ -25,7 +26,7 @@ interface TasksClientProps {
 
 const PRIORITY_ORDER: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
 
-export function TasksClient({ tasks, projects, stats }: TasksClientProps) {
+export function TasksClient({ tasks, projects, teamMembers, stats }: TasksClientProps) {
     const [filters, setFilters] = useState<FilterState>({
         search: '',
         status: 'All',
@@ -96,7 +97,7 @@ export function TasksClient({ tasks, projects, stats }: TasksClientProps) {
                         Organize, prioritize, and track your tasks efficiently.
                     </p>
                 </div>
-                <CreateTaskDialog projects={projects} />
+                <CreateTaskDialog projects={projects} teamMembers={teamMembers} />
             </div>
 
             {/* Stats */}
@@ -147,6 +148,7 @@ export function TasksClient({ tasks, projects, stats }: TasksClientProps) {
                 open={detailOpen}
                 onOpenChange={setDetailOpen}
                 projects={projects}
+                teamMembers={teamMembers}
             />
         </div>
     );

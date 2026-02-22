@@ -129,13 +129,20 @@ export function TaskCard({ task, projects = [], onOpenDetail }: TaskProps) {
                             {isDone && <CheckCircle2 className="h-3 w-3" />}
                         </button>
 
-                        {/* Title + description */}
-                        <div className="flex-1 min-w-0">
-                            <h4 className={`text-sm font-medium leading-tight ${isDone ? 'line-through text-muted-foreground' : ''}`}>
-                                {task.title}
-                            </h4>
-                            {task.description && !isDone && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                        {/* Title + description + assignee */}
+                        <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
+                            <div>
+                                <h4 className={`text-sm font-medium leading-tight ${isDone ? 'line-through text-muted-foreground' : ''}`}>
+                                    {task.title}
+                                </h4>
+                                {task.description && !isDone && (
+                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                                )}
+                            </div>
+                            {task.assignee && (
+                                <div className="h-6 w-6 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary" title={`Assigned to ${task.assignee.full_name || 'User'}`}>
+                                    {task.assignee.full_name?.charAt(0) || 'U'}
+                                </div>
                             )}
                         </div>
 
