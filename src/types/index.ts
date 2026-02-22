@@ -32,6 +32,7 @@ export interface Project {
     start_date?: string | null
     end_date?: string | null
     hourly_rate?: number | null
+    share_token?: string | null
     created_at: string
     client?: { name: string }
 }

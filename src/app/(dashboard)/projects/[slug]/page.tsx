@@ -18,6 +18,7 @@ import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
 import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
 import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog";
+import { ShareProgressDialog } from "@/components/projects/share-progress-dialog";
 import { ProjectTimerButton } from "@/components/time-tracking/project-timer-button";
 
 export default async function ProjectPage({
@@ -74,6 +75,7 @@ export default async function ProjectPage({
                 </div>
                 <div className="flex gap-2">
                     <ProjectTimerButton projectId={project.id} projectTitle={project.title} />
+                    <ShareProgressDialog projectId={project.id} projectTitle={project.title} />
                     <EditProjectDialog project={project} />
                     <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
                 </div>

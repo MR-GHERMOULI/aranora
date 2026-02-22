@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import { MiniProgressBar } from "@/components/projects/project-progress-bar";
 import { AddProjectDialog } from "@/components/projects/add-project-dialog";
 import {
     Briefcase, Search, Clock, CheckCircle2, PauseCircle, Pencil,
@@ -219,7 +219,7 @@ export function ProjectsClient({ projects, clients }: ProjectsClientProps) {
                                                     <span className="text-muted-foreground">Tasks</span>
                                                     <span className="font-medium">{project.completed_task_count}/{project.task_count}</span>
                                                 </div>
-                                                <Progress value={taskProgress} className="h-1.5" />
+                                                <MiniProgressBar percentage={taskProgress} />
                                             </div>
                                         )}
 

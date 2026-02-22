@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { CheckSquare, Loader2, Trash2, Circle, CheckCircle2, Calendar, LayoutList, User } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
-import { Progress } from "@/components/ui/progress"
+import { ProjectProgressBar } from "./project-progress-bar"
 import { AddProjectTaskDialog } from "./add-project-task-dialog"
 import { cn } from "@/lib/utils"
 import { TaskTimerButton } from "@/components/time-tracking/task-timer-button"
@@ -130,13 +130,13 @@ export function ProjectTaskList({ tasks, projectId }: ProjectTaskListProps) {
             <CardContent className="space-y-6">
                 {/* Progress Bar */}
                 {tasks.length > 0 && (
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>Progress</span>
-                            <span>{Math.round(progress)}%</span>
-                        </div>
-                        <Progress value={progress} className="h-3" />
-                    </div>
+                    <ProjectProgressBar
+                        totalTasks={tasks.length}
+                        completedTasks={completedCount}
+                        inProgressTasks={tasks.filter(t => t.status === "In Progress").length}
+                        todoTasks={tasks.filter(t => t.status !== "Done" && t.status !== "In Progress").length}
+                        variant="full"
+                    />
                 )}
 
 

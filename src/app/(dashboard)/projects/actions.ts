@@ -168,3 +168,58 @@ export async function deleteProject(projectId: string) {
 
   revalidatePath('/projects');
 }
+
+export async function toggleShareToken(projectId: string): Promise<{ share_token: string | null }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Check current token
+  const { data: project } = await supabase
+    .from('projects')
+    .select('share_token')
+    .eq('id', projectId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (!project) {
+    throw new Error('Project not found');
+  }
+
+  const newToken = project.share_token ? null : crypto.randomUUID();
+
+  const { error } = await supabase
+    .from('projects')
+    .update({ share_token: newToken })
+    .eq('id', projectId)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Error toggling share token:', error);
+    throw new Error('Failed to toggle sharing');
+  }
+
+  revalidatePath(`/projects/${projectId}`);
+  return { share_token: newToken };
+}
+
+export async function getShareToken(projectId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data } = await supabase
+    .from('projects')
+    .select('share_token')
+    .eq('id', projectId)
+    .eq('user_id', user.id)
+    .single();
+
+  return data?.share_token || null;
+}
