@@ -151,10 +151,10 @@ export async function removeCollaborator(collaboratorId: string, projectId: stri
 export async function getProjectMembers(projectId: string) {
     const supabase = await createClient();
 
-    // Get Project Owner
+    // Get Project Owner & Team ID
     const { data: project } = await supabase
         .from('projects')
-        .select('user_id')
+        .select('user_id, team_id')
         .eq('id', projectId)
         .single();
 
@@ -166,24 +166,64 @@ export async function getProjectMembers(projectId: string) {
         .eq('id', project.user_id)
         .single();
 
-    // Get Active Collaborators (Status 'active' or 'invited'? Actually active is better for assignment)
+    // Get Team Members
+    let teamMemberProfiles: any[] = [];
+    if (project.team_id) {
+        const { data: teamMembers } = await supabase
+            .from('team_members')
+            .select('user_id')
+            .eq('team_id', project.team_id);
+            
+        if (teamMembers && teamMembers.length > 0) {
+            const userIds = teamMembers.map(tm => tm.user_id);
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, full_name, company_email')
+                .in('id', userIds);
+                
+            if (profiles) {
+                // Filter out the owner if they are also a team member to avoid duplicates
+                teamMemberProfiles = profiles.filter(p => p.id !== project.user_id);
+            }
+        }
+    }
+
+    // Get Active/Invited Collaborators
     const { data: collaborators } = await supabase
         .from('project_collaborators')
         .select('collaborator_email')
         .eq('project_id', projectId)
         .in('status', ['active', 'invited']);
 
+    let collaboratorProfiles: any[] = [];
     const emails = collaborators?.map(c => c.collaborator_email) || [];
-
-    const { data: collaboratorProfiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, company_email')
-        .in('company_email', emails);
+    
+    if (emails.length > 0) {
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, company_email')
+            .in('company_email', emails);
+            
+        if (profiles) {
+           collaboratorProfiles = profiles;
+        }
+    }
 
     const members = [];
-    if (ownerProfile) members.push(ownerProfile);
-    if (collaboratorProfiles) members.push(...collaboratorProfiles);
+    if (ownerProfile) members.push({ ...ownerProfile, member_type: 'owner' });
+    
+    // Add team members
+    for (const profile of teamMemberProfiles) {
+        members.push({ ...profile, member_type: 'team' });
+    }
+    
+    // Add collaborators
+    for (const profile of collaboratorProfiles) {
+        // Only add if not already in the list (e.g. a team member who is also a collaborator)
+        if (!members.find(m => m.id === profile.id)) {
+            members.push({ ...profile, member_type: 'partner' });
+        }
+    }
 
-    // Deduplicate (just in case)
-    return Array.from(new Map(members.map(m => [m.id, m])).values());
+    return members;
 }

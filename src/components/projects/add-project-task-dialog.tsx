@@ -30,11 +30,13 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { useEffect } from "react"
 import { getProjectMembers } from "@/app/(dashboard)/projects/collaborator-actions"
+import { Badge } from "@/components/ui/badge"
 
 interface Member {
     id: string;
     full_name: string | null;
     company_email: string | null;
+    member_type?: 'owner' | 'team' | 'partner';
 }
 
 interface AddProjectTaskDialogProps {
@@ -156,8 +158,15 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
                                 <SelectContent>
                                     {members.map((member) => (
                                         <SelectItem key={member.id} value={member.id}>
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-medium">{member.full_name || "Unknown"}</span>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-medium">{member.full_name || member.company_email || "Unknown"}</span>
+                                                </div>
+                                                {member.member_type && (
+                                                    <Badge variant={member.member_type === 'owner' ? 'default' : member.member_type === 'team' ? 'secondary' : 'outline'} className="text-[10px] h-4 px-1 py-0 uppercase">
+                                                        {member.member_type}
+                                                    </Badge>
+                                                )}
                                             </div>
                                         </SelectItem>
                                     ))}
@@ -184,12 +193,19 @@ export function AddProjectTaskDialog({ projectId }: AddProjectTaskDialogProps) {
                                                 type="button"
                                                 onClick={() => toggleVisibility(member.id)}
                                                 className={cn(
-                                                    "w-full flex items-center justify-between px-2 py-1.5 rounded-sm text-xs hover:bg-muted transition-colors",
+                                                    "w-full flex items-center justify-between px-2 py-1.5 rounded-sm text-xs hover:bg-muted transition-colors gap-2",
                                                     visibleTo.includes(member.id) && "bg-brand-primary/10 text-brand-primary"
                                                 )}
                                             >
-                                                <span className="truncate">{member.full_name || member.company_email}</span>
-                                                {visibleTo.includes(member.id) && <Check className="h-3 w-3" />}
+                                                <div className="flex items-center gap-2 truncate">
+                                                    <span className="truncate">{member.full_name || member.company_email}</span>
+                                                    {member.member_type && (
+                                                        <Badge variant={member.member_type === 'owner' ? 'default' : member.member_type === 'team' ? 'secondary' : 'outline'} className="text-[9px] h-3.5 px-1 py-0 uppercase shrink-0">
+                                                            {member.member_type}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                {visibleTo.includes(member.id) && <Check className="h-3 w-3 shrink-0" />}
                                             </button>
                                         ))}
                                     </div>
