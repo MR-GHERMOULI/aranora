@@ -29,21 +29,10 @@ import { NotificationsPopover } from "./notifications/notifications-popover"
 import { Mail } from "lucide-react"
 import { getPendingInvitationsCount } from "./notifications/actions"
 import { useEffect } from "react"
-import { WorkspaceSwitcher } from "./workspace-switcher"
 
-interface Team {
-    id: string
-    name: string
-    owner_id: string
-    role: string
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-    teams?: Team[]
-    activeTeamId?: string
-}
-
-export function Sidebar({ className, teams = [], activeTeamId = "" }: SidebarProps) {
+export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const [inviteCount, setInviteCount] = useState(0)
@@ -189,11 +178,6 @@ export function Sidebar({ className, teams = [], activeTeamId = "" }: SidebarPro
                             Aranora
                         </div>
                     </Link>
-
-                    {/* Workspace Switcher */}
-                    <div className="shrink-0 mb-4 px-1">
-                        <WorkspaceSwitcher teams={teams} activeTeamId={activeTeamId} />
-                    </div>
 
                     <div className="shrink-0 mb-4 px-1">
                         <GlobalSearch />
