@@ -184,29 +184,6 @@ CREATE POLICY "Users can create own tasks" ON tasks FOR INSERT WITH CHECK (auth.
 CREATE POLICY "Users can update own tasks" ON tasks FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own tasks" ON tasks FOR DELETE USING (auth.uid() = user_id);
 
--- 7. Team Members Table
-CREATE TABLE IF NOT EXISTS team_members (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  team_owner_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
-  member_email TEXT NOT NULL,
-  role TEXT DEFAULT 'member' CHECK (role IN ('admin', 'member')),
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(team_owner_id, member_email)
-);
-CREATE INDEX IF NOT EXISTS idx_team_members_owner ON team_members(team_owner_id);
-CREATE INDEX IF NOT EXISTS idx_team_members_email ON team_members(member_email);
-ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Team owners can view their team" ON team_members;
-DROP POLICY IF EXISTS "Team owners can invite members" ON team_members;
-DROP POLICY IF EXISTS "Team owners can update members" ON team_members;
-DROP POLICY IF EXISTS "Team owners can remove members" ON team_members;
-CREATE POLICY "Team owners can view their team" ON team_members FOR SELECT USING (auth.uid() = team_owner_id);
-CREATE POLICY "Team owners can invite members" ON team_members FOR INSERT WITH CHECK (auth.uid() = team_owner_id);
-CREATE POLICY "Team owners can update members" ON team_members FOR UPDATE USING (auth.uid() = team_owner_id);
-CREATE POLICY "Team owners can remove members" ON team_members FOR DELETE USING (auth.uid() = team_owner_id);
-
 -- 8. Project Collaborators Table
 CREATE TABLE IF NOT EXISTS project_collaborators (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -269,7 +246,7 @@ DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 DROP TRIGGER IF EXISTS update_invoices_updated_at ON invoices;
 DROP TRIGGER IF EXISTS update_contracts_updated_at ON contracts;
 DROP TRIGGER IF EXISTS update_tasks_updated_at ON tasks;
-DROP TRIGGER IF EXISTS update_team_members_updated_at ON team_members;
+
 DROP TRIGGER IF EXISTS update_project_collaborators_updated_at ON project_collaborators;
 
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -278,7 +255,7 @@ CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW
 CREATE TRIGGER update_invoices_updated_at BEFORE UPDATE ON invoices FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_contracts_updated_at BEFORE UPDATE ON contracts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_team_members_updated_at BEFORE UPDATE ON team_members FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_project_collaborators_updated_at BEFORE UPDATE ON project_collaborators FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS TRIGGER AS $$

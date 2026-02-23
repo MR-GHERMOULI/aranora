@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 
 const Bar = dynamic(() => import("recharts").then(mod => mod.Bar), { ssr: false })
@@ -17,6 +18,16 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data }: RevenueChartProps) {
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) {
+        return <div className="h-[350px] w-full bg-slate-100/50 animate-pulse rounded-lg" />
+    }
+
     if (!data || data.length === 0) {
         return <div className="h-[200px] flex items-center justify-center text-muted-foreground">No data available</div>
     }
@@ -44,17 +55,17 @@ export function RevenueChart({ data }: RevenueChartProps) {
                         contentStyle={{
                             borderRadius: '8px',
                             border: '1px solid rgba(128, 128, 128, 0.2)',
-                            backgroundColor: 'var(--card)',
-                            color: 'var(--foreground)'
+                            backgroundColor: 'white',
+                            color: 'black'
                         }}
-                        itemStyle={{ color: 'var(--foreground)' }}
+                        itemStyle={{ color: 'black' }}
                         formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
                     />
                     <Bar
                         dataKey="total"
                         fill="currentColor"
                         radius={[4, 4, 0, 0]}
-                        className="fill-primary"
+                        className="fill-brand-primary"
                     />
                 </BarChart>
             </ResponsiveContainer>
