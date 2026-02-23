@@ -34,22 +34,22 @@ export async function createTeam(formData: FormData) {
 
   const { name } = result.data;
 
+  const teamId = crypto.randomUUID();
+
   // 1. Create Team
-  const { data: teamData, error: teamError } = await supabase
+  const { error: teamError } = await supabase
     .from('teams')
-    .insert([{ name, owner_id: userData.user.id }])
-    .select()
-    .single();
+    .insert([{ id: teamId, name, owner_id: userData.user.id }]);
 
   if (teamError) {
     console.error('Error creating team:', teamError);
-    return { error: 'Failed to create team.' };
+    return { error: 'Failed to create team: ' + teamError.message };
   }
 
   // 2. Add creator as owner
   const { error: memberError } = await supabase
     .from('team_members')
-    .insert([{ team_id: teamData.id, user_id: userData.user.id, role: 'owner' }]);
+    .insert([{ team_id: teamId, user_id: userData.user.id, role: 'owner' }]);
 
   if (memberError) {
     console.error('Error adding owner to team:', memberError);
@@ -58,7 +58,7 @@ export async function createTeam(formData: FormData) {
   }
 
   revalidatePath('/teams');
-  return { success: true, teamId: teamData.id };
+  return { success: true, teamId };
 }
 
 export async function inviteTeamMember(formData: FormData) {
