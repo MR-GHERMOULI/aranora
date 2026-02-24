@@ -134,9 +134,9 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             const formData = new FormData()
             formData.append("username", data.username)
             formData.append("fullName", data.fullName)
-            if (data.companyName) formData.append("companyName", data.companyName)
-            if (data.companyEmail) formData.append("companyEmail", data.companyEmail)
-            if (data.address) formData.append("address", data.address)
+            formData.append("companyName", data.companyName || "")
+            formData.append("companyEmail", data.companyEmail || "")
+            formData.append("address", data.address || "")
             formData.append("defaultPaperSize", data.defaultPaperSize)
             formData.append("defaultTaxRate", String(data.defaultTaxRate))
 

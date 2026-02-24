@@ -1,6 +1,26 @@
 -- Fix Settings Page (Profiles Table)
 DO $$ BEGIN
   -- Add missing columns to profiles table allowing settings to save
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'username') THEN
+    ALTER TABLE profiles ADD COLUMN username TEXT UNIQUE;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'full_name') THEN
+    ALTER TABLE profiles ADD COLUMN full_name TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'company_name') THEN
+    ALTER TABLE profiles ADD COLUMN company_name TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'company_email') THEN
+    ALTER TABLE profiles ADD COLUMN company_email TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'address') THEN
+    ALTER TABLE profiles ADD COLUMN address TEXT;
+  END IF;
+
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'logo_url') THEN
     ALTER TABLE profiles ADD COLUMN logo_url TEXT;
   END IF;
@@ -11,6 +31,10 @@ DO $$ BEGIN
 
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'default_tax_rate') THEN
     ALTER TABLE profiles ADD COLUMN default_tax_rate NUMERIC(12,2) DEFAULT 0;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'updated_at') THEN
+    ALTER TABLE profiles ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
   END IF;
 END $$;
 

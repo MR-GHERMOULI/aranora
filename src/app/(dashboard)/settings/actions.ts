@@ -97,7 +97,7 @@ export async function updateProfile(formData: FormData) {
         throw new Error('Failed to update profile');
     }
 
-    revalidatePath('/dashboard/settings');
+    revalidatePath('/settings');
 }
 
 export async function updateLogo(logoUrl: string | null) {
@@ -118,5 +118,5 @@ export async function updateLogo(logoUrl: string | null) {
         throw new Error('Failed to update logo');
     }
 
-    revalidatePath('/dashboard/settings');
+    revalidatePath('/settings');
 }
