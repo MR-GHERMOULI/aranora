@@ -70,6 +70,11 @@ export function SettingsForm({ profile }: SettingsFormProps) {
     })
 
     async function handleLogoUpload(file: File) {
+        if (file.size > 2 * 1024 * 1024) {
+            setServerError("File size must be less than 2MB.");
+            return;
+        }
+
         setLogoLoading(true)
         setServerError(null)
 
@@ -157,7 +162,7 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             <div className="space-y-4 pb-6 border-b">
                 <Label className="text-lg font-semibold">Company Logo</Label>
                 <p className="text-sm text-muted-foreground">
-                    Upload your company logo for invoices and documents
+                    Upload your company logo for invoices and documents. (Max 2MB. Recommended: 512x512px. PNG, JPG, or WEBP)
                 </p>
                 <div className="flex items-center gap-6">
                     <div className="relative h-24 w-24 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden bg-muted/50">
