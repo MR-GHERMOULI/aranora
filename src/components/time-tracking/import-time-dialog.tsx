@@ -113,7 +113,7 @@ export function ImportTimeDialog({ projectId, onImport }: ImportTimeDialogProps)
                                                     {entry.description || "No description"}
                                                 </label>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {new Date(entry.start_time).toLocaleDateString()} • {formatDuration(Math.round(duration))}
+                                                    {new Date(entry.start_time).toLocaleDateString('en-US')} • {formatDuration(Math.round(duration))}
                                                 </p>
                                             </div>
                                             {entry.task && (

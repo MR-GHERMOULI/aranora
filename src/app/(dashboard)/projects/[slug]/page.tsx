@@ -232,7 +232,7 @@ export default async function ProjectPage({
                                                                     {member.role}
                                                                 </Badge>
                                                                 <span className="text-[10px] text-muted-foreground">
-                                                                    Joined {new Date(member.joined_at).toLocaleDateString()}
+                                                                    Joined {new Date(member.joined_at).toLocaleDateString('en-US')}
                                                                 </span>
                                                             </div>
                                                         </div>

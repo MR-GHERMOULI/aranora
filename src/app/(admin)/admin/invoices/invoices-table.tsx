@@ -139,7 +139,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                                             ${invoice.total?.toLocaleString() || "0"}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-muted-foreground">
-                                            {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : "-"}
+                                            {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-US') : "-"}
                                         </td>
                                     </tr>
                                 ))

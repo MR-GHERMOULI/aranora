@@ -241,7 +241,7 @@ export default async function DashboardPage() {
                                                 <div>
                                                     <p className="font-medium group-hover:text-brand-primary transition-colors">{project.title}</p>
                                                     <p className="text-xs text-muted-foreground">
-                                                        Created {new Date(project.created_at).toLocaleDateString()}
+                                                        Created {new Date(project.created_at).toLocaleDateString('en-US')}
                                                     </p>
                                                 </div>
                                             </div>
@@ -298,7 +298,7 @@ export default async function DashboardPage() {
                                                     </div>
                                                 </div>
                                                 <Badge variant={isUrgent ? 'destructive' : 'outline'} className="text-xs">
-                                                    {dueDate.toLocaleDateString()}
+                                                    {dueDate.toLocaleDateString('en-US')}
                                                 </Badge>
                                             </div>
                                         );
@@ -348,7 +348,7 @@ export default async function DashboardPage() {
                                         {stats.recentInvoices.map((invoice: any) => (
                                             <tr key={invoice.id} className="border-b last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                 <td className="py-3 font-medium">{invoice.invoice_number}</td>
-                                                <td className="py-3 text-muted-foreground">{new Date(invoice.created_at).toLocaleDateString()}</td>
+                                                <td className="py-3 text-muted-foreground">{new Date(invoice.created_at).toLocaleDateString('en-US')}</td>
                                                 <td className="py-3 font-medium">{formatCurrency(invoice.total || 0)}</td>
                                                 <td className="py-3">
                                                     <Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Overdue' ? 'destructive' : 'secondary'}>

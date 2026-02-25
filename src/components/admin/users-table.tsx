@@ -199,7 +199,7 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                                         <td className="px-4 py-3 text-sm">{user.country || "-"}</td>
                                         <td className="px-4 py-3">{getStatusBadge(user.account_status || "active")}</td>
                                         <td className="px-4 py-3 text-sm text-muted-foreground">
-                                            {new Date(user.created_at).toLocaleDateString()}
+                                            {new Date(user.created_at).toLocaleDateString('en-US')}
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <DropdownMenu>
@@ -302,7 +302,7 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Joined</span>
-                                    <span>{new Date(selectedUser.created_at).toLocaleDateString()}</span>
+                                    <span>{new Date(selectedUser.created_at).toLocaleDateString('en-US')}</span>
                                 </div>
                             </div>
                         </div>

@@ -157,7 +157,7 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
                                         </span>
                                     </div>
                                     <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
-                                        {new Date(msg.created_at).toLocaleDateString()}
+                                        {new Date(msg.created_at).toLocaleDateString('en-US')}
                                     </span>
                                 </div>
 

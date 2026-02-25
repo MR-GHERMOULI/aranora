@@ -102,7 +102,7 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                                             {project.budget ? `$${project.budget.toLocaleString()}` : "-"}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-muted-foreground">
-                                            {new Date(project.created_at).toLocaleDateString()}
+                                            {new Date(project.created_at).toLocaleDateString('en-US')}
                                         </td>
                                     </tr>
                                 ))

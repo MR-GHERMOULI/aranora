@@ -67,7 +67,7 @@ export default async function AdminPagesPage() {
                         {page.updatedAt && (
                             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
                                 <Clock className="h-3 w-3" />
-                                Last updated: {new Date(page.updatedAt).toLocaleDateString()}
+                                Last updated: {new Date(page.updatedAt).toLocaleDateString('en-US')}
                             </div>
                         )}
 

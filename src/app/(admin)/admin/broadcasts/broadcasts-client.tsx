@@ -185,7 +185,7 @@ export function BroadcastsClient({ initialBroadcasts }: BroadcastsTableProps) {
                                     {b.sent_count}
                                 </div>
                                 <div className="col-span-2 text-right text-sm text-muted-foreground">
-                                    {new Date(b.created_at).toLocaleDateString()}
+                                    {new Date(b.created_at).toLocaleDateString('en-US')}
                                 </div>
                             </div>
                         ))
