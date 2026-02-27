@@ -1,33 +1,3 @@
-// ── Team / Workspace Types ─────────────────────────────
-
-export interface Team {
-    id: string;
-    name: string;
-    owner_id: string;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface TeamMember {
-    id: string;
-    team_id: string;
-    user_id: string;
-    role: 'owner' | 'admin' | 'member';
-    joined_at: string;
-    profiles?: { id: string; full_name: string; email: string; avatar_url?: string };
-}
-
-export interface TeamInvitation {
-    id: string;
-    team_id: string;
-    email: string;
-    role: 'owner' | 'admin' | 'member';
-    token: string;
-    status: 'pending' | 'accepted' | 'expired';
-    expires_at: string;
-    created_at: string;
-}
-
 // ── Core Entity Types ─────────────────────────────────
 
 export interface ContactMessage {

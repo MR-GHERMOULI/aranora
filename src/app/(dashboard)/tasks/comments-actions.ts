@@ -3,7 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getActiveTeamId } from "@/lib/team-helpers";
+
+const TEAM_ID = 'personal';
 
 export interface TaskComment {
     id: string;
@@ -28,8 +29,6 @@ export async function getTaskComments(taskId: string): Promise<TaskComment[]> {
         redirect('/login');
     }
 
-    const teamId = await getActiveTeamId();
-
     const { data: comments, error } = await supabase
         .from('task_comments')
         .select(`
@@ -37,7 +36,7 @@ export async function getTaskComments(taskId: string): Promise<TaskComment[]> {
             user:profiles!user_id(full_name, email)
         `)
         .eq('task_id', taskId)
-        .eq('team_id', teamId)
+        .eq('team_id', TEAM_ID)
         .order('created_at', { ascending: true });
 
     if (error) {
@@ -60,14 +59,12 @@ export async function addTaskComment(taskId: string, content: string, activityTy
         redirect('/login');
     }
 
-    const teamId = await getActiveTeamId();
-
     const { error } = await supabase
         .from('task_comments')
         .insert({
             task_id: taskId,
             user_id: user.id,
-            team_id: teamId,
+            team_id: TEAM_ID,
             content: content,
             activity_type: activityType,
             metadata: metadata
@@ -79,6 +76,4 @@ export async function addTaskComment(taskId: string, content: string, activityTy
     }
 
     revalidatePath('/tasks');
-    // If we knew the project ID, we could revalidate the project page too.
-    // revalidatePath(`/projects/[slug]`, 'page');
 }

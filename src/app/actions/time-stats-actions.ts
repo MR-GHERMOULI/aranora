@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getActiveTeamId } from "@/lib/team-helpers";
 import { differenceInSeconds, subDays, startOfDay, endOfDay, format } from "date-fns";
 
 export async function getTimeTrackingStats() {

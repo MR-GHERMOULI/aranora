@@ -3,7 +3,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Project } from "@/types";
-import { getActiveTeamId } from "@/lib/team-helpers";
 
 export async function getProject(identifier: string) {
     const supabase = await createClient();

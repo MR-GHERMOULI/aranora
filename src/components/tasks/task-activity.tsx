@@ -55,7 +55,7 @@ export function TaskActivity({ taskId }: TaskActivityProps) {
                     id: 'temp-' + Date.now(),
                     task_id: taskId,
                     user_id: 'current-user', // we don't know it here, but it's just optimistic
-                    team_id: 'current-team',
+                    team_id: 'personal',
                     content: newComment,
                     activity_type: 'comment',
                     metadata: {},

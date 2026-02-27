@@ -4,7 +4,6 @@ import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Client } from "@/types";
-import { getActiveTeamId } from "@/lib/team-helpers";
 
 export async function getClients() {
     const supabase = await createSupabaseClient();

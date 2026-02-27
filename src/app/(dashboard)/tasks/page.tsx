@@ -15,43 +15,25 @@ export default async function TasksPage() {
     let projects: any[] = [];
     let teamMembers: any[] = [];
     if (user) {
-        const [pResult, tmResult] = await Promise.all([
-            supabase.from('projects').select('id, title').eq('user_id', user.id),
-            (async () => {
-                try {
-                    return await supabase.rpc('get_user_team_members', { user_id_param: user.id });
-                } catch {
-                    return { data: [] };
-                }
-            })()
-        ]);
-        const pData = pResult.data;
-        const tmData = tmResult?.data;
+        const { data: pData } = await supabase
+            .from('projects')
+            .select('id, title')
+            .eq('user_id', user.id);
 
-        // Fallback if RPC fails, we just fetch from team_members where they are part of the team
-        if (tmData) {
-            teamMembers = tmData;
-        } else {
-            // Get teams the user is in
-            const { data: myTeams } = await supabase.from('team_members').select('team_id').eq('user_id', user.id);
-            if (myTeams && myTeams.length > 0) {
-                const teamIds = myTeams.map(t => t.team_id);
-                const { data: members } = await supabase
-                    .from('team_members')
-                    .select('user_id, role, profiles(full_name, email)')
-                    .in('team_id', teamIds);
-
-                // Deduplicate members
-                const uniqueMembers = new Map();
-                members?.forEach(m => {
-                    if (!uniqueMembers.has(m.user_id)) {
-                        uniqueMembers.set(m.user_id, m);
-                    }
-                });
-                teamMembers = Array.from(uniqueMembers.values());
-            }
-        }
         projects = pData || [];
+
+        // Single-user mode: current user is the only "member"
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', user.id)
+            .single();
+
+        teamMembers = [{
+            user_id: user.id,
+            role: 'owner',
+            profiles: profile || { full_name: '', email: '' }
+        }];
     }
 
     return (

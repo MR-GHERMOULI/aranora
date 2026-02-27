@@ -1,6 +1,5 @@
 import { getProject } from "../get-project-action";
 import { getInvoices } from "../../invoices/actions";
-import { getTeamMembers } from "@/lib/team-helpers";
 import { getTasks } from "../../tasks/actions";
 import { getProjectFiles } from "../file-actions";
 import { ProjectTaskList } from "@/components/projects/project-task-list";
