@@ -20,12 +20,10 @@ export async function getProjects(clientId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const teamId = await getActiveTeamId();
-
   let query = supabase
     .from('projects')
     .select('*, client:clients(name)')
-    .eq('team_id', teamId)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (clientId) {
@@ -39,11 +37,11 @@ export async function getProjects(clientId?: string) {
     return [];
   }
 
-  // Fetch task counts per project (team-scoped)
+  // Fetch task counts per project
   const { data: tasks } = await supabase
     .from('tasks')
     .select('project_id, status')
-    .eq('team_id', teamId);
+    .eq('user_id', user.id);
 
   const taskCounts: Record<string, { total: number; completed: number }> = {};
   tasks?.forEach(task => {
@@ -66,8 +64,6 @@ export async function createProject(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const teamId = await getActiveTeamId();
-
   const clientId = formData.get('clientId') as string;
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
@@ -81,7 +77,6 @@ export async function createProject(formData: FormData) {
     .from('projects')
     .insert({
       user_id: user.id,
-      team_id: teamId,
       client_id: clientId,
       title,
       slug: slugify(title),

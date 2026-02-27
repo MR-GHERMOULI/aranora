@@ -6,9 +6,9 @@ import { differenceInSeconds, subDays, startOfDay, endOfDay, format } from "date
 
 export async function getTimeTrackingStats() {
     const supabase = await createClient();
-    const teamId = await getActiveTeamId();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!teamId) {
+    if (!user) {
         return {
             totalSecondsThisWeek: 0,
             totalSecondsLastWeek: 0,
@@ -27,7 +27,7 @@ export async function getTimeTrackingStats() {
     const { data: entries, error } = await supabase
         .from("time_entries")
         .select("*")
-        .eq("team_id", teamId)
+        .eq("user_id", user.id)
         .gte("start_time", startOfLastWeek.toISOString())
         .order("start_time", { ascending: true });
 

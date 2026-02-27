@@ -13,13 +13,12 @@ export async function getProject(identifier: string) {
         redirect('/login');
     }
 
-    const teamId = await getActiveTeamId();
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier);
 
     let query = supabase
         .from('projects')
         .select('*, client:clients(name, email)')
-        .eq('team_id', teamId);
+        .eq('user_id', user.id);
 
     if (isUUID) {
         query = query.eq('id', identifier);

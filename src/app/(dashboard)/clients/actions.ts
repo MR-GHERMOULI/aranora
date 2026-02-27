@@ -11,12 +11,10 @@ export async function getClients() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
 
-    const teamId = await getActiveTeamId();
-
     const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('team_id', teamId)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -32,8 +30,6 @@ export async function createClient(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
 
-    const teamId = await getActiveTeamId();
-
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const phone = formData.get('phone') as string;
@@ -44,7 +40,6 @@ export async function createClient(formData: FormData) {
         .from('clients')
         .insert({
             user_id: user.id,
-            team_id: teamId,
             name,
             email,
             phone,

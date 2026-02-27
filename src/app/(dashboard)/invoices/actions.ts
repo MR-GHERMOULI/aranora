@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Invoice } from "@/types";
-import { getActiveTeamId } from "@/lib/team-helpers";
 
 export async function getInvoices(clientId?: string, projectId?: string) {
   const supabase = await createClient();
@@ -14,12 +13,10 @@ export async function getInvoices(clientId?: string, projectId?: string) {
     redirect('/login');
   }
 
-  const teamId = await getActiveTeamId();
-
   let query = supabase
     .from('invoices')
     .select('*, client:clients(name)')
-    .eq('team_id', teamId)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (clientId) {
@@ -139,13 +136,10 @@ export async function createInvoice(formData: FormData) {
   const total = subtotal + taxAmount;
 
   // Insert Invoice
-  const teamId = await getActiveTeamId();
-
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .insert({
       user_id: user.id,
-      team_id: teamId,
       client_id: clientId,
       project_id: projectId,
       invoice_number: invoiceNumber,

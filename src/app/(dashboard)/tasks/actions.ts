@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getActiveTeamId } from '@/lib/team-helpers';
 
 // ── Types ──────────────────────────────────────────────
 export interface TaskFilters {
@@ -69,8 +68,6 @@ function revalidateAll(extra?: string) {
 export async function getTasks(filters?: TaskFilters) {
     noStore();
     const { supabase, user } = await getAuthUser();
-    const teamId = await getActiveTeamId();
-
     let query = supabase
         .from('tasks')
         .select(`
@@ -79,14 +76,12 @@ export async function getTasks(filters?: TaskFilters) {
             creator:profiles!tasks_user_id_fkey(full_name, username),
             assignee:profiles!tasks_assigned_to_fkey(full_name, username)
         `)
+        .eq('user_id', user.id)
         .is('subtask_of', null); // Only top-level tasks by default
 
     if (filters?.projectId) {
         // Project-specific view: show all tasks in project
         query = query.eq('project_id', filters.projectId);
-    } else {
-        // Team-scoped view: show all tasks in the active workspace
-        query = query.eq('team_id', teamId);
     }
 
     // "Assigned to me" filter
@@ -168,12 +163,10 @@ export async function getSubtasks(parentId: string) {
 export async function getTaskStats(): Promise<TaskStats> {
     noStore();
     const { supabase, user } = await getAuthUser();
-    const teamId = await getActiveTeamId();
-
     const { data: tasks, error } = await supabase
         .from('tasks')
         .select('status, priority, due_date')
-        .eq('team_id', teamId)
+        .eq('user_id', user.id)
         .is('subtask_of', null);
 
     if (error || !tasks) {
@@ -211,29 +204,8 @@ export async function getTaskStats(): Promise<TaskStats> {
 // ── CREATE TASK (Team-scoped) ─────────────────────────
 export async function createTask(formData: FormData, pathToRevalidate?: string) {
     const { supabase, user } = await getAuthUser();
-    const teamId = await getActiveTeamId();
-
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const status = formData.get('status') as string || 'Todo';
-    const priority = formData.get('priority') as string || 'Medium';
-    const dueDate = formData.get('dueDate') as string;
-    const projectId = formData.get('projectId') as string;
-    const isPersonal = formData.get('isPersonal') === 'true';
-    const recurrenceType = formData.get('recurrenceType') as string;
-    const labelsStr = formData.get('labels') as string;
-    const subtaskOf = formData.get('subtaskOf') as string;
-    const estimatedHours = formData.get('estimatedHours') ? parseFloat(formData.get('estimatedHours') as string) : null;
-    const assignedTo = formData.get('assignedTo') as string;
-    const visibleToStr = formData.get('visibleTo') as string;
-
-    const recurrence = recurrenceType ? { type: recurrenceType } : null;
-    const labels = labelsStr ? labelsStr.split(',').filter(Boolean) : [];
-    const visibleTo = visibleToStr ? visibleToStr.split(',').filter(Boolean) : [];
-
     const { error } = await supabase.from('tasks').insert({
         user_id: user.id,
-        team_id: teamId,
         title,
         description,
         status,

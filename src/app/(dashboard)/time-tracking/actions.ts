@@ -3,7 +3,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { TimeEntry } from "@/types";
 import { revalidatePath } from "next/cache";
-import { getActiveTeamId } from "@/lib/team-helpers";
 
 export async function getTimeEntries(filters?: {
     projectId?: string;
@@ -16,8 +15,6 @@ export async function getTimeEntries(filters?: {
 
     if (!user) throw new Error("Unauthorized");
 
-    const teamId = await getActiveTeamId();
-
     let query = supabase
         .from("time_entries")
         .select(`
@@ -26,7 +23,7 @@ export async function getTimeEntries(filters?: {
             task:tasks(title),
             profiles:user_id(full_name, avatar_url, email)
         `)
-        .eq("team_id", teamId)
+        .eq("user_id", user.id)
         .order("start_time", { ascending: false });
 
     // RLS handles the filtering, but we can be explicit if we want for performance
@@ -105,14 +102,10 @@ export async function startTimeEntry(data: {
         }
     }
 
-    // Use the active workspace's team_id
-    const teamId = await getActiveTeamId();
-
     const { error } = await supabase.from("time_entries").insert({
         user_id: user.id,
         project_id: data.projectId,
         task_id: data.taskId,
-        team_id: teamId,
         description: data.description,
         is_billable: data.isBillable ?? true,
         hourly_rate: hourlyRate,
@@ -203,14 +196,10 @@ export async function createTimeEntry(data: {
 
     if (!user) throw new Error("Unauthorized");
 
-    // Use the active workspace's team_id
-    const teamId = await getActiveTeamId();
-
     const { error } = await supabase.from("time_entries").insert({
         user_id: user.id,
         project_id: data.projectId,
         task_id: data.taskId,
-        team_id: teamId,
         description: data.description,
         start_time: data.startTime,
         end_time: data.endTime,

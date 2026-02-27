@@ -41,9 +41,8 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, teamMembers, tasks, files] = await Promise.all([
+    const [invoices, tasks, files] = await Promise.all([
         getInvoices(undefined, project.id),
-        project.team_id ? getTeamMembers(project.team_id) : Promise.resolve([]),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id)
     ]);
@@ -138,7 +137,6 @@ export default async function ProjectPage({
                             <TabsTrigger value="tasks">Tasks</TabsTrigger>
                             <TabsTrigger value="files">Files & Documents</TabsTrigger>
                             <TabsTrigger value="invoices">Invoices</TabsTrigger>
-                            <TabsTrigger value="team">Team</TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
@@ -195,54 +193,6 @@ export default async function ProjectPage({
                                     </Card>
                                 ))
                             )}
-                        </TabsContent>
-                        <TabsContent value="team" className="mt-4">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-lg flex items-center gap-2">
-                                            <User className="h-4 w-4" /> Team Members
-                                        </CardTitle>
-                                        <CardDescription>Workspace members who can access this project.</CardDescription>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    {teamMembers.length === 0 ? (
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            No team members found.
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            {teamMembers.map((member) => (
-                                                <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="h-10 w-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-semibold text-lg">
-                                                            {/* @ts-ignore */}
-                                                            {member.profiles?.full_name?.charAt(0) || member.profiles?.email?.charAt(0) || 'U'}
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="font-medium text-sm">
-                                                                    {/* @ts-ignore */}
-                                                                    {member.profiles?.full_name || member.profiles?.email}
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <Badge variant={member.role === 'owner' ? 'default' : member.role === 'admin' ? 'secondary' : 'outline'} className="text-xs">
-                                                                    {member.role}
-                                                                </Badge>
-                                                                <span className="text-[10px] text-muted-foreground">
-                                                                    Joined {new Date(member.joined_at).toLocaleDateString('en-US')}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
                         </TabsContent>
                     </Tabs>
                 </div>
