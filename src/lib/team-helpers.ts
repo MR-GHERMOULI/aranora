@@ -13,7 +13,7 @@ const ACTIVE_TEAM_COOKIE = 'aranora_active_team'
 export async function getActiveTeamId(): Promise<string> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) redirect('/login')
+    if (!user) redirect('/login?reason=no_user')
 
     const cookieStore = await cookies()
     const storedTeamId = cookieStore.get(ACTIVE_TEAM_COOKIE)?.value
@@ -41,7 +41,7 @@ export async function getActiveTeamId(): Promise<string> {
 
     if (!firstMembership) {
         // User has no teams — this shouldn't happen if signup trigger works
-        redirect('/login')
+        redirect('/login?reason=no_team')
     }
 
     // Persist fallback
