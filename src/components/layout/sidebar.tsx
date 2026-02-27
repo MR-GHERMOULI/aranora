@@ -39,7 +39,15 @@ export function Sidebar({ className }: SidebarProps) {
         // Invitations feature removed
     }, [])
 
-    const routes = [
+    type Route = {
+        label: string;
+        icon: any; // Lucide icon component
+        href: string;
+        color: string;
+        badge?: number;
+    };
+
+    const routes: Route[] = [
         {
             label: "Dashboard",
             icon: LayoutDashboard,
