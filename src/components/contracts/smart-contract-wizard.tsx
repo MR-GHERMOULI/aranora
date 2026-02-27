@@ -88,6 +88,10 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
         ip_ownership: "Full",
         paper_size: "A4",
         tax_rate: 0,
+        late_fee_percentage: 0,
+        rush_fee: 0,
+        milestones: [],
+        non_compete_included: false,
     })
 
     const selectedClient = clients.find(c => c.id === clientId)
@@ -117,6 +121,10 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                 ip_ownership: "Full",
                 paper_size: "A4",
                 tax_rate: 0,
+                late_fee_percentage: 0,
+                rush_fee: 0,
+                milestones: [],
+                non_compete_included: false,
             })
         }
     }, [open])
@@ -127,7 +135,8 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
             setStructuredData(prev => ({
                 ...prev,
                 ...t.contract_data,
-                deliverables: (t.contract_data as any).deliverables?.length ? (t.contract_data as any).deliverables : prev.deliverables
+                deliverables: (t.contract_data as any).deliverables?.length ? (t.contract_data as any).deliverables : prev.deliverables,
+                milestones: (t.contract_data as any).milestones?.length ? (t.contract_data as any).milestones : prev.milestones
             }))
         }
     }
@@ -150,6 +159,22 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
         const newDeliverables = [...(structuredData.deliverables || [])]
         newDeliverables[index] = value
         updateStructuredData({ deliverables: newDeliverables })
+    }
+
+    const addMilestone = () => {
+        updateStructuredData({ milestones: [...(structuredData.milestones || []), { name: "", amount: 0, due_date: "" }] })
+    }
+
+    const removeMilestone = (index: number) => {
+        const newMilestones = [...(structuredData.milestones || [])]
+        newMilestones.splice(index, 1)
+        updateStructuredData({ milestones: newMilestones })
+    }
+
+    const updateMilestone = (index: number, updates: Partial<{ name: string; amount: number; due_date: string }>) => {
+        const newMilestones = [...(structuredData.milestones || [])]
+        newMilestones[index] = { ...newMilestones[index], ...updates }
+        updateStructuredData({ milestones: newMilestones })
     }
 
     const handleGenerate = () => {
@@ -393,8 +418,8 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                             </div>
                                                         </div>
                                                         <div className="space-y-3">
-                                                            <Label className="text-xs font-bold text-slate-400 uppercase">Currency & Type</Label>
-                                                            <div className="grid grid-cols-2 gap-2">
+                                                            <Label className="text-xs font-bold text-slate-400 uppercase">Currency, Type & Schedule</Label>
+                                                            <div className="grid grid-cols-3 gap-2">
                                                                 <Select value={structuredData.currency} onValueChange={(v: string) => updateStructuredData({ currency: v })}>
                                                                     <SelectTrigger className="h-12 bg-slate-800 border-slate-700 rounded-xl text-white">
                                                                         <SelectValue />
@@ -415,9 +440,123 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                                         <SelectItem value="Hourly">Hourly</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
+                                                                <Select value={structuredData.payment_schedule} onValueChange={(v: "Upfront" | "Milestones" | "On Completion" | "Custom") => updateStructuredData({ payment_schedule: v })}>
+                                                                    <SelectTrigger className="h-12 bg-slate-800 border-slate-700 rounded-xl text-white">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="Upfront">Upfront</SelectItem>
+                                                                        <SelectItem value="Milestones">Milestones</SelectItem>
+                                                                        <SelectItem value="On Completion">On Completion</SelectItem>
+                                                                        <SelectItem value="Custom">Custom</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
                                                             </div>
                                                         </div>
                                                     </div>
+
+                                                    {/* Late & Rush Fees */}
+                                                    <div className="grid sm:grid-cols-2 gap-6 pt-2 border-t border-slate-800">
+                                                        <div className="space-y-3">
+                                                            <Label className="text-xs font-bold text-slate-400 uppercase">Late Fee %</Label>
+                                                            <div className="flex gap-0 group">
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="0"
+                                                                    value={structuredData.late_fee_percentage || ""}
+                                                                    onChange={(e) => updateStructuredData({ late_fee_percentage: Number(e.target.value) })}
+                                                                    className="h-12 bg-slate-800 border-slate-700 text-white rounded-none rounded-l-xl text-sm px-4 focus-visible:ring-emerald-400"
+                                                                />
+                                                                <div className="h-12 w-12 rounded-r-xl bg-slate-700 border-y border-r border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
+                                                                    %
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-3">
+                                                            <Label className="text-xs font-bold text-slate-400 uppercase">Rush Fee</Label>
+                                                            <div className="flex gap-0 group">
+                                                                <div className="h-12 w-12 rounded-l-xl bg-slate-800 border-y border-l border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                                                                    <DollarSign className="h-4 w-4" />
+                                                                </div>
+                                                                <Input
+                                                                    type="number"
+                                                                    placeholder="0.00"
+                                                                    value={structuredData.rush_fee || ""}
+                                                                    onChange={(e) => updateStructuredData({ rush_fee: Number(e.target.value) })}
+                                                                    className="h-12 bg-slate-800 border-slate-700 text-white rounded-none rounded-r-xl text-sm px-4 focus-visible:ring-emerald-400"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Dynamic Milestones Builder */}
+                                                    <AnimatePresence>
+                                                        {structuredData.payment_schedule === 'Milestones' && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, height: 0 }}
+                                                                animate={{ opacity: 1, height: 'auto' }}
+                                                                exit={{ opacity: 0, height: 0 }}
+                                                                className="pt-4 border-t border-slate-800 overflow-hidden"
+                                                            >
+                                                                <div className="flex items-center justify-between mb-4">
+                                                                    <Label className="text-xs font-bold text-slate-400 uppercase">Payment Milestones</Label>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        onClick={addMilestone}
+                                                                        className="h-7 text-xs border-slate-700 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 bg-transparent"
+                                                                    >
+                                                                        <Plus className="h-3 w-3 mr-1" /> Add Milestone
+                                                                    </Button>
+                                                                </div>
+                                                                <div className="space-y-3">
+                                                                    {structuredData.milestones?.map((milestone, index) => (
+                                                                        <div key={index} className="flex gap-2 items-start">
+                                                                            <div className="flex-1 space-y-2">
+                                                                                <Input
+                                                                                    placeholder="Milestone Name (e.g. 50% Upfront)"
+                                                                                    value={milestone.name}
+                                                                                    onChange={(e) => updateMilestone(index, { name: e.target.value })}
+                                                                                    className="h-9 bg-slate-800 border-slate-700 text-white text-sm"
+                                                                                />
+                                                                                <div className="flex gap-2">
+                                                                                    <div className="relative flex-1">
+                                                                                        <DollarSign className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+                                                                                        <Input
+                                                                                            type="number"
+                                                                                            placeholder="Amount"
+                                                                                            value={milestone.amount || ""}
+                                                                                            onChange={(e) => updateMilestone(index, { amount: Number(e.target.value) })}
+                                                                                            className="h-9 pl-8 bg-slate-800 border-slate-700 text-white text-sm"
+                                                                                        />
+                                                                                    </div>
+                                                                                    <Input
+                                                                                        type="date"
+                                                                                        value={milestone.due_date || ""}
+                                                                                        onChange={(e) => updateMilestone(index, { due_date: e.target.value })}
+                                                                                        className="h-9 flex-1 bg-slate-800 border-slate-700 text-white text-sm"
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => removeMilestone(index)}
+                                                                                className="h-9 w-9 text-slate-500 hover:text-red-400 hover:bg-red-400/10 shrink-0"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))}
+                                                                    {structuredData.milestones?.length === 0 && (
+                                                                        <div className="text-center py-4 text-xs text-slate-500 italic">
+                                                                            No milestones added. Click "Add Milestone" to begin.
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
                                                 </div>
                                             </section>
 
@@ -473,7 +612,19 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     <h4 className="text-sm font-bold text-slate-800">Legal Provisions</h4>
                                                 </div>
 
-                                                <div className="divide-y divide-slate-50 border-t border-slate-50">
+                                                <div className="space-y-4 pt-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-xs font-bold text-slate-600 uppercase">Governing Law / Jurisdiction</Label>
+                                                        <Input
+                                                            placeholder="e.g. State of California, USA"
+                                                            value={structuredData.governing_law}
+                                                            onChange={(e) => updateStructuredData({ governing_law: e.target.value })}
+                                                            className="h-10 bg-slate-50 border-slate-200"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="divide-y divide-slate-50 border-t border-slate-50 mt-4">
                                                     <div className="py-4 flex items-center justify-between group">
                                                         <div>
                                                             <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">Confidentiality (NDA)</p>
@@ -482,6 +633,16 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                         <Switch
                                                             checked={structuredData.nda_included}
                                                             onCheckedChange={(v: boolean) => updateStructuredData({ nda_included: v })}
+                                                        />
+                                                    </div>
+                                                    <div className="py-4 flex items-center justify-between group">
+                                                        <div>
+                                                            <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">Non-Compete Clause</p>
+                                                            <p className="text-xs text-slate-400 mt-0.5">Restrict working with direct competitors</p>
+                                                        </div>
+                                                        <Switch
+                                                            checked={structuredData.non_compete_included}
+                                                            onCheckedChange={(v: boolean) => updateStructuredData({ non_compete_included: v })}
                                                         />
                                                     </div>
                                                     <div className="py-4 flex items-center justify-between group">
@@ -609,7 +770,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             <Badge className="bg-emerald-100 text-emerald-700 border-none px-3 py-1 font-bold text-[10px]">VERIFIED</Badge>
                                         </motion.div>
 
-                                        <div className="flex-1 flex flex-col min-h-0 bg-slate-900 rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl relative">
+                                        <div className="flex-1 flex min-h-0 bg-slate-900 rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl relative">
                                             {/* Scrollable Document */}
                                             <div className="flex-1 overflow-y-auto p-4 md:p-12 scrollbar-none flex justify-center bg-slate-950/20">
                                                 <div className="w-full max-w-[650px] bg-white shadow-2xl min-h-[850px] p-10 md:p-20 relative rounded-sm">
@@ -631,8 +792,67 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                 </div>
                                             </div>
 
+                                            {/* Side Data Insights */}
+                                            <div className="hidden lg:flex w-64 border-l border-slate-800 flex-col bg-slate-900/50 backdrop-blur-md">
+                                                <div className="p-6 space-y-6">
+                                                    <div className="space-y-1">
+                                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Smart Insights</span>
+                                                        <h4 className="text-xs font-bold text-white">Generated Provisions</h4>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                                                                <DollarSign className="h-4 w-4 text-emerald-400" />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-tight">Financials</span>
+                                                                <span className="text-xs text-slate-300">{structuredData.total_amount} {structuredData.currency}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        {structuredData.milestones && structuredData.milestones.length > 0 && (
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                                                                    <Layers className="h-4 w-4 text-indigo-400" />
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-tight">Milestones</span>
+                                                                    <span className="text-xs text-slate-300">{structuredData.milestones.length} Injected</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-8 w-8 rounded-lg bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
+                                                                <ShieldCheck className="h-4 w-4 text-violet-400" />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] font-bold text-violet-400 uppercase tracking-tight">Legal Protection</span>
+                                                                <span className="text-xs text-slate-300">
+                                                                    {structuredData.nda_included ? 'NDA' : ''}
+                                                                    {structuredData.nda_included && structuredData.non_compete_included ? ' + ' : ''}
+                                                                    {structuredData.non_compete_included ? 'Non-Compete' : ''}
+                                                                    {!structuredData.nda_included && !structuredData.non_compete_included ? 'Basic' : ''}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pt-6 border-t border-slate-800">
+                                                        <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <Info className="h-3 w-3 text-orange-400" />
+                                                                <span className="text-[10px] font-bold text-orange-400 uppercase tracking-tight">Editor Tip</span>
+                                                            </div>
+                                                            <p className="text-[10px] text-slate-400 leading-relaxed italic">You can manually edit the content on the left. Changes are saved automatically as you type.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             {/* Preview Overlay Label */}
-                                            <div className="absolute top-4 right-4 z-20">
+                                            <div className="absolute top-4 right-4 z-20 lg:right-[calc(16rem+1rem)]">
                                                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/40 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white tracking-widest uppercase">
                                                     <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                                     Live Preview

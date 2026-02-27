@@ -78,6 +78,10 @@ export interface ContractStructuredData {
     ip_ownership?: 'Full' | 'License' | 'After Payment'
     paper_size?: 'A4' | 'LETTER'
     tax_rate?: number
+    late_fee_percentage?: number
+    rush_fee?: number
+    milestones?: { name: string; amount: number; due_date?: string }[]
+    non_compete_included?: boolean
 }
 
 export interface Contract {
