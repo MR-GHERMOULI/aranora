@@ -88,7 +88,7 @@ export default async function ContractsPage() {
                         <FileSignature className="h-6 w-6 text-brand-primary" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+                        <h2 className="text-2xl font-bold tracking-tight text-foreground">
                             Contracts
                         </h2>
                         <p className="text-sm text-muted-foreground mt-0.5">
@@ -100,7 +100,7 @@ export default async function ContractsPage() {
                 <div className="flex items-center gap-3">
                     <Button
                         variant="outline"
-                        className="h-10 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium gap-2 transition-all"
+                        className="h-10 border-border bg-background hover:bg-muted text-foreground font-medium gap-2 transition-all"
                         asChild
                     >
                         <Link href="/contracts/templates">
@@ -137,7 +137,7 @@ export default async function ContractsPage() {
                         return (
                             <Card
                                 key={i}
-                                className={`relative overflow-hidden border bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 ${m.border}`}
+                                className={`relative overflow-hidden border bg-card shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 ${m.border} dark:border-border`}
                             >
                                 {/* Gradient accent */}
                                 <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${m.accent}`} />
@@ -151,7 +151,7 @@ export default async function ContractsPage() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="pb-5">
-                                    <div className="text-2xl font-bold text-slate-900 tabular-nums">
+                                    <div className="text-2xl font-bold text-foreground tabular-nums">
                                         {m.value}
                                     </div>
                                     <p className="text-xs text-slate-400 mt-1 font-medium">{m.sub}</p>
@@ -163,7 +163,7 @@ export default async function ContractsPage() {
             )}
 
             {/* ── Contracts Table / Empty State ── */}
-            <Card className="border-slate-100 shadow-sm overflow-hidden bg-white">
+            <Card className="border-border shadow-sm overflow-hidden bg-card">
 
                 {contracts.length === 0 ? (
                     /* ── Empty State ── */
@@ -177,8 +177,8 @@ export default async function ContractsPage() {
                                 </div>
                             </div>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 mb-2">No contracts yet</h3>
-                        <p className="text-slate-500 max-w-sm mb-8 text-sm leading-relaxed">
+                        <h3 className="text-xl font-bold text-foreground mb-2">No contracts yet</h3>
+                        <p className="text-muted-foreground max-w-sm mb-8 text-sm leading-relaxed">
                             Create professional, legally-binding contracts in minutes using the Smart Contract Assistant.
                         </p>
                         <div className="relative group">
@@ -197,13 +197,13 @@ export default async function ContractsPage() {
                     /* ── Table ── */
                     <>
                         {/* Table header strip */}
-                        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                        <div className="px-5 py-3.5 border-b border-border flex items-center justify-between bg-muted/40">
                             <div className="flex items-center gap-2">
                                 <Activity className="h-4 w-4 text-brand-primary/60" />
-                                <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                     All Contracts
                                 </span>
-                                <span className="ml-1 h-5 min-w-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center px-1">
+                                <span className="ml-1 h-5 min-w-5 rounded-full bg-muted text-foreground text-[10px] font-bold flex items-center justify-center px-1">
                                     {contracts.length}
                                 </span>
                             </div>
@@ -212,20 +212,20 @@ export default async function ContractsPage() {
                         <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
-                                    <TableRow className="hover:bg-transparent border-b border-slate-100">
-                                        <TableHead className="font-semibold text-slate-600 h-11 text-xs uppercase tracking-wider pl-5">
+                                    <TableRow className="hover:bg-transparent border-b border-border">
+                                        <TableHead className="font-semibold text-muted-foreground h-11 text-xs uppercase tracking-wider pl-5">
                                             Contract
                                         </TableHead>
-                                        <TableHead className="font-semibold text-slate-600 h-11 text-xs uppercase tracking-wider">
+                                        <TableHead className="font-semibold text-muted-foreground h-11 text-xs uppercase tracking-wider">
                                             Client
                                         </TableHead>
-                                        <TableHead className="font-semibold text-slate-600 h-11 text-xs uppercase tracking-wider">
+                                        <TableHead className="font-semibold text-muted-foreground h-11 text-xs uppercase tracking-wider">
                                             Status
                                         </TableHead>
-                                        <TableHead className="font-semibold text-slate-600 h-11 text-xs uppercase tracking-wider">
+                                        <TableHead className="font-semibold text-muted-foreground h-11 text-xs uppercase tracking-wider">
                                             Date
                                         </TableHead>
-                                        <TableHead className="text-right font-semibold text-slate-600 h-11 text-xs uppercase tracking-wider pr-5">
+                                        <TableHead className="text-right font-semibold text-muted-foreground h-11 text-xs uppercase tracking-wider pr-5">
                                             Actions
                                         </TableHead>
                                     </TableRow>
@@ -263,22 +263,22 @@ export default async function ContractsPage() {
                                         return (
                                             <TableRow
                                                 key={contract.id}
-                                                className="group hover:bg-slate-50/70 transition-colors border-b border-slate-50 last:border-0"
+                                                className="group hover:bg-muted/50 transition-colors border-b border-border last:border-0"
                                             >
                                                 {/* Contract Name */}
-                                                <TableCell className="font-medium text-slate-900 py-3.5 pl-5">
+                                                <TableCell className="font-medium text-foreground py-3.5 pl-5">
                                                     <Link
                                                         href={`/contracts/${contract.id}`}
                                                         className="flex items-center gap-3 group/link"
                                                     >
-                                                        <div className="h-9 w-9 rounded-xl bg-brand-primary/5 flex items-center justify-center border border-brand-primary/10 shrink-0 group-hover/link:bg-brand-primary/10 transition-colors">
+                                                        <div className="h-9 w-9 rounded-xl bg-brand-primary/5 dark:bg-brand-primary/10 flex items-center justify-center border border-brand-primary/10 shrink-0 group-hover/link:bg-brand-primary/10 transition-colors">
                                                             <FileText className="h-4 w-4 text-brand-primary/60 group-hover/link:text-brand-primary transition-colors" />
                                                         </div>
                                                         <div>
-                                                            <span className="text-sm font-semibold text-slate-800 group-hover/link:text-brand-primary transition-colors line-clamp-1">
+                                                            <span className="text-sm font-semibold text-foreground group-hover/link:text-brand-primary transition-colors line-clamp-1">
                                                                 {contract.title}
                                                             </span>
-                                                            <span className="text-[11px] text-slate-400 font-medium">
+                                                            <span className="text-[11px] text-muted-foreground font-medium">
                                                                 Contract Agreement
                                                             </span>
                                                         </div>
@@ -292,12 +292,12 @@ export default async function ContractsPage() {
                                                             <div className="h-7 w-7 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500 flex items-center justify-center text-white font-bold text-[10px] shrink-0 shadow-sm">
                                                                 {clientInitials ?? <User className="h-3 w-3" />}
                                                             </div>
-                                                            <span className="text-sm text-slate-700 font-medium">
+                                                            <span className="text-sm text-foreground font-medium">
                                                                 {contract.client.name}
                                                             </span>
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs text-slate-300 italic">No client</span>
+                                                        <span className="text-xs text-muted-foreground italic">No client</span>
                                                     )}
                                                 </TableCell>
 
@@ -312,10 +312,10 @@ export default async function ContractsPage() {
                                                 {/* Date */}
                                                 <TableCell className="py-3.5">
                                                     <div>
-                                                        <span className="text-sm text-slate-700 font-medium">
+                                                        <span className="text-sm text-foreground font-medium">
                                                             {format(new Date(contract.created_at), 'MMM d, yyyy')}
                                                         </span>
-                                                        <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                                                        <div className="text-[11px] text-muted-foreground font-medium mt-0.5">
                                                             {formatDistanceToNow(new Date(contract.created_at), { addSuffix: true })}
                                                         </div>
                                                     </div>
@@ -328,7 +328,7 @@ export default async function ContractsPage() {
                                                         variant="ghost"
                                                         size="sm"
                                                         asChild
-                                                        className="hidden sm:inline-flex opacity-0 group-hover:opacity-100 transition-all hover:bg-brand-primary/8 hover:text-brand-primary font-medium text-slate-600 h-8"
+                                                        className="hidden sm:inline-flex opacity-0 group-hover:opacity-100 transition-all hover:bg-brand-primary/10 hover:text-brand-primary font-medium text-muted-foreground h-8"
                                                     >
                                                         <Link href={`/contracts/${contract.id}`}>
                                                             View
@@ -338,7 +338,7 @@ export default async function ContractsPage() {
                                                     {/* Mobile: dropdown */}
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden text-slate-400">
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 sm:hidden text-muted-foreground">
                                                                 <MoreHorizontal className="h-4 w-4" />
                                                             </Button>
                                                         </DropdownMenuTrigger>

@@ -53,22 +53,28 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
             subtitle: 'Client',
             href: `/clients/${c.id}`
         })),
-        ...(projects || []).map(p => ({
-            id: p.id,
-            type: 'project' as const,
-            title: p.title,
-            // @ts-ignore
-            subtitle: `Project • ${p.client?.name || ''}`,
-            href: `/projects/${p.slug || p.id}`
-        })),
-        ...(invoices || []).map(i => ({
-            id: i.id,
-            type: 'invoice' as const,
-            title: i.invoice_number,
-            // @ts-ignore
-            subtitle: `Invoice • ${i.client?.name || ''}`,
-            href: `/invoices/${i.invoice_number}`
-        }))
+        ...(projects || []).map(p => {
+            const clientData = p.client as { name: string } | { name: string }[] | null;
+            const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
+            return {
+                id: p.id,
+                type: 'project' as const,
+                title: p.title,
+                subtitle: `Project • ${clientName || ''}`,
+                href: `/projects/${p.slug || p.id}`
+            };
+        }),
+        ...(invoices || []).map(i => {
+            const clientData = i.client as { name: string } | { name: string }[] | null;
+            const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
+            return {
+                id: i.id,
+                type: 'invoice' as const,
+                title: i.invoice_number,
+                subtitle: `Invoice • ${clientName || ''}`,
+                href: `/invoices/${i.invoice_number}`
+            };
+        })
     ];
 
     return results;

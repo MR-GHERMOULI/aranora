@@ -13,7 +13,6 @@ export default async function TasksPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     let projects: any[] = [];
-    let teamMembers: any[] = [];
     if (user) {
         const { data: pData } = await supabase
             .from('projects')
@@ -21,26 +20,12 @@ export default async function TasksPage() {
             .eq('user_id', user.id);
 
         projects = pData || [];
-
-        // Single-user mode: current user is the only "member"
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, email')
-            .eq('id', user.id)
-            .single();
-
-        teamMembers = [{
-            user_id: user.id,
-            role: 'owner',
-            profiles: profile || { full_name: '', email: '' }
-        }];
     }
 
     return (
         <TasksClient
             tasks={tasks}
             projects={projects}
-            teamMembers={teamMembers}
             stats={stats}
             currentUserId={user?.id}
         />

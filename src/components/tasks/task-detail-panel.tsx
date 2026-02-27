@@ -15,7 +15,6 @@ interface TaskDetailPanelProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     projects?: any[];
-    teamMembers?: any[];
 }
 
 const priorityConfig = {
@@ -41,7 +40,7 @@ const labelColors: Record<string, string> = {
     'Review': 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
 };
 
-export function TaskDetailPanel({ task, open, onOpenChange, projects = [], teamMembers = [] }: TaskDetailPanelProps) {
+export function TaskDetailPanel({ task, open, onOpenChange, projects = [] }: TaskDetailPanelProps) {
     const [editOpen, setEditOpen] = useState(false);
 
     if (!task) return null;
@@ -109,17 +108,6 @@ export function TaskDetailPanel({ task, open, onOpenChange, projects = [], teamM
                                     <div>
                                         <p className="text-xs text-muted-foreground">Project</p>
                                         <p className="text-sm font-medium">{task.project.title}</p>
-                                    </div>
-                                </div>
-                            )}
-                            {task.assignee && (
-                                <div className="flex items-center gap-2.5 p-3 rounded-lg bg-muted/30 border border-border/30">
-                                    <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
-                                        {task.assignee.full_name?.charAt(0) || 'U'}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">Assignee</p>
-                                        <p className="text-sm font-medium">{task.assignee.full_name || task.assignee.username || 'Unassigned'}</p>
                                     </div>
                                 </div>
                             )}
@@ -204,7 +192,6 @@ export function TaskDetailPanel({ task, open, onOpenChange, projects = [], teamM
             <EditTaskDialog
                 task={task}
                 projects={projects}
-                teamMembers={teamMembers}
                 open={editOpen}
                 onOpenChange={setEditOpen}
             />

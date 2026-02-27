@@ -22,13 +22,11 @@ export interface FilterState {
     search: string;
     status: string;
     priority: string;
-    assignee: string;
     sortBy: string;
 }
 
 const STATUSES = ['All', 'Todo', 'In Progress', 'Done', 'Postponed'];
 const PRIORITIES = ['All', 'High', 'Medium', 'Low'];
-const ASSIGNEES = ['All', 'Me', 'Unassigned'];
 const SORT_OPTIONS = [
     { value: 'due_date', label: 'Due Date' },
     { value: 'priority', label: 'Priority' },
@@ -38,18 +36,16 @@ const SORT_OPTIONS = [
 
 export function TaskFilters({ onFilterChange, activeFilters }: TaskFiltersProps) {
     const [showFilters, setShowFilters] = useState(false);
-
-    const hasActiveFilters = activeFilters.status !== 'All' || activeFilters.priority !== 'All' || activeFilters.assignee !== 'All' || activeFilters.search !== '';
+    const hasActiveFilters = activeFilters.status !== 'All' || activeFilters.priority !== 'All' || activeFilters.search !== '';
 
     const activeCount = [
         activeFilters.status !== 'All',
         activeFilters.priority !== 'All',
-        activeFilters.assignee !== 'All',
         activeFilters.search !== '',
     ].filter(Boolean).length;
 
     const clearAll = () => {
-        onFilterChange({ search: '', status: 'All', priority: 'All', assignee: 'All', sortBy: 'due_date' });
+        onFilterChange({ search: '', status: 'All', priority: 'All', sortBy: 'due_date' });
     };
 
     return (
@@ -147,27 +143,6 @@ export function TaskFilters({ onFilterChange, activeFilters }: TaskFiltersProps)
                                         }`}
                                 >
                                     {p}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="h-6 w-px bg-border" />
-
-                    {/* Assignee filter */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-muted-foreground">Assignee:</span>
-                        <div className="flex gap-1">
-                            {ASSIGNEES.map((a) => (
-                                <button
-                                    key={a}
-                                    onClick={() => onFilterChange({ ...activeFilters, assignee: a })}
-                                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${activeFilters.assignee === a
-                                        ? 'bg-primary text-primary-foreground shadow-sm'
-                                        : 'bg-background text-muted-foreground hover:text-foreground hover:bg-accent border border-border/50'
-                                        }`}
-                                >
-                                    {a}
                                 </button>
                             ))}
                         </div>

@@ -18,7 +18,8 @@ import {
     CreditCard,
     Timer,
     Radio,
-    Building2
+    Building2,
+    UserCog
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -47,80 +48,105 @@ export function Sidebar({ className }: SidebarProps) {
         badge?: number;
     };
 
-    const routes: Route[] = [
+    type RouteGroup = {
+        title: string;
+        routes: Route[];
+    };
+
+    const routeGroups: RouteGroup[] = [
         {
-            label: "Dashboard",
-            icon: LayoutDashboard,
-            href: "/dashboard",
-            color: "text-sky-500",
+            title: "Overview",
+            routes: [
+                {
+                    label: "Dashboard",
+                    icon: LayoutDashboard,
+                    href: "/dashboard",
+                    color: "text-sky-500",
+                },
+            ]
         },
         {
-            label: "Broadcasts",
-            icon: Radio,
-            href: "/broadcasts",
-            color: "text-amber-400",
+            title: "Workspace",
+            routes: [
+                {
+                    label: "Broadcasts",
+                    icon: Radio,
+                    href: "/broadcasts",
+                    color: "text-amber-400",
+                },
+                {
+                    label: "Tasks",
+                    icon: ListTodo,
+                    href: "/tasks",
+                    color: "text-indigo-500",
+                },
+                {
+                    label: "Calendar",
+                    icon: Calendar,
+                    href: "/calendar",
+                    color: "text-emerald-500",
+                },
+                {
+                    label: "Time Tracking",
+                    icon: Timer,
+                    href: "/time-tracking",
+                    color: "text-amber-500",
+                },
+            ]
         },
         {
-            label: "Tasks",
-            icon: ListTodo,
-            href: "/tasks",
-            color: "text-indigo-500",
+            title: "Management",
+            routes: [
+                {
+                    label: "Clients",
+                    icon: Users,
+                    href: "/clients",
+                    color: "text-violet-500",
+                },
+                {
+                    label: "Collaborators",
+                    icon: UserCog,
+                    href: "/collaborators",
+                    color: "text-cyan-500",
+                },
+                {
+                    label: "Projects",
+                    icon: Briefcase,
+                    href: "/projects",
+                    color: "text-pink-700",
+                },
+            ]
         },
         {
-            label: "Clients",
-            icon: Users,
-            href: "/clients",
-            color: "text-violet-500",
-        },
-        {
-            label: "Collaborators",
-            icon: Users,
-            href: "/collaborators",
-            color: "text-cyan-500",
-        },
-        {
-            label: "Projects",
-            icon: Briefcase,
-            href: "/projects",
-            color: "text-pink-700",
-        },
-        {
-            label: "Contracts",
-            icon: FileText,
-            href: "/contracts",
-            color: "text-emerald-500",
-        },
-        {
-            label: "Invoices",
-            icon: FileText,
-            href: "/invoices",
-            color: "text-orange-700",
-        },
-        {
-            label: "Subscriptions",
-            icon: CreditCard,
-            href: "/subscriptions",
-            color: "text-blue-500",
-        },
-        {
-            label: "Calendar",
-            icon: Calendar,
-            href: "/calendar",
-            color: "text-emerald-500",
-        },
-        {
-            label: "Time Tracking",
-            icon: Timer,
-            href: "/time-tracking",
-            color: "text-amber-500",
-        },
-        {
-            label: "Reports",
-            icon: BarChart,
-            href: "/reports",
-            color: "text-green-700",
-        },
-    ]
+            title: "Finance",
+            routes: [
+                {
+                    label: "Contracts",
+                    icon: FileText,
+                    href: "/contracts",
+                    color: "text-emerald-500",
+                },
+                {
+                    label: "Invoices",
+                    icon: FileText,
+                    href: "/invoices",
+                    color: "text-orange-700",
+                },
+                {
+                    label: "Subscriptions",
+                    icon: CreditCard,
+                    href: "/subscriptions",
+                    color: "text-blue-500",
+                },
+                {
+                    label: "Reports",
+                    icon: BarChart,
+                    href: "/reports",
+                    color: "text-green-700",
+                },
+            ]
+        }
+    ];
 
     return (
         <>
@@ -178,26 +204,33 @@ export function Sidebar({ className }: SidebarProps) {
                         <GlobalSearch />
                     </div>
 
-                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-1">
-                        {routes.map((route) => (
-                            <Link
-                                key={route.href}
-                                href={route.href}
-                                className={cn(
-                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                                    pathname === route.href ? "text-white bg-white/10" : "text-zinc-400"
-                                )}
-                            >
-                                <div className="flex items-center flex-1">
-                                    <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                                    {route.label}
-                                </div>
-                                {route.badge && (
-                                    <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto">
-                                        {route.badge}
-                                    </span>
-                                )}
-                            </Link>
+                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 pb-4">
+                        {routeGroups.map((group, groupIndex) => (
+                            <div key={group.title} className="space-y-1">
+                                <h3 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                                    {group.title}
+                                </h3>
+                                {group.routes.map((route) => (
+                                    <Link
+                                        key={route.href}
+                                        href={route.href}
+                                        className={cn(
+                                            "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+                                            pathname === route.href ? "text-white bg-white/10" : "text-zinc-400"
+                                        )}
+                                    >
+                                        <div className="flex items-center flex-1">
+                                            <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
+                                            {route.label}
+                                        </div>
+                                        {route.badge && (
+                                            <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-auto">
+                                                {route.badge}
+                                            </span>
+                                        )}
+                                    </Link>
+                                ))}
+                            </div>
                         ))}
                     </div>
                 </div>

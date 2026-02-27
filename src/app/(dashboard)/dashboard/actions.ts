@@ -34,7 +34,6 @@ export async function getDashboardStats() {
         { data: allProjects },
         { data: upcomingDeadlines },
         { data: prevMonthPaidInvoices },
-        { data: pendingInvitations },
         { data: recentSignedContracts },
         timeEntriesResponse,
         activeTimerResponse
@@ -75,11 +74,6 @@ export async function getDashboardStats() {
             .eq('status', 'Paid')
             .gte('issue_date', startOfPrevMonth)
             .lte('issue_date', endOfPrevMonth),
-        supabase.from('notifications').select('*')
-            .eq('user_id', user.id)
-            .eq('type', 'invite')
-            .eq('read', false)
-            .order('created_at', { ascending: false }),
         supabase.from('contracts').select('id, title, signed_at')
             .eq('user_id', user.id)
             .eq('status', 'Signed')
@@ -154,7 +148,6 @@ export async function getDashboardStats() {
         recentProjects: recentProjects || [],
         recentInvoices: recentInvoices || [],
         upcomingDeadlines: upcomingDeadlines || [],
-        pendingInvitations: pendingInvitations || [],
         totalSecondsThisWeek,
         hasActiveTimer: !!activeTimer
     };
@@ -227,12 +220,13 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
     const reminders: SmartReminder[] = [];
 
     // Process Overdue Invoices (High Priority)
-    overdueInvoices?.forEach(inv => {
+    overdueInvoices?.forEach((inv: any) => {
+        const clientData = inv.client as { name: string } | { name: string }[] | null;
+        const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
         reminders.push({
             id: `inv-${inv.id}`,
             title: `Overdue Invoice #${inv.invoice_number}`,
-            // @ts-ignore
-            description: `${inv.client?.name || 'Client'} owes $${inv.total}`,
+            description: `${clientName || 'Client'} owes $${inv.total}`,
             severity: 'high',
             actionLabel: 'Send Reminder',
             actionLink: `/invoices/${inv.id}`,
@@ -241,12 +235,13 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
     });
 
     // Process Upcoming Tasks (High/Medium Priority)
-    upcomingTasks?.forEach(task => {
+    upcomingTasks?.forEach((task: any) => {
+        const projectData = task.project as { title: string } | { title: string }[] | null;
+        const projectName = Array.isArray(projectData) ? projectData[0]?.title : projectData?.title;
         reminders.push({
             id: `task-${task.id}`,
             title: `Task Due Soon: ${task.title}`,
-            // @ts-ignore
-            description: task.project?.title ? `Project: ${task.project.title}` : 'General Task',
+            description: projectName ? `Project: ${projectName}` : 'General Task',
             severity: 'medium',
             actionLabel: 'Complete Task',
             actionLink: `/calendar`,
@@ -255,12 +250,13 @@ export async function getSmartReminders(): Promise<SmartReminder[]> {
     });
 
     // Process Stale Contracts (Medium Priority)
-    pendingContracts?.forEach(contract => {
+    pendingContracts?.forEach((contract: any) => {
+        const clientData = contract.client as { name: string } | { name: string }[] | null;
+        const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
         reminders.push({
             id: `contract-${contract.id}`,
             title: `Pending Contract: ${contract.title}`,
-            // @ts-ignore
-            description: `Sent to ${contract.client?.name} over 3 days ago`,
+            description: `Sent to ${clientName || 'Client'} over 3 days ago`,
             severity: 'medium',
             actionLabel: 'Follow Up',
             actionLink: `/contracts/${contract.id}`,
