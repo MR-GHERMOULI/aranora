@@ -204,6 +204,21 @@ export async function getTaskStats(): Promise<TaskStats> {
 // ── CREATE TASK (Team-scoped) ─────────────────────────
 export async function createTask(formData: FormData, pathToRevalidate?: string) {
     const { supabase, user } = await getAuthUser();
+      const title = formData.get('title') as string;
+      const description = formData.get('description') as string;
+      const status = (formData.get('status') as string) || 'Todo';
+      const priority = (formData.get('priority') as string) || 'Medium';
+      const dueDate = formData.get('due_date') as string;
+      const projectId = formData.get('project_id') as string;
+      const assignedTo = formData.get('assigned_to') as string;
+      const visibleTo = (formData.get('visible_to') as string) || 'private';
+      const isPersonal = formData.get('is_personal') === 'true';
+      const recurrence = (formData.get('recurrence') as string) || 'none';
+      const labels = JSON.parse((formData.get('labels') as string) || '[]');
+      const subtaskOf = formData.get('subtask_of') as string;
+            const estimatedHours = parseFloat(formData.get('estimated_hours') as string || '0');
+    
+    
     const { error } = await supabase.from('tasks').insert({
         user_id: user.id,
         title,
