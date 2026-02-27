@@ -66,7 +66,7 @@ export async function getActiveTeamId(): Promise<string> {
 
     if (teamError || !newTeam) {
         console.error('Failed to create default team:', teamError);
-        redirect('/login')
+        redirect(`/login?reason=error_create_team&details=${encodeURIComponent(teamError?.message || 'unknown')}`)
     }
 
     // Add as owner
@@ -80,7 +80,7 @@ export async function getActiveTeamId(): Promise<string> {
 
     if (memberError) {
         console.error('Failed to add user to new team:', memberError);
-        redirect('/login')
+        redirect(`/login?reason=error_add_member&details=${encodeURIComponent(memberError?.message || 'unknown')}`)
     }
 
     // Persist and return new team
