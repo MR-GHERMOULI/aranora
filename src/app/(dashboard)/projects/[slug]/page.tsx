@@ -2,16 +2,17 @@ import { getProject } from "../get-project-action";
 import { getInvoices } from "../../invoices/actions";
 import { getTasks } from "../../tasks/actions";
 import { getProjectFiles } from "../file-actions";
+import { getTimeEntries } from "../../time-tracking/actions";
 import { ProjectTaskList } from "@/components/projects/project-task-list";
 import { ProjectFileList } from "@/components/projects/project-file-list";
+import { ProjectTimeTrackingTab } from "@/components/projects/project-time-tracking-tab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddCollaboratorDialog } from "@/components/projects/add-collaborator-dialog";
 import { RemoveCollaboratorButton } from "@/components/projects/remove-collaborator-button";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Percent, Trash2 } from "lucide-react";
-import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText } from "lucide-react";
+import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
@@ -40,10 +41,11 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, tasks, files] = await Promise.all([
+    const [invoices, tasks, files, timeEntries] = await Promise.all([
         getInvoices(undefined, project.id),
         getTasks({ projectId: project.id }),
-        getProjectFiles(project.id)
+        getProjectFiles(project.id),
+        getTimeEntries({ projectId: project.id })
     ]);
 
     return (
@@ -136,12 +138,16 @@ export default async function ProjectPage({
                             <TabsTrigger value="tasks">Tasks</TabsTrigger>
                             <TabsTrigger value="files">Files & Documents</TabsTrigger>
                             <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                            <TabsTrigger value="time-tracking">Time Tracking</TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
                         </TabsContent>
                         <TabsContent value="files" className="mt-4">
                             <ProjectFileList files={files} projectId={project.id} />
+                        </TabsContent>
+                        <TabsContent value="time-tracking" className="mt-4">
+                            <ProjectTimeTrackingTab entries={timeEntries} projectId={project.id} />
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (

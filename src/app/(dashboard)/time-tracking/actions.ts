@@ -21,7 +21,7 @@ export async function getTimeEntries(filters?: {
             *,
             project:projects(title, user_id),
             task:tasks(title),
-            profiles:user_id(full_name, avatar_url, email)
+            profiles(full_name, avatar_url, email)
         `)
         .eq("user_id", user.id)
         .order("start_time", { ascending: false });

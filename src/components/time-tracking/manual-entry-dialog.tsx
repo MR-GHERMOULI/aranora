@@ -7,8 +7,14 @@ import { Plus } from "lucide-react";
 import { createTimeEntry } from "@/app/(dashboard)/time-tracking/actions";
 import { toast } from "sonner";
 import { TimeEntryForm } from "./time-entry-form";
+import { TimeEntry } from "@/types";
 
-export function ManualEntryDialog() {
+interface ManualEntryDialogProps {
+    initialData?: Partial<TimeEntry>;
+    trigger?: React.ReactNode;
+}
+
+export function ManualEntryDialog({ initialData, trigger }: ManualEntryDialogProps) {
     const [open, setOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -44,10 +50,12 @@ export function ManualEntryDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add Manual Entry
-                </Button>
+                {trigger || (
+                    <Button className="gap-2">
+                        <Plus className="h-4 w-4" />
+                        Add Manual Entry
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl">
                 <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-6 pb-2">
@@ -61,7 +69,7 @@ export function ManualEntryDialog() {
                     </DialogHeader>
                 </div>
                 <div className="p-6 pt-2">
-                    <TimeEntryForm onSubmit={onSubmit} isLoading={isLoading} />
+                    <TimeEntryForm initialData={initialData} onSubmit={onSubmit} isLoading={isLoading} />
                 </div>
             </DialogContent>
         </Dialog>

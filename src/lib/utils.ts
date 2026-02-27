@@ -13,3 +13,7 @@ export function formatDuration(seconds: number): string {
     .filter((v, i) => v !== "00" || i > 0)
     .join(":");
 }
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
