@@ -9,7 +9,7 @@ import { getActiveTeamId } from "@/lib/team-helpers";
 export async function getClients() {
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login?reason=get_clients_no_user');
+    if (!user) redirect('/login');
 
     const teamId = await getActiveTeamId();
 

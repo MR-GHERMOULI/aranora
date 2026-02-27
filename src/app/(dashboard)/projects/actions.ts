@@ -18,7 +18,7 @@ function slugify(text: string): string {
 export async function getProjects(clientId?: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login?reason=get_projects_no_user');
+  if (!user) redirect('/login');
 
   const teamId = await getActiveTeamId();
 

@@ -13,7 +13,7 @@ const ACTIVE_TEAM_COOKIE = 'aranora_active_team'
 export async function getActiveTeamId(): Promise<string> {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) redirect('/login?reason=no_user')
+    if (!user) redirect('/login')
 
     const cookieStore = await cookies()
     const storedTeamId = cookieStore.get(ACTIVE_TEAM_COOKIE)?.value
@@ -39,23 +39,59 @@ export async function getActiveTeamId(): Promise<string> {
         .limit(1)
         .single()
 
-    if (!firstMembership) {
-        // User has no teams — this shouldn't happen if signup trigger works
-        redirect('/login?reason=no_team')
-    }
-
-    // Persist fallback
-    try {
+    if (firstMembership) {
+        // Persist fallback
         cookieStore.set(ACTIVE_TEAM_COOKIE, firstMembership.team_id, {
             path: '/',
-            maxAge: 60 * 60 * 24 * 365, // 1 year
+            maxAge: 60 * 60 * 24 * 7, // 1 week
             sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production'
         })
-    } catch {
-        // Server Component context — can't set cookies
+        return firstMembership.team_id
     }
 
-    return firstMembership.team_id
+    // SECOND FALLBACK: Create a personal workspace if none exists
+    // This handles users who were created without a trigger or backfill
+    const workspaceName = (user.user_metadata?.full_name || user.email?.split('@')[0] || 'User') + "'s Workspace";
+
+    // Create team
+    const { data: newTeam, error: teamError } = await supabase
+        .from('teams')
+        .insert({
+            name: workspaceName,
+            owner_id: user.id
+        })
+        .select('id')
+        .single();
+
+    if (teamError || !newTeam) {
+        console.error('Failed to create default team:', teamError);
+        redirect('/login')
+    }
+
+    // Add as owner
+    const { error: memberError } = await supabase
+        .from('team_members')
+        .insert({
+            team_id: newTeam.id,
+            user_id: user.id,
+            role: 'owner'
+        });
+
+    if (memberError) {
+        console.error('Failed to add user to new team:', memberError);
+        redirect('/login')
+    }
+
+    // Persist and return new team
+    cookieStore.set(ACTIVE_TEAM_COOKIE, newTeam.id, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    })
+
+    return newTeam.id
 }
 
 /**
