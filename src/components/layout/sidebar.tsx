@@ -26,8 +26,6 @@ import { ModeToggle } from "@/components/ui/mode-toggle"
 import { GlobalSearch } from "./search"
 import { LogoutButton } from "./logout-button"
 import { NotificationsPopover } from "./notifications/notifications-popover"
-import { Mail } from "lucide-react"
-import { getPendingInvitationsCount } from "./notifications/actions"
 import { useEffect } from "react"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
@@ -38,11 +36,7 @@ export function Sidebar({ className }: SidebarProps) {
     const [inviteCount, setInviteCount] = useState(0)
 
     useEffect(() => {
-        const fetchCount = async () => {
-            const count = await getPendingInvitationsCount()
-            setInviteCount(count)
-        }
-        fetchCount()
+        // Invitations feature removed
     }, [])
 
     const routes = [
@@ -57,13 +51,6 @@ export function Sidebar({ className }: SidebarProps) {
             icon: Radio,
             href: "/broadcasts",
             color: "text-amber-400",
-        },
-        {
-            label: "Invitations",
-            icon: Mail,
-            href: "/invitations",
-            color: "text-red-500",
-            badge: inviteCount > 0 ? inviteCount : null,
         },
         {
             label: "Tasks",
