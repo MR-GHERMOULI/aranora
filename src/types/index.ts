@@ -166,7 +166,6 @@ export interface TimeEntry {
     updated_at: string;
     project?: { title: string };
     task?: { title: string };
-    profiles?: { full_name: string; avatar_url: string; email: string };
 }
 
 export interface CollaboratorCRM {
