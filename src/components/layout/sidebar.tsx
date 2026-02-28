@@ -69,12 +69,6 @@ export function Sidebar({ className }: SidebarProps) {
             title: "Workspace",
             routes: [
                 {
-                    label: "Broadcasts",
-                    icon: Radio,
-                    href: "/broadcasts",
-                    color: "text-amber-400",
-                },
-                {
                     label: "Tasks",
                     icon: ListTodo,
                     href: "/tasks",
@@ -200,8 +194,18 @@ export function Sidebar({ className }: SidebarProps) {
                         </div>
                     </Link>
 
-                    <div className="shrink-0 mb-4 px-1">
+                    <div className="shrink-0 mb-2">
                         <GlobalSearch />
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4 px-3 mb-6 shrink-0">
+                        <Link href="/broadcasts" title="Broadcasts">
+                            <Button size="icon" variant="ghost" className="h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/10 transition">
+                                <Radio className="h-5 w-5 text-amber-400" />
+                            </Button>
+                        </Link>
+                        <NotificationsPopover />
+                        <ModeToggle />
                     </div>
 
                     <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 pb-4">
@@ -236,10 +240,6 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
 
                 <div className="px-3 py-2 mt-auto border-t border-white/10 bg-slate-900/50 backdrop-blur-sm shrink-0">
-                    <div className="mb-2 pl-3 flex items-center gap-2">
-                        <NotificationsPopover />
-                        <ModeToggle />
-                    </div>
                     <Link
                         href="/settings"
                         className={cn(
