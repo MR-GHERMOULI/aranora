@@ -51,7 +51,16 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         fetchUnread()
     }, [])
 
-    const routes = [
+    interface SidebarRoute {
+        label: string
+        labelAr: string
+        icon: typeof LayoutDashboard
+        href: string
+        color: string
+        badge?: number | null
+    }
+
+    const routes: SidebarRoute[] = [
         {
             label: "Dashboard",
             labelAr: "لوحة التحكم",
@@ -180,10 +189,8 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                             >
                                 <route.icon className={cn("h-5 w-5", isActive ? route.color : "")} />
                                 <span>{route.label}</span>
-                                {/* @ts-ignore */}
                                 {route.badge && (
                                     <span className="ml-auto bg-destructive text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                        {/* @ts-ignore */}
                                         {route.badge}
                                     </span>
                                 )}

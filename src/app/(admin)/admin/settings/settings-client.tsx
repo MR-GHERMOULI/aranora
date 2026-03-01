@@ -604,24 +604,6 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                     }
                                 />
                             </div>
-
-                            <div className="flex items-center justify-between p-4 rounded-lg border">
-                                <div>
-                                    <p className="font-medium">Team Members</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Allow users to invite team members
-                                    </p>
-                                </div>
-                                <Toggle
-                                    checked={settings.features.team_enabled}
-                                    onChange={(checked) =>
-                                        setSettings({
-                                            ...settings,
-                                            features: { ...settings.features, team_enabled: checked },
-                                        })
-                                    }
-                                />
-                            </div>
                         </div>
 
                         <Button

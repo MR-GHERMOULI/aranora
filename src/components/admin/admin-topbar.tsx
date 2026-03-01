@@ -1,6 +1,7 @@
 "use client"
 
 import { Bell, Search, User, LogOut } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -169,6 +170,3 @@ export function AdminTopbar() {
     )
 }
 
-function cn(...classes: (string | boolean | undefined)[]) {
-    return classes.filter(Boolean).join(" ")
-}

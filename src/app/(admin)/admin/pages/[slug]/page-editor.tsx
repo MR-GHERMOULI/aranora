@@ -16,6 +16,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "sonner"
 
 interface PageEditorProps {
     slug: string
@@ -105,8 +106,10 @@ export function PageEditor({ slug, initialData, revisions }: PageEditorProps) {
             }
 
             router.refresh()
+            toast.success("Page saved successfully")
         } catch (error) {
             console.error("Error saving page:", error)
+            toast.error("Failed to save page")
         } finally {
             setIsSaving(false)
         }

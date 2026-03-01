@@ -66,7 +66,7 @@ export async function createTask(formData: FormData) {
         throw new Error('Failed to create task');
     }
 
-    revalidatePath('/dashboard/calendar');
+    revalidatePath('/calendar');
 }
 
 export async function updateTaskStatus(taskId: string, newStatus: 'Todo' | 'In Progress' | 'Done') {
@@ -88,7 +88,7 @@ export async function updateTaskStatus(taskId: string, newStatus: 'Todo' | 'In P
         throw new Error('Failed to update task status');
     }
 
-    revalidatePath('/dashboard/calendar');
+    revalidatePath('/calendar');
 }
 
 export async function updateTask(formData: FormData) {
@@ -121,7 +121,7 @@ export async function updateTask(formData: FormData) {
         throw new Error('Failed to update task');
     }
 
-    revalidatePath('/dashboard/calendar');
+    revalidatePath('/calendar');
 }
 
 export async function deleteTask(taskId: string) {
@@ -143,7 +143,7 @@ export async function deleteTask(taskId: string) {
         throw new Error('Failed to delete task');
     }
 
-    revalidatePath('/dashboard/calendar');
+    revalidatePath('/calendar');
 }
 
 export interface CalendarEvent {
@@ -203,8 +203,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
             priority: task.priority,
             color: priorityColors[task.priority] || '#6366f1',
             description: task.description,
-            // @ts-ignore
-            projectTitle: task.project?.title,
+            projectTitle: Array.isArray(task.project) ? task.project[0]?.title : (task.project as { title: string } | null)?.title,
         });
     });
 
@@ -221,10 +220,12 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
     });
 
     invoices?.forEach(invoice => {
+        const clientData = invoice.client as { name: string } | { name: string }[] | null;
+        const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
+
         events.push({
             id: `invoice-${invoice.id}`,
-            // @ts-ignore
-            title: `💰 ${invoice.invoice_number} — ${invoice.client?.name || 'Invoice'}`,
+            title: `💰 ${invoice.invoice_number} — ${clientName || 'Invoice'}`,
             date: invoice.due_date,
             type: 'invoice',
             status: invoice.status,

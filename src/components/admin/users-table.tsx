@@ -78,13 +78,27 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
         }
 
         setIsLoading(true)
-        // Note: This requires admin privileges in Supabase
-        const { error } = await supabase.auth.admin.deleteUser(userId)
+        try {
+            const response = await fetch("/api/admin/users", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId }),
+            })
 
-        if (!error) {
+            const result = await response.json()
+
+            if (!response.ok) {
+                alert(result.error || "Failed to delete user")
+                return
+            }
+
             setUsers(users.filter((u) => u.id !== userId))
+        } catch (error) {
+            console.error("Error deleting user:", error)
+            alert("Failed to delete user")
+        } finally {
+            setIsLoading(false)
         }
-        setIsLoading(false)
     }
 
     async function viewUserDetails(user: User) {

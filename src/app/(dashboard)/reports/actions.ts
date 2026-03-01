@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { format } from "date-fns";
 
 export async function getAnalyticsData() {
     const supabase = await createClient();
@@ -37,7 +38,8 @@ export async function getAnalyticsData() {
     invoices?.forEach(inv => {
         if (inv.status === 'Paid') {
             totalRevenue += inv.total;
-            const month = new Date(inv.created_at).toLocaleString('default', { month: 'short' });
+            // Use date-fns for consistent English month abbreviations (e.g., 'Jan', 'Feb')
+            const month = format(new Date(inv.created_at), 'MMM yyyy');
             revenueByMonth.set(month, (revenueByMonth.get(month) || 0) + inv.total);
         } else if (inv.status === 'Sent' || inv.status === 'Overdue') {
             pendingRevenue += inv.total;
@@ -122,15 +124,19 @@ export async function getExportData() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-    return invoices?.map(inv => ({
-        invoice_number: inv.invoice_number,
-        // @ts-ignore
-        client: inv.client?.name || 'N/A',
-        status: inv.status,
-        total: inv.total,
-        issue_date: inv.issue_date,
-        due_date: inv.due_date || 'N/A'
-    })) || [];
+    return invoices?.map(inv => {
+        const clientData = inv.client as { name: string } | { name: string }[] | null;
+        const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
+
+        return {
+            invoice_number: inv.invoice_number,
+            client: clientName || 'N/A',
+            status: inv.status,
+            total: inv.total,
+            issue_date: inv.issue_date,
+            due_date: inv.due_date || 'N/A'
+        };
+    }) || [];
 }
 
 export async function getTaskAnalytics() {

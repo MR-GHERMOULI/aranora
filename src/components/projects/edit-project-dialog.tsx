@@ -47,7 +47,8 @@ const projectSchema = z.object({
     startDate: z.date().optional(),
     endDate: z.date().optional(),
     hourlyRate: z.string().optional(),
-})
+    collaboratorEmails: z.array(z.string()),
+});
 
 type ProjectFormValues = z.infer<typeof projectSchema>
 
@@ -55,15 +56,26 @@ interface EditProjectDialogProps {
     project: Project
 }
 
+import { getCollaborators } from "@/app/(dashboard)/collaborators/actions"
+import { getProjectCollaborators } from "@/app/(dashboard)/projects/collaborator-actions"
+import { CollaboratorCRM } from "@/types"
+import { useEffect } from "react"
+import { Badge } from "@/components/ui/badge"
+import { X } from "lucide-react"
+
 export function EditProjectDialog({ project }: EditProjectDialogProps) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
+    const [crmCollaborators, setCRMCollaborators] = useState<CollaboratorCRM[]>([])
+
     const {
         register,
         handleSubmit,
         control,
+        setValue,
+        watch,
         formState: { errors },
     } = useForm<ProjectFormValues>({
         resolver: zodResolver(projectSchema),
@@ -77,8 +89,21 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             startDate: project.start_date ? new Date(project.start_date) : undefined,
             endDate: project.end_date ? new Date(project.end_date) : undefined,
             hourlyRate: project.hourly_rate?.toString() || "",
+            collaboratorEmails: [],
         },
     })
+
+    const selectedEmails = watch("collaboratorEmails") || []
+
+    useEffect(() => {
+        if (open) {
+            getCollaborators().then(setCRMCollaborators)
+            getProjectCollaborators(project.id).then(colls => {
+                const emails = colls.map(c => c.collaborator_email)
+                setValue("collaboratorEmails", emails)
+            })
+        }
+    }, [open, project.id, setValue])
 
     async function onSubmit(data: ProjectFormValues) {
         setLoading(true)
@@ -92,6 +117,7 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
             if (data.startDate) formData.append("startDate", format(data.startDate, "yyyy-MM-dd"))
             if (data.endDate) formData.append("endDate", format(data.endDate, "yyyy-MM-dd"))
             if (data.hourlyRate) formData.append("hourlyRate", data.hourlyRate)
+            formData.append("collaboratorEmails", JSON.stringify(data.collaboratorEmails))
 
             await updateProject(formData)
             toast.success("Project updated successfully")
@@ -242,6 +268,45 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
                                     )}
                                 />
                             </div>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label>Collaborators (Optional)</Label>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                                {selectedEmails.map(email => {
+                                    const coll = crmCollaborators.find(c => c.email === email);
+                                    return (
+                                        <Badge key={email} variant="secondary" className="flex items-center gap-1">
+                                            {coll?.full_name || email}
+                                            <X
+                                                className="h-3 w-3 cursor-pointer hover:text-red-500"
+                                                onClick={() => setValue("collaboratorEmails", selectedEmails.filter(e => e !== email))}
+                                            />
+                                        </Badge>
+                                    );
+                                })}
+                            </div>
+                            <Select onValueChange={(email) => {
+                                if (email && !selectedEmails.includes(email)) {
+                                    setValue("collaboratorEmails", [...selectedEmails, email]);
+                                }
+                            }}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Add collaborator from directory..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {crmCollaborators.filter(c => c.email && !selectedEmails.includes(c.email)).map(c => (
+                                        <SelectItem key={c.id} value={c.email!}>
+                                            {c.full_name} ({c.email})
+                                        </SelectItem>
+                                    ))}
+                                    {crmCollaborators.length === 0 && (
+                                        <div className="p-2 text-xs text-muted-foreground text-center">
+                                            No collaborators found in directory.
+                                        </div>
+                                    )}
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div className="grid gap-2">

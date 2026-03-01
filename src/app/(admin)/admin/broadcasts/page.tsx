@@ -35,7 +35,7 @@ export default async function AdminBroadcastsPage() {
                     title="Total Messages Sent"
                     value={totalSent}
                     iconName="Radio"
-                    description="to stats users"
+                    description="to all users"
                 />
             </div>
 

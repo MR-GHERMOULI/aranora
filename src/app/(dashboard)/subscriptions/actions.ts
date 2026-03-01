@@ -17,6 +17,7 @@ export async function getSubscriptions() {
     const { data, error } = await supabase
         .from("subscriptions")
         .select("*")
+        .eq('user_id', user.id)
         .order("next_renewal_date", { ascending: true });
 
     if (error) {

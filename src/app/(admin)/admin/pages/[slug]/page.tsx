@@ -17,13 +17,17 @@ export default async function PageEditorPage({ params }: PageEditorPageProps) {
         .eq("slug", slug)
         .single()
 
-    // Fetch revisions
-    const { data: revisions } = await supabase
-        .from("page_revisions")
-        .select("id, title, content, created_at, edited_by")
-        .eq("page_id", page?.id || "")
-        .order("created_at", { ascending: false })
-        .limit(10)
+    // Fetch revisions only if page exists
+    let revisions: { id: string; title: string; content: string; created_at: string; edited_by: string }[] = []
+    if (page?.id) {
+        const { data } = await supabase
+            .from("page_revisions")
+            .select("id, title, content, created_at, edited_by")
+            .eq("page_id", page.id)
+            .order("created_at", { ascending: false })
+            .limit(10)
+        revisions = data || []
+    }
 
     // Define page titles
     const pageTitles: Record<string, { title: string; titleAr: string }> = {

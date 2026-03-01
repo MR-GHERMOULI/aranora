@@ -38,15 +38,11 @@ export async function getDashboardStats() {
         timeEntriesResponse,
         activeTimerResponse
     ] = await Promise.all([
-        // Cache profile data as it rarely changes
-        unstable_cache(
-            async () => {
-                const { data } = await supabase.from('profiles').select('full_name, username').eq('id', user.id).single();
-                return data;
-            },
-            [`profile-${user.id}`],
-            { revalidate: 3600, tags: [`profile-${user.id}`] }
-        )(),
+        // Profile data
+        (async () => {
+            const { data } = await supabase.from('profiles').select('full_name, username').eq('id', user.id).single();
+            return data;
+        })(),
         supabase.from('clients').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('projects').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'In Progress'),
         supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('user_id', user.id).in('status', ['Sent', 'Overdue']),

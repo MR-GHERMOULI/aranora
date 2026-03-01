@@ -71,8 +71,10 @@ export async function createProject(formData: FormData) {
   const startDate = formData.get('startDate') as string || null;
   const endDate = formData.get('endDate') as string || null;
   const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
+  const collaboratorEmailsJSON = formData.get('collaboratorEmails') as string;
+  const collaboratorEmails: string[] = collaboratorEmailsJSON ? JSON.parse(collaboratorEmailsJSON) : [];
 
-  const { error } = await supabase
+  const { data: project, error } = await supabase
     .from('projects')
     .insert({
       user_id: user.id,
@@ -85,11 +87,30 @@ export async function createProject(formData: FormData) {
       start_date: startDate,
       end_date: endDate,
       hourly_rate: hourlyRate
-    });
+    })
+    .select()
+    .single();
 
-  if (error) {
+  if (error || !project) {
     console.error('Error creating project:', error);
     throw new Error('Failed to create project');
+  }
+
+  // Handle collaborators
+  if (collaboratorEmails.length > 0) {
+    const collaboratorInserts = collaboratorEmails.map(email => ({
+      project_id: project.id,
+      collaborator_email: email,
+      status: 'invited'
+    }));
+
+    const { error: collError } = await supabase
+      .from('project_collaborators')
+      .insert(collaboratorInserts);
+
+    if (collError) {
+      console.error('Error adding project collaborators:', collError);
+    }
   }
 
   revalidatePath('/projects');
@@ -109,6 +130,8 @@ export async function updateProject(formData: FormData) {
   const startDate = formData.get('startDate') as string || null;
   const endDate = formData.get('endDate') as string || null;
   const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
+  const collaboratorEmailsJSON = formData.get('collaboratorEmails') as string;
+  const collaboratorEmails: string[] = collaboratorEmailsJSON ? JSON.parse(collaboratorEmailsJSON) : [];
 
   const { error } = await supabase
     .from('projects')
@@ -127,6 +150,39 @@ export async function updateProject(formData: FormData) {
   if (error) {
     console.error('Error updating project:', error);
     throw new Error('Failed to update project');
+  }
+
+  // Handle collaborators sync
+  if (collaboratorEmails && Array.isArray(collaboratorEmails)) {
+    // Get existing collaborators
+    const { data: existingColl } = await supabase
+      .from('project_collaborators')
+      .select('collaborator_email')
+      .eq('project_id', id);
+
+    const existingEmails = existingColl?.map(c => c.collaborator_email) || [];
+
+    // Emails to add
+    const toAdd = collaboratorEmails.filter(email => !existingEmails.includes(email));
+
+    // Emails to remove
+    const toRemove = existingEmails.filter(email => !collaboratorEmails.includes(email));
+
+    if (toAdd.length > 0) {
+      const inserts = toAdd.map(email => ({
+        project_id: id,
+        collaborator_email: email,
+        status: 'invited'
+      }));
+      await supabase.from('project_collaborators').insert(inserts);
+    }
+
+    if (toRemove.length > 0) {
+      await supabase.from('project_collaborators')
+        .delete()
+        .eq('project_id', id)
+        .in('collaborator_email', toRemove);
+    }
   }
 
   revalidatePath('/projects');

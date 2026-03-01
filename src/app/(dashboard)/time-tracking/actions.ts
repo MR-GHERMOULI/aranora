@@ -248,6 +248,7 @@ export async function getUnbilledEntries(projectId?: string) {
             task:tasks(title)
         `)
         .is("invoice_id", null)
+        .eq("user_id", user.id)
         .eq("is_billable", true)
         .not("end_time", "is", null);
 

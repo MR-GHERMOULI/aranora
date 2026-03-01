@@ -20,6 +20,7 @@ import { EditProjectDialog } from "@/components/projects/edit-project-dialog";
 import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog";
 import { ShareProgressDialog } from "@/components/projects/share-progress-dialog";
 import { ProjectTimerButton } from "@/components/time-tracking/project-timer-button";
+import { getProjectCollaborators } from "../collaborator-actions";
 
 export default async function ProjectPage({
     params
@@ -41,11 +42,12 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, tasks, files, timeEntries] = await Promise.all([
+    const [invoices, tasks, files, timeEntries, collaborators] = await Promise.all([
         getInvoices(undefined, project.id),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id),
-        getTimeEntries({ projectId: project.id })
+        getTimeEntries({ projectId: project.id }),
+        getProjectCollaborators(project.id)
     ]);
 
     return (
@@ -100,6 +102,53 @@ export default async function ProjectPage({
                                             {project.client.name}
                                         </Link>
                                     </div>
+                                </div>
+                            )}
+
+                            {collaborators.length > 0 && (
+                                <div className="flex items-start gap-3">
+                                    <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                                        <User className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-medium">Collaborators</p>
+                                            <AddCollaboratorDialog projectId={project.id} />
+                                        </div>
+                                        <div className="mt-2 space-y-2">
+                                            {collaborators.map((coll) => (
+                                                <div key={coll.id} className="flex items-center justify-between group">
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-sm truncate">
+                                                            {coll.profile?.full_name || coll.collaborator_email}
+                                                        </span>
+                                                        {coll.payment_type === 'revenue_share' ? (
+                                                            <span className="text-[10px] text-muted-foreground">
+                                                                {coll.revenue_share}% Share
+                                                            </span>
+                                                        ) : coll.hourly_rate ? (
+                                                            <span className="text-[10px] text-muted-foreground">
+                                                                ${coll.hourly_rate}/h
+                                                            </span>
+                                                        ) : null}
+                                                    </div>
+                                                    <RemoveCollaboratorButton collaboratorId={coll.id} projectId={project.id} email={coll.collaborator_email} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {collaborators.length === 0 && (
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
+                                            <User className="h-4 w-4 text-blue-600" />
+                                        </div>
+                                        <p className="text-sm font-medium">Collaborators</p>
+                                    </div>
+                                    <AddCollaboratorDialog projectId={project.id} />
                                 </div>
                             )}
 
