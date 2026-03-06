@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TaskCard } from './task-card';
 import { updateTask } from '@/app/(dashboard)/tasks/actions';
 import { Input } from '@/components/ui/input';
@@ -52,6 +52,11 @@ export function TaskBoard({ tasks, projects = [] }: TaskBoardProps) {
     const [localTasks, setLocalTasks] = useState(tasks);
     const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
     const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+
+    // Sync local state with props when they change (e.g., after a new task is created)
+    useEffect(() => {
+        setLocalTasks(tasks);
+    }, [tasks]);
 
     const getTasksByStatus = (status: string) => {
         return localTasks.filter((task) => task.status === status);
@@ -135,7 +140,7 @@ export function TaskBoard({ tasks, projects = [] }: TaskBoardProps) {
 
                         {/* Tasks */}
                         <div className="flex-1 p-3 pt-0 overflow-y-auto no-scrollbar">
-                            <div className="space-y-2.5 min-h-[100px]">
+                            <div className="flex flex-col space-y-2.5 min-h-[100px]">
                                 {columnTasks.map((task) => (
                                     <div
                                         key={task.id}

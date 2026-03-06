@@ -132,11 +132,11 @@ export function TaskCard({ task, projects = [], onOpenDetail }: TaskProps) {
                         {/* Title + description + assignee */}
                         <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
                             <div>
-                                <h4 className={`text-sm font-medium leading-tight ${isDone ? 'line-through text-muted-foreground' : ''}`}>
+                                <h4 className={`text-sm font-medium leading-tight ${isDone ? 'line-through text-muted-foreground' : ''}`} dir="auto">
                                     {task.title}
                                 </h4>
                                 {task.description && !isDone && (
-                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{task.description}</p>
+                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2" dir="auto">{task.description}</p>
                                 )}
                             </div>
                             {task.assignee && (
