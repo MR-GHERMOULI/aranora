@@ -160,6 +160,29 @@ export async function updateContract(formData: FormData) {
     revalidatePath(`/contracts/${id}`);
 }
 
+export async function updateContractContent(id: string, content: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    const { error } = await supabase
+        .from('contracts')
+        .update({ content })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+    if (error) {
+        console.error('Error updating contract content:', error);
+        throw new Error('Failed to update contract content');
+    }
+
+    revalidatePath('/contracts');
+    revalidatePath(`/contracts/${id}`);
+}
+
 
 export async function deleteContract(id: string) {
     const supabase = await createClient();
@@ -237,7 +260,7 @@ export async function getContractByToken(token: string) {
 
     const { data, error } = await supabase
         .from('contracts')
-        .select('id, title, content, status, signed_at, signer_name, created_at, user_id, client:clients(name, email), project:projects(title)')
+        .select('id, title, content, status, signed_at, signer_name, created_at, user_id, contract_data, client:clients(name, email), project:projects(title)')
         .eq('signing_token', token)
         .single();
 
@@ -269,6 +292,7 @@ export async function getContractByToken(token: string) {
         signed_at: data.signed_at as string | null,
         signer_name: data.signer_name as string | null,
         created_at: data.created_at as string,
+        contract_data: (data as any).contract_data || null,
         client: clientData as { name: string; email?: string | null } | null,
         project: projectData as { title: string } | null,
         profile,

@@ -5,7 +5,8 @@ import { getProfile } from "../../settings/actions";
 import { EditContractDialog } from "@/components/contracts/edit-contract-dialog";
 import { DeleteContractDialog } from "@/components/contracts/delete-contract-dialog";
 import { DownloadContractButton } from "@/components/contracts/download-contract-button";
-import { SendContractDialog } from "@/components/contracts/send-contract-dialog";
+import { ShareContractDialog } from "@/components/contracts/share-contract-dialog";
+import { ContractPreviewDialog } from "@/components/contracts/contract-preview-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { ArrowLeft, User, CheckCircle, FileText, Send, Clock, Shield, Globe, Monitor, PenTool, LayoutTemplate, Briefcase, Activity } from "lucide-react";
@@ -71,15 +72,17 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
                     </Link>
                 </Button>
                 <div className="flex items-center gap-2">
+                    <ContractPreviewDialog contract={contract} profile={profile} />
                     <DownloadContractButton contract={contract} profile={profile} />
                     {contract.status !== 'Signed' && (
                         <EditContractDialog contract={contract} clients={clients} projects={projects} />
                     )}
-                    <SendContractDialog
+                    <ShareContractDialog
                         contractId={contract.id}
                         contractTitle={contract.title}
                         existingToken={contract.signing_token}
                         status={contract.status}
+                        clientEmail={contract.client?.email}
                     />
                     <DeleteContractDialog contractId={contract.id} contractTitle={contract.title} />
                 </div>
@@ -111,9 +114,10 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
                         </div>
 
                         {/* Actual Contract Content */}
-                        <div className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary whitespace-pre-wrap text-[15px]">
-                            {contract.content}
-                        </div>
+                        <div
+                            className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary text-[15px]"
+                            dangerouslySetInnerHTML={{ __html: contract.content || '<p>No terms specified.</p>' }}
+                        />
 
                         {/* Signature Block */}
                         {contract.status === 'Signed' && contract.signature_data && (

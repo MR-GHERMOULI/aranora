@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Pencil, Loader2, FileText, User, Briefcase, Layers } from "lucide-react"
+import { Pencil, Loader2, FileText, User, Briefcase, Layers, Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, List, ListOrdered, Undo2, Redo2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { updateContract } from "@/app/(dashboard)/contracts/actions"
 import { Contract, Client, Project } from "@/types"
 import { useRouter } from "next/navigation"
+import { useRef, useCallback } from "react"
 import {
     Select,
     SelectContent,
@@ -45,6 +46,7 @@ export function EditContractDialog({ contract, clients, projects }: EditContract
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+    const editorRef = useRef<HTMLDivElement>(null)
 
     const {
         register,
@@ -75,7 +77,7 @@ export function EditContractDialog({ contract, clients, projects }: EditContract
             formData.append("title", data.title)
             formData.append("clientId", data.clientId)
             if (data.projectId) formData.append("projectId", data.projectId)
-            formData.append("content", data.content)
+            formData.append("content", editorRef.current?.innerHTML || data.content)
 
             await updateContract(formData)
             setOpen(false)
@@ -87,6 +89,11 @@ export function EditContractDialog({ contract, clients, projects }: EditContract
             setLoading(false)
         }
     }
+
+    const execCommand = useCallback((command: string, value?: string) => {
+        document.execCommand(command, false, value)
+        editorRef.current?.focus()
+    }, [])
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -168,18 +175,53 @@ export function EditContractDialog({ contract, clients, projects }: EditContract
                             </div>
                         </div>
 
-                        {/* Content Section */}
+                        {/* Content Section - Rich Text Editor */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="edit-content" className="text-xs font-bold text-slate-500 uppercase tracking-wider">Contract Terms</Label>
-                                <Badge variant="outline" className="text-[10px] font-bold text-slate-400">MARKDOWN SUPPORT</Badge>
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Contract Terms</Label>
+                                <Badge variant="outline" className="text-[10px] font-bold text-slate-400">RICH TEXT</Badge>
                             </div>
-                            <textarea
-                                id="edit-content"
-                                className="flex min-h-[300px] w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-serif leading-relaxed focus-visible:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary/40 transition-all"
-                                placeholder="Enter contract terms here..."
-                                {...register("content")}
-                            />
+                            <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                                {/* Mini Toolbar */}
+                                <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-slate-100 bg-slate-50 flex-wrap">
+                                    {[
+                                        { icon: Bold, cmd: 'bold', label: 'Bold' },
+                                        { icon: Italic, cmd: 'italic', label: 'Italic' },
+                                        { icon: UnderlineIcon, cmd: 'underline', label: 'Underline' },
+                                        null,
+                                        { icon: Heading1, cmd: 'formatBlock', val: 'h1', label: 'H1' },
+                                        { icon: Heading2, cmd: 'formatBlock', val: 'h2', label: 'H2' },
+                                        null,
+                                        { icon: List, cmd: 'insertUnorderedList', label: 'Bullets' },
+                                        { icon: ListOrdered, cmd: 'insertOrderedList', label: 'Numbers' },
+                                        null,
+                                        { icon: Undo2, cmd: 'undo', label: 'Undo' },
+                                        { icon: Redo2, cmd: 'redo', label: 'Redo' },
+                                    ].map((btn, i) => {
+                                        if (!btn) return <div key={i} className="w-px h-5 bg-slate-200 mx-0.5" />
+                                        const Icon = btn.icon
+                                        return (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => execCommand(btn.cmd, btn.val)}
+                                                className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-900 hover:bg-white transition-all"
+                                                title={btn.label}
+                                            >
+                                                <Icon className="h-3.5 w-3.5" />
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                                {/* Editor */}
+                                <div
+                                    ref={editorRef}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    dangerouslySetInnerHTML={{ __html: contract.content || '' }}
+                                    className="min-h-[280px] max-h-[400px] overflow-y-auto px-4 py-3 text-sm font-serif leading-relaxed text-slate-800 focus:outline-none prose prose-slate prose-headings:font-serif max-w-none selection:bg-brand-primary/20"
+                                />
+                            </div>
                             {errors.content && (
                                 <p className="text-xs text-red-500 font-medium">{errors.content.message}</p>
                             )}

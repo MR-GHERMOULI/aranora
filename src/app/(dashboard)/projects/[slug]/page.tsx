@@ -3,16 +3,18 @@ import { getInvoices } from "../../invoices/actions";
 import { getTasks } from "../../tasks/actions";
 import { getProjectFiles } from "../file-actions";
 import { getTimeEntries } from "../../time-tracking/actions";
+import { getContracts } from "../../contracts/actions";
 import { ProjectTaskList } from "@/components/projects/project-task-list";
 import { ProjectFileList } from "@/components/projects/project-file-list";
 import { ProjectTimeTrackingTab } from "@/components/projects/project-time-tracking-tab";
+import { ProjectContractsTab } from "@/components/projects/project-contracts-tab";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddCollaboratorDialog } from "@/components/projects/add-collaborator-dialog";
 import { RemoveCollaboratorButton } from "@/components/projects/remove-collaborator-button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer } from "lucide-react";
+import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer, FileSignature } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
@@ -21,6 +23,7 @@ import { DeleteProjectDialog } from "@/components/projects/delete-project-dialog
 import { ShareProgressDialog } from "@/components/projects/share-progress-dialog";
 import { ProjectTimerButton } from "@/components/time-tracking/project-timer-button";
 import { getProjectCollaborators } from "../collaborator-actions";
+import { getProfile } from "../../settings/actions";
 
 export default async function ProjectPage({
     params
@@ -42,13 +45,17 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, tasks, files, timeEntries, collaborators] = await Promise.all([
+    const [invoices, tasks, files, timeEntries, collaborators, allContracts, profile] = await Promise.all([
         getInvoices(undefined, project.id),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id),
         getTimeEntries({ projectId: project.id }),
-        getProjectCollaborators(project.id)
+        getProjectCollaborators(project.id),
+        getContracts(),
+        getProfile()
     ]);
+
+    const projectContracts = allContracts.filter(c => c.project_id === project.id);
 
     return (
         <div className="px-4 lg:px-8 space-y-6 pt-8 pb-10">
@@ -188,6 +195,15 @@ export default async function ProjectPage({
                             <TabsTrigger value="files">Files & Documents</TabsTrigger>
                             <TabsTrigger value="invoices">Invoices</TabsTrigger>
                             <TabsTrigger value="time-tracking">Time Tracking</TabsTrigger>
+                            <TabsTrigger value="contracts" className="gap-1.5">
+                                <FileSignature className="h-3.5 w-3.5" />
+                                Contracts
+                                {projectContracts.length > 0 && (
+                                    <span className="ml-1 h-4 min-w-4 rounded-full bg-brand-primary/10 text-brand-primary text-[9px] font-bold flex items-center justify-center px-1">
+                                        {projectContracts.length}
+                                    </span>
+                                )}
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
@@ -197,6 +213,14 @@ export default async function ProjectPage({
                         </TabsContent>
                         <TabsContent value="time-tracking" className="mt-4">
                             <ProjectTimeTrackingTab entries={timeEntries} projectId={project.id} />
+                        </TabsContent>
+                        <TabsContent value="contracts" className="mt-4">
+                            <ProjectContractsTab
+                                contracts={projectContracts}
+                                projectId={project.id}
+                                projectTitle={project.title}
+                                profile={profile}
+                            />
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { SignatureCanvas } from "@/components/contracts/signature-canvas"
-import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ArrowDown, ShieldCheck } from "lucide-react"
+import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ArrowDown, ShieldCheck, DollarSign, Calendar, Briefcase } from "lucide-react"
 import { DownloadContractButton } from "@/components/contracts/download-contract-button"
 
 interface ContractData {
@@ -16,6 +16,7 @@ interface ContractData {
     client?: { name: string; email?: string | null } | null;
     project?: { title: string } | null;
     profile?: { full_name?: string; company_name?: string; logo_url?: string | null } | null;
+    contract_data?: any;
 }
 
 interface SigningPageClientProps {
@@ -193,10 +194,50 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
                             )}
                         </div>
 
+                        {/* Contract Metadata */}
+                        {contract.contract_data && (
+                            <div className="mb-10 p-5 bg-slate-50 rounded-xl border border-slate-100">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Key Terms</p>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                                    {contract.contract_data.total_amount !== undefined && (
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1"><DollarSign className="h-3 w-3" /> Amount</p>
+                                            <p className="font-bold text-slate-900">{contract.contract_data.total_amount} {contract.contract_data.currency || 'USD'}</p>
+                                        </div>
+                                    )}
+                                    {contract.contract_data.payment_type && (
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Payment</p>
+                                            <p className="font-semibold text-slate-700">{contract.contract_data.payment_type}</p>
+                                        </div>
+                                    )}
+                                    {contract.project && (
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1"><Briefcase className="h-3 w-3" /> Project</p>
+                                            <p className="font-semibold text-slate-700">{contract.project.title}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {contract.contract_data.deliverables && contract.contract_data.deliverables.length > 0 && (
+                                    <div className="mt-3 pt-3 border-t border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Deliverables</p>
+                                        <ul className="space-y-1">
+                                            {contract.contract_data.deliverables.map((d: string, i: number) => (
+                                                <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
+                                                    <span className="text-brand-primary mt-0.5">•</span>{d}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Terms */}
-                        <div className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary whitespace-pre-wrap">
-                            {contract.content}
-                        </div>
+                        <div
+                            className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary"
+                            dangerouslySetInnerHTML={{ __html: contract.content || '<p>No terms specified.</p>' }}
+                        />
                     </div>
                 </div>
 

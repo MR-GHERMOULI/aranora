@@ -8,7 +8,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { sendContract } from "@/app/(dashboard)/contracts/actions"
-import { Send, Copy, Check, Loader2, Link as LinkIcon, Sparkles, ShieldCheck } from "lucide-react"
+import { Send, Copy, Check, Loader2, Link as LinkIcon, Sparkles, ShieldCheck, Mail, ExternalLink } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { motion, AnimatePresence } from "framer-motion"
@@ -123,6 +123,32 @@ export function SendContractDialog({ contractId, contractTitle, existingToken, s
                                     <div className="pt-2 flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
                                         <ShieldCheck className="h-3.5 w-3.5" />
                                         <span>Encrypted & Legally Binding E-Signature</span>
+                                    </div>
+
+                                    {/* Share Actions */}
+                                    <div className="pt-3 mt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-9 gap-1.5 text-xs font-bold border-slate-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all"
+                                            onClick={() => {
+                                                const subject = encodeURIComponent(`Contract for Signature: ${contractTitle}`)
+                                                const body = encodeURIComponent(`Hello,\n\nPlease review and sign the following contract:\n\n${contractTitle}\n\nSigning Link: ${signingUrl}\n\nThank you.`)
+                                                window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+                                            }}
+                                        >
+                                            <Mail className="h-3.5 w-3.5" />
+                                            Send via Email
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-9 gap-1.5 text-xs font-bold border-slate-200 hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200 transition-all"
+                                            onClick={() => window.open(signingUrl!, '_blank')}
+                                        >
+                                            <ExternalLink className="h-3.5 w-3.5" />
+                                            Preview Page
+                                        </Button>
                                     </div>
                                 </motion.div>
                             ) : (
