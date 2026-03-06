@@ -256,7 +256,13 @@ export async function sendContract(id: string) {
 // ============================================
 
 export async function getContractByToken(token: string) {
-    const supabase = await createClient();
+    // We MUST use the service role key here because unauthenticated clients
+    // (the people clicking the signing link) will be blocked by RLS policies
+    // if we use the standard anon client. The token acts as the auth mechanism.
+    const { createClient: createSupabaseClient } = require('@supabase/supabase-js');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey);
 
     const { data, error } = await supabase
         .from('contracts')

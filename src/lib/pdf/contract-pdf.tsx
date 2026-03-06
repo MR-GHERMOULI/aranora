@@ -3,6 +3,26 @@ import { Page, Text, View, Document, StyleSheet, Image } from '@react-pdf/render
 import { Contract } from '@/types';
 import { format } from 'date-fns';
 
+const stripHtml = (html: string) => {
+    if (!html) return '';
+    // Replace block elements ending tags with newlines
+    let text = html.replace(/<\/(p|div|h[1-6]|li)>/gi, '\n');
+    text = text.replace(/<br\s*\/?>/gi, '\n');
+    text = text.replace(/<li[^>]*>/gi, '• ');
+    // Strip all remaining HTML tags
+    text = text.replace(/<[^>]*>?/gm, '');
+    // Decode common HTML entities
+    text = text
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'");
+    // Clean up multiple newlines
+    return text.replace(/\n\s*\n/g, '\n\n').trim();
+};
+
 const styles = StyleSheet.create({
     page: {
         flexDirection: 'column',
@@ -259,7 +279,7 @@ export const ContractPDF = ({ contract, profile }: ContractPDFProps) => (
             {/* Terms Section */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Agreement Terms</Text>
-                <Text style={styles.content}>{contract.content || 'No terms specified.'}</Text>
+                <Text style={styles.content}>{stripHtml(contract.content) || 'No terms specified.'}</Text>
             </View>
 
             {/* Signature Section */}
