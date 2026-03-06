@@ -22,6 +22,7 @@ import {
     Clock
 } from "lucide-react"
 import { format } from "date-fns"
+import { useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -64,6 +65,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [currentStep, setCurrentStep] = useState(1)
+    const searchParams = useSearchParams()
 
     // Form State
     const [title, setTitle] = useState("")
@@ -128,6 +130,19 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
             })
         }
     }, [open])
+
+    // Auto-select project and client if projectId is in URL
+    useEffect(() => {
+        const urlProjectId = searchParams.get('projectId')
+        if (urlProjectId) {
+            const project = projects.find(p => p.id === urlProjectId)
+            if (project && project.client_id) {
+                setClientId(project.client_id)
+                setProjectId(project.id)
+                setOpen(true) // Auto-open the wizard
+            }
+        }
+    }, [searchParams, projects])
 
     const handleTemplateSelect = (t: ContractTemplate) => {
         setTemplateId(t.id)
