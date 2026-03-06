@@ -211,7 +211,8 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
     const dueDate = formData.get('due_date') as string;
     const projectId = formData.get('project_id') as string;
     const assignedTo = formData.get('assigned_to') as string;
-    const visibleTo = (formData.get('visible_to') as string) || 'private';
+    const visibleToRaw = (formData.get('visible_to') as string) || 'private';
+    const visibleTo = visibleToRaw === 'private' ? [user.id] : [visibleToRaw];
     const isPersonal = formData.get('is_personal') === 'true';
     const recurrence = (formData.get('recurrence') as string) || 'none';
     const labels = JSON.parse((formData.get('labels') as string) || '[]');
@@ -228,7 +229,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         due_date: dueDate || null,
         project_id: projectId || null,
         assigned_to: assignedTo || user.id,
-        visible_to: [visibleTo],
+        visible_to: visibleTo,
         is_personal: isPersonal,
         recurrence,
         category: isPersonal ? 'Personal' : 'Work',

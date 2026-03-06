@@ -52,10 +52,10 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
         formData.set('status', status);
         formData.set('priority', priority);
         if (date) formData.set('due_date', format(date, 'yyyy-MM-dd'));
-        if (projectId !== 'none') formData.set('projectId', projectId);
+        if (projectId !== 'none') formData.set('project_id', projectId);
         if (selectedLabels.length > 0) formData.set('labels', JSON.stringify(selectedLabels));
-        if (recurrence !== 'none') formData.set('recurrenceType', recurrence);
-        formData.set('isPersonal', projectId === 'none' ? 'true' : 'false');
+        if (recurrence !== 'none') formData.set('recurrence', recurrence);
+        formData.set('is_personal', projectId === 'none' ? 'true' : 'false');
 
         const result = await createTask(formData);
 
