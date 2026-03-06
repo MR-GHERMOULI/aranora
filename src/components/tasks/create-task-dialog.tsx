@@ -51,9 +51,9 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
         setIsLoading(true);
         formData.set('status', status);
         formData.set('priority', priority);
-        if (date) formData.set('dueDate', format(date, 'yyyy-MM-dd'));
+        if (date) formData.set('due_date', format(date, 'yyyy-MM-dd'));
         if (projectId !== 'none') formData.set('projectId', projectId);
-        if (selectedLabels.length > 0) formData.set('labels', selectedLabels.join(','));
+        if (selectedLabels.length > 0) formData.set('labels', JSON.stringify(selectedLabels));
         if (recurrence !== 'none') formData.set('recurrenceType', recurrence);
         formData.set('isPersonal', projectId === 'none' ? 'true' : 'false');
 
@@ -101,6 +101,7 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                                     placeholder="e.g., Design new landing page"
                                     required
                                     className="h-11 bg-background border-border/60 focus:border-primary/50 transition-colors text-base"
+                                    dir="auto"
                                 />
                             </div>
 
@@ -111,6 +112,7 @@ export function CreateTaskDialog({ projects }: { projects: any[] }) {
                                     name="description"
                                     className="flex min-h-[90px] w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all"
                                     placeholder="Add context or notes..."
+                                    dir="auto"
                                 />
                             </div>
                         </div>
