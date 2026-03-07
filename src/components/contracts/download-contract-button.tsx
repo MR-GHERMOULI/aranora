@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ContractPDF } from "@/lib/pdf/contract-pdf";
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,31 @@ interface DownloadContractButtonProps {
 }
 
 export function DownloadContractButton({ contract, profile }: DownloadContractButtonProps) {
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return (
+            <Button
+                variant="outline"
+                disabled
+                className="h-9 px-4 border-slate-200 gap-2 font-semibold"
+            >
+                <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                Loading PDF...
+            </Button>
+        );
+    }
+
+    const safeFileName = contract.title ? contract.title.replace(/[^a-zA-Z0-9-]/g, '-') : 'contract';
+
     return (
         <PDFDownloadLink
             document={<ContractPDF contract={contract} profile={profile} />}
-            fileName={`${contract.title.replace(/\s+/g, '-')}.pdf`}
+            fileName={`${safeFileName}.pdf`}
         >
             {/* @ts-ignore */}
             {({ blob, url, loading, error }) => (
