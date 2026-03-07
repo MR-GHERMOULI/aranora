@@ -5,10 +5,11 @@ import { BroadcastsClient } from "./broadcasts-client"
 export default async function AdminBroadcastsPage() {
     const supabase = await createClient()
 
-    // Fetch broadcasts
+    // Fetch non-archived broadcasts
     const { data: broadcasts } = await supabase
         .from("broadcasts")
         .select("*")
+        .neq("is_archived", true)
         .order("created_at", { ascending: false })
 
     // Total sent count (sum of sent_count)

@@ -67,7 +67,8 @@ export async function POST(request: Request) {
                 title: subject,
                 message: message,
                 type: `broadcast_${type}`,
-                read: false
+                read: false,
+                payload: { broadcast_id: broadcast.id }
             }))
 
             const { error: notifyError } = await supabase
