@@ -92,7 +92,7 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
             }
         } catch (err) {
             console.error("Delete error:", err)
-            toast.error("Failed to delete message")
+            toast.error("An unexpected error occurred")
         } finally {
             setIsLoading(false)
         }
@@ -101,6 +101,7 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
     function viewMessage(msg: ContactMessage) {
         setSelectedMessage(msg)
         setIsDetailsOpen(true)
+        // Only mark as read if it's currently unread to avoid redundant API calls
         if (!msg.is_read) {
             markAsRead(msg.id)
         }
