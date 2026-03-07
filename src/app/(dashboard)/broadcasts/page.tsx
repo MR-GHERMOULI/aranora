@@ -12,12 +12,12 @@ export default async function BroadcastsPage() {
 
     if (!user) return null
 
-    // Fetch notifications that are NOT invite types (assuming these are broadcasts/system alerts)
+    // Fetch notifications that are broadcasts
     const { data: notifications } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
-        .neq('type', 'invite')
+        .like('type', 'broadcast_%')
         .order('created_at', { ascending: false })
 
     return (

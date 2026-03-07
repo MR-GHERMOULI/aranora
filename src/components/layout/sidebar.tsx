@@ -28,17 +28,22 @@ import { GlobalSearch } from "./search"
 import { LogoutButton } from "./logout-button"
 import { NotificationsPopover } from "./notifications/notifications-popover"
 import { useEffect } from "react"
+import { getUnreadBroadcastsCount } from "./notifications/actions"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
-    const [inviteCount, setInviteCount] = useState(0)
+    const [broadcastsCount, setBroadcastsCount] = useState(0)
 
     useEffect(() => {
-        // Invitations feature removed
-    }, [])
+        const fetchBroadcastsCount = async () => {
+            const count = await getUnreadBroadcastsCount()
+            setBroadcastsCount(count)
+        }
+        fetchBroadcastsCount()
+    }, [pathname])
 
     type Route = {
         label: string;
@@ -200,8 +205,13 @@ export function Sidebar({ className }: SidebarProps) {
 
                     <div className="flex items-center justify-center gap-4 px-3 mb-6 shrink-0">
                         <Link href="/broadcasts" title="Broadcasts">
-                            <Button size="icon" variant="ghost" className="h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/10 transition">
+                            <Button size="icon" variant="ghost" className="relative h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/10 transition">
                                 <Radio className="h-5 w-5 text-amber-400" />
+                                {broadcastsCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-slate-900 leading-none">
+                                        {broadcastsCount > 99 ? '99+' : broadcastsCount}
+                                    </span>
+                                )}
                             </Button>
                         </Link>
                         <NotificationsPopover />

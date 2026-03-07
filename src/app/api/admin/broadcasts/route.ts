@@ -66,7 +66,7 @@ export async function POST(request: Request) {
                 user_id: p.id,
                 title: subject,
                 message: message,
-                type: type,
+                type: `broadcast_${type}`,
                 read: false
             }))
 

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence, Variants } from "framer-motion"
 import { format } from "date-fns"
 import { Radio, Info, AlertCircle, CheckCircle, Bell } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { markBroadcastsAsRead } from "@/components/layout/notifications/actions"
 
 type Notification = {
     id: string
@@ -44,20 +45,27 @@ export function BroadcastsList({ notifications }: BroadcastsListProps) {
         return true
     }) || []
 
+    useEffect(() => {
+        const unreadCount = notifications?.filter(n => !n.read).length || 0;
+        if (unreadCount > 0) {
+            markBroadcastsAsRead();
+        }
+    }, [notifications]);
+
     const getTypeIcon = (type: string) => {
         switch (type) {
-            case "info": return <Info className="h-5 w-5 text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-            case "success": return <CheckCircle className="h-5 w-5 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            case "warning": return <AlertCircle className="h-5 w-5 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+            case "broadcast_info": return <Info className="h-5 w-5 text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+            case "broadcast_success": return <CheckCircle className="h-5 w-5 text-emerald-500 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            case "broadcast_warning": return <AlertCircle className="h-5 w-5 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
             default: return <Bell className="h-5 w-5 text-brand-primary drop-shadow-[0_0_8px_rgba(var(--brand-primary),0.5)]" />
         }
     }
 
     const getTypeGradients = (type: string) => {
         switch (type) {
-            case "info": return "from-blue-500/10 to-transparent border-blue-500/20"
-            case "success": return "from-emerald-500/10 to-transparent border-emerald-500/20"
-            case "warning": return "from-amber-500/10 to-transparent border-amber-500/20"
+            case "broadcast_info": return "from-blue-500/10 to-transparent border-blue-500/20"
+            case "broadcast_success": return "from-emerald-500/10 to-transparent border-emerald-500/20"
+            case "broadcast_warning": return "from-amber-500/10 to-transparent border-amber-500/20"
             default: return "from-brand-primary/10 to-transparent border-brand-primary/20"
         }
     }
