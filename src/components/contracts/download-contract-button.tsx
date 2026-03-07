@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react";
-import { PDFDownloadLink } from "@react-pdf/renderer";
+import { useState } from "react";
+import { pdf } from "@react-pdf/renderer";
 import { ContractPDF } from "@/lib/pdf/contract-pdf";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Download, FileDown, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileDown, Loader2 } from "lucide-react";
 import { Contract } from "@/types";
 
 interface DownloadContractButtonProps {
@@ -14,44 +13,47 @@ interface DownloadContractButtonProps {
 }
 
 export function DownloadContractButton({ contract, profile }: DownloadContractButtonProps) {
-    const [isMounted, setIsMounted] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+    const handleDownload = async () => {
+        setIsGenerating(true);
+        try {
+            const document = <ContractPDF contract={contract} profile={profile} />;
+            const asPdf = pdf(document);
+            const blob = await asPdf.toBlob();
 
-    if (!isMounted) {
-        return (
-            <Button
-                variant="outline"
-                disabled
-                className="h-9 px-4 border-slate-200 gap-2 font-semibold"
-            >
-                <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-                Loading PDF...
-            </Button>
-        );
-    }
+            const safeFileName = contract.title ? contract.title.replace(/[^a-zA-Z0-9-]/g, '-') : 'contract';
+            const url = URL.createObjectURL(blob);
 
-    const safeFileName = contract.title ? contract.title.replace(/[^a-zA-Z0-9-]/g, '-') : 'contract';
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${safeFileName}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     return (
-        <PDFDownloadLink
-            document={<ContractPDF contract={contract} profile={profile} />}
-            fileName={`${safeFileName}.pdf`}
-            className={cn(buttonVariants({ variant: "outline" }), "h-9 px-4 border-slate-200 gap-2 font-semibold transition-all")}
+        <Button
+            variant="outline"
+            disabled={isGenerating}
+            onClick={handleDownload}
+            className="h-9 px-4 border-slate-200 hover:bg-slate-50 gap-2 font-semibold transition-all"
         >
-            {/* @ts-ignore */}
-            {({ blob, url, loading, error }) => (
-                <>
-                    {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-                    ) : (
-                        <FileDown className="h-4 w-4 text-slate-400" />
-                    )}
-                    {loading ? "Generating..." : "Download PDF"}
-                </>
+            {isGenerating ? (
+                <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+            ) : (
+                <FileDown className="h-4 w-4 text-slate-400" />
             )}
-        </PDFDownloadLink>
+            {isGenerating ? "Generating..." : "Download PDF"}
+        </Button>
     );
 }
