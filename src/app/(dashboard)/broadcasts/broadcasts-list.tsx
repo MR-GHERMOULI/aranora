@@ -5,7 +5,7 @@ import { motion, AnimatePresence, Variants } from "framer-motion"
 import { format, isToday, isThisWeek, isThisMonth } from "date-fns"
 import {
     Radio, Info, AlertCircle, CheckCircle, Bell,
-    Search, Megaphone, X
+    Search, Megaphone, X, Trash2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -88,10 +88,12 @@ function getDateGroup(dateStr: string): string {
 
 const DATE_GROUP_ORDER = ["Today", "This Week", "This Month", "Older"]
 
-export function BroadcastsList({ notifications }: BroadcastsListProps) {
+export function BroadcastsList({ notifications: initialNotifications }: BroadcastsListProps) {
+    const [notifications, setNotifications] = useState<Notification[]>(initialNotifications || [])
     const [filter, setFilter] = useState<FilterType>("all")
     const [search, setSearch] = useState("")
     const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     useEffect(() => {
         const unreadCount = notifications?.filter(n => !n.read).length || 0
@@ -99,6 +101,20 @@ export function BroadcastsList({ notifications }: BroadcastsListProps) {
             markBroadcastsAsRead()
         }
     }, [notifications])
+
+    async function dismissBroadcast(id: string, e?: React.MouseEvent) {
+        e?.stopPropagation()
+        setDeletingId(id)
+        try {
+            const res = await fetch(`/api/notifications/${id}`, { method: "DELETE" })
+            if (res.ok) {
+                setNotifications(prev => prev.filter(n => n.id !== id))
+                if (selectedNotification?.id === id) setSelectedNotification(null)
+            }
+        } finally {
+            setDeletingId(null)
+        }
+    }
 
     const stats = useMemo(() => ({
         total: notifications?.length || 0,
@@ -301,9 +317,20 @@ export function BroadcastsList({ notifications }: BroadcastsListProps) {
                                                                         </Badge>
                                                                     )}
                                                                 </div>
-                                                                <span className="text-xs text-muted-foreground shrink-0">
-                                                                    {format(new Date(n.created_at), 'MMM d, yyyy · h:mm a')}
-                                                                </span>
+                                                                <div className="flex items-center gap-2 shrink-0">
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        {format(new Date(n.created_at), 'MMM d, yyyy · h:mm a')}
+                                                                    </span>
+                                                                    {/* Dismiss button — visible on hover */}
+                                                                    <button
+                                                                        onClick={(e) => dismissBroadcast(n.id, e)}
+                                                                        disabled={deletingId === n.id}
+                                                                        title="Dismiss"
+                                                                        className="opacity-0 group-hover:opacity-100 transition-opacity rounded-md p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                                                                    >
+                                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                             <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                                                                 {n.message}
@@ -391,6 +418,18 @@ export function BroadcastsList({ notifications }: BroadcastsListProps) {
                                         {selectedNotification.message}
                                     </p>
                                 </DialogDescription>
+                            </div>
+                            <div className="flex justify-end pt-2">
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    disabled={deletingId === selectedNotification.id}
+                                    onClick={() => dismissBroadcast(selectedNotification.id)}
+                                    className="gap-1.5"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    {deletingId === selectedNotification.id ? "Deleting..." : "Delete"}
+                                </Button>
                             </div>
                         </>
                     )}
