@@ -86,7 +86,7 @@ export function TasksClient({ tasks, projects, stats, currentUserId }: TasksClie
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] p-4 lg:p-8 gap-5">
+        <div className="flex flex-col min-h-[calc(100vh-4rem)] p-4 lg:p-8 gap-5">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -107,7 +107,7 @@ export function TasksClient({ tasks, projects, stats, currentUserId }: TasksClie
             <TaskFilters activeFilters={filters} onFilterChange={setFilters} />
 
             {/* Tabs */}
-            <Tabs defaultValue="list" className="flex-1 flex flex-col overflow-hidden">
+            <Tabs defaultValue="list" className="flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-3">
                     <TabsList className="bg-muted/50 p-1">
                         <TabsTrigger value="list" className="gap-2 text-xs data-[state=active]:shadow-sm">
@@ -129,15 +129,15 @@ export function TasksClient({ tasks, projects, stats, currentUserId }: TasksClie
                     </p>
                 </div>
 
-                <TabsContent value="list" className="flex-1 overflow-y-auto no-scrollbar">
+                <TabsContent value="list" className="flex-1">
                     <TaskList tasks={filteredTasks} projects={projects} />
                 </TabsContent>
 
-                <TabsContent value="board" className="flex-1 overflow-hidden h-full">
+                <TabsContent value="board" className="flex-1">
                     <TaskBoard tasks={filteredTasks} projects={projects} />
                 </TabsContent>
 
-                <TabsContent value="calendar" className="flex-1 overflow-y-auto no-scrollbar">
+                <TabsContent value="calendar" className="flex-1">
                     <TaskCalendar tasks={filteredTasks} projects={projects} />
                 </TabsContent>
             </Tabs>

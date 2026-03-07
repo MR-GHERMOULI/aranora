@@ -102,7 +102,7 @@ export function TaskBoard({ tasks, projects = [] }: TaskBoardProps) {
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-4 h-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
             {COLUMNS.map((column) => {
                 const columnTasks = getTasksByStatus(column.id);
                 const isOver = dragOverColumn === column.id;
@@ -139,8 +139,8 @@ export function TaskBoard({ tasks, projects = [] }: TaskBoardProps) {
                         )}
 
                         {/* Tasks */}
-                        <div className="flex-1 p-3 pt-0 overflow-y-auto no-scrollbar">
-                            <div className="flex flex-col space-y-2.5 min-h-[100px]">
+                        <div className="flex-1 p-3 pt-0">
+                            <div className="flex flex-col space-y-2.5 min-h-[10px] h-full">
                                 {columnTasks.map((task) => (
                                     <div
                                         key={task.id}
