@@ -18,8 +18,8 @@ export function DownloadContractButton({ contract, profile }: DownloadContractBu
     const handleDownload = async () => {
         setIsGenerating(true);
         try {
-            const document = <ContractPDF contract={contract} profile={profile} />;
-            const asPdf = pdf(document);
+            const pdfDoc = <ContractPDF contract={contract} profile={profile} />;
+            const asPdf = pdf(pdfDoc);
             const blob = await asPdf.toBlob();
 
             const safeFileName = contract.title ? contract.title.replace(/[^a-zA-Z0-9-]/g, '-') : 'contract';
