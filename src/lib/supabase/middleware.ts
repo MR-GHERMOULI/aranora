@@ -44,6 +44,10 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith("/sign") &&
         !request.nextUrl.pathname.startsWith("/api/contracts/sign") &&
         !request.nextUrl.pathname.startsWith("/progress") &&
+        !request.nextUrl.pathname.startsWith("/about") &&
+        !request.nextUrl.pathname.startsWith("/contact") &&
+        !request.nextUrl.pathname.startsWith("/privacy") &&
+        !request.nextUrl.pathname.startsWith("/terms") &&
         request.nextUrl.pathname !== "/"
     ) {
         // no user, potentially respond by redirecting the user to the login page
