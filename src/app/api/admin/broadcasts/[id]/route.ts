@@ -32,23 +32,24 @@ export async function PATCH(
             return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 })
         }
 
-        // 2. Handle Archive Action (Admin only view hide)
-        if (action === "archive") {
+        // 2. Handle Archive/Unarchive Action (Admin only view hide)
+        if (action === "archive" || action === "unarchive") {
+            const isArchived = action === "archive"
             const { error: archiveError } = await supabase
                 .from("broadcasts")
-                .update({ is_archived: true })
+                .update({ is_archived: isArchived })
                 .eq("id", broadcastId)
 
             if (archiveError) throw archiveError
 
             await supabase.from("activity_logs").insert({
                 admin_id: user.id,
-                action: "Archived Broadcast",
+                action: isArchived ? "Archived Broadcast" : "Unarchived Broadcast",
                 action_type: "system",
                 target_id: broadcastId
             })
 
-            return NextResponse.json({ success: true, message: "Broadcast archived" })
+            return NextResponse.json({ success: true, message: `Broadcast ${action}d` })
         }
 
         // 3. Handle Edit Action

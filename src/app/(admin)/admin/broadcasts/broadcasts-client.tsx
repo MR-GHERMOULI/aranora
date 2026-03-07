@@ -29,6 +29,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -40,6 +41,7 @@ interface Broadcast {
     target_audience: string
     sent_count: number
     created_at: string
+    is_archived: boolean
 }
 
 interface BroadcastsTableProps {
@@ -130,17 +132,22 @@ export function BroadcastsClient({ initialBroadcasts }: BroadcastsTableProps) {
         }
     }
 
-    async function handleArchive(id: string) {
+    async function handleArchive(id: string, isCurrentlyArchived: boolean) {
         try {
+            const action = isCurrentlyArchived ? "unarchive" : "archive"
             const response = await fetch(`/api/admin/broadcasts/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "archive" }),
+                body: JSON.stringify({ action }),
             })
 
-            if (!response.ok) throw new Error("Failed to archive broadcast")
+            if (!response.ok) throw new Error(`Failed to ${action} broadcast`)
 
-            toast.success("Broadcast archived. It is no longer visible here but users can still see it.")
+            toast.success(
+                isCurrentlyArchived
+                    ? "Broadcast unarchived and visible to admins again."
+                    : "Broadcast archived. It is no longer visible here but users can still see it."
+            )
             router.refresh()
         } catch (error) {
             console.error(error)
@@ -179,6 +186,71 @@ export function BroadcastsClient({ initialBroadcasts }: BroadcastsTableProps) {
             default: return <Info className="h-4 w-4" />
         }
     }
+
+
+    // Filter active and archived broadcasts
+    const activeBroadcasts = initialBroadcasts.filter(b => !b.is_archived)
+    const archivedBroadcasts = initialBroadcasts.filter(b => b.is_archived)
+
+    // Render a single broadcast row to reuse
+    const renderBroadcastRow = (b: Broadcast) => (
+        <div key={b.id} className="p-4 grid grid-cols-12 gap-4 items-center hover:bg-muted/10 transition-colors">
+            <div className="col-span-1 flex justify-center">
+                {getTypeIcon(b.type)}
+            </div>
+            <div className="col-span-4 font-medium truncate" title={b.subject}>
+                {b.subject}
+            </div>
+            <div className="col-span-2">
+                <Badge variant="secondary" className="text-xs">
+                    {b.target_audience === 'all' ? 'All Users' : b.target_audience}
+                </Badge>
+            </div>
+            <div className="col-span-2 text-sm text-muted-foreground flex items-center gap-1">
+                <Users className="h-3 w-3 shrink-0" />
+                {b.sent_count}
+            </div>
+            <div className="col-span-2 text-right text-sm text-muted-foreground">
+                {new Date(b.created_at).toLocaleDateString('en-US')}
+            </div>
+            <div className="col-span-1 text-right flex justify-end">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[160px]">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => {
+                            setEditData(b)
+                            setIsEditDialogOpen(true)
+                        }}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Broadcast
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleArchive(b.id, b.is_archived)}>
+                            <Archive className="mr-2 h-4 w-4" />
+                            {b.is_archived ? "Unarchive" : "Archive"}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => {
+                                setBroadcastToDelete(b)
+                                setIsDeleteDialogOpen(true)
+                            }}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        </div>
+    )
 
     return (
         <div className="space-y-6">
@@ -247,85 +319,46 @@ export function BroadcastsClient({ initialBroadcasts }: BroadcastsTableProps) {
                 </Dialog>
             </div>
 
-            {/* Broadcasts List */}
-            <div className="rounded-xl border bg-card">
-                <div className="p-4 border-b bg-muted/30">
-                    <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground">
-                        <div className="col-span-1">Type</div>
-                        <div className="col-span-4">Subject</div>
-                        <div className="col-span-2">Audience</div>
-                        <div className="col-span-2">Sent</div>
-                        <div className="col-span-2 text-right">Date</div>
-                        <div className="col-span-1 text-right">Actions</div>
-                    </div>
-                </div>
-                <div className="divide-y relative min-h-[100px]">
-                    {initialBroadcasts.length === 0 ? (
-                        <div className="p-12 text-center text-muted-foreground">
-                            No active broadcasts found
+            {/* Broadcasts List with Tabs for Active/Archived */}
+            <Tabs defaultValue="active" className="w-full">
+                <TabsList className="mb-4">
+                    <TabsTrigger value="active">Active ({activeBroadcasts.length})</TabsTrigger>
+                    <TabsTrigger value="archived">Archived ({archivedBroadcasts.length})</TabsTrigger>
+                </TabsList>
+
+                <div className="rounded-xl border bg-card">
+                    <div className="p-4 border-b bg-muted/30">
+                        <div className="grid grid-cols-12 gap-4 text-sm font-medium text-muted-foreground">
+                            <div className="col-span-1">Type</div>
+                            <div className="col-span-4">Subject</div>
+                            <div className="col-span-2">Audience</div>
+                            <div className="col-span-2">Sent</div>
+                            <div className="col-span-2 text-right">Date</div>
+                            <div className="col-span-1 text-right">Actions</div>
                         </div>
-                    ) : (
-                        initialBroadcasts.map((b) => (
-                            <div key={b.id} className="p-4 grid grid-cols-12 gap-4 items-center hover:bg-muted/10 transition-colors">
-                                <div className="col-span-1 flex justify-center">
-                                    {getTypeIcon(b.type)}
-                                </div>
-                                <div className="col-span-4 font-medium truncate" title={b.subject}>
-                                    {b.subject}
-                                </div>
-                                <div className="col-span-2">
-                                    <Badge variant="secondary" className="text-xs">
-                                        {b.target_audience === 'all' ? 'All Users' : b.target_audience}
-                                    </Badge>
-                                </div>
-                                <div className="col-span-2 text-sm text-muted-foreground flex items-center gap-1">
-                                    <Users className="h-3 w-3 shrink-0" />
-                                    {b.sent_count}
-                                </div>
-                                <div className="col-span-2 text-right text-sm text-muted-foreground">
-                                    {new Date(b.created_at).toLocaleDateString('en-US')}
-                                </div>
-                                <div className="col-span-1 text-right flex justify-end">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                <span className="sr-only">Open menu</span>
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-[160px]">
-                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => {
-                                                setEditData(b)
-                                                setIsEditDialogOpen(true)
-                                            }}>
-                                                <Edit className="mr-2 h-4 w-4" />
-                                                Edit Broadcast
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleArchive(b.id)}>
-                                                <Archive className="mr-2 h-4 w-4" />
-                                                Archive
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                className="text-destructive focus:text-destructive"
-                                                onClick={() => {
-                                                    setBroadcastToDelete(b)
-                                                    setIsDeleteDialogOpen(true)
-                                                }}
-                                            >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Delete
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
+                    </div>
+
+                    <TabsContent value="active" className="m-0 divide-y relative min-h-[100px]">
+                        {activeBroadcasts.length === 0 ? (
+                            <div className="p-12 text-center text-muted-foreground">
+                                No active broadcasts found
                             </div>
-                        ))
-                    )}
+                        ) : (
+                            activeBroadcasts.map(renderBroadcastRow)
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="archived" className="m-0 divide-y relative min-h-[100px]">
+                        {archivedBroadcasts.length === 0 ? (
+                            <div className="p-12 text-center text-muted-foreground">
+                                No archived broadcasts found
+                            </div>
+                        ) : (
+                            archivedBroadcasts.map(renderBroadcastRow)
+                        )}
+                    </TabsContent>
                 </div>
-            </div>
+            </Tabs>
 
             {/* Edit Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
@@ -413,6 +446,6 @@ export function BroadcastsClient({ initialBroadcasts }: BroadcastsTableProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     )
 }
