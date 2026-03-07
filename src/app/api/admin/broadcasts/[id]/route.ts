@@ -3,12 +3,12 @@ import { NextResponse } from "next/server"
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const body = await request.json()
         const { action, subject, message, type } = body
-        const broadcastId = params.id
+        const { id: broadcastId } = await params
 
         if (!broadcastId) {
             return NextResponse.json({ error: "Missing broadcast ID" }, { status: 400 })
@@ -102,10 +102,10 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const broadcastId = params.id
+        const { id: broadcastId } = await params
         if (!broadcastId) {
             return NextResponse.json({ error: "Missing broadcast ID" }, { status: 400 })
         }
