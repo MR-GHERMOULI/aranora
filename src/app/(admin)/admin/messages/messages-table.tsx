@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Mail, MailOpen, Trash2, Calendar, User, Eye } from "lucide-react"
+import { Search, Filter, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -18,9 +17,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-
 import { toast } from "sonner"
 import type { ContactMessage } from "@/types"
 
@@ -35,7 +32,6 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
     const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
     const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
-    const supabase = createClient()
     const router = useRouter()
 
     const filteredMessages = messages.filter((msg) => {
@@ -55,18 +51,19 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
 
     async function markAsRead(id: string) {
         // Optimistic update
-        setMessages(messages.map(m => m.id === id ? { ...m, is_read: true } : m))
+        setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: true } : m))
 
-        // Background update
-        const { error } = await supabase
-            .from("contact_messages")
-            .update({ is_read: true })
-            .eq("id", id)
+        // Background update via server API
+        const res = await fetch(`/api/admin/messages/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ is_read: true }),
+        })
 
-        if (error) {
+        if (!res.ok) {
             toast.error("Failed to mark message as read")
             // Revert optimistic update
-            setMessages(messages.map(m => m.id === id ? { ...m, is_read: false } : m))
+            setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: false } : m))
         } else {
             router.refresh()
         }
@@ -76,22 +73,29 @@ export function MessagesTable({ initialMessages }: MessagesTableProps) {
         if (!confirm("Are you sure you want to delete this message?")) return
 
         setIsLoading(true)
-        const { error } = await supabase
-            .from("contact_messages")
-            .delete()
-            .eq("id", id)
+        try {
+            const res = await fetch(`/api/admin/messages/${id}`, {
+                method: "DELETE",
+            })
 
-        if (!error) {
-            setMessages(messages.filter(m => m.id !== id))
-            if (selectedMessage?.id === id) {
-                setIsDetailsOpen(false)
+            if (res.ok) {
+                setMessages(prev => prev.filter(m => m.id !== id))
+                if (selectedMessage?.id === id) {
+                    setIsDetailsOpen(false)
+                }
+                toast.success("Message deleted successfully")
+                router.refresh()
+            } else {
+                const data = await res.json().catch(() => ({}))
+                console.error("Delete failed:", data)
+                toast.error("Failed to delete message")
             }
-            toast.success("Message deleted successfully")
-            router.refresh()
-        } else {
+        } catch (err) {
+            console.error("Delete error:", err)
             toast.error("Failed to delete message")
+        } finally {
+            setIsLoading(false)
         }
-        setIsLoading(false)
     }
 
     function viewMessage(msg: ContactMessage) {
