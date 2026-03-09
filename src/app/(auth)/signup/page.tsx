@@ -12,16 +12,21 @@ const countries = [
     "Tunisia", "United Arab Emirates", "Yemen", "Other"
 ];
 
-export default function SignupPage() {
+export default async function SignupPage({ searchParams }: { searchParams: Promise<{ promo?: string }> }) {
+    const { promo } = await searchParams;
+
     return (
         <div className="space-y-6">
             <div className="text-center space-y-2">
                 <h1 className="text-3xl font-bold text-slate-900">Create your account</h1>
-                <p className="text-slate-500">Join Aranora — it's completely free!</p>
+                <p className="text-slate-500">
+                    {promo ? 'Sign up to claim your free access!' : 'Start your 30-day free trial — no credit card required'}
+                </p>
             </div>
 
             <Card className="shadow-xl shadow-slate-200/50 border-slate-200">
                 <form>
+                    {promo && <input type="hidden" name="promoCode" value={promo} />}
                     <CardContent className="pt-6 space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="fullName" className="text-slate-700">Full Name</Label>
@@ -100,7 +105,7 @@ export default function SignupPage() {
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-4 pb-6">
                         <Button className="w-full bg-brand-primary hover:bg-brand-primary-light" formAction={signup}>
-                            Create Free Account <ArrowRight className="ml-2 h-4 w-4" />
+                            Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
 
                         <p className="text-xs text-center text-slate-500">
@@ -116,7 +121,7 @@ export default function SignupPage() {
             {/* Benefits */}
             <div className="bg-white/50 rounded-xl p-4 space-y-2">
                 {[
-                    "100% Free — No hidden fees",
+                    "30-day free trial — no credit card needed",
                     "Unlimited projects & clients",
                     "Smart invoicing & contracts"
                 ].map((benefit, i) => (

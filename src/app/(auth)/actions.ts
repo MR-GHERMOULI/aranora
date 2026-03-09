@@ -20,7 +20,7 @@ export async function login(formData: FormData) {
     }
 
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (user) {
         const { data: profile } = await supabase
             .from('profiles')
@@ -46,8 +46,9 @@ export async function signup(formData: FormData) {
     const fullName = formData.get('fullName') as string
     const phone = formData.get('phone') as string
     const country = formData.get('country') as string
+    const promoCode = formData.get('promoCode') as string | null
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signupData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -62,6 +63,49 @@ export async function signup(formData: FormData) {
     if (error) {
         console.error('Signup error:', error)
         redirect('/error')
+    }
+
+    // Handle promo code — extend trial if valid
+    if (promoCode && signupData?.user) {
+        try {
+            const { createServerClient } = await import('@supabase/ssr')
+            const serviceClient = createServerClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                { cookies: { getAll() { return [] }, setAll() { } } }
+            )
+
+            // Validate promo code
+            const { data: promo } = await serviceClient
+                .from('promo_invite_links')
+                .select('*')
+                .eq('code', promoCode)
+                .eq('is_active', true)
+                .single()
+
+            if (promo && promo.times_used < promo.max_uses) {
+                // Extend trial based on promo free_months
+                const extendedTrialEnd = new Date()
+                extendedTrialEnd.setMonth(extendedTrialEnd.getMonth() + promo.free_months)
+
+                await serviceClient
+                    .from('profiles')
+                    .update({ trial_ends_at: extendedTrialEnd.toISOString() })
+                    .eq('id', signupData.user.id)
+
+                // Mark promo as used
+                await serviceClient
+                    .from('promo_invite_links')
+                    .update({
+                        times_used: promo.times_used + 1,
+                        used_by: signupData.user.id,
+                        is_active: false,
+                    })
+                    .eq('id', promo.id)
+            }
+        } catch (promoError) {
+            console.error('Promo code error (non-blocking):', promoError)
+        }
     }
 
     revalidatePath('/', 'layout')

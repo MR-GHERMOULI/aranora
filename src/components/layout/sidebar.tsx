@@ -19,7 +19,8 @@ import {
     Timer,
     Radio,
     Building2,
-    UserCog
+    UserCog,
+    Wallet
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -142,6 +143,17 @@ export function Sidebar({ className }: SidebarProps) {
                     icon: BarChart,
                     href: "/reports",
                     color: "text-green-700",
+                },
+            ]
+        },
+        {
+            title: "Account",
+            routes: [
+                {
+                    label: "Billing",
+                    icon: Wallet,
+                    href: "/billing",
+                    color: "text-purple-500",
                 },
             ]
         }
