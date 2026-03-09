@@ -4,7 +4,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   console.warn('⚠️ STRIPE_SECRET_KEY is not set. Stripe features will not work.');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_to_prevent_build_error', {
   apiVersion: '2026-02-25.clover',
   typescript: true,
 });
