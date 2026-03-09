@@ -16,7 +16,8 @@ import {
     Shield,
     Mail,
     Radio,
-    CreditCard
+    CreditCard,
+    Link2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -111,6 +112,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             icon: CreditCard,
             href: "/admin/subscriptions",
             color: "text-emerald-500",
+        },
+        {
+            label: "Promo Links",
+            labelAr: "روابط الترويج",
+            icon: Link2,
+            href: "/admin/promo-links",
+            color: "text-indigo-500",
         },
         {
             label: "Broadcasts",
