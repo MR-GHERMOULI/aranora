@@ -15,7 +15,8 @@ import {
     X,
     Shield,
     Mail,
-    Radio
+    Radio,
+    CreditCard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -103,6 +104,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             href: "/admin/messages",
             color: "text-blue-500",
             badge: unreadCount > 0 ? unreadCount : null,
+        },
+        {
+            label: "Subscriptions",
+            labelAr: "الاشتراكات",
+            icon: CreditCard,
+            href: "/admin/subscriptions",
+            color: "text-emerald-500",
         },
         {
             label: "Broadcasts",
