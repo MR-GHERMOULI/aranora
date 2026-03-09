@@ -77,13 +77,14 @@ DECLARE base_username TEXT; final_username TEXT;
 BEGIN
   base_username := SPLIT_PART(NEW.email, '@', 1); final_username := base_username;
   IF EXISTS (SELECT 1 FROM public.profiles WHERE username = final_username) THEN final_username := base_username || '_' || SUBSTRING(gen_random_uuid()::text, 1, 4); END IF;
-  INSERT INTO public.profiles (id, username, full_name, phone, country, company_email, trial_ends_at, subscription_status)
+  INSERT INTO public.profiles (id, username, full_name, phone, country, email, company_email, trial_ends_at, subscription_status)
   VALUES (
     NEW.id,
     LOWER(final_username),
     NEW.raw_user_meta_data->>'full_name',
     NEW.raw_user_meta_data->>'phone',
     NEW.raw_user_meta_data->>'country',
+    NEW.email,
     NEW.email,
     NOW() + INTERVAL '30 days',
     'trialing'
