@@ -20,7 +20,8 @@ import {
     Radio,
     Building2,
     UserCog,
-    Wallet
+    Wallet,
+    TrendingUp
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -149,6 +150,12 @@ export function Sidebar({ className }: SidebarProps) {
         {
             title: "Account",
             routes: [
+                {
+                    label: "Affiliates",
+                    icon: TrendingUp,
+                    href: "/affiliates",
+                    color: "text-teal-500",
+                },
                 {
                     label: "Billing",
                     icon: Wallet,

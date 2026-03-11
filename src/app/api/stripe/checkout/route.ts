@@ -11,7 +11,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { planType, promoCode } = await request.json();
+        const { planType, promoCode, affiliateCode: bodyAffCode } = await request.json();
+
+        // Read affiliate code from request body or cookie
+        const cookieAffCode = request.cookies.get('aranora_ref')?.value;
+        const affiliateCode = bodyAffCode || cookieAffCode || '';
 
         if (!planType || !['monthly', 'yearly'].includes(planType)) {
             return NextResponse.json({ error: 'Invalid plan type' }, { status: 400 });
@@ -86,6 +90,7 @@ export async function POST(request: NextRequest) {
                 supabase_user_id: user.id,
                 plan_type: planType,
                 promo_code: promoCode || '',
+                affiliate_code: affiliateCode,
             },
         };
 
@@ -96,6 +101,7 @@ export async function POST(request: NextRequest) {
                     supabase_user_id: user.id,
                     plan_type: planType,
                     promo_code: promoCode || '',
+                    affiliate_code: affiliateCode,
                 },
             };
         } else {
@@ -103,6 +109,7 @@ export async function POST(request: NextRequest) {
                 metadata: {
                     supabase_user_id: user.id,
                     plan_type: planType,
+                    affiliate_code: affiliateCode,
                 },
             };
         }

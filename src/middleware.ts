@@ -12,7 +12,7 @@ const PUBLIC_ROUTES = [
 // Route prefixes that don't require subscription
 const PUBLIC_PREFIXES = [
     '/api/', '/promo/', '/invite/', '/progress/', '/sign/',
-    '/_next/', '/favicon.ico',
+    '/_next/', '/favicon.ico', '/ref/',
 ];
 
 function isPublicRoute(pathname: string): boolean {

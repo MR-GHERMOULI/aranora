@@ -17,7 +17,8 @@ import {
     Mail,
     Radio,
     CreditCard,
-    Link2
+    Link2,
+    UserPlus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -119,6 +120,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             icon: Link2,
             href: "/admin/promo-links",
             color: "text-indigo-500",
+        },
+        {
+            label: "Affiliates",
+            labelAr: "التسويق بالعمولة",
+            icon: UserPlus,
+            href: "/admin/affiliates",
+            color: "text-teal-500",
         },
         {
             label: "Broadcasts",
