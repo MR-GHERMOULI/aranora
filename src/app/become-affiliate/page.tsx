@@ -1,0 +1,374 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import {
+    TrendingUp, Mail, Lock, User, ArrowRight, CheckCircle2,
+    DollarSign, Eye, EyeOff, Loader2, Building
+} from 'lucide-react';
+
+type Mode = 'landing' | 'login' | 'signup';
+
+export default function BecomeAffiliatePage() {
+    const [mode, setMode] = useState<Mode>('landing');
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+    const [signupForm, setSignupForm] = useState({ fullName: '', email: '', password: '' });
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            const res = await fetch('/api/affiliate-auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginForm),
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                setError(json.error || 'Invalid email or password');
+            } else {
+                window.location.href = '/affiliates';
+            }
+        } catch {
+            setError('Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        if (signupForm.password.length < 8) {
+            setError('Password must be at least 8 characters');
+            setLoading(false);
+            return;
+        }
+        try {
+            const res = await fetch('/api/affiliate-auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(signupForm),
+            });
+            const json = await res.json();
+            if (!res.ok) {
+                setError(json.error || 'Registration failed');
+            } else {
+                window.location.href = '/affiliates';
+            }
+        } catch {
+            setError('Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const perks = [
+        { icon: DollarSign, text: '30% commission on every referral' },
+        { icon: TrendingUp, text: '12-month recurring commissions on monthly plans' },
+        { icon: CheckCircle2, text: '$57 one-time on every annual plan' },
+        { icon: Building, text: 'No platform subscription needed' },
+    ];
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-teal-950">
+            {/* Nav */}
+            <nav className="border-b border-slate-800/50 px-6 py-4">
+                <div className="max-w-6xl mx-auto flex items-center justify-between">
+                    <Link href="/" className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center">
+                            <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                            </svg>
+                        </div>
+                        <span className="text-xl font-bold text-white">Aranora</span>
+                        <span className="text-slate-500 text-sm ml-1">Affiliates</span>
+                    </Link>
+                    <div className="flex items-center gap-3">
+                        {mode !== 'login' && (
+                            <button onClick={() => { setMode('login'); setError(''); }}
+                                className="text-slate-400 hover:text-white text-sm transition-colors">
+                                Sign in
+                            </button>
+                        )}
+                        {mode !== 'signup' && (
+                            <button onClick={() => { setMode('signup'); setError(''); }}
+                                className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-teal-600 hover:to-emerald-600 transition-all">
+                                Join Program
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </nav>
+
+            <div className="max-w-6xl mx-auto px-6 py-16">
+                {mode === 'landing' && (
+                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                        {/* Left: Info */}
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/10 text-teal-400 text-sm font-medium mb-6 border border-teal-500/20">
+                                <TrendingUp className="h-3.5 w-3.5" />
+                                Affiliate Partner Program
+                            </div>
+                            <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6">
+                                Turn Your Audience Into{' '}
+                                <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
+                                    Passive Income
+                                </span>
+                            </h1>
+                            <p className="text-slate-400 text-lg mb-8 leading-relaxed">
+                                Refer customers to Aranora and earn 30% of every subscription for 12 months.
+                                No platform subscription required — just sign up and start sharing.
+                            </p>
+
+                            {/* Commission highlight */}
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="bg-slate-800/60 border border-teal-500/20 rounded-xl p-4">
+                                    <div className="text-2xl font-bold text-teal-400 mb-1">$5.70<span className="text-sm font-normal text-slate-400">/mo</span></div>
+                                    <div className="text-xs text-slate-400">Monthly plan referral × 12</div>
+                                    <div className="text-xs text-slate-500 mt-1">= up to $68.40</div>
+                                </div>
+                                <div className="bg-slate-800/60 border border-emerald-500/20 rounded-xl p-4">
+                                    <div className="text-2xl font-bold text-emerald-400 mb-1">$57</div>
+                                    <div className="text-xs text-slate-400">Annual plan referral</div>
+                                    <div className="text-xs text-slate-500 mt-1">one-time payout</div>
+                                </div>
+                            </div>
+
+                            {/* Perks */}
+                            <ul className="space-y-3 mb-10">
+                                {perks.map((perk, i) => (
+                                    <li key={i} className="flex items-center gap-3 text-slate-300 text-sm">
+                                        <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
+                                            <perk.icon className="h-4 w-4 text-teal-400" />
+                                        </div>
+                                        {perk.text}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <button
+                                    onClick={() => { setMode('signup'); setError(''); }}
+                                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/25"
+                                >
+                                    Apply Now <ArrowRight className="h-4 w-4" />
+                                </button>
+                                <button
+                                    onClick={() => { setMode('login'); setError(''); }}
+                                    className="flex items-center justify-center gap-2 border border-slate-700 text-slate-300 px-6 py-3 rounded-xl font-medium hover:border-slate-500 hover:text-white transition-colors"
+                                >
+                                    Already a partner? Sign in
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Right: Stats visual */}
+                        <div className="hidden lg:block">
+                            <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8">
+                                <h3 className="text-white font-semibold mb-6 flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5 text-teal-400" />
+                                    Affiliate Dashboard Preview
+                                </h3>
+                                <div className="grid grid-cols-2 gap-3 mb-6">
+                                    {[
+                                        { label: 'Total Earned', value: '$342.00', color: 'text-emerald-400' },
+                                        { label: 'This Month', value: '$57.00', color: 'text-teal-400' },
+                                        { label: 'Referrals', value: '12', color: 'text-blue-400' },
+                                        { label: 'Active Subs', value: '8', color: 'text-purple-400' },
+                                    ].map((stat, i) => (
+                                        <div key={i} className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/30">
+                                            <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
+                                            <div className="text-xs text-slate-500 mt-0.5">{stat.label}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="text-xs text-slate-500 mb-3">Recent Commissions</div>
+                                    {[
+                                        { plan: 'Monthly Plan', month: 'Month 3/12', amount: '+$5.70', status: 'Pending' },
+                                        { plan: 'Annual Plan', month: 'One-time', amount: '+$57.00', status: 'Paid' },
+                                        { plan: 'Monthly Plan', month: 'Month 1/12', amount: '+$5.70', status: 'Paid' },
+                                    ].map((row, i) => (
+                                        <div key={i} className="flex items-center justify-between bg-slate-900/30 rounded-lg px-3 py-2.5 border border-slate-800/50">
+                                            <div>
+                                                <div className="text-xs text-white">{row.plan}</div>
+                                                <div className="text-[10px] text-slate-500">{row.month}</div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border ${row.status === 'Paid' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-amber-400 bg-amber-500/10 border-amber-500/20'}`}>
+                                                    {row.status}
+                                                </span>
+                                                <span className="text-emerald-400 font-semibold text-sm">{row.amount}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Login Form */}
+                {mode === 'login' && (
+                    <div className="max-w-md mx-auto">
+                        <div className="text-center mb-8">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                                <TrendingUp className="h-7 w-7 text-teal-400" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white">Welcome back</h2>
+                            <p className="text-slate-400 text-sm mt-1">Sign in to your affiliate account</p>
+                        </div>
+
+                        <form onSubmit={handleLogin} className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 space-y-4">
+                            {error && (
+                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 text-sm">
+                                    {error}
+                                </div>
+                            )}
+                            <div>
+                                <label className="text-sm font-medium text-slate-300 mb-1.5 block">Email</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input
+                                        type="email"
+                                        required
+                                        value={loginForm.email}
+                                        onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
+                                        placeholder="you@example.com"
+                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-slate-500"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-slate-300 mb-1.5 block">Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        required
+                                        value={loginForm.password}
+                                        onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
+                                        placeholder="••••••••"
+                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-10 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-slate-500"
+                                    />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                                <div className="text-right mt-1">
+                                    <Link href="/forgot-password" className="text-xs text-slate-500 hover:text-teal-400 transition-colors">
+                                        Forgot password?
+                                    </Link>
+                                </div>
+                            </div>
+                            <button type="submit" disabled={loading}
+                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white py-3 rounded-xl font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50 mt-2">
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                                {loading ? 'Signing in...' : 'Sign In to Dashboard'}
+                            </button>
+                            <p className="text-center text-sm text-slate-500">
+                                Not a partner yet?{' '}
+                                <button type="button" onClick={() => { setMode('signup'); setError(''); }}
+                                    className="text-teal-400 hover:text-teal-300 font-medium transition-colors">
+                                    Apply now
+                                </button>
+                            </p>
+                        </form>
+                    </div>
+                )}
+
+                {/* Signup Form */}
+                {mode === 'signup' && (
+                    <div className="max-w-md mx-auto">
+                        <div className="text-center mb-8">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                                <TrendingUp className="h-7 w-7 text-teal-400" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white">Create Affiliate Account</h2>
+                            <p className="text-slate-400 text-sm mt-1">Free to join — no platform subscription needed</p>
+                        </div>
+
+                        <form onSubmit={handleSignup} className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 space-y-4">
+                            {error && (
+                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 text-sm">
+                                    {error}
+                                </div>
+                            )}
+                            <div>
+                                <label className="text-sm font-medium text-slate-300 mb-1.5 block">Full Name</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={signupForm.fullName}
+                                        onChange={e => setSignupForm(f => ({ ...f, fullName: e.target.value }))}
+                                        placeholder="John Doe"
+                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-slate-500"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-slate-300 mb-1.5 block">Email</label>
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input
+                                        type="email"
+                                        required
+                                        value={signupForm.email}
+                                        onChange={e => setSignupForm(f => ({ ...f, email: e.target.value }))}
+                                        placeholder="you@example.com"
+                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-slate-500"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-slate-300 mb-1.5 block">Password</label>
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        required
+                                        value={signupForm.password}
+                                        onChange={e => setSignupForm(f => ({ ...f, password: e.target.value }))}
+                                        placeholder="Min. 8 characters"
+                                        className="w-full bg-slate-900/50 border border-slate-700 rounded-lg pl-10 pr-10 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder:text-slate-500"
+                                    />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="bg-slate-900/40 rounded-lg p-3 text-xs text-slate-400 space-y-1">
+                                <p className="font-medium text-slate-300">What happens next?</p>
+                                <p>1. Create your account</p>
+                                <p>2. Complete affiliate application (company, payment details)</p>
+                                <p>3. Get approved → receive your unique referral link</p>
+                            </div>
+                            <button type="submit" disabled={loading}
+                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white py-3 rounded-xl font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50">
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+                                {loading ? 'Creating account...' : 'Create Account & Continue'}
+                            </button>
+                            <p className="text-center text-sm text-slate-500">
+                                Already have an account?{' '}
+                                <button type="button" onClick={() => { setMode('login'); setError(''); }}
+                                    className="text-teal-400 hover:text-teal-300 font-medium transition-colors">
+                                    Sign in
+                                </button>
+                            </p>
+                        </form>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

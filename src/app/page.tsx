@@ -10,7 +10,10 @@ import {
   Shield,
   Zap,
   Star,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  DollarSign,
+  Link as LinkIcon
 } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 import { createClient } from "@/lib/supabase/server";
@@ -73,6 +76,7 @@ export default async function LandingPage() {
               <a href="#features" className="text-sm text-slate-600 hover:text-brand-primary transition-colors">Features</a>
               <a href="#pricing" className="text-sm text-slate-600 hover:text-brand-primary transition-colors">Pricing</a>
               <a href="#testimonials" className="text-sm text-slate-600 hover:text-brand-primary transition-colors">Testimonials</a>
+              <a href="#affiliates" className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors">Affiliates</a>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" asChild>
@@ -264,7 +268,105 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Affiliate Program Section */}
+      <section id="affiliates" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-900 to-teal-950">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 text-teal-400 text-sm font-medium mb-6 border border-teal-500/20">
+              <TrendingUp className="h-4 w-4" />
+              Affiliate Program
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Earn by Spreading the Word
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Join our affiliate program and earn <span className="text-teal-400 font-semibold">30% commission</span> on every customer you refer — for 12 full months.
+            </p>
+          </div>
+
+          {/* Commission Cards */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-16">
+            <div className="relative group bg-slate-800/60 border border-slate-700/50 rounded-2xl p-8 hover:border-teal-500/40 hover:bg-slate-800/80 transition-all duration-300">
+              <div className="absolute top-4 right-4">
+                <span className="text-xs bg-teal-500/10 text-teal-400 border border-teal-500/20 px-2 py-1 rounded-full">Monthly</span>
+              </div>
+              <DollarSign className="h-12 w-12 text-teal-400 mb-4" />
+              <div className="text-4xl font-bold text-white mb-1">$5.70</div>
+              <div className="text-slate-400 text-sm mb-4">per month × 12 months</div>
+              <div className="text-slate-300 text-sm">
+                For every customer who subscribes to the <span className="text-white font-medium">$19/month</span> plan, you earn $5.70 every month for a full year.
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-700/50 text-teal-400 font-semibold">
+                Up to $68.40 per referral
+              </div>
+            </div>
+            <div className="relative group bg-slate-800/60 border border-slate-700/50 rounded-2xl p-8 hover:border-emerald-500/40 hover:bg-slate-800/80 transition-all duration-300">
+              <div className="absolute top-4 right-4">
+                <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-full">Annual</span>
+              </div>
+              <DollarSign className="h-12 w-12 text-emerald-400 mb-4" />
+              <div className="text-4xl font-bold text-white mb-1">$57.00</div>
+              <div className="text-slate-400 text-sm mb-4">one-time commission</div>
+              <div className="text-slate-300 text-sm">
+                For every customer who subscribes to the <span className="text-white font-medium">$190/year</span> plan, you earn $57 in a single payment.
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-700/50 text-emerald-400 font-semibold">
+                Instant $57 per referral
+              </div>
+            </div>
+          </div>
+
+          {/* How It Works */}
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {[
+              { step: "1", title: "Apply & Get Approved", desc: "Register as an affiliate partner. No platform subscription required — just sign up and get your unique link.", color: "from-teal-500/20 to-teal-600/20", border: "border-teal-500/20", text: "text-teal-400" },
+              { step: "2", title: "Share Your Link", desc: "Share your personalized referral link via your website, social media, email newsletters, or YouTube channel.", color: "from-blue-500/20 to-blue-600/20", border: "border-blue-500/20", text: "text-blue-400" },
+              { step: "3", title: "Earn Commissions", desc: "Get 30% of every payment made by your referrals automatically tracked and credited to your account.", color: "from-emerald-500/20 to-emerald-600/20", border: "border-emerald-500/20", text: "text-emerald-400" },
+            ].map((item) => (
+              <div key={item.step} className={`bg-gradient-to-br ${item.color} border ${item.border} rounded-2xl p-6 text-center`}>
+                <div className={`w-12 h-12 rounded-full bg-slate-900/50 flex items-center justify-center mx-auto mb-4 text-xl font-bold ${item.text}`}>
+                  {item.step}
+                </div>
+                <h3 className="text-white font-semibold text-lg mb-2">{item.title}</h3>
+                <p className="text-slate-400 text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Perks */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            {[
+              { icon: TrendingUp, label: "30% Commission", sub: "Industry-leading rate" },
+              { icon: CheckCircle2, label: "12-Month Window", sub: "On monthly plans" },
+              { icon: LinkIcon, label: "Unique Links", sub: "Track every click" },
+              { icon: DollarSign, label: "$50 Min Payout", sub: "Via PayPal or Bank" },
+            ].map((perk, i) => (
+              <div key={i} className="flex items-center gap-3 bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
+                <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
+                  <perk.icon className="h-5 w-5 text-teal-400" />
+                </div>
+                <div>
+                  <div className="text-white font-medium text-sm">{perk.label}</div>
+                  <div className="text-slate-500 text-xs">{perk.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <Link
+              href="/become-affiliate"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 hover:scale-105"
+            >
+              Become an Affiliate Partner <ArrowRight className="h-5 w-5" />
+            </Link>
+            <p className="mt-3 text-slate-500 text-sm">No platform subscription required • Free to join • Get paid monthly</p>
+          </div>
+        </div>
+      </section>
+
+
       <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-brand-primary to-brand-primary-light rounded-3xl p-12 text-white">
           <h2 className="text-4xl font-bold mb-4">{content.cta_title}</h2>
