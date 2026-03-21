@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { useRef } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Save, Eye, Globe, Upload, ImageIcon, Loader2, X } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,7 +35,6 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
     const [tagsInput, setTagsInput] = useState(initialData.tags.join(", "))
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const supabase = createClient()
     const router = useRouter()
 
     async function handleImageUpload(file: File) {
@@ -53,24 +50,25 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
 
         setIsUploading(true)
         try {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `article-${Date.now()}.${fileExt}`
+            const formData = new FormData()
+            formData.append('file', file)
 
-            const { error: uploadError } = await supabase.storage
-                .from('articles')
-                .upload(fileName, file, { upsert: true })
+            const res = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData,
+            })
 
-            if (uploadError) throw uploadError
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error || 'Failed to upload image')
+            }
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('articles')
-                .getPublicUrl(fileName)
-
-            updateField("cover_image", publicUrl)
+            const { url } = await res.json()
+            updateField("cover_image", url)
             toast.success('Cover image uploaded')
-        } catch (error) {
+        } catch (error: any) {
             console.error('Upload error:', error)
-            toast.error('Failed to upload image')
+            toast.error(error.message || 'Failed to upload image')
         } finally {
             setIsUploading(false)
         }
