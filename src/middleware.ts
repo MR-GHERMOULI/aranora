@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 
 // Routes that don't require subscription
 const PUBLIC_ROUTES = [
-    '/', '/about', '/contact', '/privacy', '/terms', '/refund',
+    '/', '/about', '/contact', '/privacy', '/terms', '/refund', '/blog',
     '/login', '/signup', '/forgot-password',
     '/pricing', '/error', '/become-affiliate',
 ];
@@ -12,7 +12,7 @@ const PUBLIC_ROUTES = [
 // Route prefixes that don't require subscription
 const PUBLIC_PREFIXES = [
     '/api/', '/promo/', '/invite/', '/progress/', '/sign/',
-    '/_next/', '/favicon.ico', '/ref/',
+    '/_next/', '/favicon.ico', '/ref/', '/blog/',
 ];
 
 function isPublicRoute(pathname: string): boolean {

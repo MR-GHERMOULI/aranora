@@ -68,7 +68,7 @@ export function Footer({ simple = false }: FooterProps) {
                         <ul className="space-y-2 text-sm text-slate-600">
                             <li><a href="#features" className="hover:text-brand-primary">Features</a></li>
                             <li><a href="#pricing" className="hover:text-brand-primary">Pricing</a></li>
-                            <li><a href="#" className="hover:text-brand-primary">Integrations</a></li>
+                            <li><Link href="/blog" className="hover:text-brand-primary">Blog</Link></li>
                         </ul>
                     </div>
                     <div>

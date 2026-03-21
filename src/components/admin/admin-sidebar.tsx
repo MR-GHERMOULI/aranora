@@ -9,6 +9,7 @@ import {
     Briefcase,
     FileText,
     FileEdit,
+    Newspaper,
     Settings,
     Activity,
     Menu,
@@ -98,6 +99,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             icon: FileEdit,
             href: "/admin/pages",
             color: "text-emerald-500",
+        },
+        {
+            label: "Articles",
+            labelAr: "المقالات",
+            icon: Newspaper,
+            href: "/admin/articles",
+            color: "text-blue-500",
         },
         {
             label: "Messages",
