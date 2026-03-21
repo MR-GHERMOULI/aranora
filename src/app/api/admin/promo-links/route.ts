@@ -32,7 +32,7 @@ async function verifyAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
 }
 
 // GET — List all promo links
-export async function GET(request: NextRequest) {
+export async function GET() {
     const supabase = await createClient();
     const user = await verifyAdmin(supabase);
 
@@ -41,9 +41,11 @@ export async function GET(request: NextRequest) {
     }
 
     const serviceClient = createServiceClient();
+
+    // Fetch links without FK joins (created_by/used_by reference auth.users, not profiles)
     const { data: links, error } = await serviceClient
         .from('promo_invite_links')
-        .select('*, creator:created_by(full_name, company_email), redeemer:used_by(full_name, company_email)')
+        .select('*')
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -51,7 +53,35 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to fetch promo links' }, { status: 500 });
     }
 
-    return NextResponse.json(links);
+    // Collect all user IDs for creator/redeemer profiles
+    const userIds = new Set<string>();
+    (links || []).forEach(link => {
+        if (link.created_by) userIds.add(link.created_by);
+        if (link.used_by) userIds.add(link.used_by);
+    });
+
+    let profilesMap: Record<string, { full_name: string; company_email: string }> = {};
+    if (userIds.size > 0) {
+        const { data: profiles } = await serviceClient
+            .from('profiles')
+            .select('id, full_name, company_email')
+            .in('id', Array.from(userIds));
+
+        if (profiles) {
+            profilesMap = Object.fromEntries(
+                profiles.map(p => [p.id, { full_name: p.full_name, company_email: p.company_email }])
+            );
+        }
+    }
+
+    // Attach creator/redeemer profile info
+    const enrichedLinks = (links || []).map(link => ({
+        ...link,
+        creator: link.created_by ? profilesMap[link.created_by] || null : null,
+        redeemer: link.used_by ? profilesMap[link.used_by] || null : null,
+    }));
+
+    return NextResponse.json(enrichedLinks);
 }
 
 // POST — Create a new promo invite link

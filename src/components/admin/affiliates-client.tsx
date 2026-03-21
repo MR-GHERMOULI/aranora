@@ -45,17 +45,20 @@ export function AffiliatesClient() {
     const [filter, setFilter] = useState<string>('all');
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
         try {
+            setError(null);
             const res = await fetch('/api/admin/affiliates');
+            if (!res.ok) throw new Error(`Server error (${res.status})`);
             const json = await res.json();
             if (json.affiliates && json.stats) {
                 setAffiliates(json.affiliates);
                 setStats(json.stats);
             }
-        } catch {
-            console.error('Failed to fetch affiliates');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load affiliates data');
         } finally {
             setLoading(false);
         }
@@ -68,16 +71,16 @@ export function AffiliatesClient() {
     const handleAction = async (affiliateId: string, action: string) => {
         setActionLoading(affiliateId);
         try {
+            setError(null);
             const res = await fetch('/api/admin/affiliates', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ affiliateId, action }),
             });
-            if (res.ok) {
-                await fetchData();
-            }
-        } catch {
-            console.error('Action failed');
+            if (!res.ok) throw new Error(`Action failed (${res.status})`);
+            await fetchData();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to perform action');
         } finally {
             setActionLoading(null);
         }
@@ -124,6 +127,16 @@ export function AffiliatesClient() {
 
     return (
         <div>
+            {/* Error Banner */}
+            {error && (
+                <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center justify-between">
+                    <span className="text-red-400 text-sm">{error}</span>
+                    <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+
             {/* Header */}
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { createServerClient } from '@supabase/ssr';
 
 function createServiceClient() {
@@ -14,36 +15,76 @@ function createServiceClient() {
     );
 }
 
+async function verifyAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const serviceClient = createServiceClient();
+    const { data: profile } = await serviceClient
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.is_admin) return null;
+    return user;
+}
+
 // GET: List all affiliates with stats
 export async function GET() {
     try {
-        const supabase = createServiceClient();
+        const supabase = await createClient();
+        const user = await verifyAdmin(supabase);
 
-        // Fetch all affiliates with user profile info
-        const { data: affiliates, error: affError } = await supabase
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const serviceClient = createServiceClient();
+
+        // Fetch all affiliates
+        const { data: affiliates, error: affError } = await serviceClient
             .from('affiliates')
-            .select('*, user:profiles!affiliates_user_id_fkey(full_name, company_email)')
+            .select('*')
             .order('created_at', { ascending: false });
 
         if (affError) throw affError;
 
+        // Fetch all profiles to map user info
+        const userIds = (affiliates || []).map(a => a.user_id).filter(Boolean);
+        let profilesMap: Record<string, { full_name: string; company_email: string }> = {};
+
+        if (userIds.length > 0) {
+            const { data: profiles } = await serviceClient
+                .from('profiles')
+                .select('id, full_name, company_email')
+                .in('id', userIds);
+
+            if (profiles) {
+                profilesMap = Object.fromEntries(
+                    profiles.map(p => [p.id, { full_name: p.full_name, company_email: p.company_email }])
+                );
+            }
+        }
+
         // Fetch referral counts per affiliate
-        const { data: referrals } = await supabase
+        const { data: referrals } = await serviceClient
             .from('affiliate_referrals')
             .select('affiliate_id, status');
 
         // Fetch commission totals per affiliate
-        const { data: commissions } = await supabase
+        const { data: commissions } = await serviceClient
             .from('affiliate_commissions')
             .select('affiliate_id, commission_amount, status');
 
         // Fetch pending payout requests
-        const { data: payouts } = await supabase
+        const { data: payouts } = await serviceClient
             .from('affiliate_payouts')
             .select('affiliate_id, amount, status');
 
         // Aggregate stats per affiliate
         const affiliatesWithStats = (affiliates || []).map(aff => {
+            const profile = profilesMap[aff.user_id];
             const affRefs = referrals?.filter(r => r.affiliate_id === aff.id) || [];
             const affComms = commissions?.filter(c => c.affiliate_id === aff.id) || [];
             const affPayouts = payouts?.filter(p => p.affiliate_id === aff.id) || [];
@@ -63,8 +104,8 @@ export async function GET() {
 
             return {
                 ...aff,
-                user_name: aff.user?.full_name || 'Unknown',
-                user_email: aff.user?.company_email || '',
+                user_name: profile?.full_name || 'Unknown',
+                user_email: profile?.company_email || '',
                 totalReferrals,
                 activeReferrals,
                 totalEarned: Number(totalEarned.toFixed(2)),
@@ -102,13 +143,20 @@ export async function GET() {
 // PATCH: Update affiliate status (approve/reject/suspend)
 export async function PATCH(request: NextRequest) {
     try {
-        const { affiliateId, action, adminNote } = await request.json();
+        const supabase = await createClient();
+        const user = await verifyAdmin(supabase);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { affiliateId, action } = await request.json();
 
         if (!affiliateId || !action) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const supabase = createServiceClient();
+        const serviceClient = createServiceClient();
 
         const statusMap: Record<string, string> = {
             approve: 'active',
@@ -127,17 +175,12 @@ export async function PATCH(request: NextRequest) {
             updateData.approved_at = new Date().toISOString();
         }
 
-        const { error } = await supabase
+        const { error } = await serviceClient
             .from('affiliates')
             .update(updateData)
             .eq('id', affiliateId);
 
         if (error) throw error;
-
-        // Handle payout actions
-        if (action === 'complete_payout' || action === 'reject_payout') {
-            // This handles payout status updates
-        }
 
         return NextResponse.json({ success: true, status: newStatus });
     } catch (error) {
@@ -149,17 +192,24 @@ export async function PATCH(request: NextRequest) {
 // POST: Handle payout management
 export async function POST(request: NextRequest) {
     try {
+        const supabase = await createClient();
+        const user = await verifyAdmin(supabase);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { payoutId, action, adminNote } = await request.json();
 
         if (!payoutId || !action) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const supabase = createServiceClient();
+        const serviceClient = createServiceClient();
 
         if (action === 'complete') {
             // Mark payout as completed
-            const { data: payout, error: payoutError } = await supabase
+            const { data: payout, error: payoutError } = await serviceClient
                 .from('affiliate_payouts')
                 .update({
                     status: 'completed',
@@ -174,13 +224,13 @@ export async function POST(request: NextRequest) {
 
             // Update affiliate's total_paid
             if (payout) {
-                const { data: affiliate } = await supabase
+                const { data: affiliate } = await serviceClient
                     .from('affiliates')
                     .select('total_paid')
                     .eq('id', payout.affiliate_id)
                     .single();
 
-                await supabase
+                await serviceClient
                     .from('affiliates')
                     .update({
                         total_paid: Number(affiliate?.total_paid || 0) + Number(payout.amount),
@@ -188,7 +238,7 @@ export async function POST(request: NextRequest) {
                     .eq('id', payout.affiliate_id);
 
                 // Mark related commissions as paid
-                await supabase
+                await serviceClient
                     .from('affiliate_commissions')
                     .update({ status: 'paid' })
                     .eq('affiliate_id', payout.affiliate_id)
@@ -197,7 +247,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json({ success: true });
         } else if (action === 'reject') {
-            const { error } = await supabase
+            const { error } = await serviceClient
                 .from('affiliate_payouts')
                 .update({
                     status: 'rejected',

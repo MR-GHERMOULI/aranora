@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Gift, Copy, Check, Plus, Clock, XCircle, CheckCircle2, Loader2, Trash2, ExternalLink } from 'lucide-react';
+import { Gift, Copy, Check, Plus, Clock, XCircle, CheckCircle2, Loader2, Trash2, X, AlertTriangle } from 'lucide-react';
 
 interface PromoLink {
     id: string;
@@ -25,14 +25,17 @@ export function PromoLinksClient() {
     const [showCreate, setShowCreate] = useState(false);
     const [freeMonths, setFreeMonths] = useState<6 | 12>(6);
     const [expiresInDays, setExpiresInDays] = useState<number | ''>('');
+    const [error, setError] = useState<string | null>(null);
 
     const fetchLinks = useCallback(async () => {
         try {
+            setError(null);
             const res = await fetch('/api/admin/promo-links');
+            if (!res.ok) throw new Error(`Server error (${res.status})`);
             const data = await res.json();
             setLinks(Array.isArray(data) ? data : []);
-        } catch {
-            console.error('Failed to fetch promo links');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load promo links');
         } finally {
             setLoading(false);
         }
@@ -45,6 +48,7 @@ export function PromoLinksClient() {
     const handleCreate = async () => {
         setCreating(true);
         try {
+            setError(null);
             const res = await fetch('/api/admin/promo-links', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -54,14 +58,13 @@ export function PromoLinksClient() {
                 }),
             });
 
-            if (res.ok) {
-                setShowCreate(false);
-                setFreeMonths(6);
-                setExpiresInDays('');
-                await fetchLinks();
-            }
-        } catch {
-            console.error('Failed to create promo link');
+            if (!res.ok) throw new Error(`Failed to create link (${res.status})`);
+            setShowCreate(false);
+            setFreeMonths(6);
+            setExpiresInDays('');
+            await fetchLinks();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to create promo link');
         } finally {
             setCreating(false);
         }
@@ -69,10 +72,12 @@ export function PromoLinksClient() {
 
     const handleDeactivate = async (id: string) => {
         try {
-            await fetch(`/api/admin/promo-links?id=${id}`, { method: 'DELETE' });
+            setError(null);
+            const res = await fetch(`/api/admin/promo-links?id=${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error(`Failed to deactivate (${res.status})`);
             await fetchLinks();
-        } catch {
-            console.error('Failed to deactivate link');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to deactivate link');
         }
     };
 
@@ -114,6 +119,19 @@ export function PromoLinksClient() {
 
     return (
         <div>
+            {/* Error Banner */}
+            {error && (
+                <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+                        <span className="text-red-400 text-sm">{error}</span>
+                    </div>
+                    <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>

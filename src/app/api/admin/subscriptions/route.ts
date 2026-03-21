@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { createServerClient } from '@supabase/ssr';
 
-// Helper to create a service role client to bypass RLS for admin tasks
 function createServiceClient() {
     return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,12 +15,34 @@ function createServiceClient() {
     );
 }
 
+async function verifyAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const serviceClient = createServiceClient();
+    const { data: profile } = await serviceClient
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.is_admin) return null;
+    return user;
+}
+
 export async function GET(request: NextRequest) {
     try {
-        const supabase = createServiceClient();
+        const supabase = await createClient();
+        const user = await verifyAdmin(supabase);
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const serviceClient = createServiceClient();
 
         // 1. Fetch all profiles with their basic billing info
-        const { data: profiles, error: profilesError } = await supabase
+        const { data: profiles, error: profilesError } = await serviceClient
             .from('profiles')
             .select('id, full_name, company_email, subscription_status, trial_ends_at')
             .order('created_at', { ascending: false });
@@ -30,7 +52,7 @@ export async function GET(request: NextRequest) {
         }
 
         // 2. Fetch all detailed billing subscriptions
-        const { data: subscriptions, error: subsError } = await supabase
+        const { data: subscriptions, error: subsError } = await serviceClient
             .from('billing_subscriptions')
             .select('*');
 
@@ -39,9 +61,9 @@ export async function GET(request: NextRequest) {
         }
 
         // 3. Map the data together
-        const mappedData = profiles.map((profile) => {
+        const mappedData = (profiles || []).map((profile) => {
             // Find the detailed subscription record if it exists
-            const sub = subscriptions.find((s) => s.user_id === profile.id);
+            const sub = subscriptions?.find((s) => s.user_id === profile.id);
 
             // Determine trial status manually just like we do for users
             const trialEnd = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
@@ -61,7 +83,7 @@ export async function GET(request: NextRequest) {
             return {
                 user_id: profile.id,
                 user_name: profile.full_name || 'Unknown User',
-                user_email: profile.company_email,
+                user_email: profile.company_email || '',
                 status: effectiveStatus,
                 plan_type: sub?.plan_type || 'None',
                 trial_days_remaining: trialDaysRemaining,
@@ -80,8 +102,9 @@ export async function GET(request: NextRequest) {
         let mrr = 0;
         mappedData.filter(d => d.status === 'active').forEach(d => {
             if (d.plan_type === 'monthly') mrr += 19;
-            if (d.plan_type === 'yearly') mrr += Math.round(190 / 12); // Average yearly contribution to MRR
+            if (d.plan_type === 'yearly') mrr += Number((190 / 12).toFixed(2)); // $15.83/mo
         });
+        mrr = Number(mrr.toFixed(2));
 
         return NextResponse.json({
             data: mappedData,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CreditCard, Users, TrendingUp, Clock, Loader2, Link as LinkIcon, Search } from 'lucide-react';
+import { CreditCard, Users, TrendingUp, Clock, Loader2, Link as LinkIcon, Search, X, AlertTriangle } from 'lucide-react';
 
 interface SubscriptionData {
     user_id: string;
@@ -19,7 +19,7 @@ interface StatsData {
     totalUsers: number;
     totalActive: number;
     totalTrialing: number;
-    mrr: number; // Monthly Recurring Revenue
+    mrr: number;
 }
 
 export function SubscriptionsClient() {
@@ -27,17 +27,21 @@ export function SubscriptionsClient() {
     const [stats, setStats] = useState<StatsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [filter, setFilter] = useState<string>('all');
+    const [error, setError] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
         try {
+            setError(null);
             const res = await fetch('/api/admin/subscriptions');
+            if (!res.ok) throw new Error(`Server error (${res.status})`);
             const json = await res.json();
             if (json.data && json.stats) {
                 setData(json.data);
                 setStats(json.stats);
             }
-        } catch {
-            console.error('Failed to fetch subscriptions data');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to load subscriptions data');
         } finally {
             setLoading(false);
         }
@@ -47,10 +51,17 @@ export function SubscriptionsClient() {
         fetchData();
     }, [fetchData]);
 
-    const filteredData = data.filter(item =>
-        item.user_name.toLowerCase().includes(search.toLowerCase()) ||
-        item.user_email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredData = data.filter(item => {
+        if (filter !== 'all' && item.status !== filter) return false;
+        if (search) {
+            const s = search.toLowerCase();
+            return (
+                item.user_name.toLowerCase().includes(s) ||
+                item.user_email?.toLowerCase().includes(s)
+            );
+        }
+        return true;
+    });
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -73,6 +84,19 @@ export function SubscriptionsClient() {
 
     return (
         <div>
+            {/* Error Banner */}
+            {error && (
+                <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+                        <span className="text-red-400 text-sm">{error}</span>
+                    </div>
+                    <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                     <CreditCard className="h-6 w-6 text-emerald-400" />
@@ -116,7 +140,24 @@ export function SubscriptionsClient() {
             {/* Data Table */}
             <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl overflow-hidden flex flex-col">
                 <div className="p-4 border-b border-slate-700/50 flex flex-col sm:flex-row gap-4 justify-between items-center bg-slate-800/80">
-                    <h3 className="font-semibold text-white">Users Dashboard</h3>
+                    <div className="flex items-center gap-3">
+                        <h3 className="font-semibold text-white">Users Dashboard</h3>
+                        <div className="flex gap-1">
+                            {['all', 'active', 'trialing', 'expired', 'canceled'].map(f => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFilter(f)}
+                                    className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors ${
+                                        filter === f
+                                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                            : 'text-slate-400 border-slate-700 hover:text-white hover:border-slate-500'
+                                    }`}
+                                >
+                                    {f === 'past_due' ? 'Past Due' : f.charAt(0).toUpperCase() + f.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <div className="relative w-full sm:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <input
