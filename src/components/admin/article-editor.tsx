@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Save, Eye, Globe } from "lucide-react"
+import { ArrowLeft, Save, Eye, Globe, Upload, ImageIcon, Loader2, X } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,7 +35,46 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
     const [isPreview, setIsPreview] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [tagsInput, setTagsInput] = useState(initialData.tags.join(", "))
+    const [isUploading, setIsUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const supabase = createClient()
     const router = useRouter()
+
+    async function handleImageUpload(file: File) {
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload an image file')
+            return
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Image size should be less than 5MB')
+            return
+        }
+
+        setIsUploading(true)
+        try {
+            const fileExt = file.name.split('.').pop()
+            const fileName = `article-${Date.now()}.${fileExt}`
+
+            const { error: uploadError } = await supabase.storage
+                .from('articles')
+                .upload(fileName, file, { upsert: true })
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('articles')
+                .getPublicUrl(fileName)
+
+            updateField("cover_image", publicUrl)
+            toast.success('Cover image uploaded')
+        } catch (error) {
+            console.error('Upload error:', error)
+            toast.error('Failed to upload image')
+        } finally {
+            setIsUploading(false)
+        }
+    }
 
     function updateField(field: keyof ArticleData, value: string | string[]) {
         setData((prev) => ({ ...prev, [field]: value }))
@@ -217,15 +258,65 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                                     placeholder="Aranora Team"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label>Cover Image URL</Label>
-                                <Input
-                                    value={data.cover_image}
-                                    onChange={(e) =>
-                                        updateField("cover_image", e.target.value)
-                                    }
-                                    placeholder="https://example.com/image.jpg"
-                                />
+                        </div>
+
+                        <div className="space-y-4 border rounded-xl p-6 bg-muted/10">
+                            <Label>Cover Image</Label>
+                            <div className="flex flex-col sm:flex-row gap-6">
+                                <div className="relative h-32 w-48 rounded-lg border-2 border-dashed flex-shrink-0 flex items-center justify-center overflow-hidden bg-muted/30">
+                                    {data.cover_image ? (
+                                        <img src={data.cover_image} alt="Cover preview" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="flex flex-col items-center text-muted-foreground opacity-50">
+                                            <ImageIcon className="h-8 w-8 mb-2" />
+                                            <span className="text-xs font-medium">No image</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-4 flex flex-col justify-center">
+                                    <div className="flex items-center gap-3">
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            ref={fileInputRef}
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0]
+                                                if (file) handleImageUpload(file)
+                                            }}
+                                        />
+                                        <Button 
+                                            type="button" 
+                                            variant="secondary" 
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isUploading}
+                                        >
+                                            {isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
+                                            {isUploading ? "Uploading..." : "Upload Image"}
+                                        </Button>
+                                        {data.cover_image && (
+                                            <Button 
+                                                type="button" 
+                                                variant="ghost" 
+                                                onClick={() => updateField("cover_image", "")}
+                                                disabled={isUploading}
+                                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <X className="h-4 w-4 mr-2" />
+                                                Remove
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs text-muted-foreground font-normal">Or paste an image URL:</Label>
+                                        <Input
+                                            value={data.cover_image}
+                                            onChange={(e) => updateField("cover_image", e.target.value)}
+                                            placeholder="https://example.com/image.jpg"
+                                            className="bg-background"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
