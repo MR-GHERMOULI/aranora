@@ -84,6 +84,7 @@ export function Footer({ simple = false }: FooterProps) {
                         <ul className="space-y-2 text-sm text-slate-600">
                             <li><Link href="/privacy" className="hover:text-brand-primary">Privacy Policy</Link></li>
                             <li><Link href="/terms" className="hover:text-brand-primary">Terms of Service</Link></li>
+                            <li><Link href="/refund" className="hover:text-brand-primary">Refund Policy</Link></li>
                         </ul>
                     </div>
                 </div>

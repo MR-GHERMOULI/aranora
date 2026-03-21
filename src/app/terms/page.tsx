@@ -2,8 +2,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
+import { createClient } from "@/lib/supabase/server";
 
-export default function TermsPage() {
+export default async function TermsPage() {
+    const supabase = await createClient();
+
+    const { data: page } = await supabase
+        .from("static_pages")
+        .select("title, content")
+        .eq("slug", "terms")
+        .single();
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
             {/* Header */}
@@ -24,81 +33,90 @@ export default function TermsPage() {
             </nav>
 
             <main className="max-w-3xl mx-auto px-4 py-16">
-                <h1 className="text-4xl font-bold text-slate-900 mb-2">Terms of Service</h1>
-                <p className="text-slate-500 mb-8">Last updated: January 2026</p>
+                <h1 className="text-4xl font-bold text-slate-900 mb-2">
+                    {page?.title || "Terms of Service"}
+                </h1>
+                <p className="text-slate-500 mb-8">Last updated: March 2026</p>
 
-                <div className="prose prose-slate max-w-none">
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">1. Acceptance of Terms</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            By accessing or using Aranora, you agree to be bound by these Terms of Service.
-                            If you do not agree to all of these terms, you may not use our services.
-                        </p>
-                    </section>
+                {page?.content ? (
+                    <div
+                        className="prose prose-slate max-w-none"
+                        dangerouslySetInnerHTML={{ __html: page.content }}
+                    />
+                ) : (
+                    <div className="prose prose-slate max-w-none">
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">1. Acceptance of Terms</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                By accessing or using Aranora, you agree to be bound by these Terms of Service.
+                                If you do not agree to all of these terms, you may not use our services.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">2. Description of Service</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            Aranora provides a platform for freelancers and independent professionals to manage
-                            their clients, projects, invoices, contracts, and team collaboration. We reserve the
-                            right to modify or discontinue any aspect of the service at any time.
-                        </p>
-                    </section>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">2. Description of Service</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                Aranora provides a platform for freelancers and independent professionals to manage
+                                their clients, projects, invoices, contracts, and team collaboration. We reserve the
+                                right to modify or discontinue any aspect of the service at any time.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">3. User Accounts</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            You are responsible for maintaining the confidentiality of your account credentials
-                            and for all activities that occur under your account. You must notify us immediately
-                            of any unauthorized use of your account.
-                        </p>
-                    </section>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">3. User Accounts</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                You are responsible for maintaining the confidentiality of your account credentials
+                                and for all activities that occur under your account. You must notify us immediately
+                                of any unauthorized use of your account.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Acceptable Use</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            You agree not to use Aranora for any unlawful purpose or in any way that could damage,
-                            disable, or impair the service. You may not attempt to gain unauthorized access to
-                            any portion of the service or any systems or networks connected to the service.
-                        </p>
-                    </section>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Acceptable Use</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                You agree not to use Aranora for any unlawful purpose or in any way that could damage,
+                                disable, or impair the service. You may not attempt to gain unauthorized access to
+                                any portion of the service or any systems or networks connected to the service.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Payment and Billing</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            Paid services are billed in advance on a monthly or annual basis. All fees are
-                            non-refundable except as required by law. We may change our prices upon 30 days'
-                            notice. Continued use after a price change constitutes acceptance of the new price.
-                        </p>
-                    </section>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Payment and Billing</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                Paid services are billed in advance on a monthly or annual basis. All fees are
+                                non-refundable except as required by law. We may change our prices upon 30 days&apos;
+                                notice. Continued use after a price change constitutes acceptance of the new price.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Intellectual Property</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            The Aranora platform and all content, features, and functionality are owned by
-                            Aranora and are protected by international copyright, trademark, and other
-                            intellectual property laws.
-                        </p>
-                    </section>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Intellectual Property</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                The Aranora platform and all content, features, and functionality are owned by
+                                Aranora and are protected by international copyright, trademark, and other
+                                intellectual property laws.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">7. Limitation of Liability</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            Aranora shall not be liable for any indirect, incidental, special, consequential,
-                            or punitive damages resulting from your use of or inability to use the service.
-                        </p>
-                    </section>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">7. Limitation of Liability</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                Aranora shall not be liable for any indirect, incidental, special, consequential,
+                                or punitive damages resulting from your use of or inability to use the service.
+                            </p>
+                        </section>
 
-                    <section className="mb-8">
-                        <h2 className="text-xl font-semibold text-slate-900 mb-3">8. Contact Information</h2>
-                        <p className="text-slate-600 leading-relaxed">
-                            For questions about these Terms of Service, please contact us at:
-                        </p>
-                        <p className="text-slate-600 mt-2">
-                            Email: <a href="mailto:legal@aranora.com" className="text-brand-primary hover:underline">legal@aranora.com</a>
-                        </p>
-                    </section>
-                </div>
+                        <section className="mb-8">
+                            <h2 className="text-xl font-semibold text-slate-900 mb-3">8. Contact Information</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                For questions about these Terms of Service, please contact us at:
+                            </p>
+                            <p className="text-slate-600 mt-2">
+                                Email: <a href="mailto:legal@aranora.com" className="text-brand-primary hover:underline">legal@aranora.com</a>
+                            </p>
+                        </section>
+                    </div>
+                )}
             </main>
 
             <Footer simple />

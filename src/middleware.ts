@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 
 // Routes that don't require subscription
 const PUBLIC_ROUTES = [
-    '/', '/about', '/contact', '/privacy', '/terms',
+    '/', '/about', '/contact', '/privacy', '/terms', '/refund',
     '/login', '/signup', '/forgot-password',
     '/pricing', '/error', '/become-affiliate',
 ];

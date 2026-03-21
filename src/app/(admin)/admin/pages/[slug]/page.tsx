@@ -36,6 +36,7 @@ export default async function PageEditorPage({ params }: PageEditorPageProps) {
         terms: { title: "Terms of Service", titleAr: "شروط الخدمة" },
         faq: { title: "FAQ", titleAr: "الأسئلة الشائعة" },
         contact: { title: "Contact Us", titleAr: "اتصل بنا" },
+        refund: { title: "Refund Policy", titleAr: "سياسة الاسترداد" },
     }
 
     if (!pageTitles[slug]) {

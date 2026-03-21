@@ -18,6 +18,7 @@ export default async function AdminPagesPage() {
         { slug: "terms", title: "Terms of Service", titleAr: "شروط الخدمة", icon: "📋" },
         { slug: "faq", title: "FAQ", titleAr: "الأسئلة الشائعة", icon: "❓" },
         { slug: "contact", title: "Contact Us", titleAr: "اتصل بنا", icon: "📞" },
+        { slug: "refund", title: "Refund Policy", titleAr: "سياسة الاسترداد", icon: "💰" },
     ]
 
     const pagesWithData = defaultPages.map((defaultPage) => {
