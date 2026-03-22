@@ -178,6 +178,9 @@ async function handleAffiliateRecurringInvoice(
         const commissionMonth = (count || 0) + 1;
         if (commissionMonth > COMMISSION_MONTHS) return; // Max 12 months
 
+        // Skip month 1 — it was already created by checkout.session.completed
+        if (commissionMonth === 1) return;
+
         // Check if a commission already exists for this invoice
         const { data: existingComm } = await supabase
             .from('affiliate_commissions')

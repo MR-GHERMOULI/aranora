@@ -17,6 +17,7 @@ interface AffiliateData {
     payment_details: Record<string, string>;
     total_earned: number;
     total_paid: number;
+    totalEarned: number;
     created_at: string;
     approved_at: string | null;
     user_name: string;
@@ -293,7 +294,7 @@ export function AffiliatesClient() {
                                             <span className="text-emerald-400">{aff.activeReferrals}</span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-right font-medium text-white">
-                                            ${aff.total_earned || 0}
+                                            ${aff.totalEarned || 0}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-right">
                                             <span className="text-amber-400">${aff.pendingCommissions}</span>

@@ -58,8 +58,14 @@ export default function BecomeAffiliatePage() {
             const json = await res.json();
             if (!res.ok) {
                 setError(json.error || 'Registration failed');
+            } else if (json.requiresLogin) {
+                // Account was created but session couldn't be established
+                setMode('login');
+                setLoginForm({ email: signupForm.email, password: signupForm.password });
+                setError('Account created successfully! Please sign in to continue.');
             } else {
-                window.location.href = '/affiliates';
+                // Redirect directly to affiliate registration form
+                window.location.href = '/affiliates/register';
             }
         } catch {
             setError('Something went wrong. Please try again.');

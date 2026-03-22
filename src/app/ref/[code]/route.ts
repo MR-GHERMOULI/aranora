@@ -1,4 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+
+function createServiceClient() {
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            cookies: {
+                getAll() { return []; },
+                setAll() { },
+            },
+        }
+    );
+}
 
 export async function GET(
     request: NextRequest,
@@ -7,6 +21,20 @@ export async function GET(
     const { code } = await params;
 
     if (!code || code.length < 3) {
+        return NextResponse.redirect(new URL('/pricing', request.url));
+    }
+
+    // Validate that the affiliate code exists and belongs to an active affiliate
+    const serviceClient = createServiceClient();
+    const { data: affiliate } = await serviceClient
+        .from('affiliates')
+        .select('id')
+        .eq('affiliate_code', code)
+        .eq('status', 'active')
+        .single();
+
+    if (!affiliate) {
+        // Invalid or inactive affiliate code — redirect without setting cookie
         return NextResponse.redirect(new URL('/pricing', request.url));
     }
 

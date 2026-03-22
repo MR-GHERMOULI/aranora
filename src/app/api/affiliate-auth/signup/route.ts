@@ -169,6 +169,45 @@ export async function POST(request: NextRequest) {
             await new Promise(resolve => setTimeout(resolve, 500));
 
             await ensureProfileExists(serviceClient, data.user.id, email, fullName);
+
+            // Track affiliate referral if a referral cookie is present
+            const refCode = request.cookies.get('aranora_ref')?.value;
+            if (refCode) {
+                try {
+                    const { data: affiliate } = await serviceClient
+                        .from('affiliates')
+                        .select('id')
+                        .eq('affiliate_code', refCode)
+                        .eq('status', 'active')
+                        .single();
+
+                    if (affiliate) {
+                        // Check if referral already exists
+                        const { data: existingRef } = await serviceClient
+                            .from('affiliate_referrals')
+                            .select('id')
+                            .eq('affiliate_id', affiliate.id)
+                            .eq('referred_user_id', data.user.id)
+                            .single();
+
+                        if (!existingRef) {
+                            await serviceClient.from('affiliate_referrals').insert({
+                                affiliate_id: affiliate.id,
+                                referred_user_id: data.user.id,
+                                status: 'signed_up',
+                            });
+
+                            // Mark profile with referring affiliate
+                            await serviceClient
+                                .from('profiles')
+                                .update({ referred_by_affiliate: refCode })
+                                .eq('id', data.user.id);
+                        }
+                    }
+                } catch (refErr) {
+                    console.warn('Referral tracking failed (non-critical):', refErr);
+                }
+            }
         }
 
         return response;

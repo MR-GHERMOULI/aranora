@@ -118,7 +118,20 @@ export async function POST(request: NextRequest) {
             sessionParams as Parameters<typeof stripe.checkout.sessions.create>[0]
         );
 
-        return NextResponse.json({ url: session.url });
+        const response = NextResponse.json({ url: session.url });
+
+        // Clear the referral cookie after checkout to prevent double-crediting
+        if (affiliateCode) {
+            response.cookies.set('aranora_ref', '', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 0,
+                path: '/',
+            });
+        }
+
+        return response;
     } catch (error) {
         console.error('Checkout error:', error);
         return NextResponse.json(

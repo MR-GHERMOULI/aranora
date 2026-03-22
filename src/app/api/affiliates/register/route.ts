@@ -65,16 +65,21 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Generate unique affiliate code
+        // Generate unique affiliate code with retry loop
         let affiliateCode = generateAffiliateCode(companyName);
-        const { data: codeExists } = await serviceClient
-            .from('affiliates')
-            .select('id')
-            .eq('affiliate_code', affiliateCode)
-            .single();
+        let attempts = 0;
+        while (attempts < 5) {
+            const { data: codeExists } = await serviceClient
+                .from('affiliates')
+                .select('id')
+                .eq('affiliate_code', affiliateCode)
+                .single();
 
-        if (codeExists) {
-            affiliateCode = generateAffiliateCode(companyName + Math.random().toString(36).substring(2, 4));
+            if (!codeExists) break;
+            attempts++;
+            affiliateCode = generateAffiliateCode(
+                companyName + Math.random().toString(36).substring(2, 6)
+            );
         }
 
         // Create affiliate record
