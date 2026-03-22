@@ -105,57 +105,60 @@ export async function POST(request: NextRequest) {
             if (error.message.includes('Database error') || error.message.includes('saving new user')) {
                 const serviceClient = createServiceClient();
 
-                // The auth user may have been created but the profile trigger failed.
-                // Look up the auth user via the profiles table email column, or query
-                // auth.users directly. We use listUsers with a page filter as a fallback.
-                // Since Supabase admin API doesn't support email filter, we query profiles
-                // or use createUser to determine if the user exists.
-                //
-                // Instead: attempt sign-in to verify the account exists and get their ID
-                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
+                // Step 1: Try to find the existing auth user via admin API
+                const { data: listData } = await serviceClient.auth.admin.listUsers({
+                    page: 1,
+                    perPage: 1,
                 });
 
-                if (!signInError && signInData?.user) {
-                    // User exists and can sign in — ensure profile exists
-                    await ensureProfileExists(serviceClient, signInData.user.id, email, fullName);
-                    return response;
-                }
-
-                // Account may exist but email confirmation is required, OR account wasn't created.
-                // Try creating via admin API to get the user ID (will fail if user exists)
-                const { data: newUserData, error: createError } = await serviceClient.auth.admin.createUser({
-                    email,
-                    password,
-                    email_confirm: true,
-                    user_metadata: { full_name: fullName },
-                });
-
-                if (!createError && newUserData?.user) {
-                    // User was just created via admin — create profile
-                    await ensureProfileExists(serviceClient, newUserData.user.id, email, fullName);
-
-                    // Sign in to establish session
-                    const { error: finalSignInError } = await supabase.auth.signInWithPassword({ email, password });
-                    if (finalSignInError) {
-                        console.warn('Admin-created account sign-in failed:', finalSignInError.message);
-                        return NextResponse.json({
-                            success: true,
-                            message: 'Account created. Please sign in to continue.',
-                            requiresLogin: true,
-                        });
-                    }
-                    return response;
-                }
-
-                // User already exists in auth (createUser returned a conflict error)
-                // We can't retrieve their ID without listUsers — return a helpful message
-                console.error('Database error recovery failed. createError:', createError?.message);
-                return NextResponse.json(
-                    { error: 'Registration failed due to a database error. Please try signing in or contact support.' },
-                    { status: 500 }
+                // Search for the user by email from the full list
+                let existingUser = listData?.users?.find(
+                    (u: { email?: string }) => u.email === email
                 );
+
+                if (!existingUser) {
+                    // User wasn't created by the failed signup — create via admin API
+                    const { data: newUserData, error: createError } = await serviceClient.auth.admin.createUser({
+                        email,
+                        password,
+                        email_confirm: true,
+                        user_metadata: { full_name: fullName },
+                    });
+
+                    if (createError || !newUserData?.user) {
+                        console.error('Admin user creation failed:', createError?.message);
+                        return NextResponse.json(
+                            { error: 'Registration failed. Please try again or contact support.' },
+                            { status: 500 }
+                        );
+                    }
+                    existingUser = newUserData.user;
+                } else {
+                    // Ensure email is confirmed so sign-in works
+                    await serviceClient.auth.admin.updateUserById(existingUser.id, {
+                        email_confirm: true,
+                    });
+                }
+
+                // Step 2: Ensure the profile exists
+                await ensureProfileExists(serviceClient, existingUser.id, email, fullName);
+
+                // Step 3: Sign in to establish session
+                const { error: signInError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+
+                if (signInError) {
+                    console.warn('Post-recovery sign-in failed:', signInError.message);
+                    return NextResponse.json({
+                        success: true,
+                        message: 'Account created. Please sign in to continue.',
+                        requiresLogin: true,
+                    });
+                }
+
+                return response;
             }
 
             return NextResponse.json({ error: error.message }, { status: 400 });
