@@ -1,4 +1,5 @@
 import { getContracts, getTemplates } from "./actions";
+import { getSubmission } from "../intake-forms/actions";
 import { getClients } from "../clients/actions";
 import { getProjects } from "../projects/actions";
 import { getProfile } from "../settings/actions";
@@ -15,13 +16,21 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-export default async function ContractsPage() {
-    const [contracts, clients, projects, templates, profile] = await Promise.all([
+interface ContractsPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function ContractsPage({ searchParams }: ContractsPageProps) {
+    const params = await searchParams;
+    const fromIntakeId = typeof params.fromIntake === 'string' ? params.fromIntake : undefined;
+
+    const [contracts, clients, projects, templates, profile, initialIntakeSubmission] = await Promise.all([
         getContracts(),
         getClients(),
         getProjects(),
         getTemplates(),
-        getProfile()
+        getProfile(),
+        fromIntakeId ? getSubmission(fromIntakeId) : Promise.resolve(null)
     ]);
 
     const signedCount = contracts.filter(c => c.status === 'Signed').length;
@@ -123,6 +132,7 @@ export default async function ContractsPage() {
                                 projects={projects}
                                 templates={templates}
                                 freelancerName={profile.full_name || profile.company_name || "Freelancer"}
+                                initialIntakeSubmission={initialIntakeSubmission}
                             />
                         </div>
                     </div>

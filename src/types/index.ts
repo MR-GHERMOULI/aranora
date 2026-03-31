@@ -198,3 +198,79 @@ export interface CollaboratorPayment {
     description?: string | null;
     created_at: string;
 }
+
+// ── Intake Forms ─────────────────────────────────
+
+export type IntakeFieldType =
+    | 'text'
+    | 'textarea'
+    | 'email'
+    | 'phone'
+    | 'number'
+    | 'select'
+    | 'multiselect'
+    | 'date'
+    | 'date_range'
+    | 'budget_range'
+    | 'file'
+    | 'section_header';
+
+export interface IntakeFormField {
+    id: string;
+    type: IntakeFieldType;
+    label: string;
+    placeholder?: string;
+    required: boolean;
+    options?: string[];
+    helpText?: string;
+    validation?: {
+        minLength?: number;
+        maxLength?: number;
+        min?: number;
+        max?: number;
+    };
+}
+
+export interface IntakeFormSettings {
+    welcomeMessage?: string;
+    thankYouMessage?: string;
+    brandColor?: string;
+    collectPhone?: boolean;
+    collectCompany?: boolean;
+}
+
+export interface IntakeForm {
+    id: string;
+    user_id: string;
+    title: string;
+    description?: string | null;
+    fields: IntakeFormField[];
+    settings: IntakeFormSettings;
+    status: 'active' | 'archived';
+    share_token: string;
+    submission_count: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface IntakeSubmission {
+    id: string;
+    form_id: string;
+    user_id: string;
+    client_name: string;
+    client_email?: string | null;
+    client_phone?: string | null;
+    client_company?: string | null;
+    responses: Record<string, any>;
+    attachments?: string[];
+    status: 'new' | 'reviewed' | 'converted' | 'archived';
+    notes?: string | null;
+    converted_project_id?: string | null;
+    converted_contract_id?: string | null;
+    submitted_at: string;
+    reviewed_at?: string | null;
+    ip_address?: string | null;
+    user_agent?: string | null;
+    created_at: string;
+    form?: IntakeForm;
+}

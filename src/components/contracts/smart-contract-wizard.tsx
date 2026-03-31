@@ -43,15 +43,18 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { createSmartContract } from "@/app/(dashboard)/contracts/actions"
+import { markSubmissionConverted } from "@/app/(dashboard)/intake-forms/actions"
 import { Client, Project, ContractTemplate, ContractStructuredData } from "@/types"
 import { injectContractData } from "@/lib/contracts/template-engine"
 import { motion, AnimatePresence } from "framer-motion"
+import { IntakeSubmission } from "@/types"
 
 interface SmartContractWizardProps {
     clients: Client[];
     projects: Project[];
     templates?: ContractTemplate[];
     freelancerName: string;
+    initialIntakeSubmission?: IntakeSubmission | null;
 }
 
 const STEPS = [
@@ -61,7 +64,7 @@ const STEPS = [
     { id: 4, title: "Review", description: "Final Draft" },
 ]
 
-export function SmartContractWizard({ clients, projects, templates = [], freelancerName }: SmartContractWizardProps) {
+export function SmartContractWizard({ clients, projects, templates = [], freelancerName, initialIntakeSubmission }: SmartContractWizardProps) {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [currentStep, setCurrentStep] = useState(1)
@@ -128,8 +131,45 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                 milestones: [],
                 non_compete_included: false,
             })
+
+            // Auto-fill from intake submission if provided
+            if (initialIntakeSubmission) {
+                setTitle(`Project Contract: ${initialIntakeSubmission.client_name}`);
+                
+                const responses = initialIntakeSubmission.responses || {};
+                let amount = 0;
+                let currency = "USD";
+                const deliverables: string[] = [];
+
+                Object.values(responses).forEach(val => {
+                    if (val && typeof val === 'object' && 'min' in val && 'max' in val) {
+                        amount = val.max || val.min || 0;
+                        if (val.currency) currency = val.currency;
+                    }
+                });
+
+                // Add context to deliverables
+                if (initialIntakeSubmission.form?.title) {
+                    deliverables.push(`Service requested: ${initialIntakeSubmission.form.title}`);
+                }
+                deliverables.push(`Client: ${initialIntakeSubmission.client_company || initialIntakeSubmission.client_name}`);
+
+                setStructuredData(prev => ({
+                    ...prev,
+                    total_amount: amount,
+                    currency,
+                    deliverables: deliverables.length > 0 ? deliverables : [""]
+                }));
+            }
         }
-    }, [open])
+    }, [open, initialIntakeSubmission])
+
+    // Auto-open if intake submission is provided
+    useEffect(() => {
+        if (initialIntakeSubmission && !open) {
+            setOpen(true);
+        }
+    }, [initialIntakeSubmission, open])
 
     // Auto-select project and client if projectId is in URL
     useEffect(() => {
@@ -215,6 +255,15 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                 content,
                 contractData: structuredData
             })
+            
+            if (initialIntakeSubmission) {
+                await markSubmissionConverted(
+                    initialIntakeSubmission.id,
+                    projectId || undefined,
+                    undefined
+                )
+            }
+            
             setOpen(false)
         } catch (error) {
             console.error(error)

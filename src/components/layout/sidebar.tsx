@@ -21,7 +21,8 @@ import {
     Building2,
     UserCog,
     Wallet,
-    TrendingUp
+    TrendingUp,
+    ClipboardList
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -103,6 +104,12 @@ export function Sidebar({ className }: SidebarProps) {
                     icon: Users,
                     href: "/clients",
                     color: "text-violet-500",
+                },
+                {
+                    label: "Intake Forms",
+                    icon: ClipboardList,
+                    href: "/intake-forms",
+                    color: "text-rose-500",
                 },
                 {
                     label: "Collaborators",

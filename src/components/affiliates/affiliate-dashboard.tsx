@@ -1,12 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     Users, DollarSign, TrendingUp, Copy, Check, Loader2,
     ExternalLink, ArrowRight, Wallet, Calendar, Share2,
-    Twitter, Linkedin, Mail, Clock, AlertCircle, UserPlus
+    Twitter, Linkedin, Mail, Clock, AlertCircle, UserPlus,
+    Award, Medal, Star, ShieldCheck, Download, Image as ImageIcon,
+    MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 
 interface AffiliateStats {
     totalReferrals: number;
@@ -56,7 +62,21 @@ interface AffiliateData {
     approved_at: string | null;
 }
 
-type TabType = 'overview' | 'referrals' | 'commissions' | 'payouts';
+type TabType = 'overview' | 'referrals' | 'commissions' | 'payouts' | 'resources';
+
+// Framer Motion Variants
+const containerVariant = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariant = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } }
+};
 
 export function AffiliateDashboard() {
     const [affiliate, setAffiliate] = useState<AffiliateData | null>(null);
@@ -96,6 +116,37 @@ export function AffiliateDashboard() {
         fetchData();
     }, [fetchData]);
 
+    // Derived Chart Data (Last 6 Months)
+    const chartData = useMemo(() => {
+        const data: { name: string; earnings: number }[] = [];
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            const monthName = d.toLocaleString('default', { month: 'short' });
+            data.push({ name: monthName, earnings: 0 });
+        }
+        commissions.forEach(c => {
+            if (c.status === 'canceled') return;
+            const date = new Date(c.created_at);
+            const monthName = date.toLocaleString('default', { month: 'short' });
+            const dataPoint = data.find(d => d.name === monthName);
+            if (dataPoint) {
+                dataPoint.earnings += Number(c.commission_amount);
+            }
+        });
+        return data;
+    }, [commissions]);
+
+    // Tier Logic
+    const getTier = (refsCount: number) => {
+        if (refsCount >= 50) return { name: 'Gold Partner', color: 'text-amber-300', bg: 'bg-amber-500/10 border-amber-500/20', icon: Award };
+        if (refsCount >= 10) return { name: 'Silver Partner', color: 'text-slate-300', bg: 'bg-slate-500/10 border-slate-500/20', icon: ShieldCheck };
+        return { name: 'Bronze Partner', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', icon: Star };
+    };
+
+    const tier = getTier(stats?.totalReferrals || 0);
+    const TierIcon = tier.icon;
+
     const referralLink = affiliate
         ? `${typeof window !== 'undefined' ? window.location.origin : ''}/ref/${affiliate.affiliate_code}`
         : '';
@@ -107,7 +158,7 @@ export function AffiliateDashboard() {
     };
 
     const shareOnTwitter = () => {
-        const text = encodeURIComponent('Check out Aranora — the all-in-one freelance management platform! 🚀');
+        const text = encodeURIComponent('Transform how you manage freelance work with Aranora. Highly recommended! 🚀');
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(referralLink)}`, '_blank');
     };
 
@@ -117,7 +168,7 @@ export function AffiliateDashboard() {
 
     const shareViaEmail = () => {
         const subject = encodeURIComponent('Try Aranora — Freelance Management Platform');
-        const body = encodeURIComponent(`Hey! I've been using Aranora to manage my freelance work. Check it out: ${referralLink}`);
+        const body = encodeURIComponent(`Hey! I've been using Aranora to manage my freelance business and thought you might like it too. Check it out: ${referralLink}`);
         window.open(`mailto:?subject=${subject}&body=${body}`);
     };
 
@@ -147,7 +198,7 @@ export function AffiliateDashboard() {
             canceled: 'text-red-400 bg-red-500/10 border-red-500/20',
             active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
             subscribed: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-            signed_up: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+            signed_up: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
             churned: 'text-red-400 bg-red-500/10 border-red-500/20',
             expired: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
             requested: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -155,321 +206,394 @@ export function AffiliateDashboard() {
             completed: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
             rejected: 'text-red-400 bg-red-500/10 border-red-500/20',
         };
-        return colors[status] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+        return colors[status.toLowerCase()] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
     };
 
     if (loading) {
         return (
             <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary/60" />
+                <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
             </div>
         );
     }
 
     if (notRegistered) {
         return (
-            <div className="max-w-2xl mx-auto mt-12">
-                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/50 rounded-2xl p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-5">
-                        <UserPlus className="h-8 w-8 text-teal-400" />
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto mt-12">
+                <div className="bg-slate-900/60 backdrop-blur-xl border border-teal-500/20 rounded-3xl p-10 text-center shadow-2xl shadow-teal-500/10 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-emerald-500" />
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-6 ring-1 ring-teal-500/50">
+                        <UserPlus className="h-10 w-10 text-teal-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-3">Join Our Affiliate Program</h2>
-                    <p className="text-slate-400 mb-2 max-w-md mx-auto">
-                        Earn <span className="text-teal-400 font-semibold">30% commission</span> on every referral for 12 months.
-                        Help spread the word and get rewarded!
+                    <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">Become a Partner</h2>
+                    <p className="text-slate-400 mb-8 max-w-md mx-auto text-lg leading-relaxed">
+                        Earn a massive <span className="text-teal-400 font-semibold">30% recurring commission</span> for every referral.
+                        Grow with Aranora.
                     </p>
-                    <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto my-6">
-                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30">
-                            <div className="text-xl font-bold text-teal-400">$5.70</div>
-                            <div className="text-xs text-slate-400 mt-1">per month × 12</div>
-                            <div className="text-[10px] text-slate-500 mt-0.5">Monthly plans</div>
+                    <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto my-8">
+                        <div className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50 transition-transform hover:scale-105">
+                            <div className="text-2xl font-bold text-teal-400">$5.70</div>
+                            <div className="text-sm text-slate-400 mt-1">per month × 12</div>
+                            <div className="text-xs text-slate-500 mt-1">Monthly Subs</div>
                         </div>
-                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30">
-                            <div className="text-xl font-bold text-emerald-400">$57.00</div>
-                            <div className="text-xs text-slate-400 mt-1">one-time</div>
-                            <div className="text-[10px] text-slate-500 mt-0.5">Annual plans</div>
+                        <div className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50 transition-transform hover:scale-105">
+                            <div className="text-2xl font-bold text-emerald-400">$57.00</div>
+                            <div className="text-sm text-slate-400 mt-1">one-time payout</div>
+                            <div className="text-xs text-slate-500 mt-1">Annual Subs</div>
                         </div>
                     </div>
                     <Link
                         href="/affiliates/register"
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-medium hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/25"
+                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-semibold hover:from-teal-400 hover:to-emerald-400 transition-all shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 w-full sm:w-auto"
                     >
-                        Apply Now <ArrowRight className="h-4 w-4" />
+                        Apply to Partner Program <ArrowRight className="h-5 w-5" />
                     </Link>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     if (affiliate?.status === 'pending') {
         return (
-            <div className="max-w-2xl mx-auto mt-12">
-                <div className="bg-slate-800/50 border border-amber-500/20 rounded-2xl p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-5">
-                        <Clock className="h-8 w-8 text-amber-400" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-2xl mx-auto mt-12">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-10 text-center shadow-2xl shadow-amber-500/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
+                    <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-amber-500/50">
+                        <Clock className="h-10 w-10 text-amber-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-3">Application Under Review</h2>
-                    <p className="text-slate-400 max-w-md mx-auto">
-                        Your affiliate application is being reviewed. You&apos;ll be notified once it&apos;s approved.
-                        This usually takes 1-2 business days.
+                    <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">Under Review</h2>
+                    <p className="text-slate-400 max-w-md mx-auto text-lg leading-relaxed">
+                        Your application is currently being evaluated by our team. Approval usually takes 1-2 business days. We will notify you via email.
                     </p>
-                    <div className="mt-4 text-xs text-slate-500">
-                        Applied on {new Date(affiliate.created_at).toLocaleDateString()}
+                    <div className="mt-8 pt-6 border-t border-slate-800 text-sm text-slate-500">
+                        Application submitted on {new Date(affiliate.created_at).toLocaleDateString()}
                     </div>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
-    if (affiliate?.status === 'rejected') {
+    if (affiliate?.status === 'rejected' || affiliate?.status === 'suspended') {
+        const isSuspended = affiliate.status === 'suspended';
         return (
-            <div className="max-w-2xl mx-auto mt-12">
-                <div className="bg-slate-800/50 border border-red-500/20 rounded-2xl p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-5">
-                        <AlertCircle className="h-8 w-8 text-red-400" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-2xl mx-auto mt-12">
+                <div className="bg-slate-900/80 backdrop-blur-xl border border-red-500/30 rounded-3xl p-10 text-center shadow-2xl shadow-red-500/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-500" />
+                    <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-red-500/50">
+                        <AlertCircle className="h-10 w-10 text-red-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-3">Application Not Approved</h2>
-                    <p className="text-slate-400 max-w-md mx-auto">
-                        Unfortunately, your affiliate application was not approved at this time.
-                        Please contact support for more information.
+                    <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">
+                        {isSuspended ? 'Account Suspended' : 'Application Declined'}
+                    </h2>
+                    <p className="text-slate-400 max-w-md mx-auto text-lg leading-relaxed">
+                        {isSuspended
+                            ? 'Your affiliate account has been temporarily suspended due to a policy violation or review requirement.'
+                            : 'Unfortunately, your affiliate application was not approved at this time.'}
                     </p>
+                    <button className="mt-8 text-teal-400 hover:text-teal-300 transition-colors font-medium">
+                        Contact Support
+                    </button>
                 </div>
-            </div>
-        );
-    }
-
-    if (affiliate?.status === 'suspended') {
-        return (
-            <div className="max-w-2xl mx-auto mt-12">
-                <div className="bg-slate-800/50 border border-amber-500/20 rounded-2xl p-8 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-5">
-                        <AlertCircle className="h-8 w-8 text-amber-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white mb-3">Account Suspended</h2>
-                    <p className="text-slate-400 max-w-md mx-auto">
-                        Your affiliate account has been suspended. Please contact support for more information.
-                    </p>
-                </div>
-            </div>
+            </motion.div>
         );
     }
 
     const tabs: { id: TabType; label: string }[] = [
-        { id: 'overview', label: 'Overview' },
+        { id: 'overview', label: 'Dashboard' },
         { id: 'referrals', label: 'Referrals' },
         { id: 'commissions', label: 'Commissions' },
         { id: 'payouts', label: 'Payouts' },
+        { id: 'resources', label: 'Resources ✨' },
     ];
 
     return (
-        <div>
-            {/* Header */}
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center">
-                        <TrendingUp className="h-5 w-5 text-teal-400" />
-                    </div>
-                    Affiliate Dashboard
-                </h2>
-                <p className="text-muted-foreground text-sm mt-1 ml-[52px]">
-                    Welcome back, {affiliate?.company_name}
-                </p>
-            </div>
-
-            {/* Referral Link Card */}
-            <div className="bg-gradient-to-r from-teal-500/10 via-emerald-500/5 to-transparent border border-teal-500/20 rounded-xl p-5 mb-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                        <h3 className="font-semibold text-sm mb-1">Your Referral Link</h3>
-                        <p className="text-muted-foreground text-xs">Share this link to earn commissions on every new subscriber</p>
-                    </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <div className="flex-1 sm:flex-none bg-background/50 border border-border rounded-lg px-3 py-2 text-xs font-mono truncate max-w-xs">
-                            {referralLink}
-                        </div>
-                        <button
-                            onClick={copyLink}
-                            className="shrink-0 flex items-center gap-1.5 bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-                        >
-                            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                            {copied ? 'Copied!' : 'Copy'}
-                        </button>
-                    </div>
+        <motion.div
+            variants={containerVariant}
+            initial="hidden"
+            animate="show"
+            className="max-w-6xl mx-auto pb-12"
+        >
+            {/* Minimalist Top Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pt-4">
+                <div>
+                    <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                        Partner Hub
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border flex items-center gap-1.5 ${tier.bg} ${tier.color}`}>
+                            <TierIcon className="h-3.5 w-3.5" />
+                            {tier.name}
+                        </span>
+                    </h2>
+                    <p className="text-slate-400 mt-2 text-sm max-w-xl">
+                        Welcome back, <span className="text-white font-medium">{affiliate?.company_name}</span>. Track your performance, manage links, and request payouts.
+                    </p>
                 </div>
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-teal-500/10">
-                    <span className="text-xs text-muted-foreground mr-1">Quick share:</span>
-                    <button onClick={shareOnTwitter} className="p-1.5 rounded-lg bg-background/30 hover:bg-background/50 text-muted-foreground hover:text-foreground transition-colors" title="Share on X (Twitter)">
-                        <Twitter className="h-3.5 w-3.5" />
-                    </button>
-                    <button onClick={shareOnLinkedIn} className="p-1.5 rounded-lg bg-background/30 hover:bg-background/50 text-muted-foreground hover:text-foreground transition-colors" title="Share on LinkedIn">
-                        <Linkedin className="h-3.5 w-3.5" />
-                    </button>
-                    <button onClick={shareViaEmail} className="p-1.5 rounded-lg bg-background/30 hover:bg-background/50 text-muted-foreground hover:text-foreground transition-colors" title="Share via Email">
-                        <Mail className="h-3.5 w-3.5" />
-                    </button>
-                    <button onClick={copyLink} className="p-1.5 rounded-lg bg-background/30 hover:bg-background/50 text-muted-foreground hover:text-foreground transition-colors" title="Copy Link">
-                        <Share2 className="h-3.5 w-3.5" />
-                    </button>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-                <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                        <Users className="h-3.5 w-3.5 text-teal-400" />
-                        <span className="text-[11px] font-medium">Referrals</span>
-                    </div>
-                    <div className="text-xl font-bold">{stats?.totalReferrals || 0}</div>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
-                        <span className="text-[11px] font-medium">Active Subs</span>
-                    </div>
-                    <div className="text-xl font-bold">{stats?.activeSubscriptions || 0}</div>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-blue-400" />
-                        <span className="text-[11px] font-medium">This Month</span>
-                    </div>
-                    <div className="text-xl font-bold">${stats?.thisMonthEarnings || 0}</div>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                        <DollarSign className="h-3.5 w-3.5 text-green-400" />
-                        <span className="text-[11px] font-medium">Total Earned</span>
-                    </div>
-                    <div className="text-xl font-bold">${stats?.totalEarned || 0}</div>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                        <Wallet className="h-3.5 w-3.5 text-purple-400" />
-                        <span className="text-[11px] font-medium">Available</span>
-                    </div>
-                    <div className="text-xl font-bold text-teal-400">${stats?.availableBalance || 0}</div>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-muted-foreground mb-1.5">
-                        <ExternalLink className="h-3.5 w-3.5 text-amber-400" />
-                        <span className="text-[11px] font-medium">Paid Out</span>
-                    </div>
-                    <div className="text-xl font-bold">${stats?.paidEarnings || 0}</div>
-                </div>
-            </div>
-
-            {/* Payout Button */}
-            {(stats?.availableBalance || 0) >= 50 && (
-                <div className="mb-6 flex justify-end">
-                    <button
+                {(stats?.availableBalance || 0) >= 50 && (
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={requestPayout}
                         disabled={payoutLoading}
-                        className="flex items-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-5 py-2.5 rounded-xl font-medium hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/25 disabled:opacity-50"
+                        className="flex items-center gap-2 bg-white text-slate-900 px-6 py-2.5 rounded-xl font-semibold hover:bg-slate-100 transition-all shadow-lg shadow-white/10 disabled:opacity-50"
                     >
                         {payoutLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
                         Request Payout (${stats?.availableBalance || 0})
+                    </motion.button>
+                )}
+            </div>
+
+            {/* Premium Hero Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+                {/* Main Hero Card */}
+                <motion.div variants={itemVariant} className="md:col-span-8 bg-slate-900/60 backdrop-blur-xl border border-teal-500/20 rounded-3xl p-8 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-32 bg-teal-500/10 rounded-full blur-[100px] -mr-16 -mt-16 transition-opacity opacity-50 group-hover:opacity-100 duration-700" />
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 h-full">
+                        <div>
+                            <div className="flex items-center gap-2 text-teal-400/80 mb-2">
+                                <DollarSign className="h-4 w-4" />
+                                <span className="font-medium text-sm">Available Balance</span>
+                            </div>
+                            <div className="text-6xl font-black text-white tracking-tighter mb-4">
+                                ${stats?.availableBalance?.toFixed(2) || '0.00'}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                                <div className="bg-slate-800/80 rounded-lg px-3 py-1.5 border border-slate-700/50">
+                                    <span className="text-slate-400 mr-2">Total Earned:</span>
+                                    <span className="text-white font-semibold">${stats?.totalEarned?.toFixed(2) || '0.00'}</span>
+                                </div>
+                                <div className="bg-slate-800/80 rounded-lg px-3 py-1.5 border border-slate-700/50">
+                                    <span className="text-slate-400 mr-2">Paid Out:</span>
+                                    <span className="text-white font-semibold">${stats?.paidEarnings?.toFixed(2) || '0.00'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Chart Area in Hero */}
+                        <div className="w-full md:w-1/2 h-[140px] mt-4 md:mt-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData}>
+                                    <defs>
+                                        <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(20, 184, 166, 0.2)', borderRadius: '12px', color: '#fff' }}
+                                        itemStyle={{ color: '#14b8a6', fontWeight: 600 }}
+                                        cursor={{ stroke: 'rgba(255,255,255,0.1)' }}
+                                    />
+                                    <Area type="monotone" dataKey="earnings" stroke="#14b8a6" strokeWidth={3} fillOpacity={1} fill="url(#colorEarnings)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Secondary Cards */}
+                <motion.div variants={itemVariant} className="md:col-span-4 flex flex-col gap-6">
+                    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 flex-1 flex flex-col justify-center relative overflow-hidden group">
+                        <div className="absolute right-0 top-0 p-20 bg-emerald-500/5 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="flex items-center gap-2 text-slate-400 mb-2 relative z-10">
+                            <Users className="h-4 w-4" />
+                            <span className="font-medium text-sm">Active Subscribers</span>
+                        </div>
+                        <div className="text-4xl font-bold text-white relative z-10">{stats?.activeSubscriptions || 0}</div>
+                        <div className="text-sm text-emerald-400 mt-2 font-medium relative z-10">+{stats?.thisMonthEarnings ? 'Generating revenue' : 'Build your recurring base'}</div>
+                    </div>
+                    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 flex-1 flex flex-col justify-center relative overflow-hidden group">
+                        <div className="absolute right-0 top-0 p-20 bg-blue-500/5 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="flex items-center gap-2 text-slate-400 mb-2 relative z-10">
+                            <TrendingUp className="h-4 w-4" />
+                            <span className="font-medium text-sm">Total Referrals</span>
+                        </div>
+                        <div className="text-4xl font-bold text-white relative z-10">{stats?.totalReferrals || 0}</div>
+                        <div className="text-sm text-slate-500 mt-2 relative z-10">Total unique signups</div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Glowing Referral Link Section */}
+            <motion.div variants={itemVariant} className="bg-gradient-to-r from-teal-900/40 via-slate-900/80 to-slate-900/40 backdrop-blur-xl border border-teal-500/30 rounded-3xl p-6 mb-8 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xl shadow-teal-900/20">
+                <div className="w-full lg:w-auto">
+                    <h3 className="text-lg font-bold text-white mb-1">Your Dedicated Link</h3>
+                    <p className="text-slate-400 text-sm">Use this link everywhere to ensure your referrals are tracked.</p>
+                </div>
+                
+                <div className="w-full lg:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div className="relative group flex-1">
+                        <div className="absolute inset-0 bg-teal-500/20 rounded-xl blur-md group-hover:bg-teal-500/30 transition-colors" />
+                        <div className="relative flex items-center bg-slate-950 border border-teal-500/40 rounded-xl pl-4 pr-1 py-1.5 overflow-hidden font-mono text-sm">
+                            <span className="text-slate-300 truncate w-full sm:w-[280px]">{referralLink}</span>
+                            <button
+                                onClick={copyLink}
+                                className="ml-2 shrink-0 flex items-center gap-2 bg-teal-500/20 hover:bg-teal-500/40 text-teal-400 px-4 py-2 rounded-lg font-semibold transition-all"
+                            >
+                                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                {copied ? 'Copied' : 'Copy'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Social Quick-share hidden on very small screens, shown as icons */}
+                <div className="w-full lg:w-auto flex justify-center lg:justify-end gap-2 border-t lg:border-t-0 lg:border-l border-slate-700/50 pt-4 lg:pt-0 lg:pl-6">
+                    <button onClick={shareOnTwitter} className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Post to X">
+                        <Twitter className="h-4 w-4" />
+                    </button>
+                    <button onClick={shareOnLinkedIn} className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Post to LinkedIn">
+                        <Linkedin className="h-4 w-4" />
+                    </button>
+                    <button onClick={shareViaEmail} className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Send via Email">
+                        <Mail className="h-4 w-4" />
                     </button>
                 </div>
-            )}
+            </motion.div>
 
-            {/* Tabs */}
-            <div className="flex gap-1 mb-4 bg-muted/50 p-1 rounded-xl w-fit">
+            {/* Premium Animated Tabs */}
+            <div className="mb-6 border-b border-slate-700/50 flex overflow-x-auto no-scrollbar relative">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                            activeTab === tab.id
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
+                        className={`px-6 py-4 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                            activeTab === tab.id ? 'text-teal-400' : 'text-slate-400 hover:text-slate-200'
                         }`}
                     >
                         {tab.label}
+                        {activeTab === tab.id && (
+                            <motion.div
+                                layoutId="activeTabIndicator"
+                                className="absolute bottom-0 left-0 w-full h-[2px] bg-teal-400"
+                                initial={false}
+                                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                            />
+                        )}
                     </button>
                 ))}
             </div>
 
-            {/* Tab Content */}
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
+            {/* Main Content Area */}
+            <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl"
+            >
                 {activeTab === 'overview' && (
-                    <div className="p-6">
-                        <h3 className="font-semibold mb-4">Recent Commissions</h3>
+                    <div className="p-8">
+                        <h3 className="text-xl font-bold text-white mb-6">Recent Activity</h3>
                         {commissions.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground text-sm">
-                                <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                                <p>No commissions yet. Share your referral link to start earning!</p>
+                            <div className="text-center py-16 px-4">
+                                <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                                    <TrendingUp className="h-8 w-8 text-slate-500" />
+                                </div>
+                                <h4 className="text-lg font-semibold text-white mb-2">No commissions yet</h4>
+                                <p className="text-slate-400 text-sm max-w-sm mx-auto">
+                                    Start sharing your referral link everywhere. The sooner you share, the faster you earn!
+                                </p>
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {commissions.slice(0, 5).map(comm => (
-                                    <div key={comm.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                                        <div>
-                                            <span className="text-sm font-medium">
-                                                {comm.subscription_type === 'yearly' ? 'Annual' : 'Monthly'} Commission
-                                                {comm.subscription_type === 'monthly' && (
-                                                    <span className="text-muted-foreground ml-1 text-xs">
-                                                        (Month {comm.commission_month}/12)
-                                                    </span>
-                                                )}
-                                            </span>
-                                            <div className="text-xs text-muted-foreground mt-0.5">
-                                                {new Date(comm.created_at).toLocaleDateString()}
+                                {commissions.slice(0, 10).map(comm => (
+                                    <div key={comm.id} className="flex items-center justify-between p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30 hover:bg-slate-800/80 transition-colors group">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                                                comm.subscription_type === 'yearly' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+                                            }`}>
+                                                <DollarSign className="h-5 w-5" />
+                                            </div>
+                                            <div>
+                                                <span className="text-sm font-semibold text-white block">
+                                                    {comm.subscription_type === 'yearly' ? 'Annual Subscription' : 'Monthly Subscription'}
+                                                    {comm.subscription_type === 'monthly' && (
+                                                        <span className="text-slate-500 ml-2 font-normal text-xs">
+                                                            (Month {comm.commission_month}/12)
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {new Date(comm.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${getStatusBadge(comm.status)}`}>
-                                                {comm.status}
+                                        <div className="flex flex-col items-end gap-2">
+                                            <span className="font-bold text-teal-400 text-lg">
+                                                +${comm.commission_amount.toFixed(2)}
                                             </span>
-                                            <span className="font-semibold text-emerald-400">
-                                                +${comm.commission_amount}
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border ${getStatusBadge(comm.status)}`}>
+                                                {comm.status}
                                             </span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
+                        
+                        {/* Compact How-To embedded at bottom of overview */}
+                        <div className="mt-12 bg-slate-950/50 rounded-2xl p-6 border border-slate-800">
+                            <h4 className="text-sm font-bold text-slate-300 uppercase tracking-widest mb-6">Quick Guide to Success</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm relative">
+                                <div className="hidden md:block absolute top-[28px] left-[15%] w-[70%] h-px bg-slate-800" />
+                                {[
+                                    { step: 1, title: 'Share & Promote', desc: 'Promote Aranora using your unique link on social media.' },
+                                    { step: 2, title: 'They Convert', desc: 'When businesses sign up and subscribe, they get tracked.' },
+                                    { step: 3, title: 'You Earn', desc: 'Receive 30% recurring for a year, or $57 flat on annual plans.' }
+                                ].map((s, i) => (
+                                    <div key={i} className="flex flex-col items-center text-center relative z-10">
+                                        <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-slate-700 flex items-center justify-center mb-4 shadow-xl">
+                                            <span className="text-lg font-black text-teal-500">{s.step}</span>
+                                        </div>
+                                        <span className="font-semibold text-white text-base">{s.title}</span>
+                                        <p className="text-slate-400 mt-2 text-xs leading-relaxed max-w-[200px]">{s.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
 
                 {activeTab === 'referrals' && (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto p-4">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                                    <th className="px-4 py-3 font-medium">User</th>
-                                    <th className="px-4 py-3 font-medium">Status</th>
-                                    <th className="px-4 py-3 font-medium">Plan</th>
-                                    <th className="px-4 py-3 font-medium">Signed Up</th>
-                                    <th className="px-4 py-3 font-medium">Converted</th>
+                                <tr className="text-slate-400 text-xs uppercase tracking-widest border-b border-slate-800">
+                                    <th className="px-6 py-5 font-semibold">Referred User</th>
+                                    <th className="px-6 py-5 font-semibold">Status</th>
+                                    <th className="px-6 py-5 font-semibold">Plan Chosen</th>
+                                    <th className="px-6 py-5 font-semibold">Signup Date</th>
+                                    <th className="px-6 py-5 font-semibold">Conversion Date</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border">
+                            <tbody className="divide-y divide-slate-800/50">
                                 {referrals.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground text-sm">
-                                            No referrals yet
+                                        <td colSpan={5} className="px-6 py-16 text-center text-slate-500 text-sm">
+                                            <Users className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                                            No referrals tracked yet
                                         </td>
                                     </tr>
                                 ) : (
                                     referrals.map(ref => (
-                                        <tr key={ref.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-4 py-3 text-sm">
-                                                {ref.referred_user?.full_name || 'Unknown'}
+                                        <tr key={ref.id} className="hover:bg-slate-800/30 transition-colors">
+                                            <td className="px-6 py-4 text-sm font-medium text-white">
+                                                {ref.referred_user?.full_name || 'Anonymous User'}
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(ref.status)}`}>
-                                                    {ref.status}
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(ref.status)}`}>
+                                                    {ref.status.replace('_', ' ')}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                {ref.subscription_type === 'yearly' ? 'Annual' : ref.subscription_type === 'monthly' ? 'Monthly' : '-'}
+                                            <td className="px-6 py-4 text-sm text-slate-400 font-medium capitalize">
+                                                {ref.subscription_type || '—'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                                            <td className="px-6 py-4 text-sm text-slate-400">
                                                 {new Date(ref.created_at).toLocaleDateString()}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                {ref.converted_at ? new Date(ref.converted_at).toLocaleDateString() : '-'}
+                                            <td className="px-6 py-4 text-sm text-emerald-400 font-medium">
+                                                {ref.converted_at ? new Date(ref.converted_at).toLocaleDateString() : '—'}
                                             </td>
                                         </tr>
                                     ))
@@ -480,45 +604,48 @@ export function AffiliateDashboard() {
                 )}
 
                 {activeTab === 'commissions' && (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto p-4">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                                    <th className="px-4 py-3 font-medium">Date</th>
-                                    <th className="px-4 py-3 font-medium">Plan</th>
-                                    <th className="px-4 py-3 font-medium">Month</th>
-                                    <th className="px-4 py-3 font-medium text-right">Invoice</th>
-                                    <th className="px-4 py-3 font-medium text-right">Commission</th>
-                                    <th className="px-4 py-3 font-medium">Status</th>
+                                <tr className="text-slate-400 text-xs uppercase tracking-widest border-b border-slate-800">
+                                    <th className="px-6 py-5 font-semibold">Date Acquired</th>
+                                    <th className="px-6 py-5 font-semibold">Subscription Plan</th>
+                                    <th className="px-6 py-5 font-semibold">Billing Cycle</th>
+                                    <th className="px-6 py-5 font-semibold text-right">Invoice Total</th>
+                                    <th className="px-6 py-5 font-semibold text-right text-teal-400">Your Share</th>
+                                    <th className="px-6 py-5 font-semibold">Payout Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border">
+                            <tbody className="divide-y divide-slate-800/50">
                                 {commissions.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">
-                                            No commissions yet
+                                        <td colSpan={6} className="px-6 py-16 text-center text-slate-500 text-sm">
+                                            <DollarSign className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                                            No commission data available
                                         </td>
                                     </tr>
                                 ) : (
                                     commissions.map(comm => (
-                                        <tr key={comm.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                                        <tr key={comm.id} className="hover:bg-slate-800/30 transition-colors">
+                                            <td className="px-6 py-4 text-sm text-slate-300">
                                                 {new Date(comm.created_at).toLocaleDateString()}
                                             </td>
-                                            <td className="px-4 py-3 text-sm">
-                                                {comm.subscription_type === 'yearly' ? 'Annual' : 'Monthly'}
+                                            <td className="px-6 py-4 text-sm font-medium text-white capitalize">
+                                                {comm.subscription_type} Plan
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                {comm.subscription_type === 'monthly' ? `${comm.commission_month}/12` : '-'}
+                                            <td className="px-6 py-4 text-sm text-slate-400">
+                                                {comm.subscription_type === 'monthly' ? `Month ${comm.commission_month}/12` : 'One-time Payment'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-right text-muted-foreground">
-                                                ${comm.invoice_amount}
+                                            <td className="px-6 py-4 text-sm text-right text-slate-400 font-mono">
+                                                ${parseFloat(comm.invoice_amount as any).toFixed(2)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-right font-medium text-emerald-400">
-                                                +${comm.commission_amount}
+                                            <td className="px-6 py-4 text-right">
+                                                <span className="bg-teal-500/10 text-teal-400 px-2 py-1 rounded font-bold font-mono">
+                                                    +${parseFloat(comm.commission_amount as any).toFixed(2)}
+                                                </span>
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(comm.status)}`}>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(comm.status)}`}>
                                                     {comm.status}
                                                 </span>
                                             </td>
@@ -531,47 +658,48 @@ export function AffiliateDashboard() {
                 )}
 
                 {activeTab === 'payouts' && (
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto p-4">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b border-border text-muted-foreground text-xs uppercase tracking-wider">
-                                    <th className="px-4 py-3 font-medium">Requested</th>
-                                    <th className="px-4 py-3 font-medium text-right">Amount</th>
-                                    <th className="px-4 py-3 font-medium">Method</th>
-                                    <th className="px-4 py-3 font-medium">Status</th>
-                                    <th className="px-4 py-3 font-medium">Processed</th>
-                                    <th className="px-4 py-3 font-medium">Note</th>
+                                <tr className="text-slate-400 text-xs uppercase tracking-widest border-b border-slate-800">
+                                    <th className="px-6 py-5 font-semibold">Date Requested</th>
+                                    <th className="px-6 py-5 font-semibold text-right text-teal-400">Withdrawal Amount</th>
+                                    <th className="px-6 py-5 font-semibold">Destination</th>
+                                    <th className="px-6 py-5 font-semibold">Status</th>
+                                    <th className="px-6 py-5 font-semibold">Date Processed</th>
+                                    <th className="px-6 py-5 font-semibold">Memex Details</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border">
+                            <tbody className="divide-y divide-slate-800/50">
                                 {payouts.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground text-sm">
-                                            No payout requests yet
+                                        <td colSpan={6} className="px-6 py-16 text-center text-slate-500 text-sm">
+                                            <Wallet className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                                            You haven't requested any payouts yet
                                         </td>
                                     </tr>
                                 ) : (
                                     payouts.map(p => (
-                                        <tr key={p.id} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
+                                        <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
+                                            <td className="px-6 py-4 text-sm text-slate-300">
                                                 {new Date(p.requested_at).toLocaleDateString()}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-right font-medium">
-                                                ${p.amount}
+                                            <td className="px-6 py-4 text-sm text-right font-bold text-white font-mono">
+                                                ${parseFloat(p.amount as any).toFixed(2)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground capitalize">
+                                            <td className="px-6 py-4 text-sm text-slate-400 font-medium capitalize">
                                                 {p.payment_method?.replace('_', ' ')}
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(p.status)}`}>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(p.status)}`}>
                                                     {p.status}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground">
-                                                {p.processed_at ? new Date(p.processed_at).toLocaleDateString() : '-'}
+                                            <td className="px-6 py-4 text-sm text-slate-400">
+                                                {p.processed_at ? new Date(p.processed_at).toLocaleDateString() : 'Pending'}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-muted-foreground max-w-[150px] truncate">
-                                                {p.admin_note || '-'}
+                                            <td className="px-6 py-4 text-sm text-slate-500 max-w-[200px] truncate">
+                                                {p.admin_note || '—'}
                                             </td>
                                         </tr>
                                     ))
@@ -580,41 +708,81 @@ export function AffiliateDashboard() {
                         </table>
                     </div>
                 )}
-            </div>
 
-            {/* Commission Info */}
-            <div className="mt-6 bg-muted/30 border border-border rounded-xl p-5">
-                <h4 className="text-sm font-semibold mb-3">How It Works</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="flex items-start gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-xs font-bold text-teal-400">1</span>
+                {activeTab === 'resources' && (
+                    <div className="p-8">
+                        <div className="mb-8">
+                            <h3 className="text-xl font-bold text-white mb-2">Marketing Toolkit</h3>
+                            <p className="text-slate-400 text-sm max-w-2xl">
+                                Boost your conversions! We've prepared high-converting graphics and copy that you can use immediately on your site or social channels.
+                            </p>
                         </div>
-                        <div>
-                            <span className="font-medium">Share your link</span>
-                            <p className="text-muted-foreground text-xs mt-0.5">Share your unique referral link with potential customers</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Graphic Asset 1 */}
+                            <div className="bg-slate-800/40 border border-slate-700/50 flex flex-col rounded-2xl overflow-hidden hover:border-teal-500/30 transition-colors">
+                                <div className="h-32 bg-slate-800 flex flex-col items-center justify-center p-4">
+                                    <div className="text-2xl font-black text-white tracking-tighter">Aranora</div>
+                                    <div className="text-[10px] text-teal-400 font-bold uppercase tracking-widest mt-1">Logo Pack</div>
+                                </div>
+                                <div className="p-5 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="font-semibold text-white mb-1">Official Brand Logos</h4>
+                                        <p className="text-xs text-slate-400 mb-4 line-clamp-2">High resolution light & dark mode vectors (SVG & PNG).</p>
+                                    </div>
+                                    <button className="flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300 font-medium">
+                                        <Download className="h-4 w-4" /> Download ZIP
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Graphic Asset 2 */}
+                            <div className="bg-slate-800/40 border border-slate-700/50 flex flex-col rounded-2xl overflow-hidden hover:border-teal-500/30 transition-colors">
+                                <div className="h-32 bg-gradient-to-br from-teal-900 to-slate-900 flex items-center justify-center p-4">
+                                    <ImageIcon className="h-10 w-10 text-teal-500/50" />
+                                </div>
+                                <div className="p-5 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="font-semibold text-white mb-1">Social Media Banners</h4>
+                                        <p className="text-xs text-slate-400 mb-4 line-clamp-2">Pre-sized banners optimized for X, LinkedIn, and Facebook.</p>
+                                    </div>
+                                    <button className="flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300 font-medium">
+                                        <Download className="h-4 w-4" /> Download pack
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Copy Asset */}
+                            <div className="bg-slate-800/40 border border-slate-700/50 flex flex-col rounded-2xl overflow-hidden hover:border-teal-500/30 transition-colors">
+                                <div className="h-32 bg-slate-800 flex flex-col items-center justify-center p-4">
+                                    <MessageSquare className="h-8 w-8 text-blue-400 mb-2" />
+                                    <div className="text-xs text-blue-400 font-bold uppercase tracking-widest">Email Templates</div>
+                                </div>
+                                <div className="p-5 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h4 className="font-semibold text-white mb-1">Email Campaign Copy</h4>
+                                        <p className="text-xs text-slate-400 mb-4 line-clamp-2">High-converting cold and warm email templates to send your list.</p>
+                                    </div>
+                                    <button className="flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300 font-medium">
+                                        <Copy className="h-4 w-4" /> Copy texts
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 bg-teal-500/5 border border-teal-500/20 rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center">
+                            <div className="w-12 h-12 bg-teal-500/10 rounded-full flex items-center justify-center shrink-0">
+                                <Award className="h-6 w-6 text-teal-400" />
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold mb-1">Do's and Don'ts</h4>
+                                <p className="text-sm text-slate-300 mb-2">We want you to succeed! Always disclose your affiliate relationship (e.g. #ad). Do not run branded PPC campaigns bidding on "Aranora" keywords.</p>
+                                <a href="#" className="text-xs text-teal-400 hover:underline">Read full program terms & guidelines →</a>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-xs font-bold text-teal-400">2</span>
-                        </div>
-                        <div>
-                            <span className="font-medium">They subscribe</span>
-                            <p className="text-muted-foreground text-xs mt-0.5">When someone subscribes using your link, you earn 30%</p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-xs font-bold text-teal-400">3</span>
-                        </div>
-                        <div>
-                            <span className="font-medium">Get paid</span>
-                            <p className="text-muted-foreground text-xs mt-0.5">Request payouts once you reach $50 minimum balance</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                )}
+            </motion.div>
+        </motion.div>
     );
 }

@@ -11,7 +11,7 @@ const PUBLIC_ROUTES = [
 
 // Route prefixes that don't require subscription
 const PUBLIC_PREFIXES = [
-    '/api/', '/promo/', '/invite/', '/progress/', '/sign/',
+    '/api/', '/promo/', '/invite/', '/progress/', '/sign/', '/intake/',
     '/_next/', '/favicon.ico', '/ref/', '/blog/',
 ];
 
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/reports') || pathname.startsWith('/calendar') ||
         pathname.startsWith('/time-tracking') || pathname.startsWith('/collaborators') ||
         pathname.startsWith('/settings') || pathname.startsWith('/subscriptions') ||
-        pathname.startsWith('/broadcasts')) {
+        pathname.startsWith('/broadcasts') || pathname.startsWith('/intake-forms')) {
 
         // Skip billing page — users need access to manage/upgrade
         if (pathname.startsWith('/billing')) {
