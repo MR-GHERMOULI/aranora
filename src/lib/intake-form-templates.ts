@@ -8,6 +8,12 @@ import { IntakeFormField } from "@/types";
 export function getFormTemplates(): { name: string; description: string; fields: IntakeFormField[]; settings: Record<string, any> }[] {
     return [
         {
+            name: "✨ Start from Scratch",
+            description: "Build a completely custom form from the ground up tailored to your specific needs.",
+            settings: { welcomeMessage: "Welcome! Please fill out the form below.", thankYouMessage: "Thank you for your submission!", collectPhone: false, collectCompany: false },
+            fields: []
+        },
+        {
             name: "🎨 Web Design Request",
             description: "Collect all the details needed for a web design project — from brand identity to technical requirements.",
             settings: { welcomeMessage: "Tell us about your web design vision!", thankYouMessage: "Thank you! We'll review your project details and get back to you within 24 hours.", collectPhone: true, collectCompany: true },

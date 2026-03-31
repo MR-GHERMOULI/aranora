@@ -10,7 +10,7 @@ import {
     Inbox, Eye, CheckCircle, TrendingUp, Copy, Check,
     ExternalLink, Link as LinkIcon, User, Mail, Phone,
     Building2, Calendar, DollarSign, FileText, ChevronRight,
-    X, ArrowRight, Archive, MessageSquare, Sparkles
+    X, ArrowRight, Archive, MessageSquare, Sparkles, Printer
 } from "lucide-react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
@@ -55,6 +55,77 @@ export function IntakeFormDetailClient({ form, submissions: initialSubmissions }
         } finally {
             setUpdating(false)
         }
+    }
+
+    const handlePrint = () => {
+        if (!selectedSubmission) return;
+        
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert("Please allow popups to print");
+            return;
+        }
+
+        const html = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Intake Submission: ${selectedSubmission.client_name}</title>
+                    <style>
+                        body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; max-width: 800px; margin: 0 auto; line-height: 1.5; }
+                        .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 24px; margin-bottom: 32px; }
+                        .header h1 { margin: 0 0 8px 0; font-size: 28px; color: #0f172a; }
+                        .header p { margin: 0; color: #64748b; font-size: 14px; }
+                        .contact { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+                        .contact div { font-size: 14px; }
+                        .contact strong { color: #475569; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
+                        .question { margin-bottom: 28px; break-inside: avoid; }
+                        .label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700; margin-bottom: 8px; }
+                        .answer { font-size: 15px; color: #0f172a; background: #fff; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; white-space: pre-wrap; }
+                        @media print {
+                            body { padding: 0; }
+                            .contact, .answer { border: 1px solid #cbd5e1; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>${selectedSubmission.client_name}</h1>
+                        <p>Submitted on ${new Date(selectedSubmission.submitted_at).toLocaleDateString()} at ${new Date(selectedSubmission.submitted_at).toLocaleTimeString()}</p>
+                    </div>
+                    <div class="contact">
+                        ${selectedSubmission.client_email ? `<div><strong>Email Address</strong> ${selectedSubmission.client_email}</div>` : ''}
+                        ${selectedSubmission.client_phone ? `<div><strong>Phone Number</strong> ${selectedSubmission.client_phone}</div>` : ''}
+                        ${selectedSubmission.client_company ? `<div><strong>Company / Organization</strong> ${selectedSubmission.client_company}</div>` : ''}
+                        <div><strong>Submission Status</strong> ${selectedSubmission.status.toUpperCase()}</div>
+                    </div>
+                    <div class="responses">
+                        ${form.fields.filter(f => f.type !== 'section_header').map(field => {
+                            let val = selectedSubmission.responses[field.id];
+                            let displayVal = val;
+                            if (val && typeof val === 'object' && field.type === 'budget_range') {
+                                displayVal = `${val.min?.toLocaleString() || 0} - ${val.max?.toLocaleString() || 0} ${val.currency || 'USD'}`;
+                            } else if (Array.isArray(val)) {
+                                displayVal = val.join(', ');
+                            } else if (!val) {
+                                displayVal = 'Not provided';
+                            }
+                            return `
+                                <div class="question">
+                                    <div class="label">${field.label || 'Untitled'}</div>
+                                    <div class="answer">${displayVal}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <script>
+                        window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 250); }
+                    </script>
+                </body>
+            </html>
+        `;
+        printWindow.document.write(html);
+        printWindow.document.close();
     }
 
     const getFieldLabel = (fieldId: string): string => {
@@ -254,9 +325,20 @@ export function IntakeFormDetailClient({ form, submissions: initialSubmissions }
                                             </p>
                                         </div>
                                     </div>
-                                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusConfig[selectedSubmission.status]?.badge}`}>
-                                        <span className={`h-1.5 w-1.5 rounded-full ${statusConfig[selectedSubmission.status]?.dot}`} />
-                                        {statusConfig[selectedSubmission.status]?.label}
+                                    <div className="flex items-center gap-3">
+                                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold ${statusConfig[selectedSubmission.status]?.badge}`}>
+                                            <span className={`h-1.5 w-1.5 rounded-full ${statusConfig[selectedSubmission.status]?.dot}`} />
+                                            {statusConfig[selectedSubmission.status]?.label}
+                                        </div>
+                                        <div className="h-4 w-[1px] bg-slate-700 mx-1" />
+                                        <Button
+                                            variant="ghost" size="icon"
+                                            className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-800 rounded-full"
+                                            onClick={handlePrint}
+                                            title="Print as PDF"
+                                        >
+                                            <Printer className="h-4 w-4" />
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
