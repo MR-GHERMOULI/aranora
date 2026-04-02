@@ -162,13 +162,20 @@ export default async function LandingPage() {
     ? { ...defaultContent, ...homepageSetting.value }
     : defaultContent;
 
+  const { createServerClient } = await import("@supabase/ssr");
+  const serviceClient = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { cookies: { getAll() { return [] }, setAll() { } } }
+  );
+
   // Fetch real user count for social proof
-  const { count: userCount } = await supabase
+  const { count: userCount } = await serviceClient
     .from("profiles")
     .select("*", { count: "exact", head: true });
 
   // Fetch real country count for social proof
-  const { data: countries } = await supabase
+  const { data: countries } = await serviceClient
     .from("profiles")
     .select("country");
 
@@ -179,14 +186,19 @@ export default async function LandingPage() {
   );
   const countryCount = Math.max(uniqueCountries.size, 1);
 
+  // Fetch real projects created
+  const { count: projectsCount } = await serviceClient
+    .from("projects")
+    .select("*", { count: "exact", head: true });
+
   // Fetch real contracts signed
-  const { count: contractsCount } = await supabase
+  const { count: contractsCount } = await serviceClient
     .from("contracts")
     .select("*", { count: "exact", head: true })
     .in("status", ["signed", "completed"]);
 
   // Fetch total invoices completed
-  const { data: invoicesData } = await supabase
+  const { data: invoicesData } = await serviceClient
     .from("invoices")
     .select("total")
     .eq("status", "paid");
@@ -414,9 +426,9 @@ export default async function LandingPage() {
                 icon: Globe,
               },
               {
-                value: `${features.length}+`,
-                label: "Professional Tools",
-                icon: Zap,
+                value: `${projectsCount || 0}+`,
+                label: "Projects Created",
+                icon: FolderOpen,
               },
               {
                 value: `${contractsCount || 0}+`,
