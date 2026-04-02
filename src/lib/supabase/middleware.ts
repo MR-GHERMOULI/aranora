@@ -52,6 +52,10 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith("/ref") &&
         !request.nextUrl.pathname.startsWith("/api/affiliate-auth") &&
         !request.nextUrl.pathname.startsWith("/pricing") &&
+        !request.nextUrl.pathname.startsWith("/blog") &&
+        !request.nextUrl.pathname.startsWith("/refund") &&
+        !request.nextUrl.pathname.startsWith("/forgot-password") &&
+        !request.nextUrl.pathname.startsWith("/error") &&
         request.nextUrl.pathname !== "/"
     ) {
         // no user, potentially respond by redirecting the user to the login page
