@@ -59,9 +59,9 @@ export default async function LandingPage() {
   const content: HomepageContent = homepageSetting?.value || defaultContent;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-slate-100">
+      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
@@ -73,10 +73,10 @@ export default async function LandingPage() {
               <span className="text-xl font-bold text-brand-primary">Aranora</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-slate-600 hover:text-brand-primary transition-colors">Features</a>
-              <a href="#pricing" className="text-sm text-slate-600 hover:text-brand-primary transition-colors">Pricing</a>
-              <a href="#testimonials" className="text-sm text-slate-600 hover:text-brand-primary transition-colors">Testimonials</a>
-              <a href="#affiliates" className="text-sm text-teal-600 hover:text-teal-700 font-medium transition-colors">Affiliates</a>
+              <a href="#features" className="text-sm text-muted-foreground hover:text-brand-primary transition-colors">Features</a>
+              <a href="#pricing" className="text-sm text-muted-foreground hover:text-brand-primary transition-colors">Pricing</a>
+              <a href="#testimonials" className="text-sm text-muted-foreground hover:text-brand-primary transition-colors">Testimonials</a>
+              <a href="#affiliates" className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium transition-colors">Affiliates</a>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="ghost" asChild>
@@ -94,11 +94,11 @@ export default async function LandingPage() {
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-secondary/10 text-brand-secondary-dark text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-secondary/10 text-brand-secondary-dark dark:text-brand-secondary text-sm font-medium mb-6">
               <Zap className="h-4 w-4" />
               The #1 Platform for Freelancers
             </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight mb-6">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6">
               {content.hero_title.includes("Like a Pro") ? (
                 <>
                   {content.hero_title.split("Like a Pro")[0]}
@@ -108,7 +108,7 @@ export default async function LandingPage() {
                 content.hero_title
               )}
             </h1>
-            <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
               {content.hero_subtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -121,15 +121,15 @@ export default async function LandingPage() {
                 Watch Demo
               </Button>
             </div>
-            <p className="mt-6 text-sm text-slate-500">
+            <p className="mt-6 text-sm text-muted-foreground">
               No credit card required • 14-day free trial • Cancel anytime
             </p>
           </div>
 
           {/* Hero Image/Dashboard Preview */}
           <div className="mt-16 relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 pointer-events-none" />
-            <div className="bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 rounded-2xl p-4 shadow-2xl shadow-slate-200/50 border border-slate-200">
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
+            <div className="bg-gradient-to-br from-brand-primary/5 to-brand-secondary/5 rounded-2xl p-4 shadow-2xl shadow-foreground/5 border border-border">
               <div className="bg-slate-900 rounded-xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 bg-slate-800">
                   <div className="flex gap-1.5">
@@ -152,12 +152,12 @@ export default async function LandingPage() {
       </section>
 
       {/* Trusted By Section */}
-      <section className="py-12 border-y border-slate-100 bg-slate-50/50">
+      <section className="py-12 border-y border-border bg-muted/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-slate-500 mb-8">Trusted by 10,000+ freelancers worldwide</p>
+          <p className="text-center text-sm text-muted-foreground mb-8">Trusted by 10,000+ freelancers worldwide</p>
           <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6 opacity-60">
             {['Upwork', 'Fiverr', 'Toptal', 'Freelancer', '99designs'].map((company) => (
-              <span key={company} className="text-xl font-bold text-slate-400">{company}</span>
+              <span key={company} className="text-xl font-bold text-muted-foreground">{company}</span>
             ))}
           </div>
         </div>
@@ -167,8 +167,8 @@ export default async function LandingPage() {
       <section id="features" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.features_title}</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-foreground mb-4">{content.features_title}</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {content.features_subtitle}
             </p>
           </div>
@@ -181,12 +181,12 @@ export default async function LandingPage() {
               { icon: BarChart3, title: "Reports & Analytics", desc: "Insights into your revenue, client activity, and business growth.", color: "bg-pink-500" },
               { icon: Zap, title: "Smart Reminders", desc: "AI-powered suggestions for follow-ups, overdue payments, and tasks.", color: "bg-amber-500" },
             ].map((feature, i) => (
-              <div key={i} className="group p-6 rounded-2xl bg-white border border-slate-200 hover:border-brand-primary/30 hover:shadow-lg hover:shadow-brand-primary/5 transition-all duration-300">
+              <div key={i} className="group p-6 rounded-2xl bg-card border border-border hover:border-brand-primary/30 hover:shadow-lg hover:shadow-brand-primary/5 transition-all duration-300">
                 <div className={`h-12 w-12 rounded-xl ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">{feature.title}</h3>
-                <p className="text-slate-600">{feature.desc}</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -194,20 +194,20 @@ export default async function LandingPage() {
       </section>
 
       {/* Free Forever Section */}
-      <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50 to-white">
+      <section id="pricing" className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-muted/50 to-background">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-secondary/10 text-brand-secondary-dark text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-secondary/10 text-brand-secondary-dark dark:text-brand-secondary text-sm font-medium mb-6">
             <Zap className="h-4 w-4" />
             100% Free Forever
           </div>
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.pricing_title}</h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold text-foreground mb-4">{content.pricing_title}</h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             {content.pricing_subtitle}
           </p>
-          <div className="bg-white rounded-2xl border-2 border-brand-primary shadow-xl shadow-brand-primary/10 p-8 max-w-md mx-auto">
+          <div className="bg-card rounded-2xl border-2 border-brand-primary shadow-xl shadow-brand-primary/10 p-8 max-w-md mx-auto">
             <div className="mb-6">
               <span className="text-5xl font-bold text-brand-primary">$0</span>
-              <span className="text-slate-500 text-lg"> / forever</span>
+              <span className="text-muted-foreground text-lg"> / forever</span>
             </div>
             <ul className="space-y-3 mb-8 text-left">
               {[
@@ -218,8 +218,8 @@ export default async function LandingPage() {
                 "Reports & analytics",
                 "Smart reminders"
               ].map((feature, i) => (
-                <li key={i} className="flex items-center gap-2 text-slate-600">
-                  <CheckCircle2 className="h-5 w-5 text-brand-secondary-dark flex-shrink-0" />
+                <li key={i} className="flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle2 className="h-5 w-5 text-brand-secondary-dark dark:text-brand-secondary flex-shrink-0" />
                   {feature}
                 </li>
               ))}
@@ -237,8 +237,8 @@ export default async function LandingPage() {
       <section id="testimonials" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">{content.testimonials_title}</h2>
-            <p className="text-lg text-slate-600">{content.testimonials_subtitle}</p>
+            <h2 className="text-4xl font-bold text-foreground mb-4">{content.testimonials_title}</h2>
+            <p className="text-lg text-muted-foreground">{content.testimonials_subtitle}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -246,20 +246,20 @@ export default async function LandingPage() {
               { name: "Marcus Johnson", role: "Web Developer", quote: "Finally, a tool that understands freelancers. The project collaboration features are game-changing.", avatar: "MJ" },
               { name: "Elena Rodriguez", role: "Content Strategist", quote: "The smart reminders keep me on top of everything. I've never missed a deadline since using Aranora.", avatar: "ER" }
             ].map((testimonial, i) => (
-              <div key={i} className="p-6 rounded-2xl bg-white border border-slate-200">
+              <div key={i} className="p-6 rounded-2xl bg-card border border-border">
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, j) => (
                     <Star key={j} className="h-5 w-5 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-slate-600 mb-6 italic">&quot;{testimonial.quote}&quot;</p>
+                <p className="text-muted-foreground mb-6 italic">&quot;{testimonial.quote}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center text-white font-medium text-sm">
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">{testimonial.name}</p>
-                    <p className="text-sm text-slate-500">{testimonial.role}</p>
+                    <p className="font-semibold text-foreground">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
                   </div>
                 </div>
               </div>

@@ -21,7 +21,7 @@ export default async function BlogPage() {
     return (
         <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
             {/* Navigation */}
-            <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
+            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link
                         href="/"
@@ -67,7 +67,7 @@ export default async function BlogPage() {
                                 <Link
                                     key={article.id}
                                     href={`/blog/${article.slug}`}
-                                    className="group rounded-2xl border bg-card overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300"
+                                    className="group rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300"
                                 >
                                     {/* Cover Image */}
                                     {article.cover_image && (
@@ -138,7 +138,7 @@ export default async function BlogPage() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t py-8">
+            <footer className="border-t border-border py-8">
                 <div className="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
                     <p>&copy; {new Date().getFullYear()} Aranora. All rights reserved.</p>
                 </div>

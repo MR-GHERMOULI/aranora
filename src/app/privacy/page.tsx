@@ -14,9 +14,9 @@ export default async function PrivacyPage() {
         .single();
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <nav className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
+            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
@@ -33,21 +33,21 @@ export default async function PrivacyPage() {
             </nav>
 
             <main className="max-w-3xl mx-auto px-4 py-16">
-                <h1 className="text-4xl font-bold text-slate-900 mb-2">
+                <h1 className="text-4xl font-bold text-foreground mb-2">
                     {page?.title || "Privacy Policy"}
                 </h1>
-                <p className="text-slate-500 mb-8">Last updated: March 2026</p>
+                <p className="text-muted-foreground mb-8">Last updated: March 2026</p>
 
                 {page?.content ? (
                     <div
-                        className="prose prose-slate max-w-none"
+                        className="prose prose-slate dark:prose-invert max-w-none"
                         dangerouslySetInnerHTML={{ __html: page.content }}
                     />
                 ) : (
-                    <div className="prose prose-slate max-w-none">
+                    <div className="prose prose-slate dark:prose-invert max-w-none">
                         <section className="mb-8">
-                            <h2 className="text-xl font-semibold text-slate-900 mb-3">1. Information We Collect</h2>
-                            <p className="text-slate-600 leading-relaxed">
+                            <h2 className="text-xl font-semibold text-foreground mb-3">1. Information We Collect</h2>
+                            <p className="text-muted-foreground leading-relaxed">
                                 We collect information you provide directly to us, such as when you create an account,
                                 use our services, make a purchase, or contact us for support. This may include your name,
                                 email address, phone number, company information, and payment details.
@@ -55,8 +55,8 @@ export default async function PrivacyPage() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-xl font-semibold text-slate-900 mb-3">2. How We Use Your Information</h2>
-                            <p className="text-slate-600 leading-relaxed">
+                            <h2 className="text-xl font-semibold text-foreground mb-3">2. How We Use Your Information</h2>
+                            <p className="text-muted-foreground leading-relaxed">
                                 We use the information we collect to provide, maintain, and improve our services,
                                 process transactions, send you technical notices and updates, respond to your comments
                                 and questions, and communicate with you about products, services, and events.
@@ -64,8 +64,8 @@ export default async function PrivacyPage() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-xl font-semibold text-slate-900 mb-3">3. Information Sharing</h2>
-                            <p className="text-slate-600 leading-relaxed">
+                            <h2 className="text-xl font-semibold text-foreground mb-3">3. Information Sharing</h2>
+                            <p className="text-muted-foreground leading-relaxed">
                                 We do not sell, trade, or otherwise transfer your personal information to outside parties
                                 except to provide our services, comply with the law, or protect our rights. Trusted third
                                 parties who assist us in operating our platform adhere to strict confidentiality obligations.
@@ -73,8 +73,8 @@ export default async function PrivacyPage() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-xl font-semibold text-slate-900 mb-3">4. Data Security</h2>
-                            <p className="text-slate-600 leading-relaxed">
+                            <h2 className="text-xl font-semibold text-foreground mb-3">4. Data Security</h2>
+                            <p className="text-muted-foreground leading-relaxed">
                                 We implement industry-standard security measures to protect your personal information
                                 against unauthorized access, alteration, disclosure, or destruction. This includes
                                 encryption, secure servers, and regular security assessments.
@@ -82,8 +82,8 @@ export default async function PrivacyPage() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-xl font-semibold text-slate-900 mb-3">5. Your Rights</h2>
-                            <p className="text-slate-600 leading-relaxed">
+                            <h2 className="text-xl font-semibold text-foreground mb-3">5. Your Rights</h2>
+                            <p className="text-muted-foreground leading-relaxed">
                                 You have the right to access, correct, or delete your personal information at any time.
                                 You can also opt out of marketing communications. To exercise any of these rights,
                                 please contact us at privacy@aranora.com.
@@ -91,11 +91,11 @@ export default async function PrivacyPage() {
                         </section>
 
                         <section className="mb-8">
-                            <h2 className="text-xl font-semibold text-slate-900 mb-3">6. Contact Us</h2>
-                            <p className="text-slate-600 leading-relaxed">
+                            <h2 className="text-xl font-semibold text-foreground mb-3">6. Contact Us</h2>
+                            <p className="text-muted-foreground leading-relaxed">
                                 If you have any questions about this Privacy Policy, please contact us at:
                             </p>
-                            <p className="text-slate-600 mt-2">
+                            <p className="text-muted-foreground mt-2">
                                 Email: <a href="mailto:privacy@aranora.com" className="text-brand-primary hover:underline">privacy@aranora.com</a>
                             </p>
                         </section>

@@ -18,20 +18,20 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
     return (
         <div className="space-y-6">
             <div className="text-center space-y-2">
-                <h1 className="text-3xl font-bold text-slate-900">Create your account</h1>
-                <p className="text-slate-500">
+                <h1 className="text-3xl font-bold text-foreground">Create your account</h1>
+                <p className="text-muted-foreground">
                     {promo ? 'Sign up to claim your free access!' : 'Start your 30-day free trial — no credit card required'}
                 </p>
             </div>
 
-            <Card className="shadow-xl shadow-slate-200/50 border-slate-200">
+            <Card className="shadow-xl border-border">
                 <form>
                     {promo && <input type="hidden" name="promoCode" value={promo} />}
                     <CardContent className="pt-6 space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="fullName" className="text-slate-700">Full Name</Label>
+                            <Label htmlFor="fullName" className="text-foreground">Full Name</Label>
                             <div className="relative">
-                                <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="fullName"
                                     name="fullName"
@@ -43,9 +43,9 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-slate-700">Email</Label>
+                            <Label htmlFor="email" className="text-foreground">Email</Label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="email"
                                     name="email"
@@ -57,9 +57,9 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-slate-700">Phone Number</Label>
+                            <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="phone"
                                     name="phone"
@@ -71,13 +71,13 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="country" className="text-slate-700">Country</Label>
+                            <Label htmlFor="country" className="text-foreground">Country</Label>
                             <div className="relative">
-                                <Globe className="absolute left-3 top-3 h-4 w-4 text-slate-400 pointer-events-none z-10" />
+                                <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
                                 <select
                                     id="country"
                                     name="country"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring appearance-none"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring appearance-none"
                                     required
                                 >
                                     <option value="">Select your country</option>
@@ -88,9 +88,9 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-slate-700">Password</Label>
+                            <Label htmlFor="password" className="text-foreground">Password</Label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     id="password"
                                     name="password"
@@ -100,7 +100,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
                                     required
                                 />
                             </div>
-                            <p className="text-xs text-slate-500">Must be at least 8 characters</p>
+                            <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-4 pb-6">
@@ -108,7 +108,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
                             Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
 
-                        <p className="text-xs text-center text-slate-500">
+                        <p className="text-xs text-center text-muted-foreground">
                             By signing up, you agree to our{" "}
                             <Link href="/terms" className="text-brand-primary hover:underline">Terms</Link>
                             {" "}and{" "}
@@ -119,20 +119,20 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
             </Card>
 
             {/* Benefits */}
-            <div className="bg-white/50 rounded-xl p-4 space-y-2">
+            <div className="bg-muted/50 rounded-xl p-4 space-y-2">
                 {[
                     "30-day free trial — no credit card needed",
                     "Unlimited projects & clients",
                     "Smart invoicing & contracts"
                 ].map((benefit, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
-                        <CheckCircle2 className="h-4 w-4 text-brand-secondary-dark flex-shrink-0" />
+                    <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <CheckCircle2 className="h-4 w-4 text-brand-secondary-dark dark:text-brand-secondary flex-shrink-0" />
                         {benefit}
                     </div>
                 ))}
             </div>
 
-            <p className="text-center text-sm text-slate-500">
+            <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link href="/login" className="font-semibold text-brand-primary hover:underline">
                     Sign in

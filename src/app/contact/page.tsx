@@ -56,9 +56,9 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <nav className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
+            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
@@ -76,8 +76,8 @@ export default function ContactPage() {
 
             <main className="max-w-4xl mx-auto px-4 py-16">
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-slate-900 mb-4">Contact Us</h1>
-                    <p className="text-xl text-slate-600">We&apos;d love to hear from you. Get in touch with our team.</p>
+                    <h1 className="text-4xl font-bold text-foreground mb-4">Contact Us</h1>
+                    <p className="text-xl text-muted-foreground">We&apos;d love to hear from you. Get in touch with our team.</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-12">
@@ -94,29 +94,29 @@ export default function ContactPage() {
                                         <item.icon className="h-5 w-5 text-brand-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm text-slate-500">{item.label}</p>
-                                        <p className="font-medium text-slate-900">{item.value}</p>
+                                        <p className="text-sm text-muted-foreground">{item.label}</p>
+                                        <p className="font-medium text-foreground">{item.value}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="pt-6 border-t">
-                            <h3 className="font-semibold text-slate-900 mb-2">Office Hours</h3>
-                            <p className="text-slate-600">Monday - Friday: 9am - 6pm PST</p>
-                            <p className="text-slate-600">Saturday - Sunday: Closed</p>
+                        <div className="pt-6 border-t border-border">
+                            <h3 className="font-semibold text-foreground mb-2">Office Hours</h3>
+                            <p className="text-muted-foreground">Monday - Friday: 9am - 6pm PST</p>
+                            <p className="text-muted-foreground">Saturday - Sunday: Closed</p>
                         </div>
                     </div>
 
                     {/* Contact Form */}
-                    <Card className="shadow-xl shadow-slate-200/50">
+                    <Card className="shadow-xl border-border">
                         <CardContent className="pt-6">
                             {isSuccess ? (
                                 <div className="text-center py-12 space-y-4">
-                                    <div className="h-16 w-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                                    <div className="h-16 w-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto">
                                         <CheckCircle className="h-8 w-8" />
                                     </div>
-                                    <h3 className="text-xl font-semibold">Message Sent!</h3>
+                                    <h3 className="text-xl font-semibold text-foreground">Message Sent!</h3>
                                     <p className="text-muted-foreground">
                                         Thanks for reaching out. We&apos;ll get back to you shortly.
                                     </p>
@@ -173,7 +173,7 @@ export default function ContactPage() {
                                         <textarea
                                             id="message"
                                             rows={4}
-                                            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                             placeholder="Tell us more about your inquiry..."
                                             required
                                             value={formData.message}

@@ -13,7 +13,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
 
     if (error || !invite) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+            <div className="flex items-center justify-center min-h-screen bg-background">
                 <Card className="max-w-md w-full">
                     <CardHeader className="text-center">
                         <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
@@ -33,7 +33,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="flex items-center justify-center min-h-screen bg-background p-4">
             <Card className="max-w-md w-full shadow-lg">
                 <CardHeader className="text-center">
                     <CheckCircle2 className="mx-auto h-12 w-12 text-brand-primary mb-4" />

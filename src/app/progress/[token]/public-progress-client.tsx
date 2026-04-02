@@ -49,7 +49,7 @@ const statusConfig: Record<string, { color: string; icon: typeof Clock }> = {
 const taskStatusIcons: Record<string, { icon: typeof Circle; color: string }> = {
     "Done": { icon: CheckCircle2, color: "text-emerald-500" },
     "In Progress": { icon: Clock, color: "text-blue-500" },
-    "Todo": { icon: Circle, color: "text-slate-400" },
+    "Todo": { icon: Circle, color: "text-muted-foreground" },
     "Postponed": { icon: AlertCircle, color: "text-orange-400" },
 }
 

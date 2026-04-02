@@ -54,7 +54,7 @@ export default async function ArticlePage({ params }: PageProps) {
     return (
         <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
             {/* Navigation */}
-            <nav className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
+            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link
                         href="/blog"
@@ -101,7 +101,7 @@ export default async function ArticlePage({ params }: PageProps) {
                             </p>
                         )}
 
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground border-b pb-6">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground border-b border-border pb-6">
                             <div className="flex items-center gap-1.5">
                                 <User className="h-4 w-4" />
                                 {article.author_name}
@@ -140,7 +140,7 @@ export default async function ArticlePage({ params }: PageProps) {
                     />
 
                     {/* CTA */}
-                    <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border text-center">
+                    <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-border text-center">
                         <h3 className="text-2xl font-bold mb-2">
                             Ready to streamline your freelance business?
                         </h3>
@@ -164,7 +164,7 @@ export default async function ArticlePage({ params }: PageProps) {
                                     <Link
                                         key={r.id}
                                         href={`/blog/${r.slug}`}
-                                        className="group p-5 rounded-xl border hover:border-primary/30 hover:shadow-md transition-all"
+                                        className="group p-5 rounded-xl border border-border hover:border-primary/30 hover:shadow-md transition-all"
                                     >
                                         <h4 className="font-semibold group-hover:text-primary transition-colors line-clamp-2 mb-2">
                                             {r.title}
@@ -181,7 +181,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </article>
 
             {/* Footer */}
-            <footer className="border-t py-8">
+            <footer className="border-t border-border py-8">
                 <div className="max-w-4xl mx-auto px-4 text-center text-sm text-muted-foreground">
                     <p>&copy; {new Date().getFullYear()} Aranora. All rights reserved.</p>
                 </div>

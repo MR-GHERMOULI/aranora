@@ -42,11 +42,11 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
 
     if (!contract) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 max-w-md text-center">
+            <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+                <div className="bg-card rounded-2xl shadow-xl border border-border p-8 max-w-md text-center">
                     <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-                    <h1 className="text-xl font-bold text-slate-900 mb-2">Contract Not Found</h1>
-                    <p className="text-slate-500">This signing link is invalid or has expired.</p>
+                    <h1 className="text-xl font-bold text-foreground mb-2">Contract Not Found</h1>
+                    <p className="text-muted-foreground">This signing link is invalid or has expired.</p>
                 </div>
             </div>
         )
@@ -54,32 +54,32 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
 
     if (signed) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-2xl border border-emerald-100 p-10 max-w-lg text-center relative overflow-hidden">
+            <div className="min-h-screen bg-gradient-to-br from-emerald-50/10 via-background to-emerald-50/5 flex items-center justify-center p-4">
+                <div className="bg-card rounded-2xl shadow-2xl border border-border p-10 max-w-lg text-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 right-0 h-2 bg-emerald-500"></div>
-                    <div className="h-20 w-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-emerald-50">
+                    <div className="h-20 w-20 bg-emerald-100/10 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-emerald-50/5">
                         <CheckCircle className="h-10 w-10 text-emerald-600" />
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-3">Contract Executed!</h1>
-                    <p className="text-slate-600 mb-8 max-w-sm mx-auto">
+                    <h1 className="text-3xl font-bold text-foreground mb-3">Contract Executed!</h1>
+                    <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
                         {contract.signer_name
                             ? `Thank you, ${contract.signer_name}. The agreement has been signed legally and securely.`
                             : 'This contract has been signed successfully.'
                         }
                     </p>
 
-                    <div className="flex flex-col items-center gap-4 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                    <div className="flex flex-col items-center gap-4 bg-muted/50 p-6 rounded-xl border border-border">
                         <DownloadContractButton
                             contract={contract as any}
                             profile={contract.profile}
                         />
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                             Download a PDF copy of the fully executed agreement for your records.
                         </p>
                     </div>
 
                     {contract.signed_at && (
-                        <div className="mt-8 flex items-center justify-center gap-2 text-slate-400">
+                        <div className="mt-8 flex items-center justify-center gap-2 text-muted-foreground/60">
                             <ShieldCheck className="h-4 w-4" />
                             <p className="text-[10px] uppercase font-bold tracking-widest">
                                 Timestamp: {new Date(contract.signed_at).toLocaleString()}
@@ -137,21 +137,21 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
     }
 
     return (
-        <div className="min-h-screen bg-slate-100/50 pb-32">
+        <div className="min-h-screen bg-muted/30 pb-32">
             {/* Minimal Header */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+            <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
                 <div className="max-w-5xl mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         {contract.profile?.logo_url && (
                             <img
                                 src={contract.profile.logo_url}
                                 alt="Logo"
-                                className="h-10 w-10 rounded-xl object-contain bg-slate-50 border border-slate-100"
+                                className="h-10 w-10 rounded-xl object-contain bg-muted border border-border"
                             />
                         )}
                         <div>
-                            <span className="text-sm font-bold text-slate-900 block">{providerName}</span>
-                            <span className="text-xs text-slate-500 uppercase tracking-widest font-semibold flex items-center gap-1 mt-0.5">
+                            <span className="text-sm font-bold text-foreground block">{providerName}</span>
+                            <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1 mt-0.5">
                                 <ShieldCheck className="h-3 w-3" /> Secure Document
                             </span>
                         </div>
@@ -163,32 +163,32 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
 
                 {/* Title Section */}
                 <div className="text-center mb-10 max-w-2xl mx-auto">
-                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4 leading-tight">
+                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-4 leading-tight">
                         {contract.title}
                     </h1>
-                    <p className="text-slate-500 text-lg">
+                    <p className="text-muted-foreground text-lg">
                         Please review the final agreement below. Once reviewed, provide your electronic signature at the bottom.
                     </p>
                 </div>
 
                 {/* Document Container */}
-                <div className="bg-white shadow-2xl ring-1 ring-slate-900/5 min-h-[800px] mb-12 relative overflow-hidden">
+                <div className="bg-card shadow-2xl ring-1 ring-border min-h-[800px] mb-12 relative overflow-hidden">
                     {/* Top edge design */}
                     <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-primary to-blue-600"></div>
 
                     <div className="p-8 md:p-16 lg:p-20">
                         {/* Parties */}
-                        <div className="flex flex-col md:flex-row gap-8 mb-12 pb-12 border-b-2 border-slate-100">
+                        <div className="flex flex-col md:flex-row gap-8 mb-12 pb-12 border-b-2 border-border">
                             <div className="flex-1">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Service Provider</p>
-                                <p className="text-lg font-bold text-slate-900">{providerName}</p>
+                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Service Provider</p>
+                                <p className="text-lg font-bold text-foreground">{providerName}</p>
                             </div>
                             {contract.client && (
                                 <div className="flex-1 md:text-right">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Client</p>
-                                    <p className="text-lg font-bold text-slate-900">{contract.client.name}</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Client</p>
+                                    <p className="text-lg font-bold text-foreground">{contract.client.name}</p>
                                     {contract.client.email && (
-                                        <p className="text-sm text-slate-500">{contract.client.email}</p>
+                                        <p className="text-sm text-muted-foreground">{contract.client.email}</p>
                                     )}
                                 </div>
                             )}
@@ -196,34 +196,34 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
 
                         {/* Contract Metadata */}
                         {contract.contract_data && (
-                            <div className="mb-10 p-5 bg-slate-50 rounded-xl border border-slate-100">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Key Terms</p>
+                            <div className="mb-10 p-5 bg-muted/50 rounded-xl border border-border">
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Key Terms</p>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                                     {contract.contract_data.total_amount !== undefined && (
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1"><DollarSign className="h-3 w-3" /> Amount</p>
-                                            <p className="font-bold text-slate-900">{contract.contract_data.total_amount} {contract.contract_data.currency || 'USD'}</p>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><DollarSign className="h-3 w-3" /> Amount</p>
+                                            <p className="font-bold text-foreground">{contract.contract_data.total_amount} {contract.contract_data.currency || 'USD'}</p>
                                         </div>
                                     )}
                                     {contract.contract_data.payment_type && (
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase">Payment</p>
-                                            <p className="font-semibold text-slate-700">{contract.contract_data.payment_type}</p>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase">Payment</p>
+                                            <p className="font-semibold text-muted-foreground">{contract.contract_data.payment_type}</p>
                                         </div>
                                     )}
                                     {contract.project && (
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1"><Briefcase className="h-3 w-3" /> Project</p>
-                                            <p className="font-semibold text-slate-700">{contract.project.title}</p>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><Briefcase className="h-3 w-3" /> Project</p>
+                                            <p className="font-semibold text-muted-foreground">{contract.project.title}</p>
                                         </div>
                                     )}
                                 </div>
                                 {contract.contract_data.deliverables && contract.contract_data.deliverables.length > 0 && (
-                                    <div className="mt-3 pt-3 border-t border-slate-100">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Deliverables</p>
+                                    <div className="mt-3 pt-3 border-t border-border">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Deliverables</p>
                                         <ul className="space-y-1">
                                             {contract.contract_data.deliverables.map((d: string, i: number) => (
-                                                <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
+                                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                                                     <span className="text-brand-primary mt-0.5">•</span>{d}
                                                 </li>
                                             ))}
@@ -235,21 +235,21 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
 
                         {/* Terms */}
                         <div
-                            className="prose prose-slate prose-headings:font-serif prose-p:font-serif max-w-none text-slate-800 leading-loose prose-a:text-brand-primary"
+                            className="prose prose-slate dark:prose-invert prose-headings:font-serif prose-p:font-serif max-w-none text-foreground leading-loose prose-a:text-brand-primary"
                             dangerouslySetInnerHTML={{ __html: contract.content || '<p>No terms specified.</p>' }}
                         />
                     </div>
                 </div>
 
                 {/* Signing Section */}
-                <div ref={signatureSectionRef} className="bg-white rounded-2xl shadow-xl ring-1 ring-slate-900/5 p-8 md:p-12 mb-12 border-t-4 border-brand-primary">
+                <div ref={signatureSectionRef} className="bg-card rounded-2xl shadow-xl ring-1 ring-border p-8 md:p-12 mb-12 border-t-4 border-brand-primary">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="h-12 w-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
                             <PenTool className="h-6 w-6" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-slate-900">Execute Agreement</h2>
-                            <p className="text-slate-500 text-sm">Provide your details and signature to legally bind this contract.</p>
+                            <h2 className="text-2xl font-bold text-foreground">Execute Agreement</h2>
+                            <p className="text-muted-foreground text-sm">Provide your details and signature to legally bind this contract.</p>
                         </div>
                     </div>
 
@@ -263,7 +263,7 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
                     <div className="grid md:grid-cols-2 gap-8 mb-8">
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
+                                <label className="block text-sm font-bold text-muted-foreground mb-2">
                                     Full Legal Name <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -271,39 +271,39 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
                                     value={signerName}
                                     onChange={(e) => setSignerName(e.target.value)}
                                     placeholder="e.g. Jane Doe"
-                                    className="w-full h-12 rounded-xl border-slate-200 bg-slate-50 px-4 text-sm focus:bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+                                    className="w-full h-12 rounded-xl border border-input bg-muted/50 px-4 text-sm text-foreground focus:bg-background focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all outline-none"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
-                                    Email Address <span className="text-slate-400 font-normal">(optional)</span>
+                                <label className="block text-sm font-bold text-muted-foreground mb-2">
+                                    Email Address <span className="text-muted-foreground/60 font-normal">(optional)</span>
                                 </label>
                                 <input
                                     type="email"
                                     value={signerEmail}
                                     onChange={(e) => setSignerEmail(e.target.value)}
                                     placeholder="jane.doe@example.com"
-                                    className="w-full h-12 rounded-xl border-slate-200 bg-slate-50 px-4 text-sm focus:bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
+                                    className="w-full h-12 rounded-xl border border-input bg-muted/50 px-4 text-sm text-foreground focus:bg-background focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center justify-between">
+                            <label className="block text-sm font-bold text-muted-foreground mb-2 flex items-center justify-between">
                                 <span>Signature <span className="text-red-500">*</span></span>
                             </label>
                             <SignatureCanvas onSignatureChange={setSignatureData} />
                         </div>
                     </div>
 
-                    <div className="bg-slate-50 rounded-xl p-6 border border-slate-100 flex flex-col md:flex-row items-center gap-6 justify-between">
-                        <p className="text-xs text-slate-500 leading-relaxed max-w-lg">
+                    <div className="bg-muted/50 rounded-xl p-6 border border-border flex flex-col md:flex-row items-center gap-6 justify-between">
+                        <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
                             By clicking <strong>"I Agree & Sign"</strong>, you confirm that you have read, understood, and agree to be bound by the terms of this contract. Your electronic signature is legally equivalent to a manual signature.
                         </p>
                         <button
                             onClick={handleSign}
                             disabled={loading || !signerName.trim() || !signatureData}
-                            className="w-full md:w-auto px-8 h-14 bg-brand-primary hover:bg-brand-primary/90 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 shrink-0 text-lg"
+                            className="w-full md:w-auto px-8 h-14 bg-brand-primary hover:bg-brand-primary/90 disabled:bg-muted disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 shrink-0 text-lg"
                         >
                             {loading ? (
                                 <>
@@ -323,10 +323,10 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
             </main>
 
             {/* Sticky Bottom Bar for quick action */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 md:hidden flex justify-center">
+            <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-border p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 md:hidden flex justify-center">
                 <button
                     onClick={scrollToSignature}
-                    className="w-full max-w-sm h-12 bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg"
+                    className="w-full max-w-sm h-12 bg-foreground text-background rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg"
                 >
                     <ArrowDown className="h-4 w-4" />
                     Skip to Signature

@@ -14,9 +14,9 @@ export default async function RefundPage() {
         .single();
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="min-h-screen bg-background">
             {/* Header */}
-            <nav className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
+            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
@@ -33,19 +33,19 @@ export default async function RefundPage() {
             </nav>
 
             <main className="max-w-3xl mx-auto px-4 py-16">
-                <h1 className="text-4xl font-bold text-slate-900 mb-2">
+                <h1 className="text-4xl font-bold text-foreground mb-2">
                     {page?.title || "Refund Policy"}
                 </h1>
-                <p className="text-slate-500 mb-8">Last updated: March 2026</p>
+                <p className="text-muted-foreground mb-8">Last updated: March 2026</p>
 
                 {page?.content ? (
                     <div
-                        className="prose prose-slate max-w-none"
+                        className="prose prose-slate dark:prose-invert max-w-none"
                         dangerouslySetInnerHTML={{ __html: page.content }}
                     />
                 ) : (
-                    <div className="prose prose-slate max-w-none">
-                        <p className="text-slate-600 leading-relaxed">
+                    <div className="prose prose-slate dark:prose-invert max-w-none">
+                        <p className="text-muted-foreground leading-relaxed">
                             Our refund policy details are being prepared. Please contact us at{" "}
                             <a href="mailto:support@aranora.com" className="text-brand-primary hover:underline">
                                 support@aranora.com

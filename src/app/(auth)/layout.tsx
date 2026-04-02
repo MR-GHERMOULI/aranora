@@ -36,7 +36,7 @@ export default function AuthLayout({
 
                     <div className="space-y-6">
                         <blockquote className="text-2xl font-medium leading-relaxed">
-                            "Aranora transformed how I manage my freelance business. It's like having a personal assistant that never sleeps."
+                            &ldquo;Aranora transformed how I manage my freelance business. It&apos;s like having a personal assistant that never sleeps.&rdquo;
                         </blockquote>
                         <div className="flex items-center gap-4">
                             <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center font-bold">
@@ -62,9 +62,9 @@ export default function AuthLayout({
             </div>
 
             {/* Right Side - Form */}
-            <div className="w-full lg:w-1/2 flex flex-col">
+            <div className="w-full lg:w-1/2 flex flex-col bg-background">
                 {/* Mobile header */}
-                <div className="lg:hidden p-6 border-b">
+                <div className="lg:hidden p-6 border-b border-border">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
                             <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -76,7 +76,7 @@ export default function AuthLayout({
                 </div>
 
                 {/* Form container */}
-                <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-slate-50">
+                <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-muted/30">
                     <div className="w-full max-w-md">
                         {children}
                     </div>
