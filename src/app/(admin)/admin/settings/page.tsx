@@ -73,17 +73,17 @@ export default async function AdminSettingsPage() {
                     cta_title: string
                     cta_subtitle: string
                 }) || {
-                    hero_title: "Manage Your Freelance Business Like a Pro",
-                    hero_subtitle: "All-in-one platform to manage clients, projects, invoices, contracts, and team collaboration. Focus on what you do best — we handle the rest.",
-                    hero_cta_text: "Start Free Trial",
+                    hero_title: "Your Freelance Business, Professionally Managed",
+                    hero_subtitle: "The all-in-one platform to manage clients, projects, invoices, contracts, time tracking, and team collaboration. Built by freelancers, for freelancers.",
+                    hero_cta_text: "Start Free — No Card Required",
                     features_title: "Everything You Need to Succeed",
-                    features_subtitle: "Powerful features designed specifically for freelancers and independent professionals.",
-                    pricing_title: "No Pricing Plans. Just Free.",
-                    pricing_subtitle: "Aranora is completely free for all freelancers. No hidden fees, no credit card required, no limits.",
-                    testimonials_title: "Loved by Freelancers",
-                    testimonials_subtitle: "See what our users have to say.",
-                    cta_title: "Ready to Level Up Your Freelance Game?",
-                    cta_subtitle: "Join thousands of freelancers who trust Aranora to run their business.",
+                    features_subtitle: "A complete suite of professional tools designed specifically for freelancers and independent professionals.",
+                    pricing_title: "Simple, Transparent Pricing",
+                    pricing_subtitle: "Start with your first month free. No credit card required. Upgrade when you're ready.",
+                    testimonials_title: "Trusted by Freelancers Worldwide",
+                    testimonials_subtitle: "See how Aranora is helping freelancers run their businesses with confidence.",
+                    cta_title: "Ready to Run Your Freelance Business Like a Pro?",
+                    cta_subtitle: "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
                 },
             }}
             adminCount={adminCount || 0}
