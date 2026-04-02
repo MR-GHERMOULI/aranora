@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -45,6 +45,14 @@ interface SettingsClientProps {
             testimonials_subtitle: string
             cta_title: string
             cta_subtitle: string
+        }
+        pricing_page: {
+            hero_title: string
+            hero_subtitle: string
+            monthly_price: number
+            annual_price: number
+            features: string[]
+            faqs: { question: string; answer: string }[]
         }
     }
     adminCount: number
@@ -157,6 +165,10 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                     <TabsTrigger value="homepage" className="gap-2">
                         <Home className="h-4 w-4" />
                         Homepage
+                    </TabsTrigger>
+                    <TabsTrigger value="pricing" className="gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Pricing
                     </TabsTrigger>
                     <TabsTrigger value="features" className="gap-2">
                         <Sliders className="h-4 w-4" />
@@ -554,6 +566,212 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                         >
                             <Save className="h-4 w-4" />
                             {savedKey === "homepage" ? "Saved!" : "Save Homepage Content"}
+                        </Button>
+                    </div>
+                </TabsContent>
+
+                {/* Pricing Tab */}
+                <TabsContent value="pricing">
+                    <div className="rounded-xl border bg-card p-6 space-y-6">
+                        <div>
+                            <h3 className="text-lg font-semibold">Pricing Page Content</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Edit the content displayed on your dedicated pricing page (/pricing)
+                            </p>
+                        </div>
+
+                        {/* Hero Section */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-medium text-sm text-primary">🚀 Hero Section</h4>
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <Label>Main Title</Label>
+                                    <Input
+                                        value={settings.pricing_page.hero_title}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            pricing_page: { ...settings.pricing_page, hero_title: e.target.value }
+                                        })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Subtitle</Label>
+                                    <textarea
+                                        value={settings.pricing_page.hero_subtitle}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            pricing_page: { ...settings.pricing_page, hero_subtitle: e.target.value }
+                                        })}
+                                        className="w-full min-h-[80px] p-3 rounded-lg border bg-background text-sm resize-y"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Pricing Values Section */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-medium text-sm text-primary">💰 Pricing Definitions</h4>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label>Monthly Price ($)</Label>
+                                    <Input
+                                        type="number"
+                                        value={settings.pricing_page.monthly_price}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            pricing_page: { ...settings.pricing_page, monthly_price: Number(e.target.value) }
+                                        })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Annual Price ($)</Label>
+                                    <Input
+                                        type="number"
+                                        value={settings.pricing_page.annual_price}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            pricing_page: { ...settings.pricing_page, annual_price: Number(e.target.value) }
+                                        })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Features List Section */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <div className="flex items-center justify-between">
+                                <h4 className="font-medium text-sm text-primary">✨ Features List</h4>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="gap-2"
+                                    onClick={() => {
+                                        setSettings({
+                                            ...settings,
+                                            pricing_page: {
+                                                ...settings.pricing_page,
+                                                features: [...settings.pricing_page.features, "New Feature"]
+                                            }
+                                        })
+                                    }}
+                                >
+                                    <Plus className="h-4 w-4" /> Add Feature
+                                </Button>
+                            </div>
+                            <div className="space-y-3">
+                                {settings.pricing_page.features.map((feature, idx) => (
+                                    <div key={idx} className="flex items-center gap-2">
+                                        <Input
+                                            value={feature}
+                                            onChange={(e) => {
+                                                const newFeatures = [...settings.pricing_page.features];
+                                                newFeatures[idx] = e.target.value;
+                                                setSettings({
+                                                    ...settings,
+                                                    pricing_page: { ...settings.pricing_page, features: newFeatures }
+                                                })
+                                            }}
+                                        />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-destructive hover:bg-destructive/10"
+                                            onClick={() => {
+                                                const newFeatures = settings.pricing_page.features.filter((_, i) => i !== idx);
+                                                setSettings({
+                                                    ...settings,
+                                                    pricing_page: { ...settings.pricing_page, features: newFeatures }
+                                                })
+                                            }}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* FAQs Section */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <div className="flex items-center justify-between">
+                                <h4 className="font-medium text-sm text-primary">❓ Frequently Asked Questions</h4>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="gap-2"
+                                    onClick={() => {
+                                        setSettings({
+                                            ...settings,
+                                            pricing_page: {
+                                                ...settings.pricing_page,
+                                                faqs: [...settings.pricing_page.faqs, { question: "New Question", answer: "New Answer" }]
+                                            }
+                                        })
+                                    }}
+                                >
+                                    <Plus className="h-4 w-4" /> Add FAQ
+                                </Button>
+                            </div>
+                            <div className="space-y-4">
+                                {settings.pricing_page.faqs.map((faq, idx) => (
+                                    <div key={idx} className="p-4 border rounded-lg bg-background relative group">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute top-2 right-2 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => {
+                                                const newFaqs = settings.pricing_page.faqs.filter((_, i) => i !== idx);
+                                                setSettings({
+                                                    ...settings,
+                                                    pricing_page: { ...settings.pricing_page, faqs: newFaqs }
+                                                })
+                                            }}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                        <div className="grid gap-3 pr-10">
+                                            <div className="space-y-1">
+                                                <Label className="text-xs">Question</Label>
+                                                <Input
+                                                    value={faq.question}
+                                                    onChange={(e) => {
+                                                        const newFaqs = [...settings.pricing_page.faqs];
+                                                        newFaqs[idx].question = e.target.value;
+                                                        setSettings({
+                                                            ...settings,
+                                                            pricing_page: { ...settings.pricing_page, faqs: newFaqs }
+                                                        })
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs">Answer</Label>
+                                                <textarea
+                                                    value={faq.answer}
+                                                    onChange={(e) => {
+                                                        const newFaqs = [...settings.pricing_page.faqs];
+                                                        newFaqs[idx].answer = e.target.value;
+                                                        setSettings({
+                                                            ...settings,
+                                                            pricing_page: { ...settings.pricing_page, faqs: newFaqs }
+                                                        })
+                                                    }}
+                                                    className="w-full min-h-[60px] p-2 text-sm rounded-md border bg-background resize-y"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Button
+                            onClick={() => saveSettings("pricing_page", settings.pricing_page)}
+                            disabled={isSaving}
+                            className="gap-2"
+                        >
+                            <Save className="h-4 w-4" />
+                            {savedKey === "pricing_page" ? "Saved!" : "Save Pricing Content"}
                         </Button>
                     </div>
                 </TabsContent>
