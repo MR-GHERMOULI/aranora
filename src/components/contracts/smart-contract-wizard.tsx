@@ -288,8 +288,8 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                     Smart Contract Assistant
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden border-none shadow-2xl gap-0">
-                <div className="flex flex-col h-[720px] bg-white">
+            <DialogContent className="sm:max-w-[850px] w-full p-0 overflow-hidden border-none shadow-2xl gap-0 max-h-[95dvh] flex flex-col">
+                <div className="flex flex-col min-h-0 flex-1 bg-white dark:bg-slate-950">
                     {/* ── Dark Header ── */}
                     <div className="bg-slate-900 text-white px-8 pt-8 pb-6 shrink-0 relative overflow-hidden">
                         {/* Decorative glow */}
@@ -345,7 +345,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                     </div>
 
                     {/* ── Content Area ── */}
-                    <div className="flex-1 overflow-y-auto bg-slate-50/30">
+                    <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentStep}
@@ -356,14 +356,14 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                 className="h-full px-8 py-8"
                             >
                                 {currentStep === 1 && (
-                                    <div className="space-y-8 max-w-2xl mx-auto">
+                                    <div className="space-y-8 max-w-2xl mx-auto" data-step="1">
                                         <section className="space-y-4">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="h-6 w-1 bg-brand-primary rounded-full" />
-                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Contract Basics</h3>
+                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Contract Basics</h3>
                                             </div>
                                             <div className="grid gap-3">
-                                                <Label htmlFor="smart-title" className="text-xs font-bold text-slate-600 uppercase">Contract Title</Label>
+                                                <Label htmlFor="smart-title" className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Contract Title</Label>
                                                 <div className="relative group">
                                                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-brand-primary transition-colors" />
                                                     <Input
@@ -371,7 +371,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                         placeholder="e.g. Website Design & Development Agreement"
                                                         value={title}
                                                         onChange={(e) => setTitle(e.target.value)}
-                                                        className="h-13 pl-12 bg-white border-slate-200 focus-visible:ring-brand-primary/20 focus-visible:border-brand-primary rounded-xl font-medium"
+                                                        className="h-13 pl-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-brand-primary/20 focus-visible:border-brand-primary rounded-xl font-medium"
                                                     />
                                                 </div>
                                             </div>
@@ -379,9 +379,9 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
 
                                         <section className="grid sm:grid-cols-2 gap-6">
                                             <div className="space-y-3">
-                                                <Label className="text-xs font-bold text-slate-600 uppercase">Choose Client</Label>
+                                                <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Choose Client</Label>
                                                 <Select value={clientId} onValueChange={setClientId}>
-                                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                                    <SelectTrigger className="h-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 rounded-xl">
                                                         <SelectValue placeholder="Select client..." />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -392,9 +392,9 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                 </Select>
                                             </div>
                                             <div className="space-y-3">
-                                                <Label className="text-xs font-bold text-slate-600 uppercase">Related Project</Label>
+                                                <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Related Project</Label>
                                                 <Select value={projectId} onValueChange={setProjectId} disabled={!clientId}>
-                                                    <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                                    <SelectTrigger className="h-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 rounded-xl">
                                                         <SelectValue placeholder="Select project (Optional)" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -410,7 +410,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
                                                     <div className="h-6 w-1 bg-violet-500 rounded-full" />
-                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Select Template Base</h3>
+                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Select Template Base</h3>
                                                 </div>
                                                 <Badge variant="secondary" className="bg-violet-50 text-violet-600 border-violet-100 text-[10px]">
                                                     {templates.length} AVAILABLE
@@ -421,14 +421,14 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     <div
                                                         key={t.id}
                                                         onClick={() => handleTemplateSelect(t)}
-                                                        className={`group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden ${templateId === t.id ? 'bg-brand-primary/5 border-brand-primary ring-1 ring-brand-primary/20' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-md'}`}
+                                                        className={`group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden ${templateId === t.id ? 'bg-brand-primary/5 border-brand-primary ring-1 ring-brand-primary/20' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 hover:shadow-md'}`}
                                                     >
                                                         <div className="flex items-center gap-4 relative z-10">
                                                             <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${templateId === t.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-violet-50 group-hover:text-violet-500'}`}>
                                                                 <Layers className="h-5 w-5" />
                                                             </div>
                                                             <div className="flex flex-col min-w-0 pr-4">
-                                                                <span className={`text-sm font-bold truncate ${templateId === t.id ? 'text-slate-900' : 'text-slate-600'}`}>{t.name}</span>
+                                                                <span className={`text-sm font-bold truncate ${templateId === t.id ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-300'}`}>{t.name}</span>
                                                                 <span className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">Reusable legally-vetted draft</span>
                                                             </div>
                                                             {templateId === t.id && (
@@ -632,20 +632,20 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                 </div>
                                                 <div className="grid sm:grid-cols-2 gap-6">
                                                     <div className="space-y-3">
-                                                        <Label className="text-xs font-bold text-slate-600 uppercase">Commencement Date</Label>
+                                                        <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Commencement Date</Label>
                                                         <div className="relative">
                                                             <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                                             <Input
                                                                 type="date"
                                                                 value={structuredData.start_date}
                                                                 onChange={(e) => updateStructuredData({ start_date: e.target.value })}
-                                                                className="h-12 pl-12 bg-white border-slate-200 rounded-xl font-medium"
+                                                                className="h-12 pl-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 rounded-xl font-medium"
                                                             />
                                                         </div>
                                                     </div>
                                                     <div className="space-y-3">
                                                         <div className="flex items-center justify-between">
-                                                            <Label className="text-xs font-bold text-slate-600 uppercase">Estimated End Date</Label>
+                                                            <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Estimated End Date</Label>
                                                             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
                                                                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Open ended</span>
                                                                 <Switch
@@ -662,7 +662,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                                 disabled={structuredData.is_open_ended}
                                                                 value={structuredData.end_date || ""}
                                                                 onChange={(e) => updateStructuredData({ end_date: e.target.value })}
-                                                                className="h-12 pl-12 bg-white border-slate-200 rounded-xl font-medium disabled:bg-slate-50"
+                                                                className="h-12 pl-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 rounded-xl font-medium disabled:bg-slate-50 dark:disabled:bg-slate-900"
                                                             />
                                                         </div>
                                                     </div>
@@ -670,29 +670,29 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             </section>
 
                                             {/* Legal Checks Card */}
-                                            <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 space-y-5">
+                                            <section className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-5">
                                                 <div className="flex items-center gap-2">
                                                     <ShieldCheck className="h-5 w-5 text-indigo-500" />
-                                                    <h4 className="text-sm font-bold text-slate-800">Legal Provisions</h4>
+                                                    <h4 className="text-sm font-bold text-slate-800 dark:text-white">Legal Provisions</h4>
                                                 </div>
 
                                                 <div className="space-y-4 pt-4">
                                                     <div className="space-y-2">
-                                                        <Label className="text-xs font-bold text-slate-600 uppercase">Governing Law / Jurisdiction</Label>
+                                                        <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Governing Law / Jurisdiction</Label>
                                                         <Input
                                                             placeholder="e.g. State of California, USA"
                                                             value={structuredData.governing_law}
                                                             onChange={(e) => updateStructuredData({ governing_law: e.target.value })}
-                                                            className="h-10 bg-slate-50 border-slate-200"
+                                                            className="h-10 bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white border-slate-200"
                                                         />
                                                     </div>
                                                 </div>
 
-                                                <div className="divide-y divide-slate-50 border-t border-slate-50 mt-4">
+                                                <div className="divide-y divide-slate-100 dark:divide-slate-700 border-t border-slate-100 dark:border-slate-700 mt-4">
                                                     <div className="py-4 flex items-center justify-between group">
                                                         <div>
-                                                            <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">Confidentiality (NDA)</p>
-                                                            <p className="text-xs text-slate-400 mt-0.5">Protect proprietary information & trade secrets</p>
+                                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-brand-primary transition-colors">Confidentiality (NDA)</p>
+                                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Protect proprietary information & trade secrets</p>
                                                         </div>
                                                         <Switch
                                                             checked={structuredData.nda_included}
@@ -701,8 +701,8 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     </div>
                                                     <div className="py-4 flex items-center justify-between group">
                                                         <div>
-                                                            <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">Non-Compete Clause</p>
-                                                            <p className="text-xs text-slate-400 mt-0.5">Restrict working with direct competitors</p>
+                                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-brand-primary transition-colors">Non-Compete Clause</p>
+                                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Restrict working with direct competitors</p>
                                                         </div>
                                                         <Switch
                                                             checked={structuredData.non_compete_included}
@@ -711,11 +711,11 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     </div>
                                                     <div className="py-4 flex items-center justify-between group">
                                                         <div>
-                                                            <p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors">IP Ownership Transfer</p>
-                                                            <p className="text-xs text-slate-400 mt-0.5">Who holds copyright upon total fulfillment?</p>
+                                                            <p className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-brand-primary transition-colors">IP Ownership Transfer</p>
+                                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Who holds copyright upon total fulfillment?</p>
                                                         </div>
                                                         <Select value={structuredData.ip_ownership} onValueChange={(v: "Full" | "License" | "After Payment") => updateStructuredData({ ip_ownership: v })}>
-                                                            <SelectTrigger className="w-48 h-10 bg-slate-50/50 border-slate-200">
+                                                            <SelectTrigger className="w-48 h-10 bg-slate-50/50 dark:bg-slate-700 dark:border-slate-600 dark:text-white border-slate-200">
                                                                 <SelectValue />
                                                             </SelectTrigger>
                                                             <SelectContent>
@@ -749,7 +749,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             </Button>
                                         </div>
 
-                                        <div className="space-y-3 bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm min-h-[300px]">
+                                        <div className="space-y-3 bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm min-h-[300px]">
                                             {structuredData.deliverables?.map((deliverable, index) => (
                                                 <motion.div
                                                     key={index}
@@ -785,22 +785,22 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             )}
                                         </div>
 
-                                        <section className="grid sm:grid-cols-2 gap-6 pt-2">
-                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                        <section className="grid sm:grid-cols-2 gap-6 pt-2" data-step="3-extras">
+                                            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-3">
                                                 <div className="flex items-center justify-between">
-                                                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Free Revision Rounds</Label>
+                                                    <Label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Free Revision Rounds</Label>
                                                     <Info className="h-3.5 w-3.5 text-slate-300" />
                                                 </div>
                                                 <Input
                                                     type="number"
                                                     value={structuredData.revisions_included}
                                                     onChange={(e) => updateStructuredData({ revisions_included: Number(e.target.value) })}
-                                                    className="h-11 rounded-xl border-slate-200 font-bold text-lg text-slate-800"
+                                                    className="h-11 rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white font-bold text-lg text-slate-800"
                                                 />
                                             </div>
-                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-3">
                                                 <div className="flex items-center justify-between">
-                                                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Termination Notice (Days)</Label>
+                                                    <Label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Termination Notice (Days)</Label>
                                                     <ShieldCheck className="h-3.5 w-3.5 text-slate-300" />
                                                 </div>
                                                 <div className="flex gap-2">
@@ -808,7 +808,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                         type="number"
                                                         value={structuredData.termination_notice_days}
                                                         onChange={(e) => updateStructuredData({ termination_notice_days: Number(e.target.value) })}
-                                                        className="h-11 rounded-xl border-slate-200 font-bold text-lg text-slate-800"
+                                                        className="h-11 rounded-xl border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white font-bold text-lg text-slate-800"
                                                     />
                                                     <div className="h-11 px-4 flex items-center bg-slate-50 rounded-xl text-[10px] font-bold text-slate-400 tracking-widest uppercase">Days</div>
                                                 </div>
@@ -822,35 +822,35 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-emerald-50/80 backdrop-blur-sm border border-emerald-100 p-5 rounded-2xl flex items-center gap-4 shrink-0 shadow-sm shadow-emerald-500/5"
+                                            className="bg-emerald-50/80 dark:bg-emerald-950/20 backdrop-blur-sm border border-emerald-100 dark:border-emerald-900/30 p-5 rounded-2xl flex items-center gap-4 shrink-0 shadow-sm shadow-emerald-500/5 transition-colors"
                                         >
                                             <div className="h-12 w-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
                                                 <CheckCircle2 className="h-7 w-7" />
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="text-sm font-bold text-emerald-900">Contract Ready for Review</h4>
-                                                <p className="text-xs text-emerald-700/80 font-medium">Smart data has been successfully injected into your {templates.find(t => t.id === templateId)?.name}.</p>
+                                                <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-400">Contract Ready for Review</h4>
+                                                <p className="text-xs text-emerald-700/80 dark:text-emerald-500/80 font-medium">Smart data has been successfully injected into your {templates.find(t => t.id === templateId)?.name}.</p>
                                             </div>
-                                            <Badge className="bg-emerald-100 text-emerald-700 border-none px-3 py-1 font-bold text-[10px]">VERIFIED</Badge>
+                                            <Badge className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border-none px-3 py-1 font-bold text-[10px]">VERIFIED</Badge>
                                         </motion.div>
 
                                         <div className="flex-1 flex min-h-0 bg-slate-900 rounded-[32px] overflow-hidden border border-slate-800 shadow-2xl relative">
                                             {/* Scrollable Document */}
                                             <div className="flex-1 overflow-y-auto p-4 md:p-12 scrollbar-none flex justify-center bg-slate-950/20">
-                                                <div className="w-full max-w-[650px] bg-white shadow-2xl min-h-[850px] p-10 md:p-20 relative rounded-sm">
+                                                <div className="w-full max-w-[650px] bg-white dark:bg-slate-900 shadow-2xl min-h-[500px] p-10 md:p-20 relative rounded-sm transition-colors">
                                                     {/* Top Binder Edge */}
                                                     <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-primary/40 to-indigo-500/40" />
 
                                                     {/* Decorative Header */}
-                                                    <div className="border-b border-slate-100 pb-8 mb-10 flex flex-col gap-2">
-                                                        <div className="h-8 w-32 bg-slate-50 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 tracking-[0.3em] uppercase">Document</div>
-                                                        <h5 className="text-2xl font-serif text-slate-900 leading-tight">{title}</h5>
+                                                    <div className="border-b border-slate-100 dark:border-slate-800 pb-8 mb-10 flex flex-col gap-2">
+                                                        <div className="h-8 w-32 bg-slate-50 dark:bg-slate-800 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 dark:text-slate-600 tracking-[0.3em] uppercase">Document</div>
+                                                        <h5 className="text-2xl font-serif text-slate-900 dark:text-slate-100 leading-tight">{title}</h5>
                                                     </div>
 
                                                     <Textarea
                                                         value={content}
                                                         onChange={(e) => setContent(e.target.value)}
-                                                        className="w-full h-full min-h-[600px] text-[15px] font-serif leading-loose border-none focus-visible:ring-0 resize-none p-0 bg-transparent text-slate-950 placeholder:italic"
+                                                        className="w-full h-full min-h-[400px] text-[15px] font-serif leading-loose border-none focus-visible:ring-0 resize-none p-0 bg-transparent text-slate-950 dark:text-slate-100 placeholder:italic transition-colors"
                                                         placeholder="Loading content..."
                                                     />
                                                 </div>
@@ -930,7 +930,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                     </div>
 
                     {/* ── Footer ── */}
-                    <div className="p-6 bg-slate-50/80 backdrop-blur-xl border-t border-slate-100 shrink-0 flex items-center justify-between">
+                    <div className="p-6 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 shrink-0 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             {currentStep > 1 && (
                                 <Button

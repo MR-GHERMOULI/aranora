@@ -185,8 +185,8 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                     Create Intake Form
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden border-none shadow-2xl gap-0">
-                <div className="flex flex-col h-[750px] bg-white dark:bg-slate-950">
+            <DialogContent className="sm:max-w-[900px] w-full p-0 overflow-hidden border-none shadow-2xl gap-0 max-h-[95dvh] flex flex-col">
+                <div className="flex flex-col min-h-0 flex-1 bg-white dark:bg-slate-950">
                     {/* Dark Header */}
                     <div className="bg-slate-900 text-white px-8 pt-7 pb-5 shrink-0 relative overflow-hidden">
                         <div className="absolute -top-24 -right-24 w-64 h-64 bg-rose-500/15 rounded-full blur-[80px]" />
@@ -236,7 +236,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-950">
+                    <div className="flex-1 overflow-y-auto bg-slate-50/30 dark:bg-slate-900/30">
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentStep}
@@ -252,27 +252,27 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                         <section className="space-y-4">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="h-6 w-1 bg-rose-500 rounded-full" />
-                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Form Details</h3>
+                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Form Details</h3>
                                             </div>
                                             <div className="space-y-3">
-                                                <Label className="text-xs font-bold text-slate-600 uppercase">Form Title *</Label>
+                                                <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Form Title *</Label>
                                                 <div className="relative group">
                                                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
                                                     <Input
                                                         placeholder="e.g. Web Design Project Request"
                                                         value={title}
                                                         onChange={(e) => setTitle(e.target.value)}
-                                                        className="h-13 pl-12 bg-white border-slate-200 focus-visible:ring-rose-500/20 focus-visible:border-rose-500 rounded-xl font-medium"
+                                                        className="h-13 pl-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-rose-500/20 focus-visible:border-rose-500 rounded-xl font-medium"
                                                     />
                                                 </div>
                                             </div>
                                             <div className="space-y-3">
-                                                <Label className="text-xs font-bold text-slate-600 uppercase">Description (shown to clients)</Label>
+                                                <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Description (shown to clients)</Label>
                                                 <Textarea
                                                     placeholder="Describe what information you need from the client..."
                                                     value={description}
                                                     onChange={(e) => setDescription(e.target.value)}
-                                                    className="min-h-[80px] bg-white border-slate-200 focus-visible:ring-rose-500/20 focus-visible:border-rose-500 rounded-xl"
+                                                    className="min-h-[80px] bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-rose-500/20 focus-visible:border-rose-500 rounded-xl"
                                                 />
                                             </div>
                                         </section>
@@ -281,7 +281,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
                                                     <div className="h-6 w-1 bg-indigo-500 rounded-full" />
-                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Start from Template</h3>
+                                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Start from Template</h3>
                                                 </div>
                                                 <Badge variant="secondary" className="bg-indigo-50 text-indigo-600 border-indigo-100 text-[10px]">
                                                     {templates.length} AVAILABLE
@@ -292,12 +292,12 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                     <div
                                                         key={i}
                                                         onClick={() => handleTemplateSelect(t)}
-                                                        className="group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden bg-white border-slate-200 hover:border-rose-200 hover:shadow-md hover:bg-rose-50/30"
+                                                        className="group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-rose-200 hover:shadow-md hover:bg-rose-50/30 dark:hover:bg-rose-900/20"
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div className="text-xl shrink-0">{t.name.split(' ')[0]}</div>
                                                             <div className="flex flex-col min-w-0">
-                                                                <span className="text-sm font-bold text-slate-700 truncate">{t.name.replace(/^[^\w]*\s*/, '')}</span>
+                                                                <span className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{t.name.replace(/^[^\w]*\s*/, '')}</span>
                                                                 <span className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{t.fields.length} fields</span>
                                                             </div>
                                                             <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-rose-500 transition-colors ml-auto shrink-0" />
@@ -321,7 +321,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <div className="h-6 w-1 bg-rose-500 rounded-full" />
-                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Form Fields</h3>
+                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Form Fields</h3>
                                                 <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px]">{fields.length}</Badge>
                                             </div>
                                             <Button
@@ -341,7 +341,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                     exit={{ opacity: 0, height: 0 }}
                                                     className="overflow-hidden"
                                                 >
-                                                    <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                                                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm">
                                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Choose Field Type</p>
                                                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                                                             {FIELD_TYPES.map(ft => (
@@ -371,7 +371,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                         layout
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0 }}
-                                                        className={`bg-white border rounded-xl transition-all ${isEditing ? 'border-rose-300 shadow-md ring-1 ring-rose-100' : 'border-slate-200 hover:border-slate-300'}`}
+                                                        className={`bg-white dark:bg-slate-800 border rounded-xl transition-all ${isEditing ? 'border-rose-300 shadow-md ring-1 ring-rose-100' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`}
                                                     >
                                                         {/* Field Header */}
                                                         <div
@@ -387,7 +387,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                                 <FieldIcon className="h-4 w-4" />
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <p className={`text-sm font-semibold truncate ${field.label ? 'text-slate-800' : 'text-slate-400 italic'}`}>
+                                                                <p className={`text-sm font-semibold truncate ${field.label ? 'text-slate-800 dark:text-white' : 'text-slate-400 italic'}`}>
                                                                     {field.label || 'Untitled field'}
                                                                 </p>
                                                                 <p className="text-[10px] text-slate-400">{FIELD_TYPES.find(ft => ft.type === field.type)?.label} {field.required ? '• Required' : ''}</p>
@@ -412,38 +412,38 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                                     <div className="space-y-4">
                                                                         <div className="grid gap-4 sm:grid-cols-2">
                                                                             <div className="space-y-2">
-                                                                                <Label className="text-[10px] font-bold text-slate-500 uppercase">Label *</Label>
+                                                                                <Label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Label *</Label>
                                                                                 <Input
                                                                                     placeholder="Field label"
                                                                                     value={field.label}
                                                                                     onChange={(e) => updateField(index, { label: e.target.value })}
-                                                                                    className="h-10 bg-slate-50 border-slate-200 rounded-lg"
+                                                                                    className="h-10 bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white border-slate-200 rounded-lg"
                                                                                 />
                                                                             </div>
                                                                             <div className="space-y-2">
-                                                                                <Label className="text-[10px] font-bold text-slate-500 uppercase">Placeholder</Label>
+                                                                                <Label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Placeholder</Label>
                                                                                 <Input
                                                                                     placeholder="Placeholder text"
                                                                                     value={field.placeholder || ''}
                                                                                     onChange={(e) => updateField(index, { placeholder: e.target.value })}
-                                                                                    className="h-10 bg-slate-50 border-slate-200 rounded-lg"
+                                                                                    className="h-10 bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white border-slate-200 rounded-lg"
                                                                                 />
                                                                             </div>
                                                                         </div>
 
                                                                         <div className="grid gap-4 sm:grid-cols-2">
                                                                             <div className="space-y-2">
-                                                                                <Label className="text-[10px] font-bold text-slate-500 uppercase">Help Text</Label>
+                                                                                <Label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Help Text</Label>
                                                                                 <Input
                                                                                     placeholder="Additional guidance for the client"
                                                                                     value={field.helpText || ''}
                                                                                     onChange={(e) => updateField(index, { helpText: e.target.value })}
-                                                                                    className="h-10 bg-slate-50 border-slate-200 rounded-lg"
+                                                                                    className="h-10 bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white border-slate-200 rounded-lg"
                                                                                 />
                                                                             </div>
                                                                             {field.type !== 'section_header' && (
-                                                                                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                                                                    <span className="text-xs font-bold text-slate-600">Required field</span>
+                                                                                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                                                                                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Required field</span>
                                                                                     <Switch
                                                                                         checked={field.required}
                                                                                         onCheckedChange={(v) => updateField(index, { required: v })}
@@ -455,13 +455,13 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                                         {/* Options for select/multiselect */}
                                                                         {(field.type === 'select' || field.type === 'multiselect') && field.options && (
                                                                             <div className="space-y-2">
-                                                                                <Label className="text-[10px] font-bold text-slate-500 uppercase">Options</Label>
+                                                                                <Label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Options</Label>
                                                                                 {field.options.map((opt, oi) => (
                                                                                     <div key={oi} className="flex gap-2">
                                                                                         <Input
                                                                                             value={opt}
                                                                                             onChange={(e) => updateOption(index, oi, e.target.value)}
-                                                                                            className="h-9 bg-slate-50 border-slate-200 rounded-lg flex-1"
+                                                                                            className="h-9 bg-slate-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white border-slate-200 rounded-lg flex-1"
                                                                                             placeholder={`Option ${oi + 1}`}
                                                                                         />
                                                                                         <Button
@@ -509,37 +509,37 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                         <section className="space-y-5">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="h-6 w-1 bg-rose-500 rounded-full" />
-                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Messages</h3>
+                                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Messages</h3>
                                             </div>
                                             <div className="space-y-3">
-                                                <Label className="text-xs font-bold text-slate-600 uppercase">Welcome Message</Label>
+                                                <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Welcome Message</Label>
                                                 <Textarea
                                                     placeholder="e.g. Thanks for considering working with us! Please fill out this form..."
                                                     value={settings.welcomeMessage}
                                                     onChange={(e) => setSettings(prev => ({ ...prev, welcomeMessage: e.target.value }))}
-                                                    className="min-h-[70px] bg-white border-slate-200 rounded-xl"
+                                                    className="min-h-[70px] bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 rounded-xl"
                                                 />
                                             </div>
                                             <div className="space-y-3">
-                                                <Label className="text-xs font-bold text-slate-600 uppercase">Thank You Message (after submission)</Label>
+                                                <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Thank You Message (after submission)</Label>
                                                 <Textarea
                                                     placeholder="e.g. Thank you! We'll review and get back to you..."
                                                     value={settings.thankYouMessage}
                                                     onChange={(e) => setSettings(prev => ({ ...prev, thankYouMessage: e.target.value }))}
-                                                    className="min-h-[70px] bg-white border-slate-200 rounded-xl"
+                                                    className="min-h-[70px] bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 rounded-xl"
                                                 />
                                             </div>
                                         </section>
 
-                                        <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 space-y-5">
+                                        <section className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-5">
                                             <div className="flex items-center gap-2">
                                                 <Settings2 className="h-5 w-5 text-indigo-500" />
-                                                <h4 className="text-sm font-bold text-slate-800">Client Information</h4>
+                                                <h4 className="text-sm font-bold text-slate-800 dark:text-white">Client Information</h4>
                                             </div>
-                                            <div className="divide-y divide-slate-50">
+                                            <div className="divide-y divide-slate-100 dark:divide-slate-700">
                                                 <div className="py-4 flex items-center justify-between">
                                                     <div>
-                                                        <p className="text-sm font-bold text-slate-700">Collect Phone Number</p>
+                                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Collect Phone Number</p>
                                                         <p className="text-xs text-slate-400 mt-0.5">Ask for client&apos;s phone number</p>
                                                     </div>
                                                     <Switch
@@ -549,7 +549,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                 </div>
                                                 <div className="py-4 flex items-center justify-between">
                                                     <div>
-                                                        <p className="text-sm font-bold text-slate-700">Collect Company Name</p>
+                                                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Collect Company Name</p>
                                                         <p className="text-xs text-slate-400 mt-0.5">Ask for organization or company</p>
                                                     </div>
                                                     <Switch
@@ -568,18 +568,18 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                         <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-emerald-50/80 border border-emerald-100 p-5 rounded-2xl flex items-center gap-4 shadow-sm"
+                                            className="bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 p-5 rounded-2xl flex items-center gap-4 shadow-sm transition-colors"
                                         >
                                             <div className="h-12 w-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
                                                 <Check className="h-7 w-7" />
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="text-sm font-bold text-emerald-900">Form Ready to Launch!</h4>
-                                                <p className="text-xs text-emerald-700/80 font-medium">Review the summary below, then click "Create & Launch" to generate your shareable link.</p>
+                                                <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-400">Form Ready to Launch!</h4>
+                                                <p className="text-xs text-emerald-700/80 dark:text-emerald-500/80 font-medium">Review the summary below, then click "Create & Launch" to generate your shareable link.</p>
                                             </div>
                                         </motion.div>
 
-                                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                                        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
                                             <div className="bg-slate-900 text-white px-6 py-4">
                                                 <h4 className="font-bold text-lg">{title}</h4>
                                                 {description && <p className="text-slate-400 text-sm mt-1">{description}</p>}
@@ -587,31 +587,31 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                             <div className="p-6 space-y-4">
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                                     <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Total Fields</p>
-                                                        <p className="font-bold text-slate-900">{fields.length}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Total Fields</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white">{fields.length}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Required Fields</p>
-                                                        <p className="font-bold text-slate-900">{fields.filter(f => f.required).length}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Required Fields</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white">{fields.filter(f => f.required).length}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Phone Collection</p>
-                                                        <p className="font-bold text-slate-900">{settings.collectPhone ? 'Yes' : 'No'}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Phone Collection</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white">{settings.collectPhone ? 'Yes' : 'No'}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Company Collection</p>
-                                                        <p className="font-bold text-slate-900">{settings.collectCompany ? 'Yes' : 'No'}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Company Collection</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white">{settings.collectCompany ? 'Yes' : 'No'}</p>
                                                     </div>
                                                 </div>
-                                                <div className="pt-4 border-t border-slate-100">
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Fields</p>
+                                                <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
+                                                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-2">Fields</p>
                                                     <div className="space-y-1.5">
                                                         {fields.map((field, i) => {
                                                             const Icon = getFieldIcon(field.type)
                                                             return (
                                                                 <div key={field.id} className="flex items-center gap-2 text-sm">
                                                                     <Icon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                                                                    <span className="text-slate-700 font-medium truncate">{field.label || 'Untitled'}</span>
+                                                                    <span className="text-slate-700 dark:text-slate-300 font-medium truncate">{field.label || 'Untitled'}</span>
                                                                     {field.required && <span className="text-[9px] font-bold text-rose-500 shrink-0">REQ</span>}
                                                                 </div>
                                                             )
@@ -627,7 +627,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between px-8 py-4 border-t border-slate-100 bg-white dark:bg-slate-950 shrink-0">
+                    <div className="flex items-center justify-between px-8 py-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 shrink-0">
                         <Button
                             variant="ghost"
                             onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : setOpen(false)}
