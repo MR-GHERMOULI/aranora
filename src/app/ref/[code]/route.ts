@@ -21,7 +21,7 @@ export async function GET(
     const { code } = await params;
 
     if (!code || code.length < 3) {
-        return NextResponse.redirect(new URL('/pricing', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     // Validate that the affiliate code exists and belongs to an active affiliate
@@ -35,11 +35,11 @@ export async function GET(
 
     if (!affiliate) {
         // Invalid or inactive affiliate code — redirect without setting cookie
-        return NextResponse.redirect(new URL('/pricing', request.url));
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     // Set a referral cookie that expires in 30 days
-    const response = NextResponse.redirect(new URL('/pricing', request.url));
+    const response = NextResponse.redirect(new URL('/', request.url));
     response.cookies.set('aranora_ref', code, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

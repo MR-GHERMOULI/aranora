@@ -18,15 +18,21 @@ async function ensureProfileExists(
     serviceClient: ReturnType<typeof createServiceClient>,
     userId: string,
     email: string,
-    fullName: string
+    fullName: string,
+    isAffiliateSignup: boolean = false
 ) {
     const { data: existingProfile } = await serviceClient
         .from('profiles')
-        .select('id')
+        .select('id, subscription_status')
         .eq('id', userId)
         .single();
 
-    if (existingProfile) return true;
+    if (existingProfile) {
+        if (isAffiliateSignup && (!existingProfile.subscription_status || existingProfile.subscription_status === 'trialing')) {
+            await serviceClient.from('profiles').update({ subscription_status: 'affiliate', trial_ends_at: null }).eq('id', userId);
+        }
+        return true;
+    }
 
     // Profile doesn't exist — create it manually
     const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '') || 'user';
@@ -41,8 +47,8 @@ async function ensureProfileExists(
             full_name: fullName,
             email,
             company_email: email,
-            trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            subscription_status: 'trialing',
+            trial_ends_at: isAffiliateSignup ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            subscription_status: isAffiliateSignup ? 'affiliate' : 'trialing',
         });
 
     if (insertError) {
@@ -140,8 +146,8 @@ export async function POST(request: NextRequest) {
                     });
                 }
 
-                // Step 2: Ensure the profile exists
-                await ensureProfileExists(serviceClient, existingUser.id, email, fullName);
+                // Step 2: Ensure the profile exists and is marked as affiliate
+                await ensureProfileExists(serviceClient, existingUser.id, email, fullName, true);
 
                 // Step 3: Sign in to establish session
                 const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -171,7 +177,7 @@ export async function POST(request: NextRequest) {
             // Small delay to give the trigger time to fire
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            await ensureProfileExists(serviceClient, data.user.id, email, fullName);
+            await ensureProfileExists(serviceClient, data.user.id, email, fullName, true);
 
             // Track affiliate referral if a referral cookie is present
             const refCode = request.cookies.get('aranora_ref')?.value;

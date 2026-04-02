@@ -21,7 +21,25 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-    // 1. Update session for Supabase
+    // 1. Intercept "via" affiliate code gracefully on ANY route
+    const viaCode = request.nextUrl.searchParams.get('via');
+    if (viaCode && viaCode.length >= 3) {
+        const cleanUrl = new URL(request.url);
+        cleanUrl.searchParams.delete('via');
+        
+        // Redirect smoothly to the same URL but without the spammy ?via= param
+        const redirectResponse = NextResponse.redirect(cleanUrl);
+        redirectResponse.cookies.set('aranora_ref', viaCode, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+            path: '/',
+        });
+        return redirectResponse;
+    }
+
+    // 2. Update session for Supabase
     let response = await updateSession(request);
 
     const pathname = request.nextUrl.pathname;
@@ -84,6 +102,9 @@ export async function middleware(request: NextRequest) {
                         }
 
                         if (!hasAccess) {
+                            if (status === 'affiliate') {
+                                return NextResponse.redirect(new URL('/affiliates', request.url));
+                            }
                             const pricingUrl = new URL('/pricing', request.url);
                             pricingUrl.searchParams.set('expired', 'true');
                             return NextResponse.redirect(pricingUrl);

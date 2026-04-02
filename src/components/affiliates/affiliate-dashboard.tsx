@@ -148,7 +148,7 @@ export function AffiliateDashboard() {
     const TierIcon = tier.icon;
 
     const referralLink = affiliate
-        ? `${typeof window !== 'undefined' ? window.location.origin : ''}/ref/${affiliate.affiliate_code}`
+        ? `${typeof window !== 'undefined' ? window.location.origin : ''}/?via=${affiliate.affiliate_code}`
         : '';
 
     const copyLink = () => {
