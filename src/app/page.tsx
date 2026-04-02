@@ -179,6 +179,27 @@ export default async function LandingPage() {
   );
   const countryCount = Math.max(uniqueCountries.size, 1);
 
+  // Fetch real contracts signed
+  const { count: contractsCount } = await supabase
+    .from("contracts")
+    .select("*", { count: "exact", head: true })
+    .in("status", ["signed", "completed"]);
+
+  // Fetch total invoices completed
+  const { data: invoicesData } = await supabase
+    .from("invoices")
+    .select("total")
+    .eq("status", "paid");
+    
+  const totalInvoicesAmount = invoicesData?.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0) || 0;
+  
+  // Format currency for display
+  const formatCurrency = (amount: number) => {
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1).replace(/\.0$/, "")}M+`;
+    if (amount >= 1000) return `$${(amount / 1000).toFixed(1).replace(/\.0$/, "")}K+`;
+    return `$${Math.round(amount)}`;
+  };
+
   // Fetch testimonials from DB
   const { data: dbTestimonials } = await supabase
     .from("testimonials")
@@ -380,7 +401,7 @@ export default async function LandingPage() {
       <section className="py-12 border-y border-border bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Real metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-8 mb-10">
             {[
               {
                 value: `${userCount || 0}+`,
@@ -393,9 +414,19 @@ export default async function LandingPage() {
                 icon: Globe,
               },
               {
-                value: "16+",
+                value: `${features.length}+`,
                 label: "Professional Tools",
                 icon: Zap,
+              },
+              {
+                value: `${contractsCount || 0}+`,
+                label: "Contracts Signed",
+                icon: FileText,
+              },
+              {
+                value: `${formatCurrency(totalInvoicesAmount)}`,
+                label: "Processed Invoices",
+                icon: DollarSign,
               },
               {
                 value: "30%",
