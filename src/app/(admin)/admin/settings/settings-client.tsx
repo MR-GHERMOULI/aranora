@@ -37,14 +37,27 @@ interface SettingsClientProps {
             hero_title: string
             hero_subtitle: string
             hero_cta_text: string
+            hero_badge_text: string
+            hero_microcopy: string
+            nav_cta_text: string
             features_title: string
             features_subtitle: string
+            how_it_works_title: string
+            how_it_works_subtitle: string
+            how_it_works_steps: { title: string; desc: string }[]
             pricing_title: string
             pricing_subtitle: string
             testimonials_title: string
             testimonials_subtitle: string
+            affiliate_title: string
+            affiliate_subtitle: string
+            affiliate_commission_rate: string
+            affiliate_monthly_earning: string
+            affiliate_annual_earning: string
+            affiliate_perks: { label: string; sub: string }[]
             cta_title: string
             cta_subtitle: string
+            stats_min_threshold: number
         }
         pricing_page: {
             hero_title: string
@@ -398,7 +411,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                         <div>
                             <h3 className="text-lg font-semibold">Homepage Content</h3>
                             <p className="text-sm text-muted-foreground">
-                                Edit the text content displayed on your landing page
+                                Edit the text content displayed on your landing page. All changes are reflected in real-time.
                             </p>
                         </div>
 
@@ -407,6 +420,18 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             <h4 className="font-medium text-sm text-primary">🚀 Hero Section</h4>
                             <div className="grid gap-4">
                                 <div className="space-y-2">
+                                    <Label>Badge Text</Label>
+                                    <Input
+                                        value={settings.homepage.hero_badge_text}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, hero_badge_text: e.target.value }
+                                        })}
+                                        placeholder="Built for Freelancers, by Freelancers"
+                                    />
+                                    <p className="text-xs text-muted-foreground">The small pill badge shown above the main title</p>
+                                </div>
+                                <div className="space-y-2">
                                     <Label>Main Title</Label>
                                     <Input
                                         value={settings.homepage.hero_title}
@@ -414,7 +439,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                             ...settings,
                                             homepage: { ...settings.homepage, hero_title: e.target.value }
                                         })}
-                                        placeholder="Manage Your Freelance Business Like a Pro"
+                                        placeholder="Your Freelance Business, Professionally Managed"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -429,17 +454,63 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                         className="w-full min-h-[80px] p-3 rounded-lg border bg-background text-sm resize-y"
                                     />
                                 </div>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label>CTA Button Text</Label>
+                                        <Input
+                                            value={settings.homepage.hero_cta_text}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                homepage: { ...settings.homepage, hero_cta_text: e.target.value }
+                                            })}
+                                            placeholder="Start Free — No Card Required"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Navigation CTA Text</Label>
+                                        <Input
+                                            value={settings.homepage.nav_cta_text}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                homepage: { ...settings.homepage, nav_cta_text: e.target.value }
+                                            })}
+                                            placeholder="Get Started Free"
+                                        />
+                                        <p className="text-xs text-muted-foreground">Button text in the top navigation bar</p>
+                                    </div>
+                                </div>
                                 <div className="space-y-2">
-                                    <Label>CTA Button Text</Label>
+                                    <Label>Microcopy</Label>
                                     <Input
-                                        value={settings.homepage.hero_cta_text}
+                                        value={settings.homepage.hero_microcopy}
                                         onChange={(e) => setSettings({
                                             ...settings,
-                                            homepage: { ...settings.homepage, hero_cta_text: e.target.value }
+                                            homepage: { ...settings.homepage, hero_microcopy: e.target.value }
                                         })}
-                                        placeholder="Start Free Trial"
+                                        placeholder="First month free • No credit card required • Cancel anytime"
                                     />
+                                    <p className="text-xs text-muted-foreground">Small text shown below the CTA buttons</p>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Social Proof Settings */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-medium text-sm text-primary">📊 Social Proof</h4>
+                            <div className="space-y-2">
+                                <Label>Minimum User Threshold</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={settings.homepage.stats_min_threshold}
+                                    onChange={(e) => setSettings({
+                                        ...settings,
+                                        homepage: { ...settings.homepage, stats_min_threshold: Number(e.target.value) }
+                                    })}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    When total registered users is below this number, the stats bar will show generic trust badges instead of actual numbers. Set to 0 to always show stats.
+                                </p>
                             </div>
                         </div>
 
@@ -472,6 +543,73 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             </div>
                         </div>
 
+                        {/* How It Works */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-medium text-sm text-primary">🚶 How It Works</h4>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label>Section Title</Label>
+                                    <Input
+                                        value={settings.homepage.how_it_works_title}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, how_it_works_title: e.target.value }
+                                        })}
+                                        placeholder="Get Started in 3 Simple Steps"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Section Subtitle</Label>
+                                    <Input
+                                        value={settings.homepage.how_it_works_subtitle}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, how_it_works_subtitle: e.target.value }
+                                        })}
+                                        placeholder="Go from sign-up to managing your business in minutes."
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-3 mt-2">
+                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Steps</Label>
+                                {settings.homepage.how_it_works_steps.map((step, idx) => (
+                                    <div key={idx} className="p-3 border rounded-lg bg-background">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Step {idx + 1}</span>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Input
+                                                value={step.title}
+                                                onChange={(e) => {
+                                                    const newSteps = [...settings.homepage.how_it_works_steps]
+                                                    newSteps[idx] = { ...newSteps[idx], title: e.target.value }
+                                                    setSettings({
+                                                        ...settings,
+                                                        homepage: { ...settings.homepage, how_it_works_steps: newSteps }
+                                                    })
+                                                }}
+                                                placeholder="Step Title"
+                                                className="font-medium"
+                                            />
+                                            <textarea
+                                                value={step.desc}
+                                                onChange={(e) => {
+                                                    const newSteps = [...settings.homepage.how_it_works_steps]
+                                                    newSteps[idx] = { ...newSteps[idx], desc: e.target.value }
+                                                    setSettings({
+                                                        ...settings,
+                                                        homepage: { ...settings.homepage, how_it_works_steps: newSteps }
+                                                    })
+                                                }}
+                                                placeholder="Step Description"
+                                                className="w-full min-h-[60px] p-2 text-sm rounded-md border bg-background resize-y"
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Pricing Section */}
                         <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
                             <h4 className="font-medium text-sm text-primary">💰 Pricing Section</h4>
@@ -484,7 +622,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                             ...settings,
                                             homepage: { ...settings.homepage, pricing_title: e.target.value }
                                         })}
-                                        placeholder="No Pricing Plans. Just Free."
+                                        placeholder="Simple, Transparent Pricing"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -495,7 +633,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                             ...settings,
                                             homepage: { ...settings.homepage, pricing_subtitle: e.target.value }
                                         })}
-                                        placeholder="Aranora is completely free for all freelancers"
+                                        placeholder="Start with your first month free."
                                     />
                                 </div>
                             </div>
@@ -527,6 +665,101 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                         placeholder="See what our users have to say"
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Affiliate Section */}
+                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
+                            <h4 className="font-medium text-sm text-primary">💸 Affiliate Section</h4>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label>Section Title</Label>
+                                    <Input
+                                        value={settings.homepage.affiliate_title}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, affiliate_title: e.target.value }
+                                        })}
+                                        placeholder="Earn by Spreading the Word"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Section Subtitle</Label>
+                                    <Input
+                                        value={settings.homepage.affiliate_subtitle}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, affiliate_subtitle: e.target.value }
+                                        })}
+                                        placeholder="Join our affiliate program and earn"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="space-y-2">
+                                    <Label>Commission Rate</Label>
+                                    <Input
+                                        value={settings.homepage.affiliate_commission_rate}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, affiliate_commission_rate: e.target.value }
+                                        })}
+                                        placeholder="30%"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Monthly Earning</Label>
+                                    <Input
+                                        value={settings.homepage.affiliate_monthly_earning}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, affiliate_monthly_earning: e.target.value }
+                                        })}
+                                        placeholder="$5.70"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Annual Earning</Label>
+                                    <Input
+                                        value={settings.homepage.affiliate_annual_earning}
+                                        onChange={(e) => setSettings({
+                                            ...settings,
+                                            homepage: { ...settings.homepage, affiliate_annual_earning: e.target.value }
+                                        })}
+                                        placeholder="$57.00"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-3 mt-2">
+                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Perks</Label>
+                                {settings.homepage.affiliate_perks.map((perk, idx) => (
+                                    <div key={idx} className="grid grid-cols-2 gap-2">
+                                        <Input
+                                            value={perk.label}
+                                            onChange={(e) => {
+                                                const newPerks = [...settings.homepage.affiliate_perks]
+                                                newPerks[idx] = { ...newPerks[idx], label: e.target.value }
+                                                setSettings({
+                                                    ...settings,
+                                                    homepage: { ...settings.homepage, affiliate_perks: newPerks }
+                                                })
+                                            }}
+                                            placeholder="Perk Label"
+                                        />
+                                        <Input
+                                            value={perk.sub}
+                                            onChange={(e) => {
+                                                const newPerks = [...settings.homepage.affiliate_perks]
+                                                newPerks[idx] = { ...newPerks[idx], sub: e.target.value }
+                                                setSettings({
+                                                    ...settings,
+                                                    homepage: { ...settings.homepage, affiliate_perks: newPerks }
+                                                })
+                                            }}
+                                            placeholder="Perk Subtitle"
+                                        />
+                                    </div>
+                                ))}
                             </div>
                         </div>
 

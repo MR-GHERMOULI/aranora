@@ -64,26 +64,61 @@ export default async function AdminSettingsPage() {
                     hero_title: string
                     hero_subtitle: string
                     hero_cta_text: string
+                    hero_badge_text: string
+                    hero_microcopy: string
+                    nav_cta_text: string
                     features_title: string
                     features_subtitle: string
+                    how_it_works_title: string
+                    how_it_works_subtitle: string
+                    how_it_works_steps: { title: string; desc: string }[]
                     pricing_title: string
                     pricing_subtitle: string
                     testimonials_title: string
                     testimonials_subtitle: string
+                    affiliate_title: string
+                    affiliate_subtitle: string
+                    affiliate_commission_rate: string
+                    affiliate_monthly_earning: string
+                    affiliate_annual_earning: string
+                    affiliate_perks: { label: string; sub: string }[]
                     cta_title: string
                     cta_subtitle: string
+                    stats_min_threshold: number
                 }) || {
                     hero_title: "Your Freelance Business, Professionally Managed",
                     hero_subtitle: "The all-in-one platform to manage clients, projects, invoices, contracts, time tracking, and team collaboration. Built by freelancers, for freelancers.",
                     hero_cta_text: "Start Free — No Card Required",
+                    hero_badge_text: "Built for Freelancers, by Freelancers",
+                    hero_microcopy: "First month free • No credit card required • Cancel anytime",
+                    nav_cta_text: "Get Started Free",
                     features_title: "Everything You Need to Succeed",
                     features_subtitle: "A complete suite of professional tools designed specifically for freelancers and independent professionals.",
+                    how_it_works_title: "Get Started in 3 Simple Steps",
+                    how_it_works_subtitle: "Go from sign-up to managing your entire freelance business in minutes.",
+                    how_it_works_steps: [
+                        { title: "Sign Up Free", desc: "Create your account in under 60 seconds. Your first month is completely free — no credit card needed." },
+                        { title: "Set Up Your Workspace", desc: "Add your first client, create a project, and configure your invoicing preferences." },
+                        { title: "Run Your Business", desc: "Manage everything from one dashboard — clients, projects, invoices, contracts, and more." },
+                    ],
                     pricing_title: "Simple, Transparent Pricing",
                     pricing_subtitle: "Start with your first month free. No credit card required. Upgrade when you're ready.",
                     testimonials_title: "Trusted by Freelancers Worldwide",
                     testimonials_subtitle: "See how Aranora is helping freelancers run their businesses with confidence.",
+                    affiliate_title: "Earn by Spreading the Word",
+                    affiliate_subtitle: "Join our affiliate program and earn",
+                    affiliate_commission_rate: "30%",
+                    affiliate_monthly_earning: "$5.70",
+                    affiliate_annual_earning: "$57.00",
+                    affiliate_perks: [
+                        { label: "30% Commission", sub: "Industry-leading rate" },
+                        { label: "12-Month Window", sub: "On monthly plans" },
+                        { label: "Unique Links", sub: "Track every click" },
+                        { label: "$50 Min Payout", sub: "Via PayPal or Bank" },
+                    ],
                     cta_title: "Ready to Run Your Freelance Business Like a Pro?",
                     cta_subtitle: "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
+                    stats_min_threshold: 50,
                 },
                 pricing_page: (settingsMap.pricing_page as {
                     hero_title: string

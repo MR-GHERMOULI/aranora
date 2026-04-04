@@ -211,3 +211,34 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Gradient mesh for hero background */
+@keyframes mesh-move {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(20px, 10px) scale(1.02); }
+}
+
+.animate-mesh {
+  animation: mesh-move 20s ease-in-out infinite;
+}
+
+/* Consistent brand card hover */
+.card-brand-hover {
+  transition: all 0.35s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+.card-brand-hover:hover {
+  border-color: var(--brand-primary);
+  box-shadow: 0 8px 30px rgba(30, 58, 95, 0.10);
+  transform: translateY(-3px);
+}
+.dark .card-brand-hover:hover {
+  box-shadow: 0 8px 30px rgba(96, 165, 250, 0.10);
+}
+
+/* Section gradient divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
