@@ -11,13 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   let faviconUrl = "/favicon.ico";
   
   try {
-    // using clean fetch client, caching logo for 1 hour to prevent DB overhead
+    // using clean fetch client, no caching so updates appear instantly
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         global: {
-          fetch: (url, init) => fetch(url, { ...init, next: { revalidate: 3600 } })
+          fetch: (url, init) => fetch(url, { ...init, cache: 'no-store' })
         }
       }
     );
