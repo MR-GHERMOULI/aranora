@@ -572,7 +572,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             </div>
                             <div className="space-y-3 mt-2">
                                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Steps</Label>
-                                {settings.homepage.how_it_works_steps.map((step, idx) => (
+                                { (settings.homepage.how_it_works_steps || []).map((step, idx) => (
                                     <div key={idx} className="p-3 border rounded-lg bg-background">
                                         <div className="flex items-center gap-2 mb-2">
                                             <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Step {idx + 1}</span>
@@ -732,7 +732,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             </div>
                             <div className="space-y-3 mt-2">
                                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">Perks</Label>
-                                {settings.homepage.affiliate_perks.map((perk, idx) => (
+                                { (settings.homepage.affiliate_perks || []).map((perk, idx) => (
                                     <div key={idx} className="grid grid-cols-2 gap-2">
                                         <Input
                                             value={perk.label}
@@ -892,7 +892,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                 </Button>
                             </div>
                             <div className="space-y-3">
-                                {settings.pricing_page.features.map((feature, idx) => (
+                                { (settings.pricing_page.features || []).map((feature, idx) => (
                                     <div key={idx} className="flex items-center gap-2">
                                         <Input
                                             value={feature}
@@ -946,7 +946,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                 </Button>
                             </div>
                             <div className="space-y-4">
-                                {settings.pricing_page.faqs.map((faq, idx) => (
+                                { (settings.pricing_page.faqs || []).map((faq, idx) => (
                                     <div key={idx} className="p-4 border rounded-lg bg-background relative group">
                                         <Button
                                             variant="ghost"

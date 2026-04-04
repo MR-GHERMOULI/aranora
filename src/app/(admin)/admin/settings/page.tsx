@@ -24,68 +24,31 @@ export default async function AdminSettingsPage() {
     return (
         <SettingsClient
             initialSettings={{
-                branding: (settingsMap.branding as {
-                    logo_url: string | null
-                    favicon_url: string | null
-                    primary_color: string
-                    secondary_color: string
-                    font_family: string
-                }) || {
+                branding: {
                     logo_url: null,
                     favicon_url: null,
                     primary_color: "#1E3A5F",
                     secondary_color: "#4ADE80",
                     font_family: "Inter",
+                    ...(settingsMap.branding as Record<string, any> || {})
                 },
-                features: (settingsMap.features as {
-                    contracts_enabled: boolean
-                    partnerships_enabled: boolean
-                    team_enabled: boolean
-                }) || {
+                features: {
                     contracts_enabled: true,
                     partnerships_enabled: true,
                     team_enabled: true,
+                    ...(settingsMap.features as Record<string, any> || {})
                 },
-                limits: (settingsMap.limits as {
-                    max_clients_per_user: number | null
-                    max_projects_per_user: number | null
-                }) || {
+                limits: {
                     max_clients_per_user: null,
                     max_projects_per_user: null,
+                    ...(settingsMap.limits as Record<string, any> || {})
                 },
-                notifications: (settingsMap.notifications as {
-                    notify_new_user: boolean
-                    notify_new_project: boolean
-                }) || {
+                notifications: {
                     notify_new_user: true,
                     notify_new_project: false,
+                    ...(settingsMap.notifications as Record<string, any> || {})
                 },
-                homepage: (settingsMap.homepage as {
-                    hero_title: string
-                    hero_subtitle: string
-                    hero_cta_text: string
-                    hero_badge_text: string
-                    hero_microcopy: string
-                    nav_cta_text: string
-                    features_title: string
-                    features_subtitle: string
-                    how_it_works_title: string
-                    how_it_works_subtitle: string
-                    how_it_works_steps: { title: string; desc: string }[]
-                    pricing_title: string
-                    pricing_subtitle: string
-                    testimonials_title: string
-                    testimonials_subtitle: string
-                    affiliate_title: string
-                    affiliate_subtitle: string
-                    affiliate_commission_rate: string
-                    affiliate_monthly_earning: string
-                    affiliate_annual_earning: string
-                    affiliate_perks: { label: string; sub: string }[]
-                    cta_title: string
-                    cta_subtitle: string
-                    stats_min_threshold: number
-                }) || {
+                homepage: {
                     hero_title: "Your Freelance Business, Professionally Managed",
                     hero_subtitle: "The all-in-one platform to manage clients, projects, invoices, contracts, time tracking, and team collaboration. Built by freelancers, for freelancers.",
                     hero_cta_text: "Start Free — No Card Required",
@@ -106,7 +69,7 @@ export default async function AdminSettingsPage() {
                     testimonials_title: "Trusted by Freelancers Worldwide",
                     testimonials_subtitle: "See how Aranora is helping freelancers run their businesses with confidence.",
                     affiliate_title: "Earn by Spreading the Word",
-                    affiliate_subtitle: "Join our affiliate program and earn",
+                    affiliate_subtitle: "Join our affiliate program and earn recurring commissions on every customer you refer. 30% commission on every customer you refer — for 12 full months.",
                     affiliate_commission_rate: "30%",
                     affiliate_monthly_earning: "$5.70",
                     affiliate_annual_earning: "$57.00",
@@ -119,15 +82,9 @@ export default async function AdminSettingsPage() {
                     cta_title: "Ready to Run Your Freelance Business Like a Pro?",
                     cta_subtitle: "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
                     stats_min_threshold: 50,
+                    ...(settingsMap.homepage as Record<string, any> || {})
                 },
-                pricing_page: (settingsMap.pricing_page as {
-                    hero_title: string
-                    hero_subtitle: string
-                    monthly_price: number
-                    annual_price: number
-                    features: string[]
-                    faqs: { question: string; answer: string }[]
-                }) || {
+                pricing_page: {
                     hero_title: "Simple, transparent pricing",
                     hero_subtitle: "Start with your first month free. No credit card required. Upgrade when you're ready to take your freelance business to the next level.",
                     monthly_price: 19,
@@ -165,7 +122,8 @@ export default async function AdminSettingsPage() {
                             question: "Can I invite my team or collaborators?",
                             answer: "Yes, Aranora is built to scale with you. You can invite team members and assign specific tools, projects, and access permissions seamlessly."
                         }
-                    ]
+                    ],
+                    ...(settingsMap.pricing_page as Record<string, any> || {})
                 },
             }}
             adminCount={adminCount || 0}
