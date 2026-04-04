@@ -107,18 +107,22 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
     async function handleImageUpload(file: File, type: 'logo' | 'favicon') {
         setIsUploading(true)
         try {
-            const fileExt = file.name.split('.').pop()
-            const fileName = `${type}-${Date.now()}.${fileExt}`
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('bucket', 'branding')
+            formData.append('prefix', type)
 
-            const { error: uploadError } = await supabase.storage
-                .from('branding')
-                .upload(fileName, file, { upsert: true })
+            const response = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData
+            })
 
-            if (uploadError) throw uploadError
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.error || 'Upload failed')
+            }
 
-            const { data: { publicUrl } } = supabase.storage
-                .from('branding')
-                .getPublicUrl(fileName)
+            const { url: publicUrl } = await response.json()
 
             if (type === 'logo') {
                 setSettings({
@@ -133,6 +137,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
             }
         } catch (error) {
             console.error('Upload error:', error)
+            alert('Failed to upload image. Please try again.')
         } finally {
             setIsUploading(false)
         }

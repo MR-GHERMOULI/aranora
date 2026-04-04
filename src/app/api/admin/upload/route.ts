@@ -33,11 +33,14 @@ export async function POST(request: Request) {
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         )
 
+        const bucket = (formData.get('bucket') as string) || 'articles'
+        const prefix = (formData.get('prefix') as string) || 'article'
+
         const fileExt = file.name.split('.').pop()
-        const fileName = `article-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+        const fileName = `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
 
         const { error: uploadError } = await supabaseAdmin.storage
-            .from('articles')
+            .from(bucket)
             .upload(fileName, file, { 
                 upsert: true,
                 contentType: file.type 
@@ -49,7 +52,7 @@ export async function POST(request: Request) {
         }
 
         const { data } = supabaseAdmin.storage
-            .from('articles')
+            .from(bucket)
             .getPublicUrl(fileName)
 
         return NextResponse.json({ url: data.publicUrl })
