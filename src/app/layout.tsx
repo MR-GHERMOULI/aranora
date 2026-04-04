@@ -5,10 +5,46 @@ import "./globals.css";
 // Font loaded via CSS fallback stack in globals.css
 const inter = { variable: "font-sans" };
 
-export const metadata: Metadata = {
-  title: "Aranora | Freelancer Management Platform",
-  description: "Professional freelancer management platform for clients, projects, and invoices.",
-};
+import { createClient } from "@supabase/supabase-js";
+
+export async function generateMetadata(): Promise<Metadata> {
+  let faviconUrl = "/favicon.ico";
+  
+  try {
+    // using clean fetch client, caching logo for 1 hour to prevent DB overhead
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          fetch: (url, init) => fetch(url, { ...init, next: { revalidate: 3600 } })
+        }
+      }
+    );
+    
+    const { data } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'branding')
+      .single();
+
+    if (data?.value?.favicon_url) {
+      faviconUrl = data.value.favicon_url;
+    }
+  } catch (error) {
+    console.error("Error fetching branding metadata:", error);
+  }
+
+  return {
+    title: "Aranora | Freelancer Management Platform",
+    description: "Professional freelancer management platform for clients, projects, and invoices.",
+    icons: {
+      icon: faviconUrl,
+      shortcut: faviconUrl,
+      apple: faviconUrl
+    }
+  };
+}
 
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
