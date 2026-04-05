@@ -257,15 +257,17 @@ export default async function LandingPage() {
   const testimonials =
     dbTestimonials && dbTestimonials.length > 0
       ? dbTestimonials.map((t) => ({
-          name: t.author_name,
-          role: t.author_role,
+          name: t.name,
+          role: t.service,
           quote: t.content,
-          avatar: t.author_name
+          avatarUrl: t.avatar_url,
+          avatar: t.name
             .split(" ")
             .map((n: string) => n[0])
             .join("")
             .toUpperCase()
             .slice(0, 2),
+          rating: t.rating || 5,
         }))
       : [
           {
@@ -274,6 +276,8 @@ export default async function LandingPage() {
             quote:
               "Aranora transformed how I manage my freelance business. The invoicing feature alone saved me hours every week.",
             avatar: "SC",
+            avatarUrl: "",
+            rating: 5,
           },
           {
             name: "Marcus Johnson",
@@ -281,6 +285,8 @@ export default async function LandingPage() {
             quote:
               "Finally, a tool that understands freelancers. The project collaboration features are game-changing.",
             avatar: "MJ",
+            avatarUrl: "",
+            rating: 5,
           },
           {
             name: "Elena Rodriguez",
@@ -288,6 +294,8 @@ export default async function LandingPage() {
             quote:
               "The smart reminders keep me on top of everything. I've never missed a deadline since using Aranora.",
             avatar: "ER",
+            avatarUrl: "",
+            rating: 5,
           },
         ];
 
@@ -738,7 +746,7 @@ export default async function LandingPage() {
                   &ldquo;
                 </div>
                 <div className="flex items-center gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (
+                  {[...Array(testimonial.rating || 5)].map((_, j) => (
                     <Star
                       key={j}
                       className="h-4 w-4 fill-brand-secondary text-brand-secondary"
@@ -749,9 +757,17 @@ export default async function LandingPage() {
                   &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3 pt-4 border-t border-border">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                    {testimonial.avatar}
-                  </div>
+                  {testimonial.avatarUrl ? (
+                    <img
+                      src={testimonial.avatarUrl}
+                      alt={testimonial.name}
+                      className="h-10 w-10 rounded-full object-cover shadow-md"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                      {testimonial.avatar}
+                    </div>
+                  )}
                   <div>
                     <p className="font-semibold text-foreground text-sm">
                       {testimonial.name}

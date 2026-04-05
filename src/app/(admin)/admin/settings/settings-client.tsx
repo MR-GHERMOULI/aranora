@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2 } from "lucide-react"
+import { useState, useRef, useCallback } from "react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -76,9 +76,16 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
     const [isSaving, setIsSaving] = useState(false)
     const [savedKey, setSavedKey] = useState<string | null>(null)
     const [isUploading, setIsUploading] = useState(false)
+    const [openSections, setOpenSections] = useState<Record<string, boolean>>({ hero: true })
     const logoInputRef = useRef<HTMLInputElement>(null)
     const faviconInputRef = useRef<HTMLInputElement>(null)
     const supabase = createClient()
+
+    const fontOptions = ["Inter", "Roboto", "Poppins", "Outfit", "Open Sans", "Lato", "Montserrat", "Nunito", "Raleway", "Source Sans Pro"]
+
+    const toggleSection = useCallback((key: string) => {
+        setOpenSections(prev => ({ ...prev, [key]: !prev[key] }))
+    }, [])
 
     async function saveSettings(key: string, value: unknown) {
         setIsSaving(true)
@@ -164,6 +171,55 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
         )
     }
 
+    const CollapsibleSection = ({ 
+        id, 
+        title, 
+        icon, 
+        children 
+    }: { 
+        id: string, 
+        title: string, 
+        icon: React.ReactNode, 
+        children: React.ReactNode 
+    }) => {
+        const isOpen = openSections[id]
+        
+        return (
+            <div className={`border rounded-xl bg-card overflow-hidden transition-all duration-200 ${isOpen ? 'ring-1 ring-primary/20 shadow-sm' : 'hover:border-primary/30'}`}>
+                <button
+                    type="button"
+                    onClick={() => toggleSection(id)}
+                    className="w-full flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 transition-colors"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                            {icon}
+                        </div>
+                        <h4 className="font-semibold text-foreground text-left">{title}</h4>
+                    </div>
+                    {isOpen ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+                </button>
+                {isOpen && (
+                    <div className="p-6 border-t animate-in slide-in-from-top-2 duration-200">
+                        {children}
+                        <div className="mt-6 pt-6 border-t flex justify-end">
+                            <Button
+                                onClick={() => saveSettings("homepage", settings.homepage)}
+                                disabled={isSaving}
+                                size="sm"
+                                className="gap-2 shadow-sm"
+                            >
+                                <Save className="h-4 w-4" />
+                                {savedKey === "homepage" ? "Saved!" : "Save Section"}
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        )
+    }
+
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -228,117 +284,207 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             </p>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-2">
-                            {/* Logo Upload */}
-                            <div className="space-y-3">
-                                <Label>Logo</Label>
-                                <div className="flex items-center gap-4">
-                                    <div className="h-20 w-20 rounded-xl border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden bg-muted/30">
-                                        {settings.branding.logo_url ? (
-                                            <img
-                                                src={settings.branding.logo_url}
-                                                alt="Logo"
-                                                className="h-full w-full object-contain"
-                                            />
-                                        ) : (
-                                            <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <input
-                                            ref={logoInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0]
-                                                if (file) handleImageUpload(file, 'logo')
-                                            }}
-                                        />
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => logoInputRef.current?.click()}
-                                            disabled={isUploading}
-                                            className="gap-2"
-                                        >
-                                            <Upload className="h-4 w-4" />
-                                            {isUploading ? 'Uploading...' : 'Upload Logo'}
-                                        </Button>
-                                        {settings.branding.logo_url && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => setSettings({
-                                                    ...settings,
-                                                    branding: { ...settings.branding, logo_url: null }
-                                                })}
-                                                className="gap-2 text-destructive"
-                                            >
-                                                <X className="h-4 w-4" />
-                                                Remove
-                                            </Button>
-                                        )}
+                        {/* Branding Controls Grid */}
+                        <div className="grid gap-8 lg:grid-cols-5">
+                            <div className="lg:col-span-3 space-y-6">
+                                {/* Visual Assets */}
+                                <div className="space-y-4 p-4 rounded-xl border bg-muted/10">
+                                    <h4 className="font-medium flex items-center gap-2">
+                                        <ImageIcon className="h-4 w-4 text-primary" /> Visual Assets
+                                    </h4>
+                                    <div className="grid gap-6 sm:grid-cols-2">
+                                        {/* Logo Upload */}
+                                        <div className="space-y-3">
+                                            <Label className="text-xs font-semibold">Main Logo</Label>
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-16 w-16 rounded-xl border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden bg-white dark:bg-black/20 shrink-0">
+                                                    {settings.branding.logo_url ? (
+                                                        <img src={settings.branding.logo_url} alt="Logo" className="h-full w-full object-contain p-2" />
+                                                    ) : (
+                                                        <ImageIcon className="h-6 w-6 text-muted-foreground/30" />
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <input
+                                                        ref={logoInputRef}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0]
+                                                            if (file) handleImageUpload(file, 'logo')
+                                                        }}
+                                                    />
+                                                    <Button variant="outline" size="sm" onClick={() => logoInputRef.current?.click()} disabled={isUploading} className="h-8 gap-2 w-full justify-start">
+                                                        <Upload className="h-3.5 w-3.5" /> Upload
+                                                    </Button>
+                                                    {settings.branding.logo_url && (
+                                                        <Button variant="ghost" size="sm" onClick={() => setSettings({ ...settings, branding: { ...settings.branding, logo_url: null } })} className="h-8 gap-2 w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                            <X className="h-3.5 w-3.5" /> Remove
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Favicon Upload */}
+                                        <div className="space-y-3">
+                                            <Label className="text-xs font-semibold">Favicon</Label>
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-12 w-12 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden bg-white dark:bg-black/20 shrink-0">
+                                                    {settings.branding.favicon_url ? (
+                                                        <img src={settings.branding.favicon_url} alt="Favicon" className="h-full w-full object-contain p-1.5" />
+                                                    ) : (
+                                                        <Globe className="h-5 w-5 text-muted-foreground/30" />
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <input
+                                                        ref={faviconInputRef}
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={(e) => {
+                                                            const file = e.target.files?.[0]
+                                                            if (file) handleImageUpload(file, 'favicon')
+                                                        }}
+                                                    />
+                                                    <Button variant="outline" size="sm" onClick={() => faviconInputRef.current?.click()} disabled={isUploading} className="h-8 gap-2">
+                                                        <Upload className="h-3.5 w-3.5" /> Upload
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Recommended: 200x200px, PNG or SVG
-                                </p>
+
+                                {/* Colors & Typography */}
+                                <div className="space-y-4 p-4 rounded-xl border bg-muted/10">
+                                    <h4 className="font-medium flex items-center gap-2">
+                                        <Palette className="h-4 w-4 text-primary" /> Colors & Typography
+                                    </h4>
+                                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold">Primary Theme Color</Label>
+                                            <div className="flex gap-2">
+                                                <Input 
+                                                    type="color" 
+                                                    value={settings.branding.primary_color || '#1E3A5F'}
+                                                    onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, primary_color: e.target.value }})}
+                                                    className="w-12 h-10 p-1 cursor-pointer rounded-md"
+                                                />
+                                                <Input 
+                                                    type="text" 
+                                                    value={settings.branding.primary_color || '#1E3A5F'}
+                                                    onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, primary_color: e.target.value }})}
+                                                    className="font-mono text-sm uppercase"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold">Secondary Accent Color</Label>
+                                            <div className="flex gap-2">
+                                                <Input 
+                                                    type="color" 
+                                                    value={settings.branding.secondary_color || '#4ADE80'}
+                                                    onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, secondary_color: e.target.value }})}
+                                                    className="w-12 h-10 p-1 cursor-pointer rounded-md"
+                                                />
+                                                <Input 
+                                                    type="text" 
+                                                    value={settings.branding.secondary_color || '#4ADE80'}
+                                                    onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, secondary_color: e.target.value }})}
+                                                    className="font-mono text-sm uppercase"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold">Typography (Base Font)</Label>
+                                            <div className="relative">
+                                                <select
+                                                    value={settings.branding.font_family || 'Inter'}
+                                                    onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, font_family: e.target.value }})}
+                                                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background appearance-none pr-8"
+                                                >
+                                                    {fontOptions.map(font => (
+                                                        <option key={font} value={font} style={{ fontFamily: font }}>{font}</option>
+                                                    ))}
+                                                </select>
+                                                <Type className="absolute right-3 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Favicon Upload */}
-                            <div className="space-y-3">
-                                <Label>Favicon</Label>
-                                <div className="flex items-center gap-4">
-                                    <div className="h-16 w-16 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden bg-muted/30">
-                                        {settings.branding.favicon_url ? (
-                                            <img
-                                                src={settings.branding.favicon_url}
-                                                alt="Favicon"
-                                                className="h-full w-full object-contain"
-                                            />
-                                        ) : (
-                                            <ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-                                        )}
+                            {/* Live Preview Panel */}
+                            <div className="lg:col-span-2">
+                                <div className="sticky top-6 rounded-xl border bg-card overflow-hidden shadow-sm">
+                                    <div className="bg-muted/50 p-3 border-b border-border/50 flex items-center justify-between">
+                                        <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" /> Live Preview</span>
+                                        <div className="flex gap-1.5">
+                                            <div className="h-2.5 w-2.5 rounded-full bg-destructive/30" />
+                                            <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/30" />
+                                            <div className="h-2.5 w-2.5 rounded-full bg-green-500/30" />
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <input
-                                            ref={faviconInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0]
-                                                if (file) handleImageUpload(file, 'favicon')
-                                            }}
-                                        />
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => faviconInputRef.current?.click()}
-                                            disabled={isUploading}
-                                            className="gap-2"
-                                        >
-                                            <Upload className="h-4 w-4" />
-                                            Upload
-                                        </Button>
+                                    <div className="p-6 bg-white dark:bg-slate-950" style={{ fontFamily: settings.branding.font_family || 'Inter' }}>
+                                        {/* Mock Navbar */}
+                                        <div className="flex items-center justify-between mb-8 pb-4 border-b">
+                                            <div className="flex items-center gap-2">
+                                                {settings.branding.logo_url ? (
+                                                    <img src={settings.branding.logo_url} alt="Logo" className="h-6 object-contain" />
+                                                ) : (
+                                                    <div className="h-6 w-6 rounded bg-primary/20" style={{ backgroundColor: `${settings.branding.primary_color}30` }} />
+                                                )}
+                                                <span className="font-bold text-sm tracking-tight" style={{ color: settings.branding.primary_color }}>Aranora</span>
+                                            </div>
+                                            <div className="rounded px-3 py-1.5 text-[10px] font-semibold text-white" style={{ backgroundColor: settings.branding.primary_color }}>
+                                                Get Started
+                                            </div>
+                                        </div>
+
+                                        {/* Mock Hero Content */}
+                                        <div className="space-y-4 text-center">
+                                            <div className="inline-block rounded-full px-2.5 py-0.5 text-[10px] font-medium" style={{ backgroundColor: `${settings.branding.secondary_color}20`, color: settings.branding.secondary_color }}>
+                                                New Features Available
+                                            </div>
+                                            <h2 className="text-xl font-bold leading-tight" style={{ color: settings.branding.primary_color }}>
+                                                Manage Your Business Like a Pro
+                                            </h2>
+                                            <p className="text-xs text-muted-foreground px-4">
+                                                The all-in-one platform built for freelancers.
+                                            </p>
+                                            
+                                            {/* Mock Button Details */}
+                                            <div className="pt-4 flex justify-center gap-2">
+                                                <div className="h-8 w-28 rounded-md bg-primary flex items-center justify-center shadow-lg" style={{ backgroundColor: settings.branding.primary_color, boxShadow: `0 4px 14px 0 ${settings.branding.primary_color}40` }}>
+                                                    <span className="text-[10px] text-white font-medium">Start Free Trial</span>
+                                                </div>
+                                                <div className="h-8 w-8 rounded-md border flex items-center justify-center">
+                                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: settings.branding.secondary_color }} />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                    Recommended: 32x32px or 64x64px
-                                </p>
                             </div>
                         </div>
 
-
-                        <Button
-                            onClick={() => saveSettings("branding", settings.branding)}
-                            disabled={isSaving}
-                            className="gap-2"
-                        >
-                            <Save className="h-4 w-4" />
-                            {savedKey === "branding" ? "Saved!" : "Save Branding"}
-                        </Button>
+                        <div className="pt-4 border-t flex items-center gap-4">
+                            <Button
+                                onClick={() => saveSettings("branding", settings.branding)}
+                                disabled={isSaving}
+                                className="gap-2"
+                                size="lg"
+                            >
+                                <Save className="h-4 w-4" />
+                                {savedKey === "branding" ? "Saved!" : "Save Branding Changes"}
+                            </Button>
+                            {savedKey === "branding" && (
+                                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Changes published successfully.</p>
+                            )}
+                        </div>
                     </div>
                 </TabsContent>
 
@@ -352,391 +498,427 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             </p>
                         </div>
 
-                        {/* Hero Section */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">🚀 Hero Section</h4>
-                            <div className="grid gap-4">
-                                <div className="space-y-2">
-                                    <Label>Badge Text</Label>
-                                    <Input
-                                        value={settings.homepage.hero_badge_text}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, hero_badge_text: e.target.value }
-                                        })}
-                                        placeholder="Built for Freelancers, by Freelancers"
-                                    />
-                                    <p className="text-xs text-muted-foreground">The small pill badge shown above the main title</p>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Main Title</Label>
-                                    <Input
-                                        value={settings.homepage.hero_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, hero_title: e.target.value }
-                                        })}
-                                        placeholder="Your Freelance Business, Professionally Managed"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Subtitle</Label>
-                                    <textarea
-                                        value={settings.homepage.hero_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, hero_subtitle: e.target.value }
-                                        })}
-                                        placeholder="All-in-one platform to manage clients, projects, invoices..."
-                                        className="w-full min-h-[80px] p-3 rounded-lg border bg-background text-sm resize-y"
-                                    />
-                                </div>
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label>CTA Button Text</Label>
+                        <div className="space-y-4">
+                            {/* Hero Section */}
+                            <CollapsibleSection id="hero" title="Hero Section" icon={<Home className="h-5 w-5" />}>
+                                <div className="grid gap-6">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Badge Text</Label>
                                         <Input
-                                            value={settings.homepage.hero_cta_text}
-                                            onChange={(e) => setSettings({
-                                                ...settings,
-                                                homepage: { ...settings.homepage, hero_cta_text: e.target.value }
-                                            })}
-                                            placeholder="Start Free — No Card Required"
+                                            value={settings.homepage.hero_badge_text}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, hero_badge_text: e.target.value }})}
+                                            placeholder="Built for Freelancers, by Freelancers"
+                                            maxLength={50}
                                         />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Navigation CTA Text</Label>
-                                        <Input
-                                            value={settings.homepage.nav_cta_text}
-                                            onChange={(e) => setSettings({
-                                                ...settings,
-                                                homepage: { ...settings.homepage, nav_cta_text: e.target.value }
-                                            })}
-                                            placeholder="Get Started Free"
-                                        />
-                                        <p className="text-xs text-muted-foreground">Button text in the top navigation bar</p>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Microcopy</Label>
-                                    <Input
-                                        value={settings.homepage.hero_microcopy}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, hero_microcopy: e.target.value }
-                                        })}
-                                        placeholder="First month free • No credit card required • Cancel anytime"
-                                    />
-                                    <p className="text-xs text-muted-foreground">Small text shown below the CTA buttons</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Social Proof Settings */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">📊 Social Proof</h4>
-                            <div className="space-y-2">
-                                <Label>Minimum User Threshold</Label>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={settings.homepage.stats_min_threshold}
-                                    onChange={(e) => setSettings({
-                                        ...settings,
-                                        homepage: { ...settings.homepage, stats_min_threshold: Number(e.target.value) }
-                                    })}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    When total registered users is below this number, the stats bar will show generic trust badges instead of actual numbers. Set to 0 to always show stats.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Features Section */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">✨ Features Section</h4>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input
-                                        value={settings.homepage.features_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, features_title: e.target.value }
-                                        })}
-                                        placeholder="Everything You Need to Succeed"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Subtitle</Label>
-                                    <Input
-                                        value={settings.homepage.features_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, features_subtitle: e.target.value }
-                                        })}
-                                        placeholder="Powerful features designed for freelancers"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* How It Works */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">🚶 How It Works</h4>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Section Title</Label>
-                                    <Input
-                                        value={settings.homepage.how_it_works_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, how_it_works_title: e.target.value }
-                                        })}
-                                        placeholder="Get Started in 3 Simple Steps"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Section Subtitle</Label>
-                                    <Input
-                                        value={settings.homepage.how_it_works_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, how_it_works_subtitle: e.target.value }
-                                        })}
-                                        placeholder="Go from sign-up to managing your business in minutes."
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-3 mt-2">
-                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Steps</Label>
-                                { (settings.homepage.how_it_works_steps || []).map((step, idx) => (
-                                    <div key={idx} className="p-3 border rounded-lg bg-background">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Step {idx + 1}</span>
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>The small pill badge shown above the main title</span>
+                                            <span>{settings.homepage.hero_badge_text?.length || 0}/50</span>
                                         </div>
-                                        <div className="grid gap-2">
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Main Title</Label>
+                                        <Input
+                                            value={settings.homepage.hero_title}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, hero_title: e.target.value }})}
+                                            placeholder="Your Freelance Business, Professionally Managed"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Subtitle</Label>
+                                        <textarea
+                                            value={settings.homepage.hero_subtitle}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, hero_subtitle: e.target.value }})}
+                                            placeholder="All-in-one platform to manage clients, projects, invoices..."
+                                            className="w-full min-h-[80px] p-3 rounded-md border border-input bg-background text-sm resize-y focus:ring-2 focus:ring-ring focus:border-input"
+                                            maxLength={160}
+                                        />
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>Appears below the main title</span>
+                                            <span>{settings.homepage.hero_subtitle?.length || 0}/160</span>
+                                        </div>
+                                    </div>
+                                    <div className="grid gap-6 md:grid-cols-2 bg-muted/20 p-4 rounded-lg">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Main CTA Button</Label>
                                             <Input
-                                                value={step.title}
-                                                onChange={(e) => {
-                                                    const newSteps = [...settings.homepage.how_it_works_steps]
-                                                    newSteps[idx] = { ...newSteps[idx], title: e.target.value }
-                                                    setSettings({
-                                                        ...settings,
-                                                        homepage: { ...settings.homepage, how_it_works_steps: newSteps }
-                                                    })
-                                                }}
-                                                placeholder="Step Title"
-                                                className="font-medium"
+                                                value={settings.homepage.hero_cta_text}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, hero_cta_text: e.target.value }})}
+                                                placeholder="Start Free — No Card Required"
                                             />
-                                            <textarea
-                                                value={step.desc}
-                                                onChange={(e) => {
-                                                    const newSteps = [...settings.homepage.how_it_works_steps]
-                                                    newSteps[idx] = { ...newSteps[idx], desc: e.target.value }
-                                                    setSettings({
-                                                        ...settings,
-                                                        homepage: { ...settings.homepage, how_it_works_steps: newSteps }
-                                                    })
-                                                }}
-                                                placeholder="Step Description"
-                                                className="w-full min-h-[60px] p-2 text-sm rounded-md border bg-background resize-y"
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Navbar CTA Button</Label>
+                                            <Input
+                                                value={settings.homepage.nav_cta_text}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, nav_cta_text: e.target.value }})}
+                                                placeholder="Get Started Free"
                                             />
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Pricing Section */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">💰 Pricing Section</h4>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input
-                                        value={settings.homepage.pricing_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, pricing_title: e.target.value }
-                                        })}
-                                        placeholder="Simple, Transparent Pricing"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Subtitle</Label>
-                                    <Input
-                                        value={settings.homepage.pricing_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, pricing_subtitle: e.target.value }
-                                        })}
-                                        placeholder="Start with your first month free."
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Testimonials Section */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">⭐ Testimonials Section</h4>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input
-                                        value={settings.homepage.testimonials_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, testimonials_title: e.target.value }
-                                        })}
-                                        placeholder="Loved by Freelancers"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Subtitle</Label>
-                                    <Input
-                                        value={settings.homepage.testimonials_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, testimonials_subtitle: e.target.value }
-                                        })}
-                                        placeholder="See what our users have to say"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Affiliate Section */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">💸 Affiliate Section</h4>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Section Title</Label>
-                                    <Input
-                                        value={settings.homepage.affiliate_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, affiliate_title: e.target.value }
-                                        })}
-                                        placeholder="Earn by Spreading the Word"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Section Subtitle</Label>
-                                    <Input
-                                        value={settings.homepage.affiliate_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, affiliate_subtitle: e.target.value }
-                                        })}
-                                        placeholder="Join our affiliate program and earn"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid gap-4 md:grid-cols-3">
-                                <div className="space-y-2">
-                                    <Label>Commission Rate</Label>
-                                    <Input
-                                        value={settings.homepage.affiliate_commission_rate}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, affiliate_commission_rate: e.target.value }
-                                        })}
-                                        placeholder="30%"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Monthly Earning</Label>
-                                    <Input
-                                        value={settings.homepage.affiliate_monthly_earning}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, affiliate_monthly_earning: e.target.value }
-                                        })}
-                                        placeholder="$5.70"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Annual Earning</Label>
-                                    <Input
-                                        value={settings.homepage.affiliate_annual_earning}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, affiliate_annual_earning: e.target.value }
-                                        })}
-                                        placeholder="$57.00"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-3 mt-2">
-                                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Perks</Label>
-                                { (settings.homepage.affiliate_perks || []).map((perk, idx) => (
-                                    <div key={idx} className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Microcopy (Trust Indicators)</Label>
                                         <Input
-                                            value={perk.label}
-                                            onChange={(e) => {
-                                                const newPerks = [...settings.homepage.affiliate_perks]
-                                                newPerks[idx] = { ...newPerks[idx], label: e.target.value }
-                                                setSettings({
-                                                    ...settings,
-                                                    homepage: { ...settings.homepage, affiliate_perks: newPerks }
-                                                })
-                                            }}
-                                            placeholder="Perk Label"
+                                            value={settings.homepage.hero_microcopy}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, hero_microcopy: e.target.value }})}
+                                            placeholder="First month free • No credit card required • Cancel anytime"
                                         />
+                                        <p className="text-xs text-muted-foreground">Small text shown directly below the CTA buttons</p>
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Social Proof Section */}
+                            <CollapsibleSection id="social_proof" title="Social Proof Analytics" icon={<Users className="h-5 w-5" />}>
+                                <div className="space-y-4">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Minimum User Threshold</Label>
+                                        <div className="flex gap-4 items-center">
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                className="w-32"
+                                                value={settings.homepage.stats_min_threshold}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, stats_min_threshold: Number(e.target.value) }})}
+                                            />
+                                            <span className="text-sm text-muted-foreground">Active Users</span>
+                                        </div>
+                                        <div className="p-3 rounded-md bg-muted/40 border text-sm text-muted-foreground mt-2">
+                                            <strong>How this works:</strong> When the total registered user count is below this number, the platform will show generic trust badges. Once the count exceeds this number, it will show real-time statistics to build trust. Set to <strong>0</strong> to always show real stats.
+                                        </div>
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Features Section */}
+                            <CollapsibleSection id="features" title="Features Overview" icon={<Sparkles className="h-5 w-5" />}>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
                                         <Input
-                                            value={perk.sub}
-                                            onChange={(e) => {
-                                                const newPerks = [...settings.homepage.affiliate_perks]
-                                                newPerks[idx] = { ...newPerks[idx], sub: e.target.value }
-                                                setSettings({
-                                                    ...settings,
-                                                    homepage: { ...settings.homepage, affiliate_perks: newPerks }
-                                                })
-                                            }}
-                                            placeholder="Perk Subtitle"
+                                            value={settings.homepage.features_title}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, features_title: e.target.value }})}
+                                            placeholder="Everything You Need to Succeed"
                                         />
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* CTA Section */}
-                        <div className="space-y-4 p-4 rounded-lg border bg-muted/20">
-                            <h4 className="font-medium text-sm text-primary">📢 Call to Action</h4>
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input
-                                        value={settings.homepage.cta_title}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, cta_title: e.target.value }
-                                        })}
-                                        placeholder="Ready to Level Up Your Freelance Game?"
-                                    />
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                        <Input
+                                            value={settings.homepage.features_subtitle}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, features_subtitle: e.target.value }})}
+                                            placeholder="Powerful features designed for freelancers"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Subtitle</Label>
-                                    <Input
-                                        value={settings.homepage.cta_subtitle}
-                                        onChange={(e) => setSettings({
-                                            ...settings,
-                                            homepage: { ...settings.homepage, cta_subtitle: e.target.value }
-                                        })}
-                                        placeholder="Join thousands of freelancers who trust Aranora"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                            </CollapsibleSection>
 
-                        <Button
-                            onClick={() => saveSettings("homepage", settings.homepage)}
-                            disabled={isSaving}
-                            className="gap-2"
-                        >
-                            <Save className="h-4 w-4" />
-                            {savedKey === "homepage" ? "Saved!" : "Save Homepage Content"}
-                        </Button>
+                            {/* How It Works Section */}
+                            <CollapsibleSection id="how_it_works" title="How It Works" icon={<Sliders className="h-5 w-5" />}>
+                                <div className="space-y-6">
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
+                                            <Input
+                                                value={settings.homepage.how_it_works_title}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_title: e.target.value }})}
+                                                placeholder="Get Started in 3 Simple Steps"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                            <Input
+                                                value={settings.homepage.how_it_works_subtitle}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_subtitle: e.target.value }})}
+                                                placeholder="Go from sign-up to managing your business in minutes."
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4 bg-muted/10 p-4 rounded-xl border">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Numbered Steps</Label>
+                                            <Button 
+                                                size="sm" 
+                                                variant="outline" 
+                                                onClick={() => {
+                                                    const newSteps = [...(settings.homepage.how_it_works_steps || []), { title: '', desc: '' }]
+                                                    setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_steps: newSteps }})
+                                                }}
+                                                className="h-8 gap-1.5"
+                                            >
+                                                <Plus className="h-3.5 w-3.5" /> Add Step
+                                            </Button>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            { (settings.homepage.how_it_works_steps || []).map((step: any, idx: number) => (
+                                                <div key={idx} className="p-4 border rounded-lg bg-background shadow-sm flex gap-4 items-start group">
+                                                    <div className="flex-col gap-1 items-center hidden sm:flex pt-2">
+                                                        <button 
+                                                            disabled={idx === 0}
+                                                            onClick={() => {
+                                                                const newSteps = [...settings.homepage.how_it_works_steps]
+                                                                const temp = newSteps[idx - 1]
+                                                                newSteps[idx - 1] = newSteps[idx]
+                                                                newSteps[idx] = temp
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_steps: newSteps }})
+                                                            }}
+                                                            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                                        ><ArrowUp className="h-4 w-4" /></button>
+                                                        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">{idx + 1}</span>
+                                                        <button 
+                                                            disabled={idx === settings.homepage.how_it_works_steps.length - 1}
+                                                            onClick={() => {
+                                                                const newSteps = [...settings.homepage.how_it_works_steps]
+                                                                const temp = newSteps[idx + 1]
+                                                                newSteps[idx + 1] = newSteps[idx]
+                                                                newSteps[idx] = temp
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_steps: newSteps }})
+                                                            }}
+                                                            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                                        ><ArrowDown className="h-4 w-4" /></button>
+                                                    </div>
+                                                    <div className="flex-grow grid gap-3">
+                                                        <Input
+                                                            value={step.title}
+                                                            onChange={(e) => {
+                                                                const newSteps = [...settings.homepage.how_it_works_steps]
+                                                                newSteps[idx] = { ...newSteps[idx], title: e.target.value }
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_steps: newSteps }})
+                                                            }}
+                                                            placeholder="e.g. Create your account"
+                                                            className="font-medium"
+                                                        />
+                                                        <textarea
+                                                            value={step.desc}
+                                                            onChange={(e) => {
+                                                                const newSteps = [...settings.homepage.how_it_works_steps]
+                                                                newSteps[idx] = { ...newSteps[idx], desc: e.target.value }
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_steps: newSteps }})
+                                                            }}
+                                                            placeholder="Detailed description of what happens in this step."
+                                                            className="w-full min-h-[60px] p-3 text-sm rounded-md border border-input bg-background resize-y"
+                                                        />
+                                                    </div>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="text-muted-foreground hover:text-destructive shrink-0 mt-1"
+                                                        onClick={() => {
+                                                            const newSteps = [...settings.homepage.how_it_works_steps]
+                                                            newSteps.splice(idx, 1)
+                                                            setSettings({ ...settings, homepage: { ...settings.homepage, how_it_works_steps: newSteps }})
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            {(!settings.homepage.how_it_works_steps || settings.homepage.how_it_works_steps.length === 0) && (
+                                                <div className="text-center p-6 border border-dashed rounded-lg text-muted-foreground text-sm">
+                                                    No steps added yet. Add steps to explain your process to customers.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Pricing Section */}
+                            <CollapsibleSection id="pricing" title="Pricing Plans" icon={<DollarSign className="h-5 w-5" />}>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
+                                        <Input
+                                            value={settings.homepage.pricing_title}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, pricing_title: e.target.value }})}
+                                            placeholder="Simple, Transparent Pricing"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                        <Input
+                                            value={settings.homepage.pricing_subtitle}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, pricing_subtitle: e.target.value }})}
+                                            placeholder="Start with your first month free."
+                                        />
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Testimonials Section */}
+                            <CollapsibleSection id="testimonials" title="Testimonials Header" icon={<MessageSquareQuote className="h-5 w-5" />}>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
+                                        <Input
+                                            value={settings.homepage.testimonials_title}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, testimonials_title: e.target.value }})}
+                                            placeholder="Loved by Freelancers"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                        <Input
+                                            value={settings.homepage.testimonials_subtitle}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, testimonials_subtitle: e.target.value }})}
+                                            placeholder="See what our users have to say"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-4 p-4 border rounded-md bg-primary/5 text-sm flex gap-3 text-primary">
+                                    <div className="shrink-0 mt-0.5"><MessageSquareQuote className="h-4 w-4" /></div>
+                                    <p><strong>Note:</strong> To add or remove actual testimonial reviews, use the <em>Testimonials</em> tab at the top of the Settings dashboard.</p>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Affiliate Hub */}
+                            <CollapsibleSection id="affiliate" title="Affiliate Hub" icon={<Users className="h-5 w-5" />}>
+                                <div className="space-y-6">
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
+                                            <Input
+                                                value={settings.homepage.affiliate_title}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_title: e.target.value }})}
+                                                placeholder="Earn by Spreading the Word"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                            <Input
+                                                value={settings.homepage.affiliate_subtitle}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_subtitle: e.target.value }})}
+                                                placeholder="Join our affiliate program and earn"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid gap-6 md:grid-cols-3 bg-muted/20 p-4 rounded-lg border">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Commission Rate Text</Label>
+                                            <Input
+                                                value={settings.homepage.affiliate_commission_rate}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_commission_rate: e.target.value }})}
+                                                placeholder="30%"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Monthly Earning Example</Label>
+                                            <Input
+                                                value={settings.homepage.affiliate_monthly_earning}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_monthly_earning: e.target.value }})}
+                                                placeholder="$5.70"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Annual Earning Example</Label>
+                                            <Input
+                                                value={settings.homepage.affiliate_annual_earning}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_annual_earning: e.target.value }})}
+                                                placeholder="$57.00"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Affiliate Perks</Label>
+                                            <Button 
+                                                size="sm" 
+                                                variant="outline" 
+                                                onClick={() => {
+                                                    const newPerks = [...(settings.homepage.affiliate_perks || []), { label: '', sub: '' }]
+                                                    setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_perks: newPerks }})
+                                                }}
+                                                className="h-8 gap-1.5"
+                                            >
+                                                <Plus className="h-3.5 w-3.5" /> Add Perk
+                                            </Button>
+                                        </div>
+                                        <div className="grid gap-3">
+                                            { (settings.homepage.affiliate_perks || []).map((perk: any, idx: number) => (
+                                                <div key={idx} className="flex gap-3 items-center">
+                                                    <div className="grid grid-cols-2 gap-3 flex-grow bg-muted/10 p-2 rounded-lg border">
+                                                        <Input
+                                                            value={perk.label}
+                                                            onChange={(e) => {
+                                                                const newPerks = [...settings.homepage.affiliate_perks]
+                                                                newPerks[idx] = { ...newPerks[idx], label: e.target.value }
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_perks: newPerks }})
+                                                            }}
+                                                            placeholder="Main Label (e.g. High Commission)"
+                                                        />
+                                                        <Input
+                                                            value={perk.sub}
+                                                            onChange={(e) => {
+                                                                const newPerks = [...settings.homepage.affiliate_perks]
+                                                                newPerks[idx] = { ...newPerks[idx], sub: e.target.value }
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_perks: newPerks }})
+                                                            }}
+                                                            placeholder="Subtitle (e.g. 30% on all plans)"
+                                                        />
+                                                    </div>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="text-muted-foreground hover:text-destructive shrink-0"
+                                                        onClick={() => {
+                                                            const newPerks = [...settings.homepage.affiliate_perks]
+                                                            newPerks.splice(idx, 1)
+                                                            setSettings({ ...settings, homepage: { ...settings.homepage, affiliate_perks: newPerks }})
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            {(!settings.homepage.affiliate_perks || settings.homepage.affiliate_perks.length === 0) && (
+                                                <div className="text-center p-6 border border-dashed rounded-lg text-muted-foreground text-sm">
+                                                    No perks added yet.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Bottom CTA Section */}
+                            <CollapsibleSection id="cta" title="Bottom Call to Action" icon={<ArrowUp className="h-5 w-5 rotate-45" />}>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Title</Label>
+                                        <Input
+                                            value={settings.homepage.cta_title}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, cta_title: e.target.value }})}
+                                            placeholder="Ready to Level Up Your Freelance Game?"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Subtitle</Label>
+                                        <Input
+                                            value={settings.homepage.cta_subtitle}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, cta_subtitle: e.target.value }})}
+                                            placeholder="Join thousands of freelancers who trust Aranora"
+                                        />
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+                        </div>
+                        
+                        <div className="pt-4 border-t flex items-center gap-4">
+                            <Button
+                                onClick={() => saveSettings("homepage", settings.homepage)}
+                                disabled={isSaving}
+                                size="lg"
+                                className="gap-2"
+                            >
+                                <Save className="h-4 w-4" />
+                                {savedKey === "homepage" ? "Saved!" : "Save Homepage Content"}
+                            </Button>
+                            {savedKey === "homepage" && (
+                                <p className="text-sm text-green-600 dark:text-green-400 font-medium">Changes published successfully.</p>
+                            )}
+                        </div>
                     </div>
                 </TabsContent>
 
