@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -58,6 +58,8 @@ interface SettingsClientProps {
             cta_title: string
             cta_subtitle: string
             stats_min_threshold: number
+            features: { iconName: string; title: string; desc: string }[]
+            pricing_features: string[]
         }
         pricing_page: {
             hero_title: string
@@ -591,22 +593,133 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
 
                             {/* Features Section */}
                             <CollapsibleSection id="features" title="Features Overview" icon={<Sparkles className="h-5 w-5" />}>
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
-                                        <Input
-                                            value={settings.homepage.features_title}
-                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, features_title: e.target.value }})}
-                                            placeholder="Everything You Need to Succeed"
-                                        />
+                                <div className="space-y-6">
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
+                                            <Input
+                                                value={settings.homepage.features_title}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, features_title: e.target.value }})}
+                                                placeholder="Everything You Need to Succeed"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                            <Input
+                                                value={settings.homepage.features_subtitle}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, features_subtitle: e.target.value }})}
+                                                placeholder="Powerful features designed for freelancers"
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
-                                        <Input
-                                            value={settings.homepage.features_subtitle}
-                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, features_subtitle: e.target.value }})}
-                                            placeholder="Powerful features designed for freelancers"
-                                        />
+                                    
+                                    <div className="space-y-4 bg-muted/10 p-4 rounded-xl border">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Feature Cards</Label>
+                                            <Button 
+                                                size="sm" 
+                                                variant="outline" 
+                                                onClick={() => {
+                                                    const newFeatures = [...(settings.homepage.features || []), { iconName: 'Star', title: '', desc: '' }]
+                                                    setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                }}
+                                                className="h-8 gap-1.5"
+                                            >
+                                                <Plus className="h-3.5 w-3.5" /> Add Feature Card
+                                            </Button>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            { (settings.homepage.features || []).map((feature: any, idx: number) => (
+                                                <div key={idx} className="p-4 border rounded-lg bg-background shadow-sm flex gap-4 items-start group">
+                                                    <div className="flex-col gap-1 items-center hidden sm:flex pt-2">
+                                                        <button 
+                                                            disabled={idx === 0}
+                                                            onClick={() => {
+                                                                const newFeatures = [...settings.homepage.features]
+                                                                const temp = newFeatures[idx - 1]
+                                                                newFeatures[idx - 1] = newFeatures[idx]
+                                                                newFeatures[idx] = temp
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                            }}
+                                                            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                                        ><ArrowUp className="h-4 w-4" /></button>
+                                                        <button 
+                                                            disabled={idx === settings.homepage.features.length - 1}
+                                                            onClick={() => {
+                                                                const newFeatures = [...settings.homepage.features]
+                                                                const temp = newFeatures[idx + 1]
+                                                                newFeatures[idx + 1] = newFeatures[idx]
+                                                                newFeatures[idx] = temp
+                                                                setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                            }}
+                                                            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                                        ><ArrowDown className="h-4 w-4" /></button>
+                                                    </div>
+                                                    <div className="flex-grow grid gap-3 md:grid-cols-[150px_1fr]">
+                                                        <div className="space-y-1">
+                                                            <Label className="text-xs">Icon Name</Label>
+                                                            <Input
+                                                                value={feature.iconName}
+                                                                onChange={(e) => {
+                                                                    const newFeatures = [...settings.homepage.features]
+                                                                    newFeatures[idx] = { ...newFeatures[idx], iconName: e.target.value }
+                                                                    setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                                }}
+                                                                placeholder="e.g. Users"
+                                                                className="text-sm"
+                                                            />
+                                                            <span className="text-[10px] text-muted-foreground leading-tight block">Use Lucide React icon names. (e.g. Star, Zap, Users, Shield)</span>
+                                                        </div>
+                                                        <div className="grid gap-2">
+                                                            <div className="space-y-1">
+                                                                <Label className="text-xs">Title</Label>
+                                                                <Input
+                                                                    value={feature.title}
+                                                                    onChange={(e) => {
+                                                                        const newFeatures = [...settings.homepage.features]
+                                                                        newFeatures[idx] = { ...newFeatures[idx], title: e.target.value }
+                                                                        setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                                    }}
+                                                                    placeholder="e.g. Client Management"
+                                                                    className="font-medium"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <Label className="text-xs">Description</Label>
+                                                                <textarea
+                                                                    value={feature.desc}
+                                                                    onChange={(e) => {
+                                                                        const newFeatures = [...settings.homepage.features]
+                                                                        newFeatures[idx] = { ...newFeatures[idx], desc: e.target.value }
+                                                                        setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                                    }}
+                                                                    placeholder="Detailed description of the feature."
+                                                                    className="w-full min-h-[60px] p-2 text-sm rounded-md border border-input bg-background resize-y"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="text-muted-foreground hover:text-destructive shrink-0 mt-6"
+                                                        onClick={() => {
+                                                            const newFeatures = [...settings.homepage.features]
+                                                            newFeatures.splice(idx, 1)
+                                                            setSettings({ ...settings, homepage: { ...settings.homepage, features: newFeatures }})
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            {(!settings.homepage.features || settings.homepage.features.length === 0) && (
+                                                <div className="text-center p-6 border border-dashed rounded-lg text-muted-foreground text-sm">
+                                                    No features added yet. Add feature cards to showcase your product!
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </CollapsibleSection>
@@ -724,23 +837,87 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                             </CollapsibleSection>
 
                             {/* Pricing Section */}
-                            <CollapsibleSection id="pricing" title="Pricing Plans" icon={<DollarSign className="h-5 w-5" />}>
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
-                                        <Input
-                                            value={settings.homepage.pricing_title}
-                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, pricing_title: e.target.value }})}
-                                            placeholder="Simple, Transparent Pricing"
-                                        />
+                            <CollapsibleSection id="pricing" title="Pricing Summary" icon={<DollarSign className="h-5 w-5" />}>
+                                <div className="space-y-6">
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Title</Label>
+                                            <Input
+                                                value={settings.homepage.pricing_title}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, pricing_title: e.target.value }})}
+                                                placeholder="Simple, Transparent Pricing"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
+                                            <Input
+                                                value={settings.homepage.pricing_subtitle}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, pricing_subtitle: e.target.value }})}
+                                                placeholder="Start with your first month free."
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-semibold text-foreground/80">Section Subtitle</Label>
-                                        <Input
-                                            value={settings.homepage.pricing_subtitle}
-                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, pricing_subtitle: e.target.value }})}
-                                            placeholder="Start with your first month free."
-                                        />
+                                    
+                                    <div className="space-y-4 bg-muted/10 p-4 rounded-xl border">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Included Features Checklist</Label>
+                                            <Button 
+                                                size="sm" 
+                                                variant="outline" 
+                                                className="gap-2"
+                                                onClick={() => {
+                                                    setSettings({
+                                                        ...settings,
+                                                        homepage: {
+                                                            ...settings.homepage,
+                                                            pricing_features: [...(settings.homepage.pricing_features || []), "New Feature Included"]
+                                                        }
+                                                    })
+                                                }}
+                                            >
+                                                <Plus className="h-4 w-4" /> Add Item
+                                            </Button>
+                                        </div>
+                                        <div className="space-y-3">
+                                            { (settings.homepage.pricing_features || []).map((feature: string, idx: number) => (
+                                                <div key={idx} className="flex items-center gap-2">
+                                                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-secondary/15 flex items-center justify-center">
+                                                        <CheckCircle2 className="h-3.5 w-3.5 text-brand-secondary-dark dark:text-brand-secondary" />
+                                                    </div>
+                                                    <Input
+                                                        value={feature}
+                                                        onChange={(e) => {
+                                                            const newFeatures = [...settings.homepage.pricing_features];
+                                                            newFeatures[idx] = e.target.value;
+                                                            setSettings({
+                                                                ...settings,
+                                                                homepage: { ...settings.homepage, pricing_features: newFeatures }
+                                                            })
+                                                        }}
+                                                        className="font-medium"
+                                                    />
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:bg-destructive/10"
+                                                        onClick={() => {
+                                                            const newFeatures = settings.homepage.pricing_features.filter((_, i) => i !== idx);
+                                                            setSettings({
+                                                                ...settings,
+                                                                homepage: { ...settings.homepage, pricing_features: newFeatures }
+                                                            })
+                                                        }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            {(!settings.homepage.pricing_features || settings.homepage.pricing_features.length === 0) && (
+                                                <div className="text-center p-6 border border-dashed rounded-lg text-muted-foreground text-sm">
+                                                    No pricing features added yet.
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </CollapsibleSection>

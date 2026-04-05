@@ -82,6 +82,70 @@ export default async function AdminSettingsPage() {
                     cta_title: "Ready to Run Your Freelance Business Like a Pro?",
                     cta_subtitle: "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
                     stats_min_threshold: 50,
+                    features: [
+                        {
+                            iconName: "Users",
+                            title: "Client Management",
+                            desc: "Organize contacts, track history, manage relationships and communications — all in one place.",
+                        },
+                        {
+                            iconName: "Briefcase",
+                            title: "Project Tracking",
+                            desc: "Manage projects with tasks, milestones, deadlines, and share real-time progress with clients.",
+                        },
+                        {
+                            iconName: "FileText",
+                            title: "Smart Invoicing",
+                            desc: "Create professional invoices, track payment status, and get paid faster with integrated billing.",
+                        },
+                        {
+                            iconName: "Shield",
+                            title: "Contracts & E-Signatures",
+                            desc: "Generate PDF contracts and collect legally binding digital signatures — no third-party tools needed.",
+                        },
+                        {
+                            iconName: "Clock",
+                            title: "Time Tracking",
+                            desc: "Log billable hours per project, track time entries, and convert them directly into invoices.",
+                        },
+                        {
+                            iconName: "CheckSquare",
+                            title: "Task Management",
+                            desc: "Create, assign, and prioritize tasks with deadlines. Delegate work and track completion across your team.",
+                        },
+                        {
+                            iconName: "CalendarDays",
+                            title: "Calendar & Scheduling",
+                            desc: "Visualize your timeline with deadlines, milestones, and appointments in a unified calendar view.",
+                        },
+                        {
+                            iconName: "UserPlus",
+                            title: "Team Collaboration",
+                            desc: "Invite collaborators to projects, delegate tasks, and monitor team activity with real-time feeds.",
+                        },
+                        {
+                            iconName: "FileInput",
+                            title: "Client Intake Forms",
+                            desc: "Build custom onboarding questionnaires to collect project requirements from new clients professionally.",
+                        },
+                        {
+                            iconName: "BarChart3",
+                            title: "Reports & Analytics",
+                            desc: "Get insights into your revenue, project metrics, client activity, and overall business performance.",
+                        },
+                    ],
+                    pricing_features: [
+                        "Unlimited clients & projects",
+                        "Smart invoicing & contracts",
+                        "E-signatures & PDF generation",
+                        "Time tracking & reports",
+                        "Team collaboration",
+                        "Calendar & task management",
+                        "Client intake forms",
+                        "File management",
+                        "Client portal with progress sharing",
+                        "Priority support",
+                    ],
                     ...(settingsMap.homepage as Record<string, any> || {})
                 },
                 pricing_page: {

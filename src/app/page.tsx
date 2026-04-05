@@ -55,6 +55,8 @@ interface HomepageContent {
   cta_title: string;
   cta_subtitle: string;
   stats_min_threshold: number;
+  features: { iconName: string; title: string; desc: string }[];
+  pricing_features: string[];
 }
 
 const defaultContent: HomepageContent = {
@@ -107,74 +109,75 @@ const defaultContent: HomepageContent = {
   cta_subtitle:
     "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
   stats_min_threshold: 50,
+  features: [
+    {
+      iconName: "Users",
+      title: "Client Management",
+      desc: "Organize contacts, track history, manage relationships and communications — all in one place.",
+    },
+    {
+      iconName: "Briefcase",
+      title: "Project Tracking",
+      desc: "Manage projects with tasks, milestones, deadlines, and share real-time progress with clients.",
+    },
+    {
+      iconName: "FileText",
+      title: "Smart Invoicing",
+      desc: "Create professional invoices, track payment status, and get paid faster with integrated billing.",
+    },
+    {
+      iconName: "Shield",
+      title: "Contracts & E-Signatures",
+      desc: "Generate PDF contracts and collect legally binding digital signatures — no third-party tools needed.",
+    },
+    {
+      iconName: "Clock",
+      title: "Time Tracking",
+      desc: "Log billable hours per project, track time entries, and convert them directly into invoices.",
+    },
+    {
+      iconName: "CheckSquare",
+      title: "Task Management",
+      desc: "Create, assign, and prioritize tasks with deadlines. Delegate work and track completion across your team.",
+    },
+    {
+      iconName: "CalendarDays",
+      title: "Calendar & Scheduling",
+      desc: "Visualize your timeline with deadlines, milestones, and appointments in a unified calendar view.",
+    },
+    {
+      iconName: "UserPlus",
+      title: "Team Collaboration",
+      desc: "Invite collaborators to projects, delegate tasks, and monitor team activity with real-time feeds.",
+    },
+    {
+      iconName: "FileInput",
+      title: "Client Intake Forms",
+      desc: "Build custom onboarding questionnaires to collect project requirements from new clients professionally.",
+    },
+    {
+      iconName: "BarChart3",
+      title: "Reports & Analytics",
+      desc: "Get insights into your revenue, project metrics, client activity, and overall business performance.",
+    },
+  ],
+  pricing_features: [
+    "Unlimited clients & projects",
+    "Smart invoicing & contracts",
+    "E-signatures & PDF generation",
+    "Time tracking & reports",
+    "Team collaboration",
+    "Calendar & task management",
+    "Client intake forms",
+    "File management",
+    "Client portal with progress sharing",
+    "Priority support",
+  ],
 };
 
-/* ─── FEATURES DATA ─── */
-const features = [
-  {
-    icon: Users,
-    title: "Client Management",
-    desc: "Organize contacts, track history, manage relationships and communications — all in one place.",
-  },
-  {
-    icon: Briefcase,
-    title: "Project Tracking",
-    desc: "Manage projects with tasks, milestones, deadlines, and share real-time progress with clients.",
-  },
-  {
-    icon: FileText,
-    title: "Smart Invoicing",
-    desc: "Create professional invoices, track payment status, and get paid faster with integrated billing.",
-  },
-  {
-    icon: Shield,
-    title: "Contracts & E-Signatures",
-    desc: "Generate PDF contracts and collect legally binding digital signatures — no third-party tools needed.",
-  },
-  {
-    icon: Clock,
-    title: "Time Tracking",
-    desc: "Log billable hours per project, track time entries, and convert them directly into invoices.",
-  },
-  {
-    icon: CheckSquare,
-    title: "Task Management",
-    desc: "Create, assign, and prioritize tasks with deadlines. Delegate work and track completion across your team.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Calendar & Scheduling",
-    desc: "Visualize your timeline with deadlines, milestones, and appointments in a unified calendar view.",
-  },
-  {
-    icon: UserPlus,
-    title: "Team Collaboration",
-    desc: "Invite collaborators to projects, delegate tasks, and monitor team activity with real-time feeds.",
-  },
-  {
-    icon: FileInput,
-    title: "Client Intake Forms",
-    desc: "Build custom onboarding questionnaires to collect project requirements from new clients professionally.",
-  },
-  {
-    icon: BarChart3,
-    title: "Reports & Analytics",
-    desc: "Get insights into your revenue, project metrics, client activity, and overall business performance.",
-  },
-];
-
-const pricingFeatures = [
-  "Unlimited clients & projects",
-  "Smart invoicing & contracts",
-  "E-signatures & PDF generation",
-  "Time tracking & reports",
-  "Team collaboration",
-  "Calendar & task management",
-  "Client intake forms",
-  "File management",
-  "Client portal with progress sharing",
-  "Priority support",
-];
+const LucideIcons: Record<string, any> = {
+  Users, Briefcase, FileText, Shield, Clock, CheckSquare, CalendarDays, UserPlus, FileInput, BarChart3, Star, Zap, Lock, Rocket, Globe, Sparkles
+};
 
 /* ─── HOW IT WORKS ICONS ─── */
 const stepIcons = [UserPlus, FolderOpen, Briefcase];
@@ -564,13 +567,15 @@ export default async function LandingPage() {
             </p>
           </div>
           <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((feature, i) => (
+            {content.features?.map((feature, i) => {
+              const Icon = LucideIcons[feature.iconName] || Zap;
+              return (
               <StaggerItem
                 key={i}
                 className="group p-6 rounded-2xl bg-card border border-border card-brand-hover"
               >
                 <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-brand-primary/15">
-                  <feature.icon className="h-6 w-6 text-white" />
+                  <Icon className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
                   {feature.title}
@@ -579,7 +584,7 @@ export default async function LandingPage() {
                   {feature.desc}
                 </p>
               </StaggerItem>
-            ))}
+            )})}
           </StaggerContainer>
         </div>
       </section>
@@ -714,7 +719,7 @@ export default async function LandingPage() {
               Everything included in both plans
             </h3>
             <div className="grid sm:grid-cols-2 gap-3">
-              {pricingFeatures.map((feature, i) => (
+              {(content.pricing_features || []).map((feature, i) => (
                 <div key={i} className="flex items-center gap-3 text-foreground">
                   <div className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-secondary/15 flex items-center justify-center">
                     <CheckCircle2 className="h-3.5 w-3.5 text-brand-secondary-dark dark:text-brand-secondary" />
