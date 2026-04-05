@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ArrowLeft, Calendar, User, Tag } from "lucide-react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import PublicNavbar from "@/components/layout/public-navbar"
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -54,23 +55,7 @@ export default async function ArticlePage({ params }: PageProps) {
     return (
         <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
             {/* Navigation */}
-            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link
-                        href="/blog"
-                        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Blog
-                    </Link>
-                    <Link
-                        href="/"
-                        className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-                    >
-                        Aranora
-                    </Link>
-                </div>
-            </nav>
+            <PublicNavbar />
 
             {/* Article */}
             <article className="py-12 md:py-16">

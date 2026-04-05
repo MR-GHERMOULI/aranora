@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PricingPageData, PricingPageClientWrap } from "./pricing-client";
+import PublicNavbar from "@/components/layout/public-navbar";
 
 export default async function PricingPage() {
     const supabase = await createClient();
@@ -55,5 +56,10 @@ export default async function PricingPage() {
         ? { ...defaultData, ...(pricingSetting.value as Partial<PricingPageData>) }
         : defaultData;
 
-    return <PricingPageClientWrap data={content} />;
+    return (
+        <>
+            <PublicNavbar />
+            <PricingPageClientWrap data={content} />
+        </>
+    );
 }

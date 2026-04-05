@@ -28,6 +28,7 @@ import {
 import { Footer } from "@/components/layout/footer";
 import { createClient } from "@/lib/supabase/server";
 import { FadeIn, ScaleIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
+import PublicNavbar from "@/components/layout/public-navbar";
 
 /* ─── CMS INTERFACE ─── */
 interface HomepageContent {
@@ -339,83 +340,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* ═══════════ NAVIGATION ═══════════ */}
-      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-xl z-50 border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center">
-                {logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
-                ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
-                    <svg
-                      className="h-5 w-5 text-white"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-              <span className="text-xl font-bold text-brand-primary tracking-tight">
-                Aranora
-              </span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a
-                href="#features"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-              >
-                Features
-              </a>
-              <a
-                href="#pricing"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-              >
-                Pricing
-              </a>
-              <a
-                href="#testimonials"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-              >
-                Testimonials
-              </a>
-              <a
-                href="#affiliates"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-              >
-                Affiliates
-              </a>
-              <Link
-                href="/blog"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-              >
-                Blog
-              </Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                asChild
-                className="hidden sm:inline-flex"
-              >
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button
-                asChild
-                className="bg-brand-primary hover:bg-brand-primary-light shadow-lg shadow-brand-primary/20 transition-all hover:shadow-brand-primary/30"
-              >
-                <Link href="/signup">
-                  {content.nav_cta_text}
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PublicNavbar />
 
       {/* ═══════════ HERO SECTION ═══════════ */}
       <section className="pt-28 sm:pt-36 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
