@@ -261,6 +261,32 @@ export async function markSubmissionConverted(id: string, projectId?: string, co
     revalidatePath('/intake-forms');
 }
 
+export async function linkSubmissionToProject(id: string, projectId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    const { error } = await supabase
+        .from('intake_submissions')
+        .update({
+            converted_project_id: projectId,
+            reviewed_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+    if (error) {
+        console.error('Error linking submission to project:', error);
+        throw new Error('Failed to link submission');
+    }
+
+    revalidatePath('/intake-forms');
+    revalidatePath('/projects');
+}
+
 export async function deleteSubmission(id: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

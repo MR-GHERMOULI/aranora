@@ -24,6 +24,9 @@ import { ShareProgressDialog } from "@/components/projects/share-progress-dialog
 import { ProjectTimerButton } from "@/components/time-tracking/project-timer-button";
 import { getProjectCollaborators } from "../collaborator-actions";
 import { getProfile } from "../../settings/actions";
+import { getSubmissions } from "../../intake-forms/actions";
+import { ProjectIntakeTab } from "@/components/projects/project-intake-tab";
+import { ClipboardList } from "lucide-react";
 
 export default async function ProjectPage({
     params
@@ -45,17 +48,19 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, tasks, files, timeEntries, collaborators, allContracts, profile] = await Promise.all([
+    const [invoices, tasks, files, timeEntries, collaborators, allContracts, profile, allSubmissions] = await Promise.all([
         getInvoices(undefined, project.id),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id),
         getTimeEntries({ projectId: project.id }),
         getProjectCollaborators(project.id),
         getContracts(),
-        getProfile()
+        getProfile(),
+        getSubmissions()
     ]);
 
     const projectContracts = allContracts.filter(c => c.project_id === project.id);
+    const linkedSubmissions = allSubmissions.filter(s => s.converted_project_id === project.id);
 
     return (
         <div className="px-4 lg:px-8 space-y-6 pt-8 pb-10">
@@ -204,6 +209,15 @@ export default async function ProjectPage({
                                     </span>
                                 )}
                             </TabsTrigger>
+                            <TabsTrigger value="intake" className="gap-1.5">
+                                <ClipboardList className="h-3.5 w-3.5" />
+                                Intake Forms
+                                {linkedSubmissions.length > 0 && (
+                                    <span className="ml-1 h-4 min-w-4 rounded-full bg-rose-500/10 text-rose-600 text-[9px] font-bold flex items-center justify-center px-1">
+                                        {linkedSubmissions.length}
+                                    </span>
+                                )}
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
@@ -220,6 +234,14 @@ export default async function ProjectPage({
                                 projectId={project.id}
                                 projectTitle={project.title}
                                 profile={profile}
+                            />
+                        </TabsContent>
+                        <TabsContent value="intake" className="mt-4">
+                            <ProjectIntakeTab
+                                submissions={linkedSubmissions}
+                                allSubmissions={allSubmissions}
+                                projectId={project.id}
+                                projectTitle={project.title}
                             />
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
