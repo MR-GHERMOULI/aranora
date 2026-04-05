@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ArrowRight, ArrowLeft } from "lucide-react"
 import type { Metadata } from "next"
 import PublicNavbar from "@/components/layout/public-navbar"
+import { Footer } from "@/components/layout/footer"
 
 export const metadata: Metadata = {
     title: "Blog | Aranora — Tips for Freelancers",
@@ -123,11 +124,7 @@ export default async function BlogPage() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-border py-8">
-                <div className="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Aranora. All rights reserved.</p>
-                </div>
-            </footer>
+            <Footer />
         </main>
     )
 }

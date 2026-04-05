@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, User, Tag } from "lucide-react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import PublicNavbar from "@/components/layout/public-navbar"
+import { Footer } from "@/components/layout/footer"
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -153,9 +154,22 @@ export default async function ArticlePage({ params }: PageProps) {
                         </Link>
                     </div>
 
+                    {/* Bottom Back Button */}
+                    <div className="mt-12 text-center">
+                        <Link
+                            href="/blog"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                        >
+                            <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                            </span>
+                            Back to Articles List
+                        </Link>
+                    </div>
+
                     {/* Related Articles */}
                     {related && related.length > 0 && (
-                        <section className="mt-16">
+                        <section className="mt-16 border-t border-border pt-12">
                             <h3 className="text-2xl font-bold mb-6">More Articles</h3>
                             <div className="grid gap-4 md:grid-cols-3">
                                 {related.map((r) => (
@@ -179,11 +193,7 @@ export default async function ArticlePage({ params }: PageProps) {
             </article>
 
             {/* Footer */}
-            <footer className="border-t border-border py-8">
-                <div className="max-w-4xl mx-auto px-4 text-center text-sm text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Aranora. All rights reserved.</p>
-                </div>
-            </footer>
+            <Footer />
         </main>
     )
 }
