@@ -56,26 +56,21 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
-            {/* Header */}
-            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
-                            <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
-                        </div>
-                        <span className="text-xl font-bold text-brand-primary">Aranora</span>
-                    </Link>
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Home</Link>
-                    </Button>
-                </div>
-            </nav>
+        <main className="max-w-4xl mx-auto px-4 pt-32 pb-16 relative">
+            {/* Back Button */}
+            <div className="mb-10">
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                    <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </span>
+                    Back to Home
+                </Link>
+            </div>
 
-            <main className="max-w-4xl mx-auto px-4 py-16">
-                <div className="text-center mb-12">
+            <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold text-foreground mb-4">Contact Us</h1>
                     <p className="text-xl text-muted-foreground">We&apos;d love to hear from you. Get in touch with our team.</p>
                 </div>
@@ -200,9 +195,6 @@ export default function ContactPage() {
                         </CardContent>
                     </Card>
                 </div>
-            </main>
-
-            <Footer simple />
-        </div>
+        </main>
     );
 }

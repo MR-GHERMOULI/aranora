@@ -2,28 +2,28 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, Target, Heart, Zap } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
+import PublicNavbar from "@/components/layout/public-navbar";
 
 export default function AboutPage() {
     return (
         <div className="min-h-screen bg-background">
-            {/* Simple Header */}
-            <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
-                            <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
-                        </div>
-                        <span className="text-xl font-bold text-brand-primary">Aranora</span>
-                    </Link>
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Home</Link>
-                    </Button>
-                </div>
-            </nav>
+            {/* Header */}
+            <PublicNavbar />
 
-            <main className="max-w-4xl mx-auto px-4 py-16">
+            <main className="max-w-4xl mx-auto px-4 pt-32 pb-16 relative">
+                {/* Back Button */}
+                <div className="mb-10">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                    >
+                        <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                        </span>
+                        Back to Home
+                    </Link>
+                </div>
+
                 <div className="text-center mb-16">
                     <h1 className="text-4xl font-bold text-foreground mb-4">About Aranora</h1>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -82,7 +82,7 @@ export default function AboutPage() {
             </main>
 
             {/* Footer */}
-            <Footer simple />
+            <Footer />
         </div>
     );
 }
