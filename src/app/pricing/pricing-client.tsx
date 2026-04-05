@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, Sparkles, Star, ArrowRight, Zap, ChevronRight, Globe, TrendingUp, DollarSign, Shield, Clock, Briefcase, Plus, Minus } from 'lucide-react';
+import { CheckCircle2, Sparkles, Star, ArrowRight, ArrowLeft, Zap, ChevronRight, Globe, TrendingUp, DollarSign, Shield, Clock, Briefcase, Plus, Minus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { FadeIn, ScaleIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
 import { Footer } from "@/components/layout/footer";
