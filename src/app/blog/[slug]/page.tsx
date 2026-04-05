@@ -58,8 +58,21 @@ export default async function ArticlePage({ params }: PageProps) {
             <PublicNavbar />
 
             {/* Article */}
-            <article className="py-12 md:py-16">
+            <article className="pt-32 pb-12 md:pt-40 md:pb-16 relative">
                 <div className="max-w-4xl mx-auto px-4">
+                    {/* Back Button */}
+                    <div className="mb-10">
+                        <Link
+                            href="/blog"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                        >
+                            <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                            </span>
+                            Back to Articles
+                        </Link>
+                    </div>
+
                     {/* Header */}
                     <header className="mb-10">
                         {article.tags && article.tags.length > 0 && (

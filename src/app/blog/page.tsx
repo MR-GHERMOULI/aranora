@@ -25,7 +25,7 @@ export default async function BlogPage() {
             <PublicNavbar />
 
             {/* Hero */}
-            <section className="py-16 md:py-24">
+            <section className="pt-24 md:pt-32 pb-16 md:pb-24">
                 <div className="max-w-6xl mx-auto px-4 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         The Aranora Blog
