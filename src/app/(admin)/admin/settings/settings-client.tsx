@@ -57,6 +57,7 @@ interface SettingsClientProps {
             affiliate_perks: { label: string; sub: string }[]
             cta_title: string
             cta_subtitle: string
+            footer_tagline: string
             stats_min_threshold: number
             features: { iconName: string; title: string; desc: string }[]
             pricing_features: string[]
@@ -1077,6 +1078,42 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                             onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, cta_subtitle: e.target.value }})}
                                             placeholder="Join thousands of freelancers who trust Aranora"
                                         />
+                                    </div>
+                                </div>
+                            </CollapsibleSection>
+
+                            {/* Footer Branding Section */}
+                            <CollapsibleSection id="footer_branding" title="Footer Branding" icon={<LinkIcon className="h-5 w-5" />}>
+                                <div className="space-y-4">
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-semibold text-foreground/80">Footer Tagline</Label>
+                                        <textarea
+                                            value={settings.homepage.footer_tagline}
+                                            onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, footer_tagline: e.target.value }})}
+                                            placeholder="The all-in-one platform for freelancers."
+                                            className="w-full min-h-[80px] p-3 rounded-md border border-input bg-background text-sm resize-y focus:ring-2 focus:ring-ring focus:border-input"
+                                            maxLength={100}
+                                        />
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>The small tagline text shown below the logo in the footer</span>
+                                            <span>{settings.homepage.footer_tagline?.length || 0}/100</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-muted/40 rounded-xl border border-dashed text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-2 mb-2 font-semibold">
+                                            <Eye className="h-3.5 w-3.5" /> Footer Preview
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2">
+                                                {settings.branding.logo_url ? (
+                                                    <img src={settings.branding.logo_url} alt="Logo" className="h-6 object-contain" />
+                                                ) : (
+                                                    <div className="h-6 w-6 rounded bg-primary/20" />
+                                                )}
+                                                <span className="font-bold text-sm tracking-tight" style={{ color: settings.branding.primary_color }}>Aranora</span>
+                                            </div>
+                                            <p className="opacity-70 leading-relaxed">{settings.homepage.footer_tagline || "The all-in-one platform for freelancers."}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </CollapsibleSection>

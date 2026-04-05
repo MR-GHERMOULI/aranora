@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getFooterLinks } from '@/app/(admin)/admin/settings/footer-actions'
+import { createClient } from '@/lib/supabase/client'
 
 interface FooterProps {
     simple?: boolean
@@ -10,21 +11,69 @@ interface FooterProps {
 
 export function Footer({ simple = false }: FooterProps) {
     const [links, setLinks] = useState<any[]>([])
+    const [tagline, setTagline] = useState("The all-in-one platform for freelancers.")
+    const [logoUrl, setLogoUrl] = useState<string | null>(null)
+    const [primaryColor, setPrimaryColor] = useState("#1E3A5F")
 
     useEffect(() => {
-        const fetchLinks = async () => {
-            const data = await getFooterLinks()
-            setLinks(data.filter(l => l.is_active))
+        const fetchFooterData = async () => {
+            const supabase = createClient()
+            
+            // Fetch links
+            const linksData = await getFooterLinks()
+            setLinks(linksData.filter((l: any) => l.is_active))
+
+            // Fetch Homepage Settings (Tagline)
+            const { data: homepageSetting } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "homepage")
+                .single()
+            if (homepageSetting?.value?.footer_tagline) {
+                setTagline(homepageSetting.value.footer_tagline)
+            }
+
+            // Fetch Branding Settings (Logo)
+            const { data: brandingSetting } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single()
+            if (brandingSetting?.value?.logo_url) {
+                setLogoUrl(brandingSetting.value.logo_url)
+            }
+            if (brandingSetting?.value?.primary_color) {
+                setPrimaryColor(brandingSetting.value.primary_color)
+            }
         }
-        fetchLinks()
+        fetchFooterData()
     }, [])
+
+    const Logo = () => (
+        <div className="flex items-center gap-2 mb-4 transition-transform hover:scale-105 active:scale-95 origin-left">
+            <div className="h-8 w-8 rounded-lg overflow-hidden flex items-center justify-center">
+                {logoUrl ? (
+                    <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
+                        <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>
+                    </div>
+                )}
+            </div>
+            <span className="text-xl font-bold tracking-tight" style={{ color: primaryColor }}>Aranora</span>
+        </div>
+    )
 
     if (simple) {
         return (
-            <footer className="border-t border-border py-8 mt-auto">
+            <footer className="border-t border-border py-8 mt-auto bg-background">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground">
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-                        <p>© {new Date().getFullYear()} Aranora. All rights reserved.</p>
+                        <Link href="/" className="hover:opacity-80 transition-opacity">
+                            <p>© {new Date().getFullYear()} Aranora. All rights reserved.</p>
+                        </Link>
                         {links.length > 0 && (
                             <div className="flex items-center gap-4">
                                 <span className="hidden md:inline text-border">|</span>
@@ -52,15 +101,12 @@ export function Footer({ simple = false }: FooterProps) {
             <div className="max-w-7xl mx-auto">
                 <div className="grid md:grid-cols-4 gap-8 mb-8">
                     <div>
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
-                                <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
-                            </div>
-                            <span className="text-xl font-bold text-brand-primary">Aranora</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">The all-in-one platform for freelancers.</p>
+                        <Link href="/">
+                            <Logo />
+                        </Link>
+                        <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
+                            {tagline}
+                        </p>
                     </div>
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Product</h4>
@@ -112,3 +158,4 @@ export function Footer({ simple = false }: FooterProps) {
         </footer>
     )
 }
+
