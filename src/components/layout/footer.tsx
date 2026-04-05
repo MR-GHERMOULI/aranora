@@ -65,8 +65,8 @@ export function Footer({ simple = false }: FooterProps) {
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Product</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#features" className="hover:text-brand-primary transition-colors">Features</a></li>
-                            <li><a href="#pricing" className="hover:text-brand-primary transition-colors">Pricing</a></li>
+                            <li><Link href="/#features" className="hover:text-brand-primary transition-colors">Features</Link></li>
+                            <li><Link href="/pricing" className="hover:text-brand-primary transition-colors">Pricing</Link></li>
                             <li><Link href="/blog" className="hover:text-brand-primary transition-colors">Blog</Link></li>
                         </ul>
                     </div>

@@ -100,6 +100,19 @@ function PricingContent({ data }: { data: PricingPageData }) {
                         </FadeIn>
                     )}
 
+                    {/* Back Button */}
+                    <FadeIn className="mb-10">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                        >
+                            <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                            </span>
+                            Back to Home
+                        </Link>
+                    </FadeIn>
+
                     {/* Hero */}
                     <FadeIn delay={0.1} className="text-center mb-16 max-w-4xl mx-auto">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-sm font-semibold mb-6">

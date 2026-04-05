@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import { SignatureCanvas } from "@/components/contracts/signature-canvas"
-import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ArrowDown, ShieldCheck, DollarSign, Calendar, Briefcase } from "lucide-react"
+import { CheckCircle, FileText, Loader2, AlertCircle, PenTool, ArrowDown, ShieldCheck, DollarSign, Calendar, Briefcase, ArrowLeft } from "lucide-react"
 import { DownloadContractButton } from "@/components/contracts/download-contract-button"
+import Link from "next/link"
 
 interface ContractData {
     id: string;
@@ -137,29 +138,19 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
     }
 
     return (
-        <div className="min-h-screen bg-muted/30 pb-32">
-            {/* Minimal Header */}
-            <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
-                <div className="max-w-5xl mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {contract.profile?.logo_url && (
-                            <img
-                                src={contract.profile.logo_url}
-                                alt="Logo"
-                                className="h-10 w-10 rounded-xl object-contain bg-muted border border-border"
-                            />
-                        )}
-                        <div>
-                            <span className="text-sm font-bold text-foreground block">{providerName}</span>
-                            <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1 mt-0.5">
-                                <ShieldCheck className="h-3 w-3" /> Secure Document
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-4xl mx-auto px-4 lg:px-8 pt-10">
+        <main className="max-w-4xl mx-auto px-4 lg:px-8 pt-32 pb-16 relative">
+            {/* Back Button */}
+            <div className="mb-10">
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                    <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </span>
+                    Back to Home
+                </Link>
+            </div>
 
                 {/* Title Section */}
                 <div className="text-center mb-10 max-w-2xl mx-auto">
@@ -321,17 +312,5 @@ export default function SigningPageClient({ contract, token }: SigningPageClient
                 </div>
 
             </main>
-
-            {/* Sticky Bottom Bar for quick action */}
-            <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-border p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 md:hidden flex justify-center">
-                <button
-                    onClick={scrollToSignature}
-                    className="w-full max-w-sm h-12 bg-foreground text-background rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg"
-                >
-                    <ArrowDown className="h-4 w-4" />
-                    Skip to Signature
-                </button>
-            </div>
-        </div>
     )
 }

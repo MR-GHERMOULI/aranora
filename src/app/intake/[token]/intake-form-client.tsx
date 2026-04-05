@@ -6,6 +6,7 @@ import {
     ArrowLeft, User, Mail, Phone, Building2, FileText, Calendar,
     DollarSign, Upload, ChevronDown, X, Info
 } from "lucide-react"
+import Link from "next/link"
 import { IntakeFormField } from "@/types"
 
 interface FormData {
@@ -383,41 +384,27 @@ export default function IntakeFormClient({ form, token }: IntakeFormClientProps)
     }
 
     return (
-        <div className="min-h-screen bg-muted/30">
-            {/* Header */}
-            <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
-                <div className="max-w-3xl mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {form.profile?.logo_url && (
-                            <img
-                                src={form.profile.logo_url}
-                                alt="Logo"
-                                className="h-10 w-10 rounded-xl object-contain bg-muted border border-border"
-                            />
-                        )}
-                        <div>
-                            <span className="text-sm font-bold text-foreground block">{providerName}</span>
-                            <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1 mt-0.5">
-                                <ShieldCheck className="h-3 w-3" /> Secure Form
-                            </span>
-                        </div>
-                    </div>
-                    <div className="text-right hidden sm:block">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                            Step {currentSection + 1} of {totalSections}
-                        </span>
-                    </div>
-                </div>
-                {/* Progress Bar */}
-                <div className="h-1 bg-muted">
-                    <div
-                        className="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-500 ease-out"
-                        style={{ width: `${progress}%` }}
-                    />
-                </div>
-            </header>
+        <main className="max-w-3xl mx-auto px-4 lg:px-8 pt-32 pb-32 relative">
+            {/* Back Button */}
+            <div className="mb-10">
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                    <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                    </span>
+                    Back to Home
+                </Link>
+            </div>
 
-            <main className="max-w-3xl mx-auto px-4 lg:px-8 pt-10 pb-32">
+            {/* Progress Bar (Floating below navbar if sticky or just relative) */}
+            <div className="mb-8 bg-muted rounded-full h-2 overflow-hidden shadow-sm">
+                <div
+                    className="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                />
+            </div>
                 {/* Title */}
                 <div className="text-center mb-10 max-w-2xl mx-auto">
                     <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight">
@@ -586,7 +573,6 @@ export default function IntakeFormClient({ form, token }: IntakeFormClientProps)
                         </button>
                     )}
                 </div>
-            </main>
 
             {/* Mobile Sticky Nav */}
             <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-border p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 sm:hidden">
@@ -619,6 +605,6 @@ export default function IntakeFormClient({ form, token }: IntakeFormClientProps)
                     )}
                 </div>
             </div>
-        </div>
+        </main>
     )
 }

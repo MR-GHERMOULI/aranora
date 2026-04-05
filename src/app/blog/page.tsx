@@ -27,14 +27,29 @@ export default async function BlogPage() {
 
             {/* Hero */}
             <section className="pt-24 md:pt-32 pb-16 md:pb-24">
-                <div className="max-w-6xl mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        The Aranora Blog
-                    </h1>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Expert tips, insights, and guides to help you thrive as a freelancer.
-                        From invoicing best practices to client management strategies.
-                    </p>
+                <div className="max-w-6xl mx-auto px-4">
+                    {/* Back Button */}
+                    <div className="mb-10">
+                        <Link
+                            href="/"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+                        >
+                            <span className="flex items-center justify-center h-8 w-8 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
+                                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                            </span>
+                            Back to Home
+                        </Link>
+                    </div>
+
+                    <div className="text-center">
+                        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            The Aranora Blog
+                        </h1>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            Expert tips, insights, and guides to help you thrive as a freelancer.
+                            From invoicing best practices to client management strategies.
+                        </p>
+                    </div>
                 </div>
             </section>
 
