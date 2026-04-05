@@ -24,7 +24,7 @@ import { ShareProgressDialog } from "@/components/projects/share-progress-dialog
 import { ProjectTimerButton } from "@/components/time-tracking/project-timer-button";
 import { getProjectCollaborators } from "../collaborator-actions";
 import { getProfile } from "../../settings/actions";
-import { getSubmissions } from "../../intake-forms/actions";
+import { getIntakeForms, getSubmissions } from "../../intake-forms/actions";
 import { ProjectIntakeTab } from "@/components/projects/project-intake-tab";
 import { ClipboardList } from "lucide-react";
 
@@ -48,7 +48,7 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, tasks, files, timeEntries, collaborators, allContracts, profile, allSubmissions] = await Promise.all([
+    const [invoices, tasks, files, timeEntries, collaborators, allContracts, profile, allSubmissions, allForms] = await Promise.all([
         getInvoices(undefined, project.id),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id),
@@ -56,7 +56,8 @@ export default async function ProjectPage({
         getProjectCollaborators(project.id),
         getContracts(),
         getProfile(),
-        getSubmissions()
+        getSubmissions(),
+        getIntakeForms()
     ]);
 
     const projectContracts = allContracts.filter(c => c.project_id === project.id);
@@ -239,6 +240,7 @@ export default async function ProjectPage({
                         <TabsContent value="intake" className="mt-4">
                             <ProjectIntakeTab
                                 submissions={linkedSubmissions}
+                                forms={allForms}
                                 allSubmissions={allSubmissions}
                                 projectId={project.id}
                                 projectTitle={project.title}
