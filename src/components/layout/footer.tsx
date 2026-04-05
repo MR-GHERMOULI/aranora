@@ -1,9 +1,8 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getFooterLinks } from '@/app/(admin)/admin/settings/footer-actions'
 import { createClient } from '@/lib/supabase/client'
+import { Twitter, Linkedin } from 'lucide-react'
 
 interface FooterProps {
     simple?: boolean
@@ -14,6 +13,10 @@ export function Footer({ simple = false }: FooterProps) {
     const [tagline, setTagline] = useState("The all-in-one platform for freelancers.")
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
     const [primaryColor, setPrimaryColor] = useState("#1E3A5F")
+    const [socialLinks, setSocialLinks] = useState({
+        twitter: "",
+        linkedin: ""
+    })
 
     useEffect(() => {
         const fetchFooterData = async () => {
@@ -23,14 +26,21 @@ export function Footer({ simple = false }: FooterProps) {
             const linksData = await getFooterLinks()
             setLinks(linksData.filter((l: any) => l.is_active))
 
-            // Fetch Homepage Settings (Tagline)
+            // Fetch Homepage Settings (Tagline & Socials)
             const { data: homepageSetting } = await supabase
                 .from("platform_settings")
                 .select("value")
                 .eq("key", "homepage")
                 .single()
-            if (homepageSetting?.value?.footer_tagline) {
-                setTagline(homepageSetting.value.footer_tagline)
+            
+            if (homepageSetting?.value) {
+                if (homepageSetting.value.footer_tagline) {
+                    setTagline(homepageSetting.value.footer_tagline)
+                }
+                setSocialLinks({
+                    twitter: homepageSetting.value.twitter_url || "",
+                    linkedin: homepageSetting.value.linkedin_url || ""
+                })
             }
 
             // Fetch Branding Settings (Logo)
@@ -104,9 +114,31 @@ export function Footer({ simple = false }: FooterProps) {
                         <Link href="/">
                             <Logo />
                         </Link>
-                        <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
+                        <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px] mb-6">
                             {tagline}
                         </p>
+                        <div className="flex items-center gap-4">
+                            {socialLinks.twitter && (
+                                <a 
+                                    href={socialLinks.twitter} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-brand-primary hover:border-brand-primary transition-all duration-300"
+                                >
+                                    <Twitter className="h-4 w-4" />
+                                </a>
+                            )}
+                            {socialLinks.linkedin && (
+                                <a 
+                                    href={socialLinks.linkedin} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-brand-primary hover:border-brand-primary transition-all duration-300"
+                                >
+                                    <Linkedin className="h-4 w-4" />
+                                </a>
+                            )}
+                        </div>
                     </div>
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Product</h4>

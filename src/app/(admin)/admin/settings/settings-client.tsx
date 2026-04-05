@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2 } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2, Twitter, Linkedin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -58,6 +58,8 @@ interface SettingsClientProps {
             cta_title: string
             cta_subtitle: string
             footer_tagline: string
+            twitter_url: string
+            linkedin_url: string
             stats_min_threshold: number
             features: { iconName: string; title: string; desc: string }[]
             pricing_features: string[]
@@ -1097,6 +1099,28 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                         <div className="flex justify-between text-xs text-muted-foreground">
                                             <span>The small tagline text shown below the logo in the footer</span>
                                             <span>{settings.homepage.footer_tagline?.length || 0}/100</span>
+                                        </div>
+                                    </div>
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                                                <Twitter className="h-4 w-4 text-[#1DA1F2]" /> Twitter URL
+                                            </Label>
+                                            <Input
+                                                value={settings.homepage.twitter_url}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, twitter_url: e.target.value }})}
+                                                placeholder="https://twitter.com/aranora"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                                                <Linkedin className="h-4 w-4 text-[#0077B5]" /> LinkedIn URL
+                                            </Label>
+                                            <Input
+                                                value={settings.homepage.linkedin_url}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, linkedin_url: e.target.value }})}
+                                                placeholder="https://linkedin.com/company/aranora"
+                                            />
                                         </div>
                                     </div>
                                     <div className="p-4 bg-muted/40 rounded-xl border border-dashed text-xs text-muted-foreground">

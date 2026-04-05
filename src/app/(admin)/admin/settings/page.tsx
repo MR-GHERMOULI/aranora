@@ -82,6 +82,8 @@ export default async function AdminSettingsPage() {
                     cta_title: "Ready to Run Your Freelance Business Like a Pro?",
                     cta_subtitle: "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
                     footer_tagline: "The all-in-one platform for freelancers.",
+                    twitter_url: "https://twitter.com/aranora",
+                    linkedin_url: "https://linkedin.com/company/aranora",
                     stats_min_threshold: 50,
                     features: [
                         {
