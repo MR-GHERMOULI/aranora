@@ -25,7 +25,8 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Textarea } from "@/components/ui/textarea"
-import { linkSubmissionToProject, updateSubmissionStatus, deleteIntakeForm, updateIntakeForm } from "@/app/(dashboard)/intake-forms/actions"
+import { getIntakeForms, getSubmissions, deleteIntakeForm, updateIntakeForm, linkSubmissionToProject, updateSubmissionStatus } from "@/app/(dashboard)/intake-forms/actions"
+import { FormBuilder } from "@/components/intake-forms/form-builder"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -345,6 +346,7 @@ export function ProjectIntakeTab({ submissions, forms, allSubmissions, projectId
                                     {forms.length}
                                 </span>
                             </div>
+                            <FormBuilder onCreated={() => router.refresh()} />
                         </div>
                         <div className="overflow-x-auto">
                             <Table>
