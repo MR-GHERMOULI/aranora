@@ -11,23 +11,43 @@ export async function GET() {
     )
     
     // Quick public read from platform_settings
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('platform_settings')
       .select('value')
       .eq('key', 'branding')
       .single()
 
+    if (error) {
+      console.error("Favicon Supabase fetch error:", error.message)
+    }
+
     if (data?.value?.favicon_url) {
-      return NextResponse.redirect(data.value.favicon_url)
+      // Instead of redirecting which some browsers ignore for favicons, construct a reliable image response
+      const response = await fetch(data.value.favicon_url)
+      
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || 'image/x-icon'
+        const arrayBuffer = await response.arrayBuffer()
+        
+        return new NextResponse(arrayBuffer, {
+          headers: {
+            'Content-Type': contentType,
+            // Prevent Next static build caching, but allow browser to cache actively
+            'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+          }
+        })
+      }
     }
   } catch (error) {
-    console.error("Favicon redirect error:", error)
+    console.error("Favicon proxy error:", error)
   }
 
   // Fallback to a placeholder base64 blank icon to prevent 404s if nothing is uploaded yet
-  // Or handle a default SVG
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1E3A5F"/></svg>`
   return new NextResponse(svg, {
-    headers: { 'Content-Type': 'image/svg+xml' }
+    headers: { 
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 'public, max-age=60'
+    }
   })
 }
