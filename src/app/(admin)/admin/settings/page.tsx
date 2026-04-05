@@ -79,6 +79,7 @@ export default async function AdminSettingsPage() {
                         { label: "Unique Links", sub: "Track every click" },
                         { label: "$50 Min Payout", sub: "Via PayPal or Bank" },
                     ],
+                    cta_title: "Ready to Run Your Freelance Business Like a Pro?",
                     cta_subtitle: "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
                     footer_tagline: "The all-in-one platform for freelancers.",
                     stats_min_threshold: 50,
