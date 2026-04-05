@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2, Twitter, Linkedin } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2, Twitter, Linkedin, Code } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -60,6 +60,8 @@ interface SettingsClientProps {
             footer_tagline: string
             twitter_url: string
             linkedin_url: string
+            developer_text: string
+            developer_url: string
             stats_min_threshold: number
             features: { iconName: string; title: string; desc: string }[]
             pricing_features: string[]
@@ -1120,6 +1122,26 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                                 value={settings.homepage.linkedin_url}
                                                 onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, linkedin_url: e.target.value }})}
                                                 placeholder="https://linkedin.com/company/aranora"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80 flex items-center gap-2">
+                                                <Code className="h-4 w-4 text-primary" /> Developer Text
+                                            </Label>
+                                            <Input
+                                                value={settings.homepage.developer_text}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, developer_text: e.target.value }})}
+                                                placeholder="Developed by Your Name"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <Label className="text-sm font-semibold text-foreground/80">Developer URL (Optional)</Label>
+                                            <Input
+                                                value={settings.homepage.developer_url}
+                                                onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, developer_url: e.target.value }})}
+                                                placeholder="https://yourportfolio.com"
                                             />
                                         </div>
                                     </div>

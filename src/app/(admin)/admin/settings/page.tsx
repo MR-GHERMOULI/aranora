@@ -84,6 +84,8 @@ export default async function AdminSettingsPage() {
                     footer_tagline: "The all-in-one platform for freelancers.",
                     twitter_url: "https://twitter.com/aranora",
                     linkedin_url: "https://linkedin.com/company/aranora",
+                    developer_text: "",
+                    developer_url: "",
                     stats_min_threshold: 50,
                     features: [
                         {

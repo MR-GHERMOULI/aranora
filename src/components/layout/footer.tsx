@@ -19,6 +19,10 @@ export function Footer({ simple = false }: FooterProps) {
         twitter: "",
         linkedin: ""
     })
+    const [developerCredit, setDeveloperCredit] = useState({
+        text: "",
+        url: ""
+    })
 
     useEffect(() => {
         const fetchFooterData = async () => {
@@ -28,7 +32,7 @@ export function Footer({ simple = false }: FooterProps) {
             const linksData = await getFooterLinks()
             setLinks(linksData.filter((l: any) => l.is_active))
 
-            // Fetch Homepage Settings (Tagline & Socials)
+            // Fetch Homepage Settings (Tagline, Socials, Developer)
             const { data: homepageSetting } = await supabase
                 .from("platform_settings")
                 .select("value")
@@ -42,6 +46,10 @@ export function Footer({ simple = false }: FooterProps) {
                 setSocialLinks({
                     twitter: homepageSetting.value.twitter_url || "",
                     linkedin: homepageSetting.value.linkedin_url || ""
+                })
+                setDeveloperCredit({
+                    text: homepageSetting.value.developer_text || "",
+                    url: homepageSetting.value.developer_url || ""
                 })
             }
 
@@ -169,7 +177,26 @@ export function Footer({ simple = false }: FooterProps) {
                 </div>
                 <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-                        <p>© {new Date().getFullYear()} Aranora. All rights reserved.</p>
+                        <div className="flex items-center gap-2">
+                            <p>© {new Date().getFullYear()} Aranora. All rights reserved.</p>
+                            {developerCredit.text && (
+                                <>
+                                    <span className="hidden md:inline text-border">|</span>
+                                    {developerCredit.url ? (
+                                        <a 
+                                            href={developerCredit.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="hover:text-brand-primary transition-colors font-medium"
+                                        >
+                                            {developerCredit.text}
+                                        </a>
+                                    ) : (
+                                        <span>{developerCredit.text}</span>
+                                    )}
+                                </>
+                            )}
+                        </div>
                         {links.length > 0 && (
                             <div className="flex items-center gap-4">
                                 <span className="hidden md:inline text-border">|</span>
