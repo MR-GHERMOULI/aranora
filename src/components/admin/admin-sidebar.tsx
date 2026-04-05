@@ -41,18 +41,30 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
     const { setTheme } = useTheme()
 
     const [unreadCount, setUnreadCount] = useState(0)
+    const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
     useEffect(() => {
-        // Simple fetch for unread count
-        const fetchUnread = async () => {
+        // Simple fetch for unread count and branding
+        const fetchData = async () => {
             const supabase = createClient()
-            const { count } = await supabase
-                .from("contact_messages")
-                .select("*", { count: "exact", head: true })
-                .eq("is_read", false)
-            setUnreadCount(count || 0)
+            const [unreadRes, brandingRes] = await Promise.all([
+                supabase
+                    .from("contact_messages")
+                    .select("*", { count: "exact", head: true })
+                    .eq("is_read", false),
+                supabase
+                    .from("platform_settings")
+                    .select("value")
+                    .eq("key", "branding")
+                    .single()
+            ])
+            
+            setUnreadCount(unreadRes.count || 0)
+            if (brandingRes.data?.value?.logo_url) {
+                setLogoUrl(brandingRes.data.value.logo_url)
+            }
         }
-        fetchUnread()
+        fetchData()
     }, [])
 
     interface SidebarRoute {
@@ -164,7 +176,11 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             {/* Mobile Header */}
             <div className="lg:hidden p-4 flex items-center justify-between border-b bg-background fixed top-0 left-0 right-0 z-50">
                 <div className="flex items-center gap-2">
-                    <Shield className="h-6 w-6 text-primary" />
+                    {logoUrl ? (
+                        <img src={logoUrl} alt="Logo" className="h-6 w-6 object-contain rounded-sm" />
+                    ) : (
+                        <Shield className="h-6 w-6 text-primary" />
+                    )}
                     <span className="text-lg font-bold">Admin Panel</span>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => setIsOpen(!isOpen)}>
@@ -191,8 +207,14 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 {/* Logo */}
                 <div className="p-6 border-b border-slate-700/50">
                     <Link href="/admin" className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                            <Shield className="h-6 w-6 text-white" />
+                        <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 bg-white/5">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                    <Shield className="h-6 w-6 text-white" />
+                                </div>
+                            )}
                         </div>
                         <div>
                             <h1 className="text-xl font-bold">Aranora</h1>

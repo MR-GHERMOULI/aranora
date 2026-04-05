@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/client"
 import {
     LayoutDashboard,
     ListTodo,
@@ -39,13 +40,24 @@ export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
     const [broadcastsCount, setBroadcastsCount] = useState(0)
+    const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
     useEffect(() => {
-        const fetchBroadcastsCount = async () => {
-            const count = await getUnreadBroadcastsCount()
+        const fetchData = async () => {
+            const [count, { data }] = await Promise.all([
+                getUnreadBroadcastsCount(),
+                createClient()
+                    .from("platform_settings")
+                    .select("value")
+                    .eq("key", "branding")
+                    .single()
+            ])
             setBroadcastsCount(count)
+            if (data?.value?.logo_url) {
+                setLogoUrl(data.value.logo_url)
+            }
         }
-        fetchBroadcastsCount()
+        fetchData()
     }, [pathname])
 
     type Route = {
@@ -179,18 +191,22 @@ export function Sidebar({ className }: SidebarProps) {
                 <div className="flex items-center gap-2">
 
                     <div className="relative z-20 flex items-center text-lg font-medium">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="mr-2 h-6 w-6 text-primary"
-                        >
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                        </svg>
+                        {logoUrl ? (
+                            <img src={logoUrl} alt="Logo" className="mr-2 h-7 w-7 object-contain rounded-md" />
+                        ) : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="mr-2 h-6 w-6 text-primary"
+                            >
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                            </svg>
+                        )}
                         Aranora
                     </div>
                 </div>
@@ -209,18 +225,22 @@ export function Sidebar({ className }: SidebarProps) {
                 <div className="px-3 py-2 flex-1 flex flex-col min-h-0">
                     <Link href="/dashboard" className="flex items-center pl-3 mb-5 shrink-0">
                         <div className="relative z-20 flex items-center text-xl font-bold">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="mr-2 h-8 w-8 text-secondary"
-                            >
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Logo" className="mr-3 h-8 w-8 object-contain rounded-lg" />
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="mr-2 h-8 w-8 text-secondary"
+                                >
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                </svg>
+                            )}
                             Aranora
                         </div>
                     </Link>

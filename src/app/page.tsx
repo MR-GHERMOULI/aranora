@@ -189,9 +189,18 @@ export default async function LandingPage() {
     .eq("key", "homepage")
     .single();
 
+  const { data: brandingSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "branding")
+    .single();
+
   const content: HomepageContent = homepageSetting?.value
     ? { ...defaultContent, ...homepageSetting.value }
     : defaultContent;
+
+  const branding = brandingSetting?.value || {};
+  const logoUrl = branding.logo_url;
 
   const { createServerClient } = await import("@supabase/ssr");
   const serviceClient = createServerClient(
@@ -331,16 +340,22 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
-                <svg
-                  className="h-5 w-5 text-white"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+              <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center">
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                ) : (
+                  <div className="h-full w-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
+                    <svg
+                      className="h-5 w-5 text-white"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                  </div>
+                )}
               </div>
               <span className="text-xl font-bold text-brand-primary tracking-tight">
                 Aranora
