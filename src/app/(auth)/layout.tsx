@@ -102,24 +102,7 @@ export default async function AuthLayout({
                             </p>
                         </div>
 
-                        {/* Glass feature cards */}
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { icon: '📊', title: 'Smart Dashboard', desc: 'All your metrics in one view' },
-                                { icon: '📄', title: 'Auto Invoicing', desc: 'Get paid faster with smart billing' },
-                                { icon: '🤝', title: 'Client Portal', desc: 'Share progress in real-time' },
-                                { icon: '⏱️', title: 'Time Tracking', desc: 'Log hours, bill accurately' },
-                            ].map((feature, i) => (
-                                <div
-                                    key={i}
-                                    className="p-4 rounded-xl bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] hover:bg-white/[0.10] transition-all duration-300 group"
-                                >
-                                    <div className="text-xl mb-2">{feature.icon}</div>
-                                    <p className="text-sm font-semibold text-white/90 mb-0.5">{feature.title}</p>
-                                    <p className="text-xs text-white/45">{feature.desc}</p>
-                                </div>
-                            ))}
-                        </div>
+
 
                         {/* Testimonials Carousel */}
                         <TestimonialCarousel testimonials={testimonials} />
