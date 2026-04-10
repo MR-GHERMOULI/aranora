@@ -125,7 +125,7 @@ export async function middleware(request: NextRequest) {
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         img-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://*.stripe.com;
         font-src 'self' data: https://fonts.gstatic.com;
-        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://api.stripe.com;
+        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://api.stripe.com https://get.geojs.io;
         frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
         worker-src 'self' blob:;
         object-src 'none';
