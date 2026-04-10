@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useCallback } from "react"
-import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2, Twitter, Linkedin, Code } from "lucide-react"
+import { Save, Shield, Sliders, Bell, ToggleLeft, Users, Palette, Home, Upload, X, Image as ImageIcon, Quote, Globe, Link as LinkIcon, DollarSign, Plus, Trash2, ChevronDown, ChevronUp, Eye, Type, ArrowUp, ArrowDown, Sparkles, MessageSquareQuote, CheckCircle2, Twitter, Linkedin, Code, Plug, Search, BarChart3, Tag, ExternalLink, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -73,6 +73,11 @@ interface SettingsClientProps {
             annual_price: number
             features: string[]
             faqs: { question: string; answer: string }[]
+        }
+        integrations: {
+            google_analytics_id: string
+            google_tag_manager_id: string
+            google_search_console_code: string
         }
     }
     adminCount: number
@@ -238,7 +243,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
             </div>
 
             <Tabs defaultValue="branding" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:grid-cols-9 lg:w-full">
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 lg:grid-cols-11 lg:w-full">
                     <TabsTrigger value="branding" className="gap-2">
                         <Palette className="h-4 w-4" />
                         Branding
@@ -266,6 +271,10 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                     <TabsTrigger value="security" className="gap-2">
                         <Shield className="h-4 w-4" />
                         Security
+                    </TabsTrigger>
+                    <TabsTrigger value="integrations" className="gap-2">
+                        <Plug className="h-4 w-4" />
+                        Integrations
                     </TabsTrigger>
                     <TabsTrigger value="testimonials" className="gap-2">
                         <Quote className="h-4 w-4" />
@@ -1597,6 +1606,134 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                 in the <code className="bg-muted px-1 rounded">profiles</code> table directly in Supabase.
                             </p>
                         </div>
+                    </div>
+                </TabsContent>
+
+                {/* Integrations Tab */}
+                <TabsContent value="integrations">
+                    <div className="rounded-xl border bg-card p-6 space-y-6">
+                        <div>
+                            <h3 className="text-lg font-semibold flex items-center gap-2">
+                                <Plug className="h-5 w-5 text-primary" />
+                                Integrations
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Connect your site with third-party services and APIs.
+                            </p>
+                        </div>
+
+                        {/* Google Search Console */}
+                        <div className="space-y-4 p-5 rounded-xl border bg-muted/10">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                    <Search className="h-5 w-5 text-blue-500" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold flex items-center gap-2">Google Search Console</h4>
+                                    <p className="text-xs text-muted-foreground">Verify your site ownership with Google Search Console.</p>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium">HTML Tag Verification Code</Label>
+                                <Input
+                                    value={settings.integrations.google_search_console_code}
+                                    onChange={(e) =>
+                                        setSettings({
+                                            ...settings,
+                                            integrations: { ...settings.integrations, google_search_console_code: e.target.value },
+                                        })
+                                    }
+                                    placeholder="e.g. abc123def456..."
+                                    className="font-mono text-sm"
+                                />
+                                <div className="flex items-start gap-2 p-3 rounded-md bg-blue-500/5 border border-blue-500/10 text-xs text-muted-foreground">
+                                    <Info className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                                    <span>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline font-medium">Google Search Console</a> → Add Property → Choose &quot;URL prefix&quot; → Select &quot;HTML tag&quot; verification method → Paste the <code className="bg-muted px-1 rounded">content</code> attribute value here.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Analytics Section */}
+                        <div className="space-y-4 p-5 rounded-xl border bg-muted/10">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                    <BarChart3 className="h-5 w-5 text-orange-500" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Analytics</h4>
+                                    <p className="text-xs text-muted-foreground">Track user behavior and website metrics.</p>
+                                </div>
+                            </div>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Google Analytics ID</Label>
+                                    <Input
+                                        value={settings.integrations.google_analytics_id}
+                                        onChange={(e) =>
+                                            setSettings({
+                                                ...settings,
+                                                integrations: { ...settings.integrations, google_analytics_id: e.target.value },
+                                            })
+                                        }
+                                        placeholder="G-XXXXXXXXXX"
+                                        className="font-mono text-sm"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Your Google Analytics 4 measurement ID.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Google Tag Manager ID</Label>
+                                    <Input
+                                        value={settings.integrations.google_tag_manager_id}
+                                        onChange={(e) =>
+                                            setSettings({
+                                                ...settings,
+                                                integrations: { ...settings.integrations, google_tag_manager_id: e.target.value },
+                                            })
+                                        }
+                                        placeholder="GTM-XXXXXXX"
+                                        className="font-mono text-sm"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Your Google Tag Manager container ID.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Connection Status Preview */}
+                        <div className="p-4 rounded-lg border bg-muted/20">
+                            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Connection Status</h4>
+                            <div className="grid gap-3 sm:grid-cols-3">
+                                <div className="flex items-center gap-3 p-3 rounded-lg border bg-background">
+                                    <div className={`h-2.5 w-2.5 rounded-full ${settings.integrations.google_search_console_code ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-muted-foreground/30'}`} />
+                                    <div>
+                                        <p className="text-sm font-medium">Search Console</p>
+                                        <p className="text-xs text-muted-foreground">{settings.integrations.google_search_console_code ? 'Configured' : 'Not connected'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-3 rounded-lg border bg-background">
+                                    <div className={`h-2.5 w-2.5 rounded-full ${settings.integrations.google_analytics_id ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-muted-foreground/30'}`} />
+                                    <div>
+                                        <p className="text-sm font-medium">Analytics</p>
+                                        <p className="text-xs text-muted-foreground">{settings.integrations.google_analytics_id ? 'Configured' : 'Not connected'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 p-3 rounded-lg border bg-background">
+                                    <div className={`h-2.5 w-2.5 rounded-full ${settings.integrations.google_tag_manager_id ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-muted-foreground/30'}`} />
+                                    <div>
+                                        <p className="text-sm font-medium">Tag Manager</p>
+                                        <p className="text-xs text-muted-foreground">{settings.integrations.google_tag_manager_id ? 'Configured' : 'Not connected'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Button
+                            onClick={() => saveSettings("integrations", settings.integrations)}
+                            disabled={isSaving}
+                            className="gap-2"
+                        >
+                            <Save className="h-4 w-4" />
+                            {savedKey === "integrations" ? "Saved!" : "Save Integrations"}
+                        </Button>
                     </div>
                 </TabsContent>
 

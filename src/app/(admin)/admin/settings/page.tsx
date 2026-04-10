@@ -194,6 +194,12 @@ export default async function AdminSettingsPage() {
                     ],
                     ...(settingsMap.pricing_page as Record<string, any> || {})
                 },
+                integrations: {
+                    google_analytics_id: "",
+                    google_tag_manager_id: "",
+                    google_search_console_code: "",
+                    ...(settingsMap.integrations as Record<string, any> || {})
+                },
             }}
             adminCount={adminCount || 0}
         />

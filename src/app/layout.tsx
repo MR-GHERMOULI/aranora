@@ -21,6 +21,7 @@ import { Toaster } from "@/components/ui/sonner"
 // ... imports
 import SupabaseProvider from "@/components/providers/supabase-provider";
 import { DynamicBranding } from "@/components/providers/dynamic-branding";
+import { GoogleIntegrations } from "@/components/providers/google-integrations";
 
 export default function RootLayout({
   children,
@@ -32,6 +33,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <GoogleIntegrations />
       </head>
       <body className="antialiased font-sans" suppressHydrationWarning>
         <DynamicBranding />
