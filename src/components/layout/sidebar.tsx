@@ -86,6 +86,35 @@ export function Sidebar({ className }: SidebarProps) {
             ]
         },
         {
+            title: "Management",
+            routes: [
+                {
+                    label: "Projects",
+                    icon: Briefcase,
+                    href: "/projects",
+                    color: "text-pink-700",
+                },
+                {
+                    label: "Clients",
+                    icon: Users,
+                    href: "/clients",
+                    color: "text-violet-500",
+                },
+                {
+                    label: "Intake Forms",
+                    icon: ClipboardList,
+                    href: "/intake-forms",
+                    color: "text-rose-500",
+                },
+                {
+                    label: "Collaborators",
+                    icon: UserCog,
+                    href: "/collaborators",
+                    color: "text-cyan-500",
+                },
+            ]
+        },
+        {
             title: "Workspace",
             routes: [
                 {
@@ -105,35 +134,6 @@ export function Sidebar({ className }: SidebarProps) {
                     icon: Timer,
                     href: "/time-tracking",
                     color: "text-amber-500",
-                },
-            ]
-        },
-        {
-            title: "Management",
-            routes: [
-                {
-                    label: "Clients",
-                    icon: Users,
-                    href: "/clients",
-                    color: "text-violet-500",
-                },
-                {
-                    label: "Intake Forms",
-                    icon: ClipboardList,
-                    href: "/intake-forms",
-                    color: "text-rose-500",
-                },
-                {
-                    label: "Collaborators",
-                    icon: UserCog,
-                    href: "/collaborators",
-                    color: "text-cyan-500",
-                },
-                {
-                    label: "Projects",
-                    icon: Briefcase,
-                    href: "/projects",
-                    color: "text-pink-700",
                 },
             ]
         },
