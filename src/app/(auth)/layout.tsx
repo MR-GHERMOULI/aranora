@@ -1,10 +1,41 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import TestimonialCarousel from "@/components/auth/TestimonialCarousel";
 
-export default function AuthLayout({
+export default async function AuthLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const supabase = await createClient();
+    
+    // Fetch active testimonials
+    const { data: dbTestimonials } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+    const testimonials = dbTestimonials && dbTestimonials.length > 0
+        ? dbTestimonials.map((t) => ({
+            name: t.name,
+            role: t.service,
+            quote: t.content,
+            avatarUrl: t.avatar_url,
+            avatar: t.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2),
+            rating: t.rating || 5,
+        }))
+        : [
+            {
+                name: "Sarah Chen",
+                role: "UI/UX Designer",
+                quote: "Aranora transformed how I manage my freelance business. It's like having a personal assistant that handles invoicing, contracts, and client management — all in one place.",
+                avatar: "SC",
+                rating: 5,
+            }
+        ];
+
     return (
         <div className="min-h-screen flex bg-background">
             {/* ── Left Side — Premium Branding Panel ── */}
@@ -90,28 +121,8 @@ export default function AuthLayout({
                             ))}
                         </div>
 
-                        {/* Testimonial */}
-                        <div className="p-5 rounded-xl bg-white/[0.06] backdrop-blur-sm border border-white/[0.08]">
-                            <div className="flex gap-1 mb-3">
-                                {[...Array(5)].map((_, i) => (
-                                    <svg key={i} className="h-4 w-4 text-[#4ADE80]" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
-                                ))}
-                            </div>
-                            <blockquote className="text-sm text-white/80 leading-relaxed mb-3 italic">
-                                &ldquo;Aranora transformed how I manage my freelance business. It&apos;s like having a personal assistant that handles invoicing, contracts, and client management — all in one place.&rdquo;
-                            </blockquote>
-                            <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#4ADE80] to-[#22C55E] flex items-center justify-center text-[#0F2642] font-bold text-xs">
-                                    SC
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-white/90">Sarah Chen</p>
-                                    <p className="text-xs text-white/45">UI/UX Designer • 5+ years freelancing</p>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Testimonials Carousel */}
+                        <TestimonialCarousel testimonials={testimonials} />
                     </div>
 
                     {/* Footer */}
