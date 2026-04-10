@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useMemo } from 'react'
+import { useState, useTransition, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { signup } from '@/app/(auth)/actions'
 import { createClient } from '@/lib/supabase/client'
@@ -64,6 +64,25 @@ export default function SignupForm({ promo }: { promo?: string }) {
         ),
         [countrySearch]
     )
+
+    // Auto-detect country on mount
+    useEffect(() => {
+        if (!selectedCountry) {
+            fetch('https://get.geojs.io/v1/ip/geo.json')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.country) {
+                        const matchedCountry = countries.find(
+                            c => c.toLowerCase() === data.country.toLowerCase()
+                        )
+                        if (matchedCountry) {
+                            setSelectedCountry(matchedCountry)
+                        }
+                    }
+                })
+                .catch(err => console.warn('Failed to auto-detect country:', err))
+        }
+    }, [selectedCountry])
 
     async function handleSubmit(formData: FormData) {
         setError(null)
