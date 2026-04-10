@@ -1,0 +1,118 @@
+﻿ظû▓ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local
+
+npx : ظأب The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
+https://nextjs.org/docs/messages/middleware-to-proxy
+Au caractère Ligne:1 : 1
++ npx next build 2>&1 | Out-File -FilePath build_log.txt -Encoding utf8 ...
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ظأب The "middle...leware-to-proxy:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Creating an optimized production build ...
+ظ£ô Compiled successfully in 47s
+  Running TypeScript ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/67) ...
+  Generating static pages using 3 workers (16/67) 
+  Generating static pages using 3 workers (33/67) 
+  Generating static pages using 3 workers (50/67) 
+ظ£ô Generating static pages using 3 workers (67/67) in 1524.8ms
+  Finalizing page optimization ...
+
+Route (app)
+ظ¤î ╞ْ /
+ظ¤£ ╞ْ /_not-found
+ظ¤£ ╞ْ /about
+ظ¤£ ╞ْ /admin
+ظ¤£ ╞ْ /admin/activity
+ظ¤£ ╞ْ /admin/affiliates
+ظ¤£ ╞ْ /admin/articles
+ظ¤£ ╞ْ /admin/articles/[id]
+ظ¤£ ╞ْ /admin/articles/new
+ظ¤£ ╞ْ /admin/broadcasts
+ظ¤£ ╞ْ /admin/invoices
+ظ¤£ ╞ْ /admin/messages
+ظ¤£ ╞ْ /admin/pages
+ظ¤£ ╞ْ /admin/pages/[slug]
+ظ¤£ ╞ْ /admin/projects
+ظ¤£ ╞ْ /admin/promo-links
+ظ¤£ ╞ْ /admin/settings
+ظ¤£ ╞ْ /admin/subscriptions
+ظ¤£ ╞ْ /admin/users
+ظ¤£ ╞ْ /affiliates
+ظ¤£ ╞ْ /affiliates/register
+ظ¤£ ╞ْ /api/admin/affiliates
+ظ¤£ ╞ْ /api/admin/articles
+ظ¤£ ╞ْ /api/admin/articles/[id]
+ظ¤£ ╞ْ /api/admin/broadcasts
+ظ¤£ ╞ْ /api/admin/broadcasts/[id]
+ظ¤£ ╞ْ /api/admin/messages/[id]
+ظ¤£ ╞ْ /api/admin/promo-links
+ظ¤£ ╞ْ /api/admin/subscriptions
+ظ¤£ ╞ْ /api/admin/upload
+ظ¤£ ╞ْ /api/admin/users
+ظ¤£ ╞ْ /api/affiliate-auth/login
+ظ¤£ ╞ْ /api/affiliate-auth/signup
+ظ¤£ ╞ْ /api/affiliates/dashboard
+ظ¤£ ╞ْ /api/affiliates/payout
+ظ¤£ ╞ْ /api/affiliates/register
+ظ¤£ ╞ْ /api/auth/callback
+ظ¤£ ╞ْ /api/contact
+ظ¤£ ╞ْ /api/contracts/sign
+ظ¤£ ╞ْ /api/favicon
+ظ¤£ ╞ْ /api/intake/submit
+ظ¤£ ╞ْ /api/invitations/accept
+ظ¤£ ╞ْ /api/notifications/[id]
+ظ¤£ ╞ْ /api/projects/shared/[token]
+ظ¤£ ╞ْ /api/stripe/checkout
+ظ¤£ ╞ْ /api/stripe/portal
+ظ¤£ ╞ْ /api/stripe/webhook
+ظ¤£ ╞ْ /become-affiliate
+ظ¤£ ╞ْ /billing
+ظ¤£ ╞ْ /blog
+ظ¤£ ╞ْ /blog/[slug]
+ظ¤£ ╞ْ /broadcasts
+ظ¤£ ╞ْ /calendar
+ظ¤£ ╞ْ /clients
+ظ¤£ ╞ْ /clients/[id]
+ظ¤£ ╞ْ /collaborators
+ظ¤£ ╞ْ /collaborators/[id]
+ظ¤£ ╞ْ /contact
+ظ¤£ ╞ْ /contracts
+ظ¤£ ╞ْ /contracts/[id]
+ظ¤£ ╞ْ /contracts/templates
+ظ¤£ ╞ْ /dashboard
+ظ¤£ ╞ْ /forgot-password
+ظ¤£ ╞ْ /intake-forms
+ظ¤£ ╞ْ /intake-forms/[id]
+ظ¤£ ╞ْ /intake/[token]
+ظ¤£ ╞ْ /invite/[token]
+ظ¤£ ╞ْ /invoices
+ظ¤£ ╞ْ /invoices/[id]
+ظ¤£ ╞ْ /invoices/[id]/edit
+ظ¤£ ╞ْ /invoices/history
+ظ¤£ ╞ْ /invoices/new
+ظ¤£ ╞ْ /login
+ظ¤£ ╞ْ /pricing
+ظ¤£ ╞ْ /privacy
+ظ¤£ ╞ْ /progress/[token]
+ظ¤£ ╞ْ /projects
+ظ¤£ ╞ْ /projects/[slug]
+ظ¤£ ╞ْ /promo/[code]
+ظ¤£ ╞ْ /ref/[code]
+ظ¤£ ╞ْ /refund
+ظ¤£ ╞ْ /reports
+ظ¤£ ╞ْ /settings
+ظ¤£ ╞ْ /sign/[token]
+ظ¤£ ╞ْ /signup
+ظ¤£ ╞ْ /subscriptions
+ظ¤£ ╞ْ /tasks
+ظ¤£ ╞ْ /terms
+ظ¤¤ ╞ْ /time-tracking
+
+
+╞ْ Proxy (Middleware)
+
+╞ْ  (Dynamic)  server-rendered on demand
+

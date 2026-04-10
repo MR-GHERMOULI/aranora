@@ -10,13 +10,23 @@ export async function login(formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
+    if (!email || !password) {
+        return { error: 'Please provide both email and password.' }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
     })
 
     if (error) {
-        redirect('/error')
+        if (error.message.includes('Invalid login credentials')) {
+            return { error: 'Invalid email or password. Please try again.' }
+        }
+        if (error.message.includes('Email not confirmed')) {
+            return { error: 'Please verify your email address before signing in.' }
+        }
+        return { error: error.message }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -53,6 +63,14 @@ export async function signup(formData: FormData) {
     const country = formData.get('country') as string
     const promoCode = formData.get('promoCode') as string | null
 
+    if (!email || !password || !fullName) {
+        return { error: 'Please fill in all required fields.' }
+    }
+
+    if (password.length < 8) {
+        return { error: 'Password must be at least 8 characters long.' }
+    }
+
     const { data: signupData, error } = await supabase.auth.signUp({
         email,
         password,
@@ -66,8 +84,13 @@ export async function signup(formData: FormData) {
     })
 
     if (error) {
-        console.error('Signup error:', error)
-        redirect('/error')
+        if (error.message.includes('already registered')) {
+            return { error: 'This email is already registered. Please sign in instead.' }
+        }
+        if (error.message.includes('password')) {
+            return { error: 'Password is too weak. Use at least 8 characters with a mix of letters and numbers.' }
+        }
+        return { error: error.message }
     }
 
     // Handle promo code — extend trial if valid
@@ -115,6 +138,26 @@ export async function signup(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/dashboard')
+}
+
+export async function resetPassword(formData: FormData) {
+    const supabase = await createClient()
+
+    const email = formData.get('email') as string
+
+    if (!email) {
+        return { error: 'Please enter your email address.' }
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.aranora.com'}/login`,
+    })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    return { success: true }
 }
 
 export async function logout() {
