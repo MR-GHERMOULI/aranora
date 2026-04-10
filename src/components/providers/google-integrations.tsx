@@ -7,16 +7,22 @@ interface IntegrationSettings {
     google_search_console_code?: string
 }
 
-export async function GoogleIntegrations() {
+async function getIntegrations() {
     const supabase = await createClient()
-
     const { data } = await supabase
         .from("platform_settings")
         .select("value")
         .eq("key", "integrations")
         .single()
+    
+    return (data?.value as IntegrationSettings) || {}
+}
 
-    const integrations = (data?.value as IntegrationSettings) || {}
+/**
+ * Injects scripts into the <head>
+ */
+export async function GoogleHeadIntegrations() {
+    const integrations = await getIntegrations()
     const gaId = integrations.google_analytics_id?.trim()
     const gtmId = integrations.google_tag_manager_id?.trim()
     const gscCode = integrations.google_search_console_code?.trim()
@@ -25,7 +31,13 @@ export async function GoogleIntegrations() {
         <>
             {/* Google Search Console Verification */}
             {gscCode && (
-                <meta name="google-site-verification" content={gscCode} />
+                gscCode.startsWith('<meta') ? (
+                    // If the user pasted the full tag
+                    <div dangerouslySetInnerHTML={{ __html: gscCode }} />
+                ) : (
+                    // If they just pasted the code
+                    <meta name="google-site-verification" content={gscCode} />
+                )
             )}
 
             {/* Google Analytics 4 */}
@@ -59,5 +71,26 @@ export async function GoogleIntegrations() {
                 </Script>
             )}
         </>
+    )
+}
+
+/**
+ * Injects scripts at the start of the <body>
+ */
+export async function GoogleBodyIntegrations() {
+    const integrations = await getIntegrations()
+    const gtmId = integrations.google_tag_manager_id?.trim()
+
+    if (!gtmId) return null
+
+    return (
+        <noscript>
+            <iframe 
+                src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                height="0" 
+                width="0" 
+                style={{ display: 'none', visibility: 'hidden' }}
+            />
+        </noscript>
     )
 }
