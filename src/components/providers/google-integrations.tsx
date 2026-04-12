@@ -31,13 +31,14 @@ export async function GoogleHeadIntegrations() {
         <>
             {/* Google Search Console Verification */}
             {gscCode && (
-                gscCode.startsWith('<meta') ? (
-                    // If the user pasted the full tag
-                    <div dangerouslySetInnerHTML={{ __html: gscCode }} />
-                ) : (
-                    // If they just pasted the code
-                    <meta name="google-site-verification" content={gscCode} />
-                )
+                <meta 
+                    name="google-site-verification" 
+                    content={
+                        gscCode.startsWith('<meta') 
+                            ? (gscCode.match(/content="([^"]+)"/)?.[1] || gscCode)
+                            : gscCode
+                    } 
+                />
             )}
 
             {/* Google Analytics 4 */}
