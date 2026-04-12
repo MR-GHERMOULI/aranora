@@ -36,29 +36,35 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith("/login") &&
-        !request.nextUrl.pathname.startsWith("/signup") &&
-        !request.nextUrl.pathname.startsWith("/auth") &&
-        !request.nextUrl.pathname.startsWith("/sign") &&
-        !request.nextUrl.pathname.startsWith("/api/contracts/sign") &&
-        !request.nextUrl.pathname.startsWith("/progress") &&
-        !request.nextUrl.pathname.startsWith("/about") &&
-        !request.nextUrl.pathname.startsWith("/contact") &&
-        !request.nextUrl.pathname.startsWith("/privacy") &&
-        !request.nextUrl.pathname.startsWith("/terms") &&
-        !request.nextUrl.pathname.startsWith("/become-affiliate") &&
-        !request.nextUrl.pathname.startsWith("/ref") &&
-        !request.nextUrl.pathname.startsWith("/api/affiliate-auth") &&
-        !request.nextUrl.pathname.startsWith("/pricing") &&
-        !request.nextUrl.pathname.startsWith("/blog") &&
-        !request.nextUrl.pathname.startsWith("/refund") &&
-        !request.nextUrl.pathname.startsWith("/forgot-password") &&
-        !request.nextUrl.pathname.startsWith("/error") &&
-        request.nextUrl.pathname !== "/"
-    ) {
-        // no user, potentially respond by redirecting the user to the login page
+    // Only redirect to login for known protected (dashboard) routes.
+    // Unknown routes pass through so Next.js can render the 404 page
+    // instead of confusingly redirecting visitors to the login page.
+    const PROTECTED_PREFIXES = [
+        "/dashboard",
+        "/projects",
+        "/clients",
+        "/invoices",
+        "/contracts",
+        "/tasks",
+        "/reports",
+        "/calendar",
+        "/time-tracking",
+        "/collaborators",
+        "/settings",
+        "/subscriptions",
+        "/billing",
+        "/broadcasts",
+        "/intake-forms",
+        "/admin",
+        "/affiliates",
+    ];
+
+    const isProtectedRoute = PROTECTED_PREFIXES.some(prefix =>
+        request.nextUrl.pathname.startsWith(prefix)
+    );
+
+    if (!user && isProtectedRoute) {
+        // No user on a protected route — redirect to login
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         return NextResponse.redirect(url);
