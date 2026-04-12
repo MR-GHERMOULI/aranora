@@ -121,23 +121,23 @@ export async function middleware(request: NextRequest) {
     // 3. Add Security Headers
     const cspHeader = `
         default-src 'self' blob: data:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://js.stripe.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://tagassistant.google.com https://js.stripe.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         img-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://*.stripe.com;
         font-src 'self' data: https://fonts.gstatic.com;
-        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://api.stripe.com https://get.geojs.io;
+        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://tagassistant.google.com https://api.stripe.com https://get.geojs.io;
         frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
         worker-src 'self' blob:;
         object-src 'none';
         base-uri 'self';
         form-action 'self';
-        frame-ancestors 'none';
+        frame-ancestors 'self' https://tagassistant.google.com;
         upgrade-insecure-requests;
     `.replace(/\s{2,}/g, ' ').trim();
 
     response.headers.set('Content-Security-Policy', cspHeader);
     response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Frame-Options', 'DENY');
+    // REMOVED X-Frame-Options to allow Tag Assistant frame-ancestors to work properly
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
