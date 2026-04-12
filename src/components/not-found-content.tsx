@@ -126,12 +126,12 @@ export default function NotFoundContent() {
             animate={
               isHovered
                 ? {
-                    textShadow: [
-                      "0 0 0px transparent",
-                      "0 0 40px rgba(74, 222, 128, 0.3)",
-                      "0 0 0px transparent",
-                    ],
-                  }
+                  textShadow: [
+                    "0 0 0px transparent",
+                    "0 0 40px rgba(74, 222, 128, 0.3)",
+                    "0 0 0px transparent",
+                  ],
+                }
                 : {}
             }
             transition={{ duration: 1.5, repeat: Infinity }}

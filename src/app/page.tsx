@@ -270,47 +270,47 @@ export default async function LandingPage() {
   const testimonials =
     dbTestimonials && dbTestimonials.length > 0
       ? dbTestimonials.map((t) => ({
-          name: t.name,
-          role: t.service,
-          quote: t.content,
-          avatarUrl: t.avatar_url,
-          avatar: t.name
-            .split(" ")
-            .map((n: string) => n[0])
-            .join("")
-            .toUpperCase()
-            .slice(0, 2),
-          rating: t.rating || 5,
-        }))
+        name: t.name,
+        role: t.service,
+        quote: t.content,
+        avatarUrl: t.avatar_url,
+        avatar: t.name
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2),
+        rating: t.rating || 5,
+      }))
       : [
-          {
-            name: "Sarah Chen",
-            role: "UI/UX Designer",
-            quote:
-              "Aranora transformed how I manage my freelance business. The invoicing feature alone saved me hours every week.",
-            avatar: "SC",
-            avatarUrl: "",
-            rating: 5,
-          },
-          {
-            name: "Marcus Johnson",
-            role: "Web Developer",
-            quote:
-              "Finally, a tool that understands freelancers. The project collaboration features are game-changing.",
-            avatar: "MJ",
-            avatarUrl: "",
-            rating: 5,
-          },
-          {
-            name: "Elena Rodriguez",
-            role: "Content Strategist",
-            quote:
-              "The smart reminders keep me on top of everything. I've never missed a deadline since using Aranora.",
-            avatar: "ER",
-            avatarUrl: "",
-            rating: 5,
-          },
-        ];
+        {
+          name: "Sarah Chen",
+          role: "UI/UX Designer",
+          quote:
+            "Aranora transformed how I manage my freelance business. The invoicing feature alone saved me hours every week.",
+          avatar: "SC",
+          avatarUrl: "",
+          rating: 5,
+        },
+        {
+          name: "Marcus Johnson",
+          role: "Web Developer",
+          quote:
+            "Finally, a tool that understands freelancers. The project collaboration features are game-changing.",
+          avatar: "MJ",
+          avatarUrl: "",
+          rating: 5,
+        },
+        {
+          name: "Elena Rodriguez",
+          role: "Content Strategist",
+          quote:
+            "The smart reminders keep me on top of everything. I've never missed a deadline since using Aranora.",
+          avatar: "ER",
+          avatarUrl: "",
+          rating: 5,
+        },
+      ];
 
   // Fetch platform links from DB
   const { data: platformLinks } = await supabase
@@ -495,21 +495,22 @@ export default async function LandingPage() {
             {content.features?.map((feature, i) => {
               const Icon = LucideIcons[feature.iconName] || Zap;
               return (
-              <StaggerItem
-                key={i}
-                className="group p-6 rounded-2xl bg-card border border-border card-brand-hover"
-              >
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-brand-primary/15">
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.desc}
-                </p>
-              </StaggerItem>
-            )})}
+                <StaggerItem
+                  key={i}
+                  className="group p-6 rounded-2xl bg-card border border-border card-brand-hover"
+                >
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-brand-primary/15">
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feature.desc}
+                  </p>
+                </StaggerItem>
+              )
+            })}
           </StaggerContainer>
         </div>
       </section>

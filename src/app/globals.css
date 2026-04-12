@@ -10,36 +10,36 @@
   --brand-primary-light: #2E5A8F;
   --brand-secondary: #4ADE80;
   --brand-secondary-dark: #22C55E;
-  
+
   /* System Colors - Light Mode */
   --background: #FFFFFF;
   --foreground: #1E293B;
-  
+
   --card: #FFFFFF;
   --card-foreground: #1E293B;
-  
+
   --popover: #FFFFFF;
   --popover-foreground: #1E293B;
-  
+
   --primary: #1E3A5F;
   --primary-foreground: #FFFFFF;
-  
+
   --secondary: #4ADE80;
   --secondary-foreground: #0F172A;
-  
+
   --muted: #F1F5F9;
   --muted-foreground: #64748B;
-  
+
   --accent: #F8FAFC;
   --accent-foreground: #1E293B;
-  
+
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  
+
   --border: #E2E8F0;
   --input: #E2E8F0;
   --ring: #1E3A5F;
-  
+
   --radius: 0.5rem;
 }
 
@@ -47,76 +47,78 @@
   /* System Colors - Dark Mode */
   --background: #0F172A;
   --foreground: #F8FAFC;
-  
+
   --card: #1E293B;
   --card-foreground: #F8FAFC;
-  
+
   --popover: #1E293B;
   --popover-foreground: #F8FAFC;
-  
-  --primary: #4ADE80; /* Brighter for dark mode visibility */
+
+  --primary: #4ADE80;
+  /* Brighter for dark mode visibility */
   --primary-foreground: #0F172A;
-  
+
   --secondary: #1E3A5F;
   --secondary-foreground: #FFFFFF;
-  
+
   --muted: #1E293B;
   --muted-foreground: #94A3B8;
-  
+
   --accent: #1E293B;
   --accent-foreground: #F8FAFC;
-  
+
   --destructive: #7F1D1D;
   --destructive-foreground: #F8FAFC;
-  
+
   --border: #334155;
   --input: #334155;
   --ring: #4ADE80;
 
   /* Brand Colors - Dark Mode Adjustments */
-  --brand-primary: #60A5FA; /* Lighter blue for dark mode */
+  --brand-primary: #60A5FA;
+  /* Lighter blue for dark mode */
   --brand-primary-light: #93C5FD;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   /* Brand Colors */
   --color-brand-primary: var(--brand-primary);
   --color-brand-primary-light: var(--brand-primary-light);
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-secondary-dark: var(--brand-secondary-dark);
-  
+
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  
+
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  
+
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);
-  
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
@@ -130,30 +132,38 @@ body {
 
 
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 
   /* Custom minimal scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 9999px;
   }
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
   }
+
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
@@ -162,24 +172,53 @@ body {
 
 /* Landing page animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-float {
@@ -213,10 +252,23 @@ body {
 
 /* Gradient mesh for hero background */
 @keyframes mesh-move {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(30px, -20px) scale(1.05); }
-  50% { transform: translate(-20px, 20px) scale(0.95); }
-  75% { transform: translate(20px, 10px) scale(1.02); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+
+  50% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+
+  75% {
+    transform: translate(20px, 10px) scale(1.02);
+  }
 }
 
 .animate-mesh {
@@ -227,11 +279,13 @@ body {
 .card-brand-hover {
   transition: all 0.35s cubic-bezier(0.21, 0.47, 0.32, 0.98);
 }
+
 .card-brand-hover:hover {
   border-color: var(--brand-primary);
   box-shadow: 0 8px 30px rgba(30, 58, 95, 0.10);
   transform: translateY(-3px);
 }
+
 .dark .card-brand-hover:hover {
   box-shadow: 0 8px 30px rgba(96, 165, 250, 0.10);
 }
@@ -241,4 +295,3 @@ body {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border), transparent);
 }
-

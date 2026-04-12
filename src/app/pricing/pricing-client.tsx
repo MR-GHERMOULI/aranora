@@ -21,8 +21,8 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div className="border border-border bg-card rounded-2xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-md">
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
+            <button
+                onClick={() => setIsOpen(!isOpen)}
                 className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none"
             >
                 <span className="font-semibold text-foreground text-[15px]">{question}</span>
@@ -30,7 +30,7 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
                     {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                 </div>
             </button>
-            <div 
+            <div
                 className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-40 pb-5 opacity-100" : "max-h-0 opacity-0"}`}
             >
                 <p className="text-muted-foreground text-[15px] leading-relaxed pr-8">{answer}</p>
