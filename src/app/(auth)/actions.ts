@@ -83,6 +83,8 @@ export async function signup(formData: FormData) {
         }
     })
 
+    let userToReturn = signupData?.user;
+
     if (error) {
         if (error.message.includes('already registered')) {
             return { error: 'This email is already registered. Please sign in instead.' }
@@ -90,11 +92,87 @@ export async function signup(formData: FormData) {
         if (error.message.includes('password')) {
             return { error: 'Password is too weak. Use at least 8 characters with a mix of letters and numbers.' }
         }
-        return { error: error.message }
+        
+        if (error.message.includes('Database error') || error.message.includes('saving new user')) {
+            try {
+                const { createServerClient } = await import('@supabase/ssr')
+                const serviceClient = createServerClient(
+                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                    { cookies: { getAll() { return [] }, setAll() { } } }
+                )
+
+                // 1. Find existing user or create them
+                const { data: existingUsersData } = await serviceClient.auth.admin.listUsers({
+                    page: 1,
+                    perPage: 1000,
+                })
+                let existingUser = existingUsersData?.users?.find(u => u.email === email)
+
+                if (!existingUser) {
+                    const { data: newUserData, error: createError } = await serviceClient.auth.admin.createUser({
+                        email,
+                        password,
+                        email_confirm: true,
+                        user_metadata: { full_name: fullName, phone, country },
+                    })
+                    if (createError || !newUserData?.user) {
+                        return { error: 'Registration failed. Please try again or contact support.' }
+                    }
+                    existingUser = newUserData.user
+                } else {
+                    await serviceClient.auth.admin.updateUserById(existingUser.id, {
+                        email_confirm: true,
+                    })
+                }
+
+                // 2. Ensure profile exists
+                const { data: existingProfile } = await serviceClient
+                    .from('profiles')
+                    .select('id')
+                    .eq('id', existingUser.id)
+                    .single()
+
+                if (!existingProfile) {
+                    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '') || 'user'
+                    const suffix = Math.random().toString(36).substring(2, 6)
+                    const username = `${baseUsername}_${suffix}`
+
+                    await serviceClient.from('profiles').insert({
+                        id: existingUser.id,
+                        username,
+                        full_name: fullName,
+                        email,
+                        company_email: email,
+                        phone: phone || null,
+                        country: country || null,
+                        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                        subscription_status: 'trialing',
+                    })
+                }
+
+                // 3. Sign in to establish session
+                const { error: signInError } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                })
+
+                if (signInError) {
+                    return { error: 'Account created. Please sign in to continue.' }
+                }
+
+                userToReturn = existingUser;
+            } catch (fallbackError) {
+                console.error('Signup fallback error:', fallbackError)
+                return { error: 'An unexpected error occurred during registration. Please try again.' }
+            }
+        } else {
+            return { error: error.message }
+        }
     }
 
     // Handle promo code — extend trial if valid
-    if (promoCode && signupData?.user) {
+    if (promoCode && userToReturn) {
         try {
             const { createServerClient } = await import('@supabase/ssr')
             const serviceClient = createServerClient(
@@ -119,14 +197,14 @@ export async function signup(formData: FormData) {
                 await serviceClient
                     .from('profiles')
                     .update({ trial_ends_at: extendedTrialEnd.toISOString() })
-                    .eq('id', signupData.user.id)
+                    .eq('id', userToReturn.id)
 
                 // Mark promo as used
                 await serviceClient
                     .from('promo_invite_links')
                     .update({
                         times_used: promo.times_used + 1,
-                        used_by: signupData.user.id,
+                        used_by: userToReturn.id,
                         is_active: false,
                     })
                     .eq('id', promo.id)
