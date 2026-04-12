@@ -71,6 +71,44 @@ export async function signup(formData: FormData) {
         return { error: 'Password must be at least 8 characters long.' }
     }
 
+    // Create service client upfront for fallback and profile verification
+    const { createServerClient } = await import('@supabase/ssr')
+    const serviceClient = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { cookies: { getAll() { return [] }, setAll() { } } }
+    )
+
+    let userId: string | null = null
+
+    // Helper: ensure a profile row exists for the given user
+    async function ensureProfile(uid: string) {
+        const { data: existingProfile } = await serviceClient
+            .from('profiles')
+            .select('id')
+            .eq('id', uid)
+            .single()
+
+        if (!existingProfile) {
+            const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '') || 'user'
+            const suffix = Math.random().toString(36).substring(2, 6)
+            const username = `${baseUsername}_${suffix}`
+
+            await serviceClient.from('profiles').insert({
+                id: uid,
+                username,
+                full_name: fullName,
+                email,
+                company_email: email,
+                phone: phone || null,
+                country: country || null,
+                trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                subscription_status: 'trialing',
+            })
+        }
+    }
+
+    // --- Step 1: Try normal signup ---
     const { data: signupData, error } = await supabase.auth.signUp({
         email,
         password,
@@ -83,8 +121,6 @@ export async function signup(formData: FormData) {
         }
     })
 
-    let userToReturn = signupData?.user;
-
     if (error) {
         if (error.message.includes('already registered')) {
             return { error: 'This email is already registered. Please sign in instead.' }
@@ -92,17 +128,13 @@ export async function signup(formData: FormData) {
         if (error.message.includes('password')) {
             return { error: 'Password is too weak. Use at least 8 characters with a mix of letters and numbers.' }
         }
-        
-        if (error.message.includes('Database error') || error.message.includes('saving new user')) {
-            try {
-                const { createServerClient } = await import('@supabase/ssr')
-                const serviceClient = createServerClient(
-                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-                    { cookies: { getAll() { return [] }, setAll() { } } }
-                )
 
-                // 1. Find existing user or create them
+        // --- Database / trigger error fallback ---
+        if (error.message.includes('Database error') || error.message.includes('saving new user')) {
+            console.error('Signup trigger error:', error.message)
+
+            try {
+                // Check if user was partially created in auth.users
                 const { data: existingUsersData } = await serviceClient.auth.admin.listUsers({
                     page: 1,
                     perPage: 1000,
@@ -110,6 +142,7 @@ export async function signup(formData: FormData) {
                 let existingUser = existingUsersData?.users?.find(u => u.email === email)
 
                 if (!existingUser) {
+                    // User not found — try admin create
                     const { data: newUserData, error: createError } = await serviceClient.auth.admin.createUser({
                         email,
                         password,
@@ -117,51 +150,34 @@ export async function signup(formData: FormData) {
                         user_metadata: { full_name: fullName, phone, country },
                     })
                     if (createError || !newUserData?.user) {
+                        console.error('Admin createUser failed:', createError?.message)
                         return { error: 'Registration failed. Please try again or contact support.' }
                     }
                     existingUser = newUserData.user
                 } else {
+                    // User exists but maybe unconfirmed — confirm + set password
                     await serviceClient.auth.admin.updateUserById(existingUser.id, {
                         email_confirm: true,
+                        password: password,
                     })
                 }
 
-                // 2. Ensure profile exists
-                const { data: existingProfile } = await serviceClient
-                    .from('profiles')
-                    .select('id')
-                    .eq('id', existingUser.id)
-                    .single()
+                userId = existingUser.id
 
-                if (!existingProfile) {
-                    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '') || 'user'
-                    const suffix = Math.random().toString(36).substring(2, 6)
-                    const username = `${baseUsername}_${suffix}`
+                // Ensure profile row exists (trigger may have failed silently)
+                await ensureProfile(userId)
 
-                    await serviceClient.from('profiles').insert({
-                        id: existingUser.id,
-                        username,
-                        full_name: fullName,
-                        email,
-                        company_email: email,
-                        phone: phone || null,
-                        country: country || null,
-                        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                        subscription_status: 'trialing',
-                    })
-                }
-
-                // 3. Sign in to establish session
+                // Sign in to establish the browser session
                 const { error: signInError } = await supabase.auth.signInWithPassword({
                     email,
                     password,
                 })
 
                 if (signInError) {
-                    return { error: 'Account created. Please sign in to continue.' }
+                    console.error('Post-create signIn error:', signInError.message)
+                    return { error: 'Account created successfully! Please sign in with your credentials.' }
                 }
 
-                userToReturn = existingUser;
             } catch (fallbackError) {
                 console.error('Signup fallback error:', fallbackError)
                 return { error: 'An unexpected error occurred during registration. Please try again.' }
@@ -169,18 +185,25 @@ export async function signup(formData: FormData) {
         } else {
             return { error: error.message }
         }
+    } else {
+        // --- Signup succeeded ---
+        userId = signupData?.user?.id || null
+
+        // Belt-and-suspenders: verify the trigger created the profile.
+        // If the trigger's EXCEPTION handler caught an error, the user exists
+        // but the profile might be missing.
+        if (userId) {
+            try {
+                await ensureProfile(userId)
+            } catch (profileError) {
+                console.error('Profile verification error (non-blocking):', profileError)
+            }
+        }
     }
 
-    // Handle promo code — extend trial if valid
-    if (promoCode && userToReturn) {
+    // --- Handle promo code — extend trial if valid ---
+    if (promoCode && userId) {
         try {
-            const { createServerClient } = await import('@supabase/ssr')
-            const serviceClient = createServerClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!,
-                { cookies: { getAll() { return [] }, setAll() { } } }
-            )
-
             // Validate promo code
             const { data: promo } = await serviceClient
                 .from('promo_invite_links')
@@ -197,14 +220,14 @@ export async function signup(formData: FormData) {
                 await serviceClient
                     .from('profiles')
                     .update({ trial_ends_at: extendedTrialEnd.toISOString() })
-                    .eq('id', userToReturn.id)
+                    .eq('id', userId)
 
                 // Mark promo as used
                 await serviceClient
                     .from('promo_invite_links')
                     .update({
                         times_used: promo.times_used + 1,
-                        used_by: userToReturn.id,
+                        used_by: userId,
                         is_active: false,
                     })
                     .eq('id', promo.id)
