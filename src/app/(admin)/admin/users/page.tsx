@@ -1,15 +1,27 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 import { UsersTable } from "@/components/admin/users-table"
 import { StatsCard } from "@/components/admin/stats-card"
 
 export default async function AdminUsersPage() {
-    const supabase = await createClient()
+    const supabaseAdmin = await createAdminClient()
 
     // Fetch all users with their profiles
-    const { data: users } = await supabase
+    const { data: usersData } = await supabaseAdmin
         .from("profiles")
         .select("id, username, full_name, company_email, country, account_status, created_at")
         .order("created_at", { ascending: false })
+
+    // Fetch auth users to get missing emails
+    const { data: authData } = await supabaseAdmin.auth.admin.listUsers()
+
+    // Merge missing information
+    const users = (usersData || []).map(profile => {
+        const authUser = authData?.users?.find(u => u.id === profile.id);
+        return {
+            ...profile,
+            company_email: profile.company_email || authUser?.email || null
+        }
+    });
 
     // Get stats
     const [
@@ -17,9 +29,9 @@ export default async function AdminUsersPage() {
         { count: activeUsers },
         { count: suspendedUsers },
     ] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("account_status", "active"),
-        supabase.from("profiles").select("*", { count: "exact", head: true }).eq("account_status", "suspended"),
+        supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }),
+        supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }).eq("account_status", "active"),
+        supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }).eq("account_status", "suspended"),
     ])
 
     return (

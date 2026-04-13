@@ -1,8 +1,8 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/server"
 import { AdminDashboardClient } from "./dashboard-client"
 
 export default async function AdminDashboardPage() {
-    const supabase = await createClient()
+    const supabaseAdmin = await createAdminClient()
 
     // Fetch statistics
     const [
@@ -16,15 +16,15 @@ export default async function AdminDashboardPage() {
         { data: invoicesByMonth },
         { data: usersByCountry },
     ] = await Promise.all([
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("projects").select("*", { count: "exact", head: true }),
-        supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "In Progress"),
-        supabase.from("invoices").select("*", { count: "exact", head: true }),
-        supabase.from("invoices").select("*", { count: "exact", head: true }).eq("status", "Paid"),
-        supabase.from("profiles").select("id, created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("projects").select("status"),
-        supabase.from("invoices").select("total, created_at"),
-        supabase.from("profiles").select("country"),
+        supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }),
+        supabaseAdmin.from("projects").select("*", { count: "exact", head: true }),
+        supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).eq("status", "In Progress"),
+        supabaseAdmin.from("invoices").select("*", { count: "exact", head: true }),
+        supabaseAdmin.from("invoices").select("*", { count: "exact", head: true }).eq("status", "Paid"),
+        supabaseAdmin.from("profiles").select("id, created_at").order("created_at", { ascending: false }).limit(100),
+        supabaseAdmin.from("projects").select("status"),
+        supabaseAdmin.from("invoices").select("total, created_at"),
+        supabaseAdmin.from("profiles").select("country"),
     ])
 
     // Calculate monthly active users (users created in last 30 days as proxy)
