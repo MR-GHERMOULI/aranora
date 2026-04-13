@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/server"
 import { AdminDashboardClient } from "./dashboard-client"
 
 export default async function AdminDashboardPage() {
-    const supabaseAdmin = await createAdminClient()
+    const supabaseAdmin = createAdminClient()
 
     // Fetch statistics
     const [

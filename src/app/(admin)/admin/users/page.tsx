@@ -3,7 +3,7 @@ import { UsersTable } from "@/components/admin/users-table"
 import { StatsCard } from "@/components/admin/stats-card"
 
 export default async function AdminUsersPage() {
-    const supabaseAdmin = await createAdminClient()
+    const supabaseAdmin = createAdminClient()
 
     // Fetch all users with their profiles
     const { data: usersData } = await supabaseAdmin
