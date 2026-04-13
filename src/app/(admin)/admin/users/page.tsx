@@ -8,7 +8,7 @@ export default async function AdminUsersPage() {
     // Fetch all users with their profiles
     const { data: usersData } = await supabaseAdmin
         .from("profiles")
-        .select("id, username, full_name, company_email, country, account_status, created_at")
+        .select("id, username, full_name, company_email, country, account_status, created_at, is_admin")
         .order("created_at", { ascending: false })
 
     // Fetch auth users to get missing emails

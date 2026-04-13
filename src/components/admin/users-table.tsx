@@ -28,6 +28,7 @@ interface User {
     country: string | null
     account_status: string
     created_at: string
+    is_admin?: boolean
     projects_count?: number
     invoices_count?: number
     collaborations_count?: number
@@ -56,6 +57,9 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
 
         return matchesSearch && matchesStatus
     })
+
+    const adminUsers = filteredUsers.filter((u) => u.is_admin)
+    const regularUsers = filteredUsers.filter((u) => !u.is_admin)
 
     async function updateUserStatus(userId: string, status: string) {
         setIsLoading(true)
@@ -135,6 +139,71 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
         }
     }
 
+    const renderUserRow = (user: User, isAdminStyle: boolean = false) => (
+        <tr key={user.id} className={`transition-colors ${isAdminStyle ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/30"}`}>
+            <td className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${isAdminStyle ? "bg-primary text-primary-foreground" : "bg-gradient-to-br from-primary/20 to-secondary/20"}`}>
+                        <span className="text-sm font-medium">
+                            {(user.full_name || user.username || "U").charAt(0).toUpperCase()}
+                        </span>
+                    </div>
+                    <div>
+                        <p className="font-medium flex items-center gap-2">
+                            {user.full_name || "No Name"}
+                            {user.is_admin && <span className="text-xs bg-primary/20 text-primary px-1.5 rounded uppercase font-bold">Owner</span>}
+                        </p>
+                        <p className="text-sm text-muted-foreground">@{user.username || "unknown"}</p>
+                    </div>
+                </div>
+            </td>
+            <td className="px-4 py-3 text-sm">{user.company_email || "-"}</td>
+            <td className="px-4 py-3 text-sm">{user.country || "-"}</td>
+            <td className="px-4 py-3">{getStatusBadge(user.account_status || "active")}</td>
+            <td className="px-4 py-3 text-sm text-muted-foreground">
+                {new Date(user.created_at).toLocaleDateString('en-US')}
+            </td>
+            <td className="px-4 py-3 text-right">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" disabled={isLoading}>
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => viewUserDetails(user)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {!user.is_admin && user.account_status !== "active" && (
+                            <DropdownMenuItem onClick={() => updateUserStatus(user.id, "active")}>
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Activate
+                            </DropdownMenuItem>
+                        )}
+                        {!user.is_admin && user.account_status !== "suspended" && (
+                            <DropdownMenuItem onClick={() => updateUserStatus(user.id, "suspended")}>
+                                <UserX className="mr-2 h-4 w-4" />
+                                Suspend
+                            </DropdownMenuItem>
+                        )}
+                        {!user.is_admin && <DropdownMenuSeparator />}
+                        {!user.is_admin && (
+                            <DropdownMenuItem
+                                onClick={() => deleteUser(user.id)}
+                                className="text-destructive"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </DropdownMenuItem>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </td>
+        </tr>
+    );
+
     return (
         <>
             {/* Filters */}
@@ -186,73 +255,36 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                                 <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Actions</th>
                             </tr>
                         </thead>
+
+                        {/* Admin / Owners Section */}
+                        {adminUsers.length > 0 && (
+                            <tbody className="divide-y border-b-4 border-muted">
+                                <tr>
+                                    <td colSpan={6} className="px-4 py-2 bg-muted/20 text-xs font-semibold text-primary uppercase tracking-wider">
+                                        👑 Platform Owners / Administrators
+                                    </td>
+                                </tr>
+                                {adminUsers.map(user => renderUserRow(user, true))}
+                            </tbody>
+                        )}
+
+                        {/* Regular Users Section */}
                         <tbody className="divide-y">
-                            {filteredUsers.length === 0 ? (
+                            {regularUsers.length > 0 && adminUsers.length > 0 && (
+                                <tr>
+                                    <td colSpan={6} className="px-4 py-2 bg-muted/20 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                        👥 Registered Users
+                                    </td>
+                                </tr>
+                            )}
+                            {regularUsers.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                                        No users found
+                                        {adminUsers.length > 0 ? "No regular users found" : "No users found"}
                                     </td>
                                 </tr>
                             ) : (
-                                filteredUsers.map((user) => (
-                                    <tr key={user.id} className="hover:bg-muted/30 transition-colors">
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                                                    <span className="text-sm font-medium">
-                                                        {(user.full_name || user.username || "U").charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium">{user.full_name || "No Name"}</p>
-                                                    <p className="text-sm text-muted-foreground">@{user.username || "unknown"}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm">{user.company_email || "-"}</td>
-                                        <td className="px-4 py-3 text-sm">{user.country || "-"}</td>
-                                        <td className="px-4 py-3">{getStatusBadge(user.account_status || "active")}</td>
-                                        <td className="px-4 py-3 text-sm text-muted-foreground">
-                                            {new Date(user.created_at).toLocaleDateString('en-US')}
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" disabled={isLoading}>
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => viewUserDetails(user)}>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        View Details
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    {user.account_status !== "active" && (
-                                                        <DropdownMenuItem onClick={() => updateUserStatus(user.id, "active")}>
-                                                            <UserCheck className="mr-2 h-4 w-4" />
-                                                            Activate
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                    {user.account_status !== "suspended" && (
-                                                        <DropdownMenuItem onClick={() => updateUserStatus(user.id, "suspended")}>
-                                                            <UserX className="mr-2 h-4 w-4" />
-                                                            Suspend
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem
-                                                        onClick={() => deleteUser(user.id)}
-                                                        className="text-destructive"
-                                                    >
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </td>
-                                    </tr>
-                                ))
+                                regularUsers.map(user => renderUserRow(user, false))
                             )}
                         </tbody>
                     </table>
