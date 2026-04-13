@@ -1,6 +1,7 @@
 import { getCollaborators } from "./actions"
 import { CollaboratorList } from "@/components/collaborators/collaborator-list"
 import { AddCollaboratorDialog } from "@/components/collaborators/add-collaborator-dialog"
+import { SubscriptionGate } from "@/components/billing/subscription-gate"
 import { Users } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
@@ -22,7 +23,9 @@ export default async function CollaboratorsPage() {
                         Manage your network of external talent and collaborators.
                     </p>
                 </div>
-                <AddCollaboratorDialog />
+                <SubscriptionGate>
+                    <AddCollaboratorDialog />
+                </SubscriptionGate>
             </div>
 
             <CollaboratorList collaborators={collaborators} />

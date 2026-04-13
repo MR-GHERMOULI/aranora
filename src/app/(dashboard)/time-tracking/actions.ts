@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { TimeEntry } from "@/types";
 import { revalidatePath } from "next/cache";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 export async function getTimeEntries(filters?: {
     projectId?: string;
@@ -75,6 +76,7 @@ export async function startTimeEntry(data: {
     isBillable?: boolean;
     hourlyRate?: number;
 }) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -120,6 +122,7 @@ export async function startTimeEntry(data: {
 }
 
 export async function stopTimeEntry(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -142,6 +145,7 @@ export async function stopTimeEntry(id: string) {
 }
 
 export async function updateTimeEntry(id: string, data: Partial<TimeEntry>) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -162,6 +166,7 @@ export async function updateTimeEntry(id: string, data: Partial<TimeEntry>) {
 }
 
 export async function deleteTimeEntry(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -190,6 +195,7 @@ export async function createTimeEntry(data: {
     isBillable?: boolean;
     hourlyRate?: number;
 }) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -215,6 +221,7 @@ export async function createTimeEntry(data: {
 }
 
 export async function bulkLinkToInvoice(timeEntryIds: string[], invoiceId: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

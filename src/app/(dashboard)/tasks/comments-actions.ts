@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 const TEAM_ID = 'personal';
 
@@ -52,6 +53,7 @@ export async function getTaskComments(taskId: string): Promise<TaskComment[]> {
 }
 
 export async function addTaskComment(taskId: string, content: string, activityType: string = 'comment', metadata: any = {}) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

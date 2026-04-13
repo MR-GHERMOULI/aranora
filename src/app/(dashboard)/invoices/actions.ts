@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Invoice } from "@/types";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 export async function getInvoices(clientId?: string, projectId?: string) {
   const supabase = await createClient();
@@ -84,6 +85,7 @@ export async function getInvoice(id: string) {
 
 
 export async function createInvoice(formData: FormData) {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -184,6 +186,7 @@ export async function createInvoice(formData: FormData) {
 }
 
 export async function updateInvoice(formData: FormData) {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -268,6 +271,7 @@ export async function updateInvoice(formData: FormData) {
 
 
 export async function deleteInvoice(invoiceId: string) {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

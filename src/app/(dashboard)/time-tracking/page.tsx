@@ -3,6 +3,7 @@ import { getTimeTrackingStats } from "@/app/actions/time-stats-actions";
 import { TimeLogTable } from "@/components/time-tracking/time-log-table";
 import { ManualEntryDialog } from "@/components/time-tracking/manual-entry-dialog";
 import { TimeTrackingChart } from "@/components/time-tracking/time-tracking-chart";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import { Timer, TrendingUp, TrendingDown, DollarSign, Clock } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { cn, formatDuration } from "@/lib/utils";
@@ -37,7 +38,9 @@ export default async function TimeTrackingPage() {
                         <p className="text-muted-foreground">Manage your work hours and productivity.</p>
                     </div>
                 </div>
-                <ManualEntryDialog />
+                <SubscriptionGate>
+                    <ManualEntryDialog />
+                </SubscriptionGate>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">

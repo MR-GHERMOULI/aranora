@@ -1,5 +1,6 @@
 import { getIntakeForms, getSubmissions } from "./actions";
 import { FormBuilder } from "@/components/intake-forms/form-builder";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     ClipboardList, Inbox, Eye, TrendingUp, Sparkles
@@ -81,12 +82,14 @@ export default async function IntakeFormsPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300" />
-                        <div className="relative">
-                            <FormBuilder />
+                    <SubscriptionGate>
+                        <div className="relative group">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300" />
+                            <div className="relative">
+                                <FormBuilder />
+                            </div>
                         </div>
-                    </div>
+                    </SubscriptionGate>
                 </div>
             </div>
 
@@ -138,12 +141,14 @@ export default async function IntakeFormsPage() {
                         <p className="text-muted-foreground max-w-sm mb-8 text-sm leading-relaxed">
                             Create a professional intake form to collect client requirements before starting any project. Send a link — clients fill it out — you get structured data.
                         </p>
-                        <div className="relative group">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl blur opacity-40 group-hover:opacity-70 transition duration-300" />
-                            <div className="relative">
-                                <FormBuilder />
+                        <SubscriptionGate>
+                            <div className="relative group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-pink-500 rounded-xl blur opacity-40 group-hover:opacity-70 transition duration-300" />
+                                <div className="relative">
+                                    <FormBuilder />
+                                </div>
                             </div>
-                        </div>
+                        </SubscriptionGate>
                     </div>
                 ) : (
                     <IntakeFormsClient forms={forms} submissions={allSubmissions} />

@@ -4,6 +4,7 @@ import { getClients } from "../clients/actions";
 import { getProjects } from "../projects/actions";
 import { getProfile } from "../settings/actions";
 import { SmartContractWizard } from "@/components/contracts/smart-contract-wizard";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -124,18 +125,20 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
                     </Button>
 
                     {/* Glowing CTA */}
-                    <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300" />
-                        <div className="relative">
-                            <SmartContractWizard
-                                clients={clients}
-                                projects={projects}
-                                templates={templates}
-                                freelancerName={profile.full_name || profile.company_name || "Freelancer"}
-                                initialIntakeSubmission={initialIntakeSubmission}
-                            />
+                    <SubscriptionGate>
+                        <div className="relative group">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-300" />
+                            <div className="relative">
+                                <SmartContractWizard
+                                    clients={clients}
+                                    projects={projects}
+                                    templates={templates}
+                                    freelancerName={profile.full_name || profile.company_name || "Freelancer"}
+                                    initialIntakeSubmission={initialIntakeSubmission}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    </SubscriptionGate>
                 </div>
             </div>
 
@@ -191,17 +194,19 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
                         <p className="text-muted-foreground max-w-sm mb-8 text-sm leading-relaxed">
                             Create professional, legally-binding contracts in minutes using the Smart Contract Assistant.
                         </p>
-                        <div className="relative group">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-blue-500 rounded-xl blur opacity-40 group-hover:opacity-70 transition duration-300" />
-                            <div className="relative">
-                                <SmartContractWizard
-                                    clients={clients}
-                                    projects={projects}
-                                    templates={templates}
-                                    freelancerName={profile.full_name || profile.company_name || "Freelancer"}
-                                />
+                        <SubscriptionGate>
+                            <div className="relative group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-brand-primary to-blue-500 rounded-xl blur opacity-40 group-hover:opacity-70 transition duration-300" />
+                                <div className="relative">
+                                    <SmartContractWizard
+                                        clients={clients}
+                                        projects={projects}
+                                        templates={templates}
+                                        freelancerName={profile.full_name || profile.company_name || "Freelancer"}
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        </SubscriptionGate>
                     </div>
                 ) : (
                     /* ── Table ── */

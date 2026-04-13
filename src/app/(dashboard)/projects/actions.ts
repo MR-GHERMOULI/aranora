@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Project } from "@/types";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 function slugify(text: string): string {
   return text
@@ -59,6 +60,7 @@ export async function getProjects(clientId?: string) {
 }
 
 export async function createProject(formData: FormData) {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -118,6 +120,7 @@ export async function createProject(formData: FormData) {
 
 
 export async function updateProject(formData: FormData) {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -194,6 +197,7 @@ export async function updateProject(formData: FormData) {
 }
 
 export async function deleteProject(projectId: string) {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -214,6 +218,7 @@ export async function deleteProject(projectId: string) {
 import { v4 as uuidv4 } from 'uuid';
 
 export async function toggleShareToken(projectId: string): Promise<{ share_token: string | null }> {
+  await requireActiveSubscription();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');

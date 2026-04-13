@@ -105,9 +105,10 @@ export async function middleware(request: NextRequest) {
                             if (status === 'affiliate') {
                                 return NextResponse.redirect(new URL('/affiliates', request.url));
                             }
-                            const pricingUrl = new URL('/pricing', request.url);
-                            pricingUrl.searchParams.set('expired', 'true');
-                            return NextResponse.redirect(pricingUrl);
+                            // Allow expired users through in read-only mode.
+                            // Write operations are blocked at the server action level.
+                            // UI shows a read-only banner prompting renewal.
+                            // (No redirect — they can still view their data)
                         }
                     }
                 }

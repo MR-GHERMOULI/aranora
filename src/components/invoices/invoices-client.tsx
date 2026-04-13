@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import {
     FileText, Search, Plus, Filter, LayoutGrid, List,
     DollarSign, CheckCircle2, Clock, AlertCircle, Calendar,
@@ -72,11 +73,13 @@ export function InvoicesClient({ invoices }: InvoicesClientProps) {
                             <History className="mr-2 h-4 w-4" /> History
                         </Link>
                     </Button>
-                    <Button size="sm" asChild className="bg-brand-primary hover:bg-brand-primary/90">
-                        <Link href="/invoices/new">
-                            <Plus className="mr-2 h-4 w-4" /> Create Invoice
-                        </Link>
-                    </Button>
+                    <SubscriptionGate>
+                        <Button size="sm" asChild className="bg-brand-primary hover:bg-brand-primary/90">
+                            <Link href="/invoices/new">
+                                <Plus className="mr-2 h-4 w-4" /> Create Invoice
+                            </Link>
+                        </Button>
+                    </SubscriptionGate>
                 </div>
             </div>
 
@@ -200,9 +203,11 @@ export function InvoicesClient({ invoices }: InvoicesClientProps) {
                                 : "You haven't created any invoices yet. Start by creating your first one."}
                         </p>
                         {!(search || statusFilter !== "All") && (
-                            <Button asChild className="mt-4" variant="outline">
-                                <Link href="/invoices/new">Create Invoice</Link>
-                            </Button>
+                            <SubscriptionGate>
+                                <Button asChild className="mt-4" variant="outline">
+                                    <Link href="/invoices/new">Create Invoice</Link>
+                                </Button>
+                            </SubscriptionGate>
                         )}
                     </CardContent>
                 </Card>

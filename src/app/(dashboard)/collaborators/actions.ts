@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { CollaboratorCRM, CollaboratorPayment } from "@/types";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 export async function getCollaborators() {
     const supabase = await createClient();
@@ -46,6 +47,7 @@ export async function getCollaborator(id: string) {
 }
 
 export async function createCollaborator(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -80,6 +82,7 @@ export async function createCollaborator(formData: FormData) {
 }
 
 export async function updateCollaborator(id: string, formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -113,6 +116,7 @@ export async function updateCollaborator(id: string, formData: FormData) {
 }
 
 export async function deleteCollaborator(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -171,6 +175,7 @@ export async function getCollaboratorPayments(collaboratorId: string) {
 }
 
 export async function addCollaboratorPayment(collaboratorId: string, formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

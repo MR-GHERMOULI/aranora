@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Contract, ContractTemplate, ContractStructuredData } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 // ... (rest of imports)
 
 
@@ -58,6 +59,7 @@ export async function getContract(id: string) {
 }
 
 export async function createContract(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -96,6 +98,7 @@ export async function createSmartContract(data: {
     content: string;
     contractData: ContractStructuredData;
 }) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -124,6 +127,7 @@ export async function createSmartContract(data: {
 }
 
 export async function updateContract(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -161,6 +165,7 @@ export async function updateContract(formData: FormData) {
 }
 
 export async function updateContractContent(id: string, content: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -185,6 +190,7 @@ export async function updateContractContent(id: string, content: string) {
 
 
 export async function deleteContract(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -211,6 +217,7 @@ export async function deleteContract(id: string) {
 // ============================================
 
 export async function sendContract(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -332,6 +339,7 @@ export async function getTemplates() {
 }
 
 export async function createTemplate(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -362,6 +370,7 @@ export async function createTemplate(formData: FormData) {
 }
 
 export async function updateTemplate(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -395,6 +404,7 @@ export async function updateTemplate(formData: FormData) {
 }
 
 export async function deleteTemplate(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

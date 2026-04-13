@@ -9,6 +9,7 @@ import { TaskStats } from "@/components/tasks/task-stats";
 import { TaskFilters, FilterState } from "@/components/tasks/task-filters";
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel";
 import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import { List, LayoutGrid, CalendarDays } from "lucide-react";
 
 interface TasksClientProps {
@@ -97,7 +98,9 @@ export function TasksClient({ tasks, projects, stats, currentUserId }: TasksClie
                         Organize, prioritize, and track your tasks efficiently.
                     </p>
                 </div>
-                <CreateTaskDialog projects={projects} />
+                <SubscriptionGate>
+                    <CreateTaskDialog projects={projects} />
+                </SubscriptionGate>
             </div>
 
             {/* Stats */}

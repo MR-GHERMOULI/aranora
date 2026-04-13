@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 export interface Collaborator {
     id: string;
@@ -45,6 +46,7 @@ export async function getProjectCollaborators(projectId: string) {
 }
 
 export async function addCollaborator(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -128,6 +130,7 @@ export async function addCollaborator(formData: FormData) {
 }
 
 export async function removeCollaborator(collaboratorId: string, projectId: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { requireActiveSubscription } from '@/lib/subscription-guard';
 
 // ── Types ──────────────────────────────────────────────
 export interface TaskFilters {
@@ -203,6 +204,7 @@ export async function getTaskStats(): Promise<TaskStats> {
 
 // ── CREATE TASK (Team-scoped) ─────────────────────────
 export async function createTask(formData: FormData, pathToRevalidate?: string) {
+    await requireActiveSubscription();
     const { supabase, user } = await getAuthUser();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
@@ -251,6 +253,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
 
 // ── UPDATE TASK ────────────────────────────────────────
 export async function updateTask(taskId: string, data: any, pathToRevalidate?: string) {
+    await requireActiveSubscription();
     const { supabase, user } = await getAuthUser();
 
     // Auto-set completed_at when status changes
@@ -283,6 +286,7 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
 
 // ── DELETE TASK ────────────────────────────────────────
 export async function deleteTask(taskId: string, pathToRevalidate?: string) {
+    await requireActiveSubscription();
     const { supabase, user } = await getAuthUser();
 
     const { data: deletedTask, error } = await supabase
@@ -307,6 +311,7 @@ export async function deleteTask(taskId: string, pathToRevalidate?: string) {
 
 // ── BULK UPDATE ────────────────────────────────────────
 export async function bulkUpdateTasks(taskIds: string[], data: any) {
+    await requireActiveSubscription();
     const { supabase, user } = await getAuthUser();
 
     if (data.status === 'Done') {
@@ -331,6 +336,7 @@ export async function bulkUpdateTasks(taskIds: string[], data: any) {
 
 // ── BULK DELETE ────────────────────────────────────────
 export async function bulkDeleteTasks(taskIds: string[]) {
+    await requireActiveSubscription();
     const { supabase, user } = await getAuthUser();
 
     const { error } = await supabase

@@ -4,6 +4,7 @@ import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Client } from "@/types";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 export async function getClients() {
     const supabase = await createSupabaseClient();
@@ -25,6 +26,7 @@ export async function getClients() {
 }
 
 export async function createClient(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
@@ -56,6 +58,7 @@ export async function createClient(formData: FormData) {
 
 
 export async function updateClient(formData: FormData) {
+    await requireActiveSubscription();
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
@@ -88,6 +91,7 @@ export async function updateClient(formData: FormData) {
 }
 
 export async function deleteClient(clientId: string) {
+    await requireActiveSubscription();
     const supabase = await createSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');

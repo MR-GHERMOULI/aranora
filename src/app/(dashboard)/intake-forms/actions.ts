@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { IntakeForm, IntakeSubmission, IntakeFormField } from "@/types";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 // ============================================
 // INTAKE FORM CRUD
@@ -60,6 +61,7 @@ export async function createIntakeForm(formData: {
     fields: IntakeFormField[];
     settings: Record<string, any>;
 }) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -96,6 +98,7 @@ export async function updateIntakeForm(id: string, formData: {
     settings?: Record<string, any>;
     status?: 'active' | 'archived';
 }) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -126,6 +129,7 @@ export async function updateIntakeForm(id: string, formData: {
 }
 
 export async function deleteIntakeForm(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -203,6 +207,7 @@ export async function getSubmission(id: string) {
 }
 
 export async function updateSubmissionStatus(id: string, status: 'new' | 'reviewed' | 'converted' | 'archived', notes?: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -233,6 +238,7 @@ export async function updateSubmissionStatus(id: string, status: 'new' | 'review
 }
 
 export async function markSubmissionConverted(id: string, projectId?: string, contractId?: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -262,6 +268,7 @@ export async function markSubmissionConverted(id: string, projectId?: string, co
 }
 
 export async function linkSubmissionToProject(id: string, projectId: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -288,6 +295,7 @@ export async function linkSubmissionToProject(id: string, projectId: string) {
 }
 
 export async function deleteSubmission(id: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

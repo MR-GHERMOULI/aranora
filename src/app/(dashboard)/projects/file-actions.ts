@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireActiveSubscription } from "@/lib/subscription-guard";
 
 export async function getProjectFiles(projectId: string) {
     const supabase = await createClient();
@@ -28,6 +29,7 @@ export async function getProjectFiles(projectId: string) {
 }
 
 export async function deleteProjectFile(fileId: string, filePath: string, pathToRevalidate: string) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -60,6 +62,7 @@ export async function deleteProjectFile(fileId: string, filePath: string, pathTo
 }
 
 export async function addProjectFileRecord(data: {
+
     projectId: string;
     fileName: string;
     fileUrl: string;
@@ -68,6 +71,7 @@ export async function addProjectFileRecord(data: {
     storagePath: string;
     pathToRevalidate: string;
 }) {
+    await requireActiveSubscription();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

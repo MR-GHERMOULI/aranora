@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MiniProgressBar } from "@/components/projects/project-progress-bar";
 import { AddProjectDialog } from "@/components/projects/add-project-dialog";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import {
     Briefcase, Search, Clock, CheckCircle2, PauseCircle, Pencil,
     Calendar, DollarSign, ArrowRight
@@ -68,7 +69,9 @@ export function ProjectsClient({ projects, clients }: ProjectsClientProps) {
                         Track and manage your projects.
                     </p>
                 </div>
-                <AddProjectDialog clients={clients} />
+                <SubscriptionGate>
+                    <AddProjectDialog clients={clients} />
+                </SubscriptionGate>
             </div>
 
             {/* Stats */}

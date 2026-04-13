@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { AddClientDialog } from "@/components/clients/add-client-dialog";
 import { EditClientDialog } from "@/components/clients/edit-client-dialog";
 import { DeleteClientDialog } from "@/components/clients/delete-client-dialog";
+import { SubscriptionGate } from "@/components/billing/subscription-gate";
 import {
     Users, Search, UserCheck, UserMinus, UserPlus,
     Mail, Phone, StickyNote, Grid3X3, List
@@ -82,7 +83,9 @@ export function ClientsClient({ clients }: ClientsClientProps) {
                         Manage your client relationships.
                     </p>
                 </div>
-                <AddClientDialog />
+                <SubscriptionGate>
+                    <AddClientDialog />
+                </SubscriptionGate>
             </div>
 
             {/* Stats */}
@@ -229,8 +232,12 @@ export function ClientsClient({ clients }: ClientsClientProps) {
                                 </div>
 
                                 <div className="flex items-center gap-2 mt-4 pt-3 border-t">
-                                    <EditClientDialog client={client} />
-                                    <DeleteClientDialog clientId={client.id} clientName={client.name} />
+                                    <SubscriptionGate>
+                                        <EditClientDialog client={client} />
+                                    </SubscriptionGate>
+                                    <SubscriptionGate>
+                                        <DeleteClientDialog clientId={client.id} clientName={client.name} />
+                                    </SubscriptionGate>
                                 </div>
                             </CardContent>
                         </Card>
@@ -273,8 +280,12 @@ export function ClientsClient({ clients }: ClientsClientProps) {
                                             </td>
                                             <td className="p-4 align-middle text-right">
                                                 <div className="flex items-center gap-1 justify-end">
-                                                    <EditClientDialog client={client} />
-                                                    <DeleteClientDialog clientId={client.id} clientName={client.name} />
+                                                    <SubscriptionGate>
+                                                        <EditClientDialog client={client} />
+                                                    </SubscriptionGate>
+                                                    <SubscriptionGate>
+                                                        <DeleteClientDialog clientId={client.id} clientName={client.name} />
+                                                    </SubscriptionGate>
                                                 </div>
                                             </td>
                                         </tr>
