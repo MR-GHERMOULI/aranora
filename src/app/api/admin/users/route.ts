@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 export async function DELETE(request: Request) {
@@ -38,8 +38,10 @@ export async function DELETE(request: Request) {
             )
         }
 
+        const supabaseAdmin = createAdminClient()
+
         // Delete the user via Supabase admin API (server-side only)
-        const { error } = await supabase.auth.admin.deleteUser(userId)
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
         if (error) {
             console.error("Error deleting user:", error)
@@ -49,8 +51,8 @@ export async function DELETE(request: Request) {
             )
         }
 
-        // Log the activity
-        await supabase.from("activity_logs").insert({
+        // Log the activity using admin client to bypass RLS if necessary
+        await supabaseAdmin.from("activity_logs").insert({
             admin_id: user.id,
             action: "Deleted User",
             action_type: "user",
