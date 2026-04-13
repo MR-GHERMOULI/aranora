@@ -63,17 +63,29 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
 
     async function updateUserStatus(userId: string, status: string) {
         setIsLoading(true)
-        const { error } = await supabase
-            .from("profiles")
-            .update({ account_status: status })
-            .eq("id", userId)
+        try {
+            const response = await fetch("/api/admin/users", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, status }),
+            })
 
-        if (!error) {
+            const result = await response.json()
+
+            if (!response.ok) {
+                alert(result.error || "Failed to update user status")
+                return
+            }
+
             setUsers(users.map((u) =>
                 u.id === userId ? { ...u, account_status: status } : u
             ))
+        } catch (error) {
+            console.error("Error updating user status:", error)
+            alert("Failed to update user status")
+        } finally {
+            setIsLoading(false)
         }
-        setIsLoading(false)
     }
 
     async function deleteUser(userId: string) {
