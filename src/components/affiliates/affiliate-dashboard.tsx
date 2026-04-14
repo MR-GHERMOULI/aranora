@@ -158,7 +158,7 @@ export function AffiliateDashboard() {
     };
 
     const shareOnTwitter = () => {
-        const text = encodeURIComponent('Transform how you manage freelance work with Aranora. Highly recommended! 🚀');
+        const text = encodeURIComponent('Stop juggling clients and deadlines — Aranora keeps your freelance business organized in one place. Try it free');
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(referralLink)}`, '_blank');
     };
 
