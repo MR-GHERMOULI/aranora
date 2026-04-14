@@ -13,7 +13,7 @@ import { useSubscriptionStatus } from '@/components/providers/subscription-conte
 export function ReadOnlyBanner() {
     const { isReadOnly, subscriptionStatus, trialDaysRemaining } = useSubscriptionStatus();
 
-    if (!isReadOnly) return null;
+    if (!isReadOnly || subscriptionStatus === 'affiliate') return null;
 
     const isExpiredTrial = subscriptionStatus === 'expired' || subscriptionStatus === 'trialing';
     const title = isExpiredTrial
