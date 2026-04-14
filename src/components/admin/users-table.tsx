@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, MoreHorizontal, UserCheck, UserX, Trash2, Eye, Crown, Gift, Clock, CreditCard, AlertTriangle } from "lucide-react"
+import { Search, MoreHorizontal, UserCheck, UserX, Trash2, Eye, Crown, Gift, Clock, CreditCard, AlertTriangle, ShieldAlert, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +17,8 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
+    DialogFooter,
 } from "@/components/ui/dialog"
 import { createClient } from "@/lib/supabase/client"
 
@@ -94,59 +96,114 @@ const tierConfig: Record<UserTier, { label: string; emoji: string; color: string
     },
 }
 
+const ACTIVATION_OPTIONS = [
+    { months: 1, label: "1 Month", description: "30 days of access" },
+    { months: 6, label: "6 Months", description: "~180 days of access" },
+    { months: 12, label: "1 Year", description: "365 days of access" },
+]
+
 export function UsersTable({ initialUsers }: UsersTableProps) {
     const [users, setUsers] = useState<User[]>(initialUsers)
     const [searchQuery, setSearchQuery] = useState("")
     const [tierFilter, setTierFilter] = useState<string>("all")
-    const [selectedUser, setSelectedUser] = useState<User | null>(null)
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const supabase = createClient()
+
+    // Dialog states
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+    const [isActivateOpen, setIsActivateOpen] = useState(false)
+    const [isSuspendOpen, setIsSuspendOpen] = useState(false)
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+    const [actionTarget, setActionTarget] = useState<User | null>(null)
 
     const filteredUsers = users.filter((user) => {
         const matchesSearch =
             user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             user.company_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             user.username?.toLowerCase().includes(searchQuery.toLowerCase())
-
         const matchesTier = tierFilter === "all" || user.tier === tierFilter
-
         return matchesSearch && matchesTier
     })
 
-    // Sort users into tier groups (maintaining the order)
     const tierOrder: UserTier[] = ["owner", "paid", "promo", "trial", "expired"]
-    const groupedUsers: Record<UserTier, User[]> = {
-        owner: [], paid: [], promo: [], trial: [], expired: []
-    }
+    const groupedUsers: Record<UserTier, User[]> = { owner: [], paid: [], promo: [], trial: [], expired: [] }
     filteredUsers.forEach(u => groupedUsers[u.tier].push(u))
 
-    async function updateUserStatus(userId: string, status: string) {
+    // ── Activate: extend trial by N months ──
+    async function activateUser(userId: string, months: number) {
         setIsLoading(true)
         try {
             const response = await fetch("/api/admin/users", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, status }),
+                body: JSON.stringify({ userId, action: "activate", months }),
             })
             const result = await response.json()
             if (!response.ok) {
-                alert(result.error || "Failed to update user status")
+                alert(result.error || "Failed to activate user")
                 return
             }
-            setUsers(users.map((u) =>
-                u.id === userId ? { ...u, account_status: status } : u
+            // Update local state
+            const newTrialEnd = new Date()
+            newTrialEnd.setMonth(newTrialEnd.getMonth() + months)
+            const daysRemaining = Math.ceil((newTrialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+
+            setUsers(users.map(u =>
+                u.id === userId ? {
+                    ...u,
+                    account_status: "active",
+                    subscription_status: "trialing",
+                    trial_ends_at: newTrialEnd.toISOString(),
+                    tier: "trial" as UserTier,
+                    daysRemaining,
+                } : u
             ))
+            setIsActivateOpen(false)
+            setActionTarget(null)
         } catch (error) {
-            console.error("Error updating user status:", error)
-            alert("Failed to update user status")
+            console.error("Error activating user:", error)
+            alert("Failed to activate user")
         } finally {
             setIsLoading(false)
         }
     }
 
+    // ── Suspend: block account ──
+    async function suspendUser(userId: string) {
+        setIsLoading(true)
+        try {
+            const response = await fetch("/api/admin/users", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId, action: "suspend" }),
+            })
+            const result = await response.json()
+            if (!response.ok) {
+                alert(result.error || "Failed to suspend user")
+                return
+            }
+            setUsers(users.map(u =>
+                u.id === userId ? {
+                    ...u,
+                    account_status: "suspended",
+                    subscription_status: "expired",
+                    tier: "expired" as UserTier,
+                    daysRemaining: null,
+                } : u
+            ))
+            setIsSuspendOpen(false)
+            setActionTarget(null)
+        } catch (error) {
+            console.error("Error suspending user:", error)
+            alert("Failed to suspend user")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // ── Delete: permanently remove ──
     async function deleteUser(userId: string) {
-        if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) return
         setIsLoading(true)
         try {
             const response = await fetch("/api/admin/users", {
@@ -159,7 +216,9 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                 alert(result.error || "Failed to delete user")
                 return
             }
-            setUsers(users.filter((u) => u.id !== userId))
+            setUsers(users.filter(u => u.id !== userId))
+            setIsDeleteOpen(false)
+            setActionTarget(null)
         } catch (error) {
             console.error("Error deleting user:", error)
             alert("Failed to delete user")
@@ -245,7 +304,9 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                 </div>
             )
         }
-        // expired
+        if (user.account_status === "suspended") {
+            return <span className="text-xs text-red-500 font-medium">🚫 Suspended</span>
+        }
         return <span className="text-xs text-red-500 font-medium">Expired</span>
     }
 
@@ -264,9 +325,7 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                         </span>
                     </div>
                     <div className="min-w-0">
-                        <p className="font-medium text-sm flex items-center gap-1.5 truncate">
-                            {user.full_name || "No Name"}
-                        </p>
+                        <p className="font-medium text-sm truncate">{user.full_name || "No Name"}</p>
                         <p className="text-xs text-muted-foreground truncate">@{user.username || "unknown"}</p>
                     </div>
                 </div>
@@ -287,33 +346,28 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                             <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem onClick={() => viewUserDetails(user)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        {!user.is_admin && user.account_status !== "active" && (
-                            <DropdownMenuItem onClick={() => updateUserStatus(user.id, "active")}>
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Activate
-                            </DropdownMenuItem>
-                        )}
-                        {!user.is_admin && user.account_status !== "suspended" && (
-                            <DropdownMenuItem onClick={() => updateUserStatus(user.id, "suspended")}>
-                                <UserX className="mr-2 h-4 w-4" />
-                                Suspend
-                            </DropdownMenuItem>
-                        )}
-                        {!user.is_admin && <DropdownMenuSeparator />}
                         {!user.is_admin && (
-                            <DropdownMenuItem
-                                onClick={() => deleteUser(user.id)}
-                                className="text-destructive"
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => { setActionTarget(user); setIsActivateOpen(true); }}>
+                                    <Zap className="mr-2 h-4 w-4 text-emerald-500" />
+                                    <span className="text-emerald-600 font-medium">Activate</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setActionTarget(user); setIsSuspendOpen(true); }}>
+                                    <ShieldAlert className="mr-2 h-4 w-4 text-amber-500" />
+                                    <span className="text-amber-600 font-medium">Suspend</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => { setActionTarget(user); setIsDeleteOpen(true); }}>
+                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                    <span className="text-red-600 font-medium">Delete</span>
+                                </DropdownMenuItem>
+                            </>
                         )}
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -334,7 +388,7 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                         className="pl-10"
                     />
                 </div>
-                <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1 flex-wrap">
                     {TIER_FILTERS.map(filter => (
                         <Button
                             key={filter.value}
@@ -408,12 +462,150 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
 
             {/* Stats Footer */}
             <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                    Showing {filteredUsers.length} of {users.length} users
-                </span>
+                <span>Showing {filteredUsers.length} of {users.length} users</span>
             </div>
 
-            {/* User Details Dialog */}
+            {/* ════════════════════════════════════════════════════════════
+                ACTIVATE DIALOG — Choose duration: 1 month, 6 months, 1 year
+               ════════════════════════════════════════════════════════════ */}
+            <Dialog open={isActivateOpen} onOpenChange={(open) => { setIsActivateOpen(open); if (!open) setActionTarget(null); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                <Zap className="h-4 w-4 text-emerald-500" />
+                            </div>
+                            Activate Account
+                        </DialogTitle>
+                        <DialogDescription>
+                            Grant <span className="font-semibold text-foreground">{actionTarget?.full_name || actionTarget?.company_email}</span> access to the platform. Choose the duration:
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-3 py-4">
+                        {ACTIVATION_OPTIONS.map((option) => (
+                            <button
+                                key={option.months}
+                                disabled={isLoading}
+                                onClick={() => actionTarget && activateUser(actionTarget.id, option.months)}
+                                className="flex items-center justify-between p-4 rounded-xl border border-border hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group disabled:opacity-50"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                                        <Clock className="h-5 w-5 text-emerald-500" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="font-semibold text-sm">{option.label}</p>
+                                        <p className="text-xs text-muted-foreground">{option.description}</p>
+                                    </div>
+                                </div>
+                                <div className="text-xs font-medium text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Select
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => { setIsActivateOpen(false); setActionTarget(null); }} disabled={isLoading}>
+                            Cancel
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* ════════════════════════════════════════════════════════════
+                SUSPEND DIALOG — Confirm account suspension
+               ════════════════════════════════════════════════════════════ */}
+            <Dialog open={isSuspendOpen} onOpenChange={(open) => { setIsSuspendOpen(open); if (!open) setActionTarget(null); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                <ShieldAlert className="h-4 w-4 text-amber-500" />
+                            </div>
+                            Suspend Account
+                        </DialogTitle>
+                        <DialogDescription>
+                            This will suspend <span className="font-semibold text-foreground">{actionTarget?.full_name || actionTarget?.company_email}</span>&apos;s account and block all platform access. They will be treated as an expired account and will only be able to view their data in read-only mode until you manually re-activate them.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="bg-amber-500/5 border border-amber-200/40 rounded-xl p-4 my-2">
+                        <div className="flex items-start gap-3">
+                            <ShieldAlert className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                            <div className="text-sm">
+                                <p className="font-medium text-amber-700 mb-1">What happens when suspended:</p>
+                                <ul className="text-amber-600/80 space-y-1 text-xs">
+                                    <li>• All write operations (create, edit, delete) will be blocked</li>
+                                    <li>• User will see a read-only banner on their dashboard</li>
+                                    <li>• Account remains suspended until you activate it again</li>
+                                    <li>• User&apos;s existing data is preserved and viewable</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => { setIsSuspendOpen(false); setActionTarget(null); }} disabled={isLoading}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="default"
+                            className="bg-amber-500 hover:bg-amber-600 text-white"
+                            onClick={() => actionTarget && suspendUser(actionTarget.id)}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Suspending..." : "Suspend Account"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* ════════════════════════════════════════════════════════════
+                DELETE DIALOG — Confirm permanent deletion
+               ════════════════════════════════════════════════════════════ */}
+            <Dialog open={isDeleteOpen} onOpenChange={(open) => { setIsDeleteOpen(open); if (!open) setActionTarget(null); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                            </div>
+                            Delete Account Permanently
+                        </DialogTitle>
+                        <DialogDescription>
+                            You are about to permanently delete <span className="font-semibold text-foreground">{actionTarget?.full_name || actionTarget?.company_email}</span>&apos;s account. This action <span className="font-semibold text-red-500">cannot be undone</span>.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="bg-red-500/5 border border-red-200/40 rounded-xl p-4 my-2">
+                        <div className="flex items-start gap-3">
+                            <Trash2 className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+                            <div className="text-sm">
+                                <p className="font-medium text-red-700 mb-1">This will permanently remove:</p>
+                                <ul className="text-red-600/80 space-y-1 text-xs">
+                                    <li>• The user&apos;s profile and all account data</li>
+                                    <li>• All projects, tasks, and invoices</li>
+                                    <li>• All contracts and intake forms</li>
+                                    <li>• Authentication credentials</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => { setIsDeleteOpen(false); setActionTarget(null); }} disabled={isLoading}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => actionTarget && deleteUser(actionTarget.id)}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Deleting..." : "Delete Permanently"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* ════════════════════════════════════════════════════════════
+                VIEW DETAILS DIALOG
+               ════════════════════════════════════════════════════════════ */}
             <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
@@ -421,7 +613,6 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                     </DialogHeader>
                     {selectedUser && (
                         <div className="space-y-5">
-                            {/* User header */}
                             <div className="flex items-center gap-4">
                                 <div className={`h-16 w-16 rounded-full flex items-center justify-center shrink-0 ${
                                     selectedUser.tier === "owner" ? "bg-gradient-to-br from-amber-400 to-amber-600" :
@@ -442,7 +633,6 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                                 </div>
                             </div>
 
-                            {/* Activity stats */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div className="rounded-xl bg-muted/50 p-3 text-center">
                                     <p className="text-2xl font-bold">{selectedUser.projects_count}</p>
@@ -458,7 +648,6 @@ export function UsersTable({ initialUsers }: UsersTableProps) {
                                 </div>
                             </div>
 
-                            {/* Info */}
                             <div className="space-y-2.5 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-muted-foreground">Username</span>
