@@ -41,20 +41,38 @@ export function Sidebar({ className }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [broadcastsCount, setBroadcastsCount] = useState(0)
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
+    const [isAffiliate, setIsAffiliate] = useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
-            const [count, { data }] = await Promise.all([
+            const supabase = createClient()
+
+            const [count, { data: brandingData }, { data: { user } }] = await Promise.all([
                 getUnreadBroadcastsCount(),
-                createClient()
+                supabase
                     .from("platform_settings")
                     .select("value")
                     .eq("key", "branding")
-                    .single()
+                    .single(),
+                supabase.auth.getUser(),
             ])
+
             setBroadcastsCount(count)
-            if (data?.value?.logo_url) {
-                setLogoUrl(data.value.logo_url)
+            if (brandingData?.value?.logo_url) {
+                setLogoUrl(brandingData.value.logo_url)
+            }
+
+            // Check if the user is an affiliate marketer
+            if (user) {
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .select("subscription_status")
+                    .eq("id", user.id)
+                    .single()
+
+                if (profile?.subscription_status === "affiliate") {
+                    setIsAffiliate(true)
+                }
             }
         }
         fetchData()
@@ -185,6 +203,84 @@ export function Sidebar({ className }: SidebarProps) {
         }
     ];
 
+    // ── Affiliate-only sidebar ──
+    // Affiliates see only the Affiliate Dashboard + Sign Out
+    if (isAffiliate) {
+        return (
+            <>
+                <div className="md:hidden p-4 flex items-center justify-between border-b bg-background">
+                    <div className="flex items-center gap-2">
+                        <div className="relative z-20 flex items-center text-lg font-medium">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Logo" className="mr-2 h-7 w-7 object-contain rounded-md" />
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-6 w-6 text-primary">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                </svg>
+                            )}
+                            Aranora
+                        </div>
+                    </div>
+                    <Button size="icon" variant="ghost" onClick={() => setIsOpen(!isOpen)}>
+                        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </Button>
+                </div>
+
+                <div
+                    className={cn(
+                        "space-y-4 py-4 flex flex-col h-full bg-slate-900 text-white fixed inset-y-0 left-0 z-50 w-72 transition-transform transform md:relative md:translate-x-0",
+                        isOpen ? "translate-x-0" : "-translate-x-full",
+                        className
+                    )}
+                >
+                    <div className="px-3 py-2 flex-1 flex flex-col min-h-0">
+                        <Link href="/affiliates" className="flex items-center pl-3 mb-5 shrink-0">
+                            <div className="relative z-20 flex items-center text-xl font-bold">
+                                {logoUrl ? (
+                                    <img src={logoUrl} alt="Logo" className="mr-3 h-8 w-8 object-contain rounded-lg" />
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 h-8 w-8 text-secondary">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                    </svg>
+                                )}
+                                Aranora
+                            </div>
+                        </Link>
+
+                        <div className="flex items-center justify-center gap-4 px-3 mb-6 shrink-0">
+                            <ModeToggle />
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 pb-4">
+                            <div className="space-y-1">
+                                <h3 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                                    Affiliate Program
+                                </h3>
+                                <Link
+                                    href="/affiliates"
+                                    className={cn(
+                                        "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+                                        pathname === "/affiliates" ? "text-white bg-white/10" : "text-zinc-400"
+                                    )}
+                                >
+                                    <div className="flex items-center flex-1">
+                                        <TrendingUp className="h-5 w-5 mr-3 text-teal-500" />
+                                        Affiliate Dashboard
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="px-3 py-2 mt-auto border-t border-white/10 bg-slate-900/50 backdrop-blur-sm shrink-0">
+                        <LogoutButton />
+                    </div>
+                </div>
+            </>
+        )
+    }
+
+    // ── Full sidebar for regular/owner/paid users ──
     return (
         <>
             <div className="md:hidden p-4 flex items-center justify-between border-b bg-background">
@@ -313,3 +409,4 @@ export function Sidebar({ className }: SidebarProps) {
         </>
     )
 }
+
