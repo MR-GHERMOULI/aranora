@@ -45,8 +45,8 @@ export async function getUserBillingInfo(userId: string): Promise<UserBillingInf
         .eq('id', userId)
         .single();
 
-    // Owner accounts (is_admin) always have full, lifetime access —
-    // no trial, no subscription required.
+    // ── TIER 1: Owner accounts (is_admin = true) ──
+    // Lifetime access, no trial, no subscription, no payment ever required.
     if (profile?.is_admin) {
         return {
             status: 'active' as BillingStatus,
@@ -59,6 +59,11 @@ export async function getUserBillingInfo(userId: string): Promise<UserBillingInf
             stripeCustomerId: profile.stripe_customer_id || null,
         };
     }
+
+    // ── TIER 2 & 3: Promo accounts (extended trial) & Regular accounts ──
+    // Promo: subscription_status = 'trialing', trial_ends_at = 6–12 months ahead
+    // Regular: subscription_status = 'trialing', trial_ends_at = 30 days ahead
+    // Both tiers follow the same billing logic below.
 
     // Get active billing subscription
     const { data: subscription } = await supabase

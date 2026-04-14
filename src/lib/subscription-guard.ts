@@ -4,6 +4,11 @@
  * Enforces read-only mode for users whose trial has expired
  * or whose paid subscription has lapsed.
  * 
+ * Bypass rules:
+ *  - Owner accounts (is_admin = true) → ALWAYS have full access, lifetime, no payment.
+ *  - Promo accounts ("Friends of the platform") → trialing with extended trial_ends_at
+ *    (6 or 12 months). They get full access while trial is active, then must pay.
+ * 
  * Usage: Add `await requireActiveSubscription()` at the top
  * of any server action that creates, updates, or deletes data.
  */
@@ -25,7 +30,8 @@ export class SubscriptionExpiredError extends Error {
  * subscription (trialing or paid). Throws SubscriptionExpiredError
  * if the user's access has lapsed.
  *
- * - Admins always bypass this check.
+ * - Owner (is_admin) accounts always bypass — lifetime access.
+ * - Promo accounts have extended trial periods (6–12 months).
  * - Unauthenticated requests redirect to /login.
  */
 export async function requireActiveSubscription(): Promise<void> {
@@ -42,7 +48,7 @@ export async function requireActiveSubscription(): Promise<void> {
         .eq('id', user.id)
         .single();
 
-    // Admins always have full access
+    // ── Owner accounts: lifetime access, no restrictions ──
     if (profile?.is_admin) {
         return;
     }
@@ -59,7 +65,8 @@ export async function requireActiveSubscription(): Promise<void> {
         return;
     }
 
-    // Active trial period
+    // Active trial period (covers both regular 30-day trials AND
+    // extended promo trials of 6–12 months)
     if (status === 'trialing' && trialEndsAt) {
         const trialEnd = new Date(trialEndsAt);
         if (trialEnd > new Date()) {
@@ -70,3 +77,4 @@ export async function requireActiveSubscription(): Promise<void> {
     // Everything else: expired, canceled, past_due, or trial ended
     throw new SubscriptionExpiredError();
 }
+
