@@ -38,12 +38,27 @@ export function getTrialDaysRemaining(trialEndsAt: string | null): number {
 export async function getUserBillingInfo(userId: string): Promise<UserBillingInfo> {
     const supabase = createServiceClient();
 
-    // Get profile billing info
+    // Get profile billing info (including is_admin to identify Owner accounts)
     const { data: profile } = await supabase
         .from('profiles')
-        .select('trial_ends_at, subscription_status, stripe_customer_id')
+        .select('trial_ends_at, subscription_status, stripe_customer_id, is_admin')
         .eq('id', userId)
         .single();
+
+    // Owner accounts (is_admin) always have full, lifetime access —
+    // no trial, no subscription required.
+    if (profile?.is_admin) {
+        return {
+            status: 'active' as BillingStatus,
+            trialEndsAt: null,
+            trialDaysRemaining: 0,
+            isActive: true,
+            planType: 'owner',
+            currentPeriodEnd: null,
+            cancelAtPeriodEnd: false,
+            stripeCustomerId: profile.stripe_customer_id || null,
+        };
+    }
 
     // Get active billing subscription
     const { data: subscription } = await supabase
