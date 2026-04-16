@@ -588,54 +588,113 @@ export function AffiliateDashboard() {
             >
                 {activeTab === 'overview' && (
                     <div className="p-8">
-                        <h3 className="text-xl font-bold text-white mb-6">Recent Activity</h3>
-                        {commissions.length === 0 ? (
-                            <div className="text-center py-16 px-4">
-                                <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
-                                    <TrendingUp className="h-8 w-8 text-slate-500" />
-                                </div>
-                                <h4 className="text-lg font-semibold text-white mb-2">No commissions yet</h4>
-                                <p className="text-slate-400 text-sm max-w-sm mx-auto">
-                                    Start sharing your referral link everywhere. The sooner you share, the faster you earn!
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {commissions.slice(0, 10).map(comm => (
-                                    <div key={comm.id} className="flex items-center justify-between p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30 hover:bg-slate-800/80 transition-colors group">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
-                                                comm.subscription_type === 'yearly' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'
-                                            }`}>
-                                                <DollarSign className="h-5 w-5" />
-                                            </div>
-                                            <div>
-                                                <span className="text-sm font-semibold text-white block">
-                                                    {comm.subscription_type === 'yearly' ? 'Annual Subscription' : 'Monthly Subscription'}
-                                                    {comm.subscription_type === 'monthly' && (
-                                                        <span className="text-slate-500 ml-2 font-normal text-xs">
-                                                            (Month {comm.commission_month}/12)
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Commissions Column */}
+                            <div>
+                                <h3 className="text-xl font-bold text-white mb-6">Recent Commissions</h3>
+                                {commissions.length === 0 ? (
+                                    <div className="text-center py-12 px-4 bg-slate-800/20 rounded-2xl border border-slate-700/50">
+                                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                                            <TrendingUp className="h-6 w-6 text-slate-500" />
+                                        </div>
+                                        <h4 className="text-base font-semibold text-white mb-1">No commissions yet</h4>
+                                        <p className="text-slate-400 text-xs max-w-sm mx-auto">
+                                            Earnings appear here when referrals subscribe.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {commissions.slice(0, 10).map(comm => (
+                                            <div key={comm.id} className="flex items-center justify-between p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30 hover:bg-slate-800/80 transition-colors group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
+                                                        comm.subscription_type === 'yearly' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'
+                                                    }`}>
+                                                        <DollarSign className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-sm font-semibold text-white block">
+                                                            {comm.subscription_type === 'yearly' ? 'Annual Subscription' : 'Monthly Subscription'}
+                                                            {comm.subscription_type === 'monthly' && (
+                                                                <span className="text-slate-500 ml-1 font-normal text-xs">
+                                                                    (Month {comm.commission_month}/12)
+                                                                </span>
+                                                            )}
                                                         </span>
-                                                    )}
-                                                </span>
-                                                <div className="text-xs text-slate-400 mt-1 flex items-center gap-2">
-                                                    <Calendar className="h-3 w-3" />
-                                                    {new Date(comm.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                        <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                                                            <Calendar className="h-3 w-3" />
+                                                            {new Date(comm.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col items-end gap-1.5 shrink-0 pl-2">
+                                                    <span className="font-bold text-teal-400 text-base">
+                                                        +${comm.commission_amount.toFixed(2)}
+                                                    </span>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase border ${getStatusBadge(comm.status)}`}>
+                                                        {comm.status}
+                                                    </span>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="flex flex-col items-end gap-2">
-                                            <span className="font-bold text-teal-400 text-lg">
-                                                +${comm.commission_amount.toFixed(2)}
-                                            </span>
-                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border ${getStatusBadge(comm.status)}`}>
-                                                {comm.status}
-                                            </span>
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        )}
+
+                            {/* Signups Column */}
+                            <div>
+                                <h3 className="text-xl font-bold text-white mb-6 flex items-center justify-between">
+                                    Recent Signups
+                                    {stats && stats.totalReferrals > 0 && (
+                                        <span className="text-xs font-normal text-slate-400 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">
+                                            {stats.totalReferrals} total
+                                        </span>
+                                    )}
+                                </h3>
+                                {referrals.length === 0 ? (
+                                    <div className="text-center py-12 px-4 bg-slate-800/20 rounded-2xl border border-slate-700/50">
+                                        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                                            <UserPlus className="h-6 w-6 text-slate-500" />
+                                        </div>
+                                        <h4 className="text-base font-semibold text-white mb-1">No signups yet</h4>
+                                        <p className="text-slate-400 text-xs max-w-sm mx-auto">
+                                            Start sharing your link to get referrals.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {referrals.slice(0, 10).map(ref => {
+                                            const statusLabel = getReferralStatusLabel(ref);
+                                            const computedStatus = ref.status === 'signed_up' && ref.referred_user?.subscription_status === 'trialing' ? 'trialing' : ref.status;
+                                            
+                                            return (
+                                                <div key={ref.id} className="flex items-center justify-between p-4 bg-slate-800/40 rounded-2xl border border-slate-700/30 hover:bg-slate-800/80 transition-colors group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                                                            <Users className="h-4 w-4" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-sm font-semibold text-white block">
+                                                                {ref.referred_user?.full_name || 'Anonymous User'}
+                                                            </span>
+                                                            <div className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                                                                <Clock className="h-3 w-3" />
+                                                                {new Date(ref.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase border ${getStatusBadge(computedStatus)}`}>
+                                                            {statusLabel}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         
                         {/* Compact How-To embedded at bottom of overview */}
                         <div className="mt-12 bg-slate-950/50 rounded-2xl p-6 border border-slate-800">

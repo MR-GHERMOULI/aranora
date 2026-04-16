@@ -250,7 +250,7 @@ export async function signup(formData: FormData) {
                     .from('affiliates')
                     .select('id')
                     .eq('affiliate_code', refCode)
-                    .eq('status', 'active')
+                    .in('status', ['active', 'pending'])
                     .single();
 
                 if (affiliate) {

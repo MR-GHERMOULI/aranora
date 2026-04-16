@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
             .from('affiliates')
             .select('id, total_clicks')
             .eq('affiliate_code', affiliateCode)
-            .eq('status', 'active')
+            .in('status', ['active', 'pending'])
             .single();
 
         if (!affiliate) {

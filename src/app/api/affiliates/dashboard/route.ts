@@ -37,17 +37,11 @@ export async function GET() {
             return NextResponse.json({ error: 'Not registered as affiliate' }, { status: 404 });
         }
 
-        // Get referrals with referred user profile + subscription details
-        const { data: referrals } = await serviceClient
+        // Get referrals without joining profiles directly (due to foreign key pointing to auth.users)
+        const { data: rawReferrals, error: referralsError } = await serviceClient
             .from('affiliate_referrals')
             .select(`
                 *,
-                referred_user:profiles!affiliate_referrals_referred_user_id_fkey(
-                    full_name,
-                    company_email,
-                    subscription_status,
-                    trial_ends_at
-                ),
                 subscription:billing_subscriptions!affiliate_referrals_subscription_id_fkey(
                     plan_type,
                     status,
@@ -58,6 +52,28 @@ export async function GET() {
             `)
             .eq('affiliate_id', affiliate.id)
             .order('created_at', { ascending: false });
+
+        if (referralsError) {
+            console.error('Failed to fetch referrals:', referralsError);
+        }
+
+        // Manually fetch and join the referred user profiles
+        let referrals = rawReferrals || [];
+        const userIds = referrals.map(r => r.referred_user_id).filter(Boolean);
+        
+        if (userIds.length > 0) {
+            const { data: profiles } = await serviceClient
+                .from('profiles')
+                .select('id, full_name, company_email, subscription_status, trial_ends_at')
+                .in('id', userIds);
+            
+            if (profiles) {
+                referrals = referrals.map(r => ({
+                    ...r,
+                    referred_user: profiles.find(p => p.id === r.referred_user_id) || null
+                }));
+            }
+        }
 
         // Get commissions
         const { data: commissions } = await serviceClient

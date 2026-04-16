@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
                         .from('affiliates')
                         .select('id')
                         .eq('affiliate_code', refCode)
-                        .eq('status', 'active')
+                        .in('status', ['active', 'pending'])
                         .single();
 
                     if (affiliate) {

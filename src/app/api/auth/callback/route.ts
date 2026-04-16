@@ -32,7 +32,7 @@ export async function GET(request: Request) {
                             .from('affiliates')
                             .select('id')
                             .eq('affiliate_code', refCode)
-                            .eq('status', 'active')
+                            .in('status', ['active', 'pending'])
                             .single();
 
                         if (affiliate) {
