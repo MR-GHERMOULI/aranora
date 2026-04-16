@@ -559,6 +559,7 @@ export function AffiliateDashboard() {
                         <CardContent className="p-6 pt-0">
                             <p className="text-[11px] text-muted-foreground">Signup → Paid conversion</p>
                         </CardContent>
+                    </Card>
                 </motion.div>
             </div>
 
