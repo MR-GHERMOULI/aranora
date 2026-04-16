@@ -14,6 +14,17 @@ export interface Collaborator {
     payment_type: 'revenue_share' | 'hourly';
     status: string;
     created_at: string;
+    invite_token?: string;
+    profile?: {
+        username: string;
+        full_name: string;
+        company_email: string;
+        avatar_url?: string;
+    };
+    crm_entry?: {
+        full_name: string;
+        email: string;
+    };
 }
 
 export async function getProjectCollaborators(projectId: string) {
@@ -29,17 +40,27 @@ export async function getProjectCollaborators(projectId: string) {
         .select('*')
         .eq('project_id', projectId);
 
-    if (collError || !collaborators) return [];
+    if (collError || !collaborators || collaborators.length === 0) return [];
 
     const emails = collaborators.map(c => c.collaborator_email);
+    
+    // Fetch profiles of users who have signed up
     const { data: profiles } = await supabase
         .from('profiles')
-        .select('username, full_name, company_email')
+        .select('username, full_name, company_email, avatar_url')
         .in('company_email', emails);
+
+    // Fetch matches from CRM directory
+    const { data: crmEntries } = await supabase
+        .from('collaborators_crm')
+        .select('full_name, email')
+        .eq('user_id', user.id)
+        .in('email', emails);
 
     const result = collaborators.map(coll => ({
         ...coll,
-        profile: profiles?.find(p => p.company_email === coll.collaborator_email)
+        profile: profiles?.find(p => p.company_email === coll.collaborator_email),
+        crm_entry: crmEntries?.find(c => c.email === coll.collaborator_email)
     }));
 
     return result;
@@ -60,18 +81,42 @@ export async function addCollaborator(formData: FormData) {
     const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
     const paymentType = (formData.get('paymentType') as string) || 'revenue_share';
 
-    // Check if user exists
+    // Check if they are already a collaborator to avoid unique constraint error
+    const { data: existingColl } = await supabase
+        .from('project_collaborators')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('collaborator_email', email)
+        .maybeSingle();
+
+    if (existingColl) {
+        // Just return the existing one
+        return {
+            type: existingColl.status === 'invited' ? 'new' : 'existing',
+            inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${existingColl.invite_token}`,
+            token: existingColl.invite_token,
+            message: 'Already a collaborator'
+        };
+    }
+
+    // Check if user exists (use maybeSingle to avoid PGRST116 errors on non-existent users)
     const { data: existingUser } = await supabase
         .from('profiles')
         .select('id, full_name, username')
         .eq('company_email', email)
-        .single();
+        .maybeSingle();
 
     const { data: inviterProfile } = await supabase
         .from('profiles')
         .select('full_name, username')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
+
+    const { data: projectInfo } = await supabase
+        .from('projects')
+        .select('title, slug')
+        .eq('id', projectId)
+        .maybeSingle();
 
     let status = 'invited';
     let inviteType = 'link'; // 'notification' or 'link'
@@ -98,6 +143,12 @@ export async function addCollaborator(formData: FormData) {
         throw new Error('Failed to add collaborator');
     }
 
+    // Proper revalidation path
+    revalidatePath('/projects');
+    if (projectInfo?.slug) {
+        revalidatePath(`/projects/${projectInfo.slug}`);
+    }
+
     if (inviteType === 'notification' && existingUser) {
         // Create notification
         await supabase.from('notifications').insert({
@@ -105,14 +156,13 @@ export async function addCollaborator(formData: FormData) {
             type: 'invite',
             payload: {
                 projectId,
-                projectName: (await supabase.from('projects').select('title').eq('id', projectId).single()).data?.title,
+                projectName: projectInfo?.title || 'a project',
                 inviterName: inviterProfile?.full_name || user.email,
                 inviterUsername: inviterProfile?.username,
                 collaboratorId: newCollaborator.id
             }
         });
 
-        revalidatePath(`/dashboard/projects/${projectId}`);
         return {
             type: 'existing',
             message: `User @${existingUser.username} notified`,
@@ -120,7 +170,6 @@ export async function addCollaborator(formData: FormData) {
         };
     } else {
         // Return info for the link
-        revalidatePath(`/dashboard/projects/${projectId}`);
         return {
             type: 'new',
             inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${newCollaborator.invite_token}`,

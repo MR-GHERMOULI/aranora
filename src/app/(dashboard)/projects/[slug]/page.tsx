@@ -132,9 +132,9 @@ export default async function ProjectPage({
                                             {collaborators.map((coll) => (
                                                 <div key={coll.id} className="flex items-center justify-between group">
                                                     <div className="flex flex-col min-w-0">
-                                                        <span className="text-sm truncate">
-                                                            {coll.profile?.full_name || coll.collaborator_email}
-                                                        </span>
+                                                                <span className="text-sm truncate">
+                                                                    {coll.profile?.full_name || (coll as any).crm_entry?.full_name || coll.collaborator_email}
+                                                                </span>
                                                         {coll.payment_type === 'revenue_share' ? (
                                                             <span className="text-[10px] text-muted-foreground">
                                                                 {coll.revenue_share}% Share

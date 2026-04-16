@@ -116,6 +116,7 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
             if (response?.type === 'new') {
                 setResult(response)
                 reset()
+                router.refresh()
             } else {
                 setOpen(false)
                 reset()

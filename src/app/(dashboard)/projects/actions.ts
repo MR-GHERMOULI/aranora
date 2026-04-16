@@ -117,12 +117,40 @@ export async function createProject(formData: FormData) {
       status: 'invited'
     }));
 
-    const { error: collError } = await supabase
+    const { data: newCollaborators, error: collError } = await supabase
       .from('project_collaborators')
-      .insert(collaboratorInserts);
+      .insert(collaboratorInserts)
+      .select();
 
     if (collError) {
       console.error('Error adding project collaborators:', collError);
+    } else if (newCollaborators) {
+      // Send notifications to existing platform users
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, company_email')
+        .in('company_email', collaboratorEmails);
+
+      const { data: inviterProfile } = await supabase
+        .from('profiles')
+        .select('full_name, username')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profiles && profiles.length > 0) {
+        const notifications = profiles.map(profile => ({
+          user_id: profile.id,
+          type: 'invite',
+          payload: {
+            projectId: project.id,
+            projectName: project.title,
+            inviterName: inviterProfile?.full_name || user.email,
+            inviterUsername: inviterProfile?.username,
+            collaboratorId: newCollaborators.find(c => c.collaborator_email === profile.company_email)?.id
+          }
+        }));
+        await supabase.from('notifications').insert(notifications);
+      }
     }
   }
 
@@ -189,7 +217,45 @@ export async function updateProject(formData: FormData) {
         collaborator_email: email,
         status: 'invited'
       }));
-      await supabase.from('project_collaborators').insert(inserts);
+      const { data: newColls, error: addError } = await supabase
+        .from('project_collaborators')
+        .insert(inserts)
+        .select();
+
+      if (!addError && newColls) {
+        // Send notifications to existing platform users
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, company_email')
+          .in('company_email', toAdd);
+
+        const { data: projectInfo } = await supabase
+            .from('projects')
+            .select('title')
+            .eq('id', id)
+            .maybeSingle();
+
+        const { data: inviterProfile } = await supabase
+          .from('profiles')
+          .select('full_name, username')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profiles && profiles.length > 0) {
+          const notifications = profiles.map(profile => ({
+            user_id: profile.id,
+            type: 'invite',
+            payload: {
+              projectId: id,
+              projectName: projectInfo?.title || 'a project',
+              inviterName: inviterProfile?.full_name || user.email,
+              inviterUsername: inviterProfile?.username,
+              collaboratorId: newColls.find(c => c.collaborator_email === profile.company_email)?.id
+            }
+          }));
+          await supabase.from('notifications').insert(notifications);
+        }
+      }
     }
 
     if (toRemove.length > 0) {
