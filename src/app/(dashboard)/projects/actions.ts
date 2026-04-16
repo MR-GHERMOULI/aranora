@@ -76,10 +76,20 @@ export async function createProject(formData: FormData) {
   const collaboratorEmailsJSON = formData.get('collaboratorEmails') as string;
   const collaboratorEmails: string[] = collaboratorEmailsJSON ? JSON.parse(collaboratorEmailsJSON) : [];
 
+  // Fetch user's personal workspace (team)
+  const { data: teamMember } = await supabase
+    .from('team_members')
+    .select('team_id')
+    .eq('user_id', user.id)
+    .order('joined_at', { ascending: true })
+    .limit(1)
+    .single();
+
   const { data: project, error } = await supabase
     .from('projects')
     .insert({
       user_id: user.id,
+      team_id: teamMember?.team_id || null,
       client_id: clientId,
       title,
       slug: slugify(title),
@@ -95,7 +105,8 @@ export async function createProject(formData: FormData) {
 
   if (error || !project) {
     console.error('Error creating project:', error);
-    throw new Error('Failed to create project');
+    const errorMessage = error?.message || 'Failed to create project';
+    throw new Error(errorMessage);
   }
 
   // Handle collaborators

@@ -110,9 +110,9 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
             toast.success("Project created successfully")
             setOpen(false)
             reset()
-        } catch (error) {
+        } catch (error: any) {
             console.error(error)
-            toast.error("Failed to create project")
+            toast.error(error.message || "Failed to create project")
         } finally {
             setLoading(false)
         }

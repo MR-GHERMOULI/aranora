@@ -17,9 +17,9 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 export class SubscriptionExpiredError extends Error {
-    constructor() {
+    constructor(message?: string) {
         super(
-            'Your subscription has expired. Please upgrade your plan to continue using this feature.'
+            message || 'Your subscription has expired. Please upgrade your plan to continue using this feature.'
         );
         this.name = 'SubscriptionExpiredError';
     }
@@ -42,11 +42,17 @@ export async function requireActiveSubscription(): Promise<void> {
         redirect('/login');
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
         .from('profiles')
         .select('trial_ends_at, subscription_status, is_admin')
         .eq('id', user.id)
         .single();
+
+    if (error) {
+        console.error('Error fetching profile in subscription guard:', error);
+        // If there's a DB error (like missing table), don't just say "subscription expired"
+        throw new Error(`Profile check failed: ${error.message}`);
+    }
 
     // ── Owner accounts: lifetime access, no restrictions ──
     if (profile?.is_admin) {
@@ -54,7 +60,7 @@ export async function requireActiveSubscription(): Promise<void> {
     }
 
     if (!profile) {
-        throw new SubscriptionExpiredError();
+        throw new SubscriptionExpiredError('User profile not found. Please contact support.');
     }
 
     const status = profile.subscription_status;
