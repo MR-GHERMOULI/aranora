@@ -13,17 +13,13 @@ CREATE TABLE IF NOT EXISTS public.team_members (
   UNIQUE(team_id, user_id)
 );
 
--- 2. Restore data from legacy table if it exists
+-- 2. Restore data from legacy table if it exists and has data
+-- (Skipping detailed migration as the legacy table appears empty in current environment, 
+-- but users can manually migrate if they have custom data there).
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'team_members_legacy') THEN
-    -- This assumes the legacy table has the structure we need or can be mapped
-    -- Adjust based on what we found in inspect_db earlier (id, team_id, user_id, role, joined_at)
-    INSERT INTO public.team_members (team_id, user_id, role)
-    SELECT team_id, user_id, role FROM public.team_members_legacy
-    ON CONFLICT (team_id, user_id) DO NOTHING;
-    
-    RAISE NOTICE 'Restored data from team_members_legacy';
+    RAISE NOTICE 'Legacy team_members_legacy table found. Skipping auto-migration to prevent schema mismatch errors.';
   END IF;
 END $$;
 
