@@ -36,6 +36,19 @@ export async function middleware(request: NextRequest) {
             maxAge: 30 * 24 * 60 * 60, // 30 days
             path: '/',
         });
+
+        // Fire-and-forget: track the affiliate link click
+        const trackUrl = new URL('/api/affiliates/track-click', request.url);
+        fetch(trackUrl.toString(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                affiliateCode: viaCode,
+                landingPage: request.nextUrl.pathname,
+                referrer: request.headers.get('referer') || null,
+            }),
+        }).catch(() => { /* non-critical */ });
+
         return redirectResponse;
     }
 

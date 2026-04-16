@@ -6,17 +6,29 @@ import {
     ExternalLink, ArrowRight, Wallet, Calendar, Share2,
     Twitter, Linkedin, Mail, Clock, AlertCircle, UserPlus,
     Award, Medal, Star, ShieldCheck, Download, Image as ImageIcon,
-    MessageSquare
+    MessageSquare, MousePointerClick, CreditCard, BarChart3,
+    ArrowDownRight, Eye, Percent, Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    BarChart, Bar
 } from 'recharts';
 
 interface AffiliateStats {
+    totalClicks: number;
     totalReferrals: number;
+    totalSignedUp: number;
+    totalTrialing: number;
+    totalSubscribed: number;
+    totalChurned: number;
+    totalExpired: number;
     activeSubscriptions: number;
+    monthlySubscribers: number;
+    yearlySubscribers: number;
+    clickToSignupRate: number;
+    signupToSubscriptionRate: number;
     totalEarned: number;
     pendingEarnings: number;
     paidEarnings: number;
@@ -40,7 +52,19 @@ interface Referral {
     subscription_type: string | null;
     created_at: string;
     converted_at: string | null;
-    referred_user: { full_name: string; company_email: string } | null;
+    referred_user: {
+        full_name: string;
+        company_email: string;
+        subscription_status: string | null;
+        trial_ends_at: string | null;
+    } | null;
+    subscription: {
+        plan_type: string;
+        status: string;
+        current_period_start: string | null;
+        current_period_end: string | null;
+        cancel_at_period_end: boolean;
+    } | null;
 }
 
 interface Payout {
@@ -60,9 +84,15 @@ interface AffiliateData {
     company_name: string;
     created_at: string;
     approved_at: string | null;
+    total_clicks: number;
 }
 
-type TabType = 'overview' | 'referrals' | 'commissions' | 'payouts' | 'resources';
+interface ClickChartData {
+    date: string;
+    clicks: number;
+}
+
+type TabType = 'overview' | 'statistics' | 'referrals' | 'commissions' | 'payouts' | 'resources';
 
 // Framer Motion Variants
 const containerVariant = {
@@ -84,6 +114,7 @@ export function AffiliateDashboard() {
     const [commissions, setCommissions] = useState<Commission[]>([]);
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [payouts, setPayouts] = useState<Payout[]>([]);
+    const [clickChartData, setClickChartData] = useState<ClickChartData[]>([]);
     const [loading, setLoading] = useState(true);
     const [notRegistered, setNotRegistered] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -104,6 +135,7 @@ export function AffiliateDashboard() {
                 setCommissions(json.commissions || []);
                 setReferrals(json.referrals || []);
                 setPayouts(json.payouts || []);
+                setClickChartData(json.clickChartData || []);
             }
         } catch {
             console.error('Failed to fetch affiliate data');
@@ -116,8 +148,8 @@ export function AffiliateDashboard() {
         fetchData();
     }, [fetchData]);
 
-    // Derived Chart Data (Last 6 Months)
-    const chartData = useMemo(() => {
+    // Derived Chart Data (Last 6 Months earnings)
+    const earningsChartData = useMemo(() => {
         const data: { name: string; earnings: number }[] = [];
         for (let i = 5; i >= 0; i--) {
             const d = new Date();
@@ -199,6 +231,7 @@ export function AffiliateDashboard() {
             active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
             subscribed: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
             signed_up: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+            trialing: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
             churned: 'text-red-400 bg-red-500/10 border-red-500/20',
             expired: 'text-slate-400 bg-slate-500/10 border-slate-500/20',
             requested: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
@@ -207,6 +240,33 @@ export function AffiliateDashboard() {
             rejected: 'text-red-400 bg-red-500/10 border-red-500/20',
         };
         return colors[status.toLowerCase()] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+    };
+
+    const getReferralStatusLabel = (ref: Referral): string => {
+        if (ref.status === 'subscribed') {
+            return ref.subscription_type === 'yearly' ? 'Annual Subscriber' : 'Monthly Subscriber';
+        }
+        if (ref.status === 'signed_up') {
+            const userProfile = ref.referred_user;
+            if (userProfile?.subscription_status === 'trialing' && userProfile?.trial_ends_at) {
+                const trialEnd = new Date(userProfile.trial_ends_at);
+                if (trialEnd > new Date()) return 'Free Trial';
+                return 'Trial Expired';
+            }
+            return 'Signed Up';
+        }
+        if (ref.status === 'churned') return 'Churned';
+        if (ref.status === 'expired') return 'Expired';
+        return ref.status.replace('_', ' ');
+    };
+
+    const getTrialDaysRemaining = (ref: Referral): number | null => {
+        if (ref.status !== 'signed_up') return null;
+        const trialEnd = ref.referred_user?.trial_ends_at;
+        if (!trialEnd) return null;
+        const diff = new Date(trialEnd).getTime() - Date.now();
+        if (diff <= 0) return 0;
+        return Math.ceil(diff / (1000 * 60 * 60 * 24));
     };
 
     if (loading) {
@@ -300,10 +360,19 @@ export function AffiliateDashboard() {
 
     const tabs: { id: TabType; label: string }[] = [
         { id: 'overview', label: 'Dashboard' },
+        { id: 'statistics', label: 'Statistics' },
         { id: 'referrals', label: 'Referrals' },
         { id: 'commissions', label: 'Commissions' },
         { id: 'payouts', label: 'Payouts' },
         { id: 'resources', label: 'Resources ✨' },
+    ];
+
+    // Funnel data for visual
+    const funnelSteps = [
+        { label: 'Link Clicks', value: stats?.totalClicks || 0, color: 'from-violet-500 to-purple-500', borderColor: 'border-violet-500/30', icon: MousePointerClick },
+        { label: 'Signups', value: stats?.totalReferrals || 0, color: 'from-blue-500 to-cyan-500', borderColor: 'border-blue-500/30', icon: UserPlus },
+        { label: 'Free Trials', value: stats?.totalTrialing || 0, color: 'from-teal-500 to-emerald-500', borderColor: 'border-teal-500/30', icon: Clock },
+        { label: 'Paid', value: stats?.totalSubscribed || 0, color: 'from-emerald-500 to-green-500', borderColor: 'border-emerald-500/30', icon: CreditCard },
     ];
 
     return (
@@ -341,9 +410,32 @@ export function AffiliateDashboard() {
                 )}
             </div>
 
-            {/* Premium Hero Stats Grid */}
+            {/* Premium Conversion Funnel Strip */}
+            <motion.div variants={itemVariant} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                {funnelSteps.map((step, i) => {
+                    const StepIcon = step.icon;
+                    return (
+                        <div key={step.label} className={`relative bg-slate-900/60 backdrop-blur-xl border ${step.borderColor} rounded-2xl p-5 overflow-hidden group transition-all hover:scale-[1.02]`}>
+                            <div className={`absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r ${step.color}`} />
+                            <div className="flex items-center gap-2 text-slate-400 mb-2 relative z-10">
+                                <StepIcon className="h-4 w-4" />
+                                <span className="font-medium text-xs uppercase tracking-wider">{step.label}</span>
+                            </div>
+                            <div className="text-3xl font-bold text-white relative z-10">{step.value.toLocaleString()}</div>
+                            {i > 0 && funnelSteps[i - 1].value > 0 && (
+                                <div className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1 relative z-10">
+                                    <ArrowDownRight className="h-3 w-3" />
+                                    {((step.value / funnelSteps[i - 1].value) * 100).toFixed(1)}% conversion
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </motion.div>
+
+            {/* Hero Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
-                {/* Main Hero Card */}
+                {/* Main Hero Card - Earnings */}
                 <motion.div variants={itemVariant} className="md:col-span-8 bg-slate-900/60 backdrop-blur-xl border border-teal-500/20 rounded-3xl p-8 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-32 bg-teal-500/10 rounded-full blur-[100px] -mr-16 -mt-16 transition-opacity opacity-50 group-hover:opacity-100 duration-700" />
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 h-full">
@@ -355,7 +447,7 @@ export function AffiliateDashboard() {
                             <div className="text-6xl font-black text-white tracking-tighter mb-4">
                                 ${stats?.availableBalance?.toFixed(2) || '0.00'}
                             </div>
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-4 text-sm flex-wrap">
                                 <div className="bg-slate-800/80 rounded-lg px-3 py-1.5 border border-slate-700/50">
                                     <span className="text-slate-400 mr-2">Total Earned:</span>
                                     <span className="text-white font-semibold">${stats?.totalEarned?.toFixed(2) || '0.00'}</span>
@@ -364,13 +456,17 @@ export function AffiliateDashboard() {
                                     <span className="text-slate-400 mr-2">Paid Out:</span>
                                     <span className="text-white font-semibold">${stats?.paidEarnings?.toFixed(2) || '0.00'}</span>
                                 </div>
+                                <div className="bg-slate-800/80 rounded-lg px-3 py-1.5 border border-slate-700/50">
+                                    <span className="text-slate-400 mr-2">This Month:</span>
+                                    <span className="text-emerald-400 font-semibold">${stats?.thisMonthEarnings?.toFixed(2) || '0.00'}</span>
+                                </div>
                             </div>
                         </div>
 
                         {/* Chart Area in Hero */}
                         <div className="w-full md:w-1/2 h-[140px] mt-4 md:mt-0">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={chartData}>
+                                <AreaChart data={earningsChartData}>
                                     <defs>
                                         <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
@@ -394,20 +490,29 @@ export function AffiliateDashboard() {
                     <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 flex-1 flex flex-col justify-center relative overflow-hidden group">
                         <div className="absolute right-0 top-0 p-20 bg-emerald-500/5 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="flex items-center gap-2 text-slate-400 mb-2 relative z-10">
-                            <Users className="h-4 w-4" />
+                            <CreditCard className="h-4 w-4" />
                             <span className="font-medium text-sm">Active Subscribers</span>
                         </div>
                         <div className="text-4xl font-bold text-white relative z-10">{stats?.activeSubscriptions || 0}</div>
-                        <div className="text-sm text-emerald-400 mt-2 font-medium relative z-10">+{stats?.thisMonthEarnings ? 'Generating revenue' : 'Build your recurring base'}</div>
+                        <div className="flex items-center gap-3 mt-2 relative z-10">
+                            <span className="text-[11px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full">
+                                {stats?.monthlySubscribers || 0} monthly
+                            </span>
+                            <span className="text-[11px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-full">
+                                {stats?.yearlySubscribers || 0} annual
+                            </span>
+                        </div>
                     </div>
                     <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 flex-1 flex flex-col justify-center relative overflow-hidden group">
-                        <div className="absolute right-0 top-0 p-20 bg-blue-500/5 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="absolute right-0 top-0 p-20 bg-violet-500/5 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                         <div className="flex items-center gap-2 text-slate-400 mb-2 relative z-10">
-                            <TrendingUp className="h-4 w-4" />
-                            <span className="font-medium text-sm">Total Referrals</span>
+                            <Percent className="h-4 w-4" />
+                            <span className="font-medium text-sm">Conversion Rate</span>
                         </div>
-                        <div className="text-4xl font-bold text-white relative z-10">{stats?.totalReferrals || 0}</div>
-                        <div className="text-sm text-slate-500 mt-2 relative z-10">Total unique signups</div>
+                        <div className="text-4xl font-bold text-white relative z-10">{stats?.signupToSubscriptionRate || 0}%</div>
+                        <div className="text-[11px] text-slate-500 mt-2 relative z-10">
+                            Signup → Paid conversion
+                        </div>
                     </div>
                 </motion.div>
             </div>
@@ -435,7 +540,7 @@ export function AffiliateDashboard() {
                     </div>
                 </div>
 
-                {/* Social Quick-share hidden on very small screens, shown as icons */}
+                {/* Social Quick-share */}
                 <div className="w-full lg:w-auto flex justify-center lg:justify-end gap-2 border-t lg:border-t-0 lg:border-l border-slate-700/50 pt-4 lg:pt-0 lg:pl-6">
                     <button onClick={shareOnTwitter} className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors" title="Post to X">
                         <Twitter className="h-4 w-4" />
@@ -555,6 +660,133 @@ export function AffiliateDashboard() {
                     </div>
                 )}
 
+                {/* ===== NEW STATISTICS TAB ===== */}
+                {activeTab === 'statistics' && (
+                    <div className="p-8">
+                        {/* Conversion Funnel Visual */}
+                        <div className="mb-10">
+                            <h3 className="text-xl font-bold text-white mb-2">Conversion Funnel</h3>
+                            <p className="text-slate-400 text-sm mb-6">Full transparency into your referral performance at every stage.</p>
+                            
+                            <div className="space-y-3">
+                                {funnelSteps.map((step, i) => {
+                                    const StepIcon = step.icon;
+                                    const maxValue = Math.max(...funnelSteps.map(s => s.value), 1);
+                                    const widthPercent = Math.max((step.value / maxValue) * 100, 8);
+                                    const prevValue = i > 0 ? funnelSteps[i - 1].value : null;
+                                    const dropOff = prevValue && prevValue > 0
+                                        ? ((1 - step.value / prevValue) * 100).toFixed(1)
+                                        : null;
+
+                                    return (
+                                        <div key={step.label} className="group">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <StepIcon className="h-4 w-4 text-slate-400" />
+                                                    <span className="text-sm font-medium text-white">{step.label}</span>
+                                                    {dropOff !== null && Number(dropOff) > 0 && (
+                                                        <span className="text-[10px] text-red-400/70 font-medium">
+                                                            (-{dropOff}% drop-off)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className="text-sm font-bold text-white">{step.value.toLocaleString()}</span>
+                                            </div>
+                                            <div className="h-8 bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/30">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${widthPercent}%` }}
+                                                    transition={{ duration: 0.8, delay: i * 0.15, ease: 'easeOut' }}
+                                                    className={`h-full bg-gradient-to-r ${step.color} rounded-xl flex items-center justify-end pr-3`}
+                                                >
+                                                    {step.value > 0 && (
+                                                        <span className="text-[11px] font-bold text-white/90 drop-shadow-sm">
+                                                            {step.value}
+                                                        </span>
+                                                    )}
+                                                </motion.div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                            <div className="bg-slate-800/40 border border-slate-700/30 rounded-2xl p-5">
+                                <div className="flex items-center gap-2 text-violet-400 mb-2">
+                                    <MousePointerClick className="h-4 w-4" />
+                                    <span className="text-xs font-medium uppercase tracking-wider">Click→Signup</span>
+                                </div>
+                                <div className="text-2xl font-bold text-white">{stats?.clickToSignupRate || 0}%</div>
+                            </div>
+                            <div className="bg-slate-800/40 border border-slate-700/30 rounded-2xl p-5">
+                                <div className="flex items-center gap-2 text-emerald-400 mb-2">
+                                    <Zap className="h-4 w-4" />
+                                    <span className="text-xs font-medium uppercase tracking-wider">Signup→Paid</span>
+                                </div>
+                                <div className="text-2xl font-bold text-white">{stats?.signupToSubscriptionRate || 0}%</div>
+                            </div>
+                            <div className="bg-slate-800/40 border border-slate-700/30 rounded-2xl p-5">
+                                <div className="flex items-center gap-2 text-red-400 mb-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span className="text-xs font-medium uppercase tracking-wider">Churned</span>
+                                </div>
+                                <div className="text-2xl font-bold text-white">{stats?.totalChurned || 0}</div>
+                            </div>
+                            <div className="bg-slate-800/40 border border-slate-700/30 rounded-2xl p-5">
+                                <div className="flex items-center gap-2 text-blue-400 mb-2">
+                                    <Clock className="h-4 w-4" />
+                                    <span className="text-xs font-medium uppercase tracking-wider">In Trial</span>
+                                </div>
+                                <div className="text-2xl font-bold text-white">{stats?.totalTrialing || 0}</div>
+                            </div>
+                        </div>
+
+                        {/* Click Trend Chart */}
+                        <div>
+                            <h3 className="text-lg font-bold text-white mb-1">Link Click Trend</h3>
+                            <p className="text-slate-400 text-sm mb-4">Daily clicks over the last 30 days</p>
+                            <div className="h-[200px] bg-slate-800/20 rounded-2xl border border-slate-700/30 p-4">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={clickChartData}>
+                                        <defs>
+                                            <linearGradient id="clickBarGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                                                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.2} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                                        <XAxis
+                                            dataKey="date"
+                                            tickFormatter={(v: string) => {
+                                                const d = new Date(v);
+                                                return `${d.getDate()}/${d.getMonth() + 1}`;
+                                            }}
+                                            stroke="rgba(255,255,255,0.15)"
+                                            tick={{ fontSize: 10, fill: '#64748b' }}
+                                            interval="preserveStartEnd"
+                                        />
+                                        <YAxis stroke="rgba(255,255,255,0.15)" tick={{ fontSize: 10, fill: '#64748b' }} allowDecimals={false} />
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: '#0f172a',
+                                                border: '1px solid rgba(139, 92, 246, 0.3)',
+                                                borderRadius: '12px',
+                                                color: '#fff'
+                                            }}
+                                            labelFormatter={(v) => new Date(String(v)).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            itemStyle={{ color: '#8b5cf6', fontWeight: 600 }}
+                                        />
+                                        <Bar dataKey="clicks" fill="url(#clickBarGrad)" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {activeTab === 'referrals' && (
                     <div className="overflow-x-auto p-4">
                         <table className="w-full text-left border-collapse">
@@ -562,41 +794,86 @@ export function AffiliateDashboard() {
                                 <tr className="text-slate-400 text-xs uppercase tracking-widest border-b border-slate-800">
                                     <th className="px-6 py-5 font-semibold">Referred User</th>
                                     <th className="px-6 py-5 font-semibold">Status</th>
-                                    <th className="px-6 py-5 font-semibold">Plan Chosen</th>
+                                    <th className="px-6 py-5 font-semibold">Plan</th>
+                                    <th className="px-6 py-5 font-semibold">Billing Period</th>
+                                    <th className="px-6 py-5 font-semibold">Trial / Info</th>
                                     <th className="px-6 py-5 font-semibold">Signup Date</th>
-                                    <th className="px-6 py-5 font-semibold">Conversion Date</th>
+                                    <th className="px-6 py-5 font-semibold">Conversion</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800/50">
                                 {referrals.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-16 text-center text-slate-500 text-sm">
+                                        <td colSpan={7} className="px-6 py-16 text-center text-slate-500 text-sm">
                                             <Users className="h-8 w-8 mx-auto mb-3 opacity-20" />
                                             No referrals tracked yet
                                         </td>
                                     </tr>
                                 ) : (
-                                    referrals.map(ref => (
-                                        <tr key={ref.id} className="hover:bg-slate-800/30 transition-colors">
-                                            <td className="px-6 py-4 text-sm font-medium text-white">
-                                                {ref.referred_user?.full_name || 'Anonymous User'}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(ref.status)}`}>
-                                                    {ref.status.replace('_', ' ')}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-slate-400 font-medium capitalize">
-                                                {ref.subscription_type || '—'}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-slate-400">
-                                                {new Date(ref.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-emerald-400 font-medium">
-                                                {ref.converted_at ? new Date(ref.converted_at).toLocaleDateString() : '—'}
-                                            </td>
-                                        </tr>
-                                    ))
+                                    referrals.map(ref => {
+                                        const trialDays = getTrialDaysRemaining(ref);
+                                        const statusLabel = getReferralStatusLabel(ref);
+                                        const periodStart = ref.subscription?.current_period_start;
+                                        const periodEnd = ref.subscription?.current_period_end;
+                                        
+                                        return (
+                                            <tr key={ref.id} className="hover:bg-slate-800/30 transition-colors">
+                                                <td className="px-6 py-4 text-sm font-medium text-white">
+                                                    {ref.referred_user?.full_name || 'Anonymous User'}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadge(
+                                                        ref.status === 'signed_up' && ref.referred_user?.subscription_status === 'trialing' ? 'trialing' : ref.status
+                                                    )}`}>
+                                                        {statusLabel}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-400 font-medium capitalize">
+                                                    {ref.subscription_type
+                                                        ? `${ref.subscription_type} Plan`
+                                                        : '—'
+                                                    }
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-400">
+                                                    {periodStart && periodEnd ? (
+                                                        <span className="flex items-center gap-1.5">
+                                                            <Calendar className="h-3 w-3 text-slate-500" />
+                                                            {new Date(periodStart).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                            {' – '}
+                                                            {new Date(periodEnd).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        </span>
+                                                    ) : '—'}
+                                                    {ref.subscription?.cancel_at_period_end && (
+                                                        <span className="block text-[10px] text-amber-400 mt-0.5">Cancels at period end</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm">
+                                                    {trialDays !== null ? (
+                                                        trialDays > 0 ? (
+                                                            <span className="text-blue-400 font-medium flex items-center gap-1">
+                                                                <Clock className="h-3 w-3" />
+                                                                {trialDays}d remaining
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-red-400 text-xs">Trial expired</span>
+                                                        )
+                                                    ) : ref.status === 'subscribed' ? (
+                                                        <span className="text-emerald-400 text-xs font-medium">Active & paying</span>
+                                                    ) : ref.status === 'churned' ? (
+                                                        <span className="text-red-400 text-xs">Cancelled</span>
+                                                    ) : (
+                                                        <span className="text-slate-500">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-slate-400">
+                                                    {new Date(ref.created_at).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-emerald-400 font-medium">
+                                                    {ref.converted_at ? new Date(ref.converted_at).toLocaleDateString() : '—'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
                         </table>
@@ -637,11 +914,11 @@ export function AffiliateDashboard() {
                                                 {comm.subscription_type === 'monthly' ? `Month ${comm.commission_month}/12` : 'One-time Payment'}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-right text-slate-400 font-mono">
-                                                ${parseFloat(comm.invoice_amount as any).toFixed(2)}
+                                                ${parseFloat(comm.invoice_amount as unknown as string).toFixed(2)}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <span className="bg-teal-500/10 text-teal-400 px-2 py-1 rounded font-bold font-mono">
-                                                    +${parseFloat(comm.commission_amount as any).toFixed(2)}
+                                                    +${parseFloat(comm.commission_amount as unknown as string).toFixed(2)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
@@ -667,7 +944,7 @@ export function AffiliateDashboard() {
                                     <th className="px-6 py-5 font-semibold">Destination</th>
                                     <th className="px-6 py-5 font-semibold">Status</th>
                                     <th className="px-6 py-5 font-semibold">Date Processed</th>
-                                    <th className="px-6 py-5 font-semibold">Memex Details</th>
+                                    <th className="px-6 py-5 font-semibold">Memo Details</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800/50">
@@ -675,7 +952,7 @@ export function AffiliateDashboard() {
                                     <tr>
                                         <td colSpan={6} className="px-6 py-16 text-center text-slate-500 text-sm">
                                             <Wallet className="h-8 w-8 mx-auto mb-3 opacity-20" />
-                                            You haven't requested any payouts yet
+                                            You haven&apos;t requested any payouts yet
                                         </td>
                                     </tr>
                                 ) : (
@@ -685,7 +962,7 @@ export function AffiliateDashboard() {
                                                 {new Date(p.requested_at).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-right font-bold text-white font-mono">
-                                                ${parseFloat(p.amount as any).toFixed(2)}
+                                                ${parseFloat(p.amount as unknown as string).toFixed(2)}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-slate-400 font-medium capitalize">
                                                 {p.payment_method?.replace('_', ' ')}
@@ -714,7 +991,7 @@ export function AffiliateDashboard() {
                         <div className="mb-8">
                             <h3 className="text-xl font-bold text-white mb-2">Marketing Toolkit</h3>
                             <p className="text-slate-400 text-sm max-w-2xl">
-                                Boost your conversions! We've prepared high-converting graphics and copy that you can use immediately on your site or social channels.
+                                Boost your conversions! We&apos;ve prepared high-converting graphics and copy that you can use immediately on your site or social channels.
                             </p>
                         </div>
 
@@ -728,7 +1005,7 @@ export function AffiliateDashboard() {
                                 <div className="p-5 flex-1 flex flex-col justify-between">
                                     <div>
                                         <h4 className="font-semibold text-white mb-1">Official Brand Logos</h4>
-                                        <p className="text-xs text-slate-400 mb-4 line-clamp-2">High resolution light & dark mode vectors (SVG & PNG).</p>
+                                        <p className="text-xs text-slate-400 mb-4 line-clamp-2">High resolution light &amp; dark mode vectors (SVG &amp; PNG).</p>
                                     </div>
                                     <button className="flex items-center gap-2 text-sm text-teal-400 hover:text-teal-300 font-medium">
                                         <Download className="h-4 w-4" /> Download ZIP
@@ -775,9 +1052,9 @@ export function AffiliateDashboard() {
                                 <Award className="h-6 w-6 text-teal-400" />
                             </div>
                             <div>
-                                <h4 className="text-white font-bold mb-1">Do's and Don'ts</h4>
-                                <p className="text-sm text-slate-300 mb-2">We want you to succeed! Always disclose your affiliate relationship (e.g. #ad). Do not run branded PPC campaigns bidding on "Aranora" keywords.</p>
-                                <a href="#" className="text-xs text-teal-400 hover:underline">Read full program terms & guidelines →</a>
+                                <h4 className="text-white font-bold mb-1">Do&apos;s and Don&apos;ts</h4>
+                                <p className="text-sm text-slate-300 mb-2">We want you to succeed! Always disclose your affiliate relationship (e.g. #ad). Do not run branded PPC campaigns bidding on &quot;Aranora&quot; keywords.</p>
+                                <a href="#" className="text-xs text-teal-400 hover:underline">Read full program terms &amp; guidelines →</a>
                             </div>
                         </div>
                     </div>

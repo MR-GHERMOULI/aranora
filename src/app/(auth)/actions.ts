@@ -237,6 +237,50 @@ export async function signup(formData: FormData) {
         }
     }
 
+    // --- Track affiliate referral if ref cookie exists ---
+    if (userId) {
+        try {
+            const { cookies } = await import('next/headers');
+            const cookieStore = await cookies();
+            const refCode = cookieStore.get('aranora_ref')?.value;
+
+            if (refCode) {
+                const { data: affiliate } = await serviceClient
+                    .from('affiliates')
+                    .select('id')
+                    .eq('affiliate_code', refCode)
+                    .eq('status', 'active')
+                    .single();
+
+                if (affiliate) {
+                    // Check if referral already exists
+                    const { data: existingRef } = await serviceClient
+                        .from('affiliate_referrals')
+                        .select('id')
+                        .eq('affiliate_id', affiliate.id)
+                        .eq('referred_user_id', userId)
+                        .single();
+
+                    if (!existingRef) {
+                        await serviceClient.from('affiliate_referrals').insert({
+                            affiliate_id: affiliate.id,
+                            referred_user_id: userId,
+                            status: 'signed_up',
+                        });
+
+                        // Mark profile with referring affiliate
+                        await serviceClient
+                            .from('profiles')
+                            .update({ referred_by_affiliate: refCode })
+                            .eq('id', userId);
+                    }
+                }
+            }
+        } catch (refErr) {
+            console.error('Referral tracking in signup (non-critical):', refErr);
+        }
+    }
+
     revalidatePath('/', 'layout')
     redirect('/dashboard')
 }
