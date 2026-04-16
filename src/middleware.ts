@@ -29,8 +29,17 @@ export async function middleware(request: NextRequest) {
         
         // Redirect smoothly to the same URL but without the spammy ?via= param
         const redirectResponse = NextResponse.redirect(cleanUrl);
+        // httpOnly cookie for server-side usage (checkout, webhooks)
         redirectResponse.cookies.set('aranora_ref', viaCode, {
             httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+            path: '/',
+        });
+        // JS-readable cookie for client-side form submissions (signup tracking)
+        redirectResponse.cookies.set('aranora_ref_code', viaCode, {
+            httpOnly: false,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: 30 * 24 * 60 * 60, // 30 days

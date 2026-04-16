@@ -55,6 +55,7 @@ export default function SignupForm({ promo }: { promo?: string }) {
     const [countrySearch, setCountrySearch] = useState('')
     const [countryDropdownOpen, setCountryDropdownOpen] = useState(false)
     const [selectedCountry, setSelectedCountry] = useState('')
+    const [refCode, setRefCode] = useState('')
 
     const strength = password.length > 0 ? getPasswordStrength(password) : null
 
@@ -64,6 +65,17 @@ export default function SignupForm({ promo }: { promo?: string }) {
         ),
         [countrySearch]
     )
+
+    // Read affiliate referral cookie on mount
+    useEffect(() => {
+        try {
+            const cookies = document.cookie.split(';').map(c => c.trim());
+            const refCookie = cookies.find(c => c.startsWith('aranora_ref_code='));
+            if (refCookie) {
+                setRefCode(refCookie.split('=')[1]);
+            }
+        } catch { /* ignore */ }
+    }, []);
 
     // Auto-detect country on mount
     useEffect(() => {
@@ -184,6 +196,7 @@ export default function SignupForm({ promo }: { promo?: string }) {
             {/* Form */}
             <form action={handleSubmit} className="space-y-4">
                 {promo && <input type="hidden" name="promoCode" value={promo} />}
+                {refCode && <input type="hidden" name="refCode" value={refCode} />}
 
                 {/* Full Name */}
                 <div className="space-y-2">

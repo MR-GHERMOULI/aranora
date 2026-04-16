@@ -62,6 +62,7 @@ export async function signup(formData: FormData) {
     const phone = formData.get('phone') as string
     const country = formData.get('country') as string
     const promoCode = formData.get('promoCode') as string | null
+    const formRefCode = formData.get('refCode') as string | null
 
     if (!email || !password || !fullName) {
         return { error: 'Please fill in all required fields.' }
@@ -242,7 +243,7 @@ export async function signup(formData: FormData) {
         try {
             const { cookies } = await import('next/headers');
             const cookieStore = await cookies();
-            const refCode = cookieStore.get('aranora_ref')?.value;
+            const refCode = formRefCode || cookieStore.get('aranora_ref')?.value || cookieStore.get('aranora_ref_code')?.value;
 
             if (refCode) {
                 const { data: affiliate } = await serviceClient
