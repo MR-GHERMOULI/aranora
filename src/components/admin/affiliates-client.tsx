@@ -3,8 +3,34 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
     UserPlus, Users, DollarSign, Clock, Loader2, Search,
-    Check, X, Ban, ExternalLink, Copy, TrendingUp, Wallet
+    Check, X, Ban, ExternalLink, Copy, TrendingUp, Wallet,
+    Eye, Calendar, Phone, Mail, Globe, MapPin, CreditCard
 } from 'lucide-react';
+
+interface ReferralData {
+    id: string;
+    referred_user_id: string;
+    status: string;
+    subscription_type: string | null;
+    converted_at: string | null;
+    created_at: string;
+    referred_user: {
+        id: string;
+        full_name: string;
+        company_email: string;
+        phone: string | null;
+        country: string | null;
+        subscription_status: string | null;
+        trial_ends_at: string | null;
+    } | null;
+    subscription: {
+        plan_type: string;
+        status: string;
+        current_period_start: string | null;
+        current_period_end: string | null;
+        cancel_at_period_end: boolean;
+    } | null;
+}
 
 interface AffiliateData {
     id: string;
@@ -47,6 +73,12 @@ export function AffiliatesClient() {
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    // Modal state
+    const [selectedAffiliateId, setSelectedAffiliateId] = useState<string | null>(null);
+    const [referralsData, setReferralsData] = useState<ReferralData[]>([]);
+    const [referralsLoading, setReferralsLoading] = useState(false);
+    const [referralsError, setReferralsError] = useState<string | null>(null);
 
     const fetchData = useCallback(async () => {
         try {
@@ -93,6 +125,26 @@ export function AffiliatesClient() {
         setTimeout(() => setCopiedCode(null), 2000);
     };
 
+    const fetchReferrals = async (affiliateId: string) => {
+        setSelectedAffiliateId(affiliateId);
+        setReferralsLoading(true);
+        setReferralsError(null);
+        setReferralsData([]);
+        
+        try {
+            const res = await fetch(`/api/admin/affiliates/${affiliateId}/referrals`);
+            if (!res.ok) throw new Error(`Failed to fetch referrals (${res.status})`);
+            const json = await res.json();
+            if (json.referrals) {
+                setReferralsData(json.referrals);
+            }
+        } catch (err) {
+            setReferralsError(err instanceof Error ? err.message : 'Error loading referrals');
+        } finally {
+            setReferralsLoading(false);
+        }
+    };
+
     const filteredAffiliates = affiliates
         .filter(aff => {
             if (filter !== 'all' && aff.status !== filter) return false;
@@ -116,6 +168,27 @@ export function AffiliatesClient() {
             case 'rejected': return 'text-muted-foreground bg-secondary border-border';
             default: return 'text-muted-foreground bg-secondary border-border';
         }
+    };
+
+    const getReferralBadge = (status: string, trialEndsAt: string | null) => {
+        if (status === 'subscribed') return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+        if (status === 'churned') return 'bg-red-500/10 text-red-500 border-red-500/20';
+        if (status === 'signed_up' && trialEndsAt && new Date(trialEndsAt) > new Date()) {
+            return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+        }
+        return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+    };
+
+    const getReferralLabel = (status: string, trialEndsAt: string | null) => {
+        if (status === 'subscribed') return 'Active Paid';
+        if (status === 'churned') return 'Churned';
+        if (status === 'signed_up' && trialEndsAt && new Date(trialEndsAt) > new Date()) {
+            return 'Trialing';
+        }
+        if (status === 'signed_up' && trialEndsAt && new Date(trialEndsAt) <= new Date()) {
+            return 'Trial Expired';
+        }
+        return 'Signed Up';
     };
 
     if (loading) {
@@ -347,6 +420,13 @@ export function AffiliatesClient() {
                                                                 <Check className="h-3.5 w-3.5" />
                                                             </button>
                                                         )}
+                                                        <button
+                                                            onClick={() => fetchReferrals(aff.id)}
+                                                            className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors ml-1"
+                                                            title="View Referrals"
+                                                        >
+                                                            <Eye className="h-3.5 w-3.5" />
+                                                        </button>
                                                     </>
                                                 )}
                                             </div>
@@ -379,6 +459,132 @@ export function AffiliatesClient() {
                     </div>
                 </div>
             </div>
+
+            {/* Referrals Viewer Modal */}
+            {selectedAffiliateId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+                    <div className="bg-card w-full max-w-5xl rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex items-center justify-between p-6 border-b border-border bg-card/50">
+                            <div>
+                                <h3 className="text-lg font-bold text-foreground">Referred Users</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    Detailed list of user accounts generated by{' '}
+                                    <span className="font-medium text-foreground">
+                                        {affiliates.find(a => a.id === selectedAffiliateId)?.company_name || affiliates.find(a => a.id === selectedAffiliateId)?.user_name}
+                                    </span>
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedAffiliateId(null)}
+                                className="p-2 rounded-full hover:bg-muted text-muted-foreground transition-colors"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-0 border-b border-border">
+                            {referralsLoading ? (
+                                <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                                    <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                                    Loading referral data...
+                                </div>
+                            ) : referralsError ? (
+                                <div className="flex items-center justify-center h-64 text-red-500">
+                                    <Ban className="h-5 w-5 mr-2" />
+                                    {referralsError}
+                                </div>
+                            ) : referralsData.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-64">
+                                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
+                                        <Users className="h-8 w-8 text-muted-foreground" />
+                                    </div>
+                                    <p className="text-foreground font-medium">No referrals yet</p>
+                                    <p className="text-sm text-muted-foreground">This affiliate hasn't referred any valid user accounts.</p>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left border-collapse min-w-[800px]">
+                                    <thead>
+                                        <tr className="bg-muted/50 text-muted-foreground text-[11px] uppercase tracking-wider sticky top-0 backdrop-blur-md">
+                                            <th className="px-6 py-4 font-semibold">User Details</th>
+                                            <th className="px-6 py-4 font-semibold">Contact Info</th>
+                                            <th className="px-6 py-4 font-semibold">Status</th>
+                                            <th className="px-6 py-4 font-semibold text-right">Subscription Plan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border">
+                                        {referralsData.map(ref => (
+                                            <tr key={ref.id} className="hover:bg-muted/30 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-foreground text-sm">
+                                                        {ref.referred_user?.full_name || 'Incomplete Profile'}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+                                                        <Calendar className="h-3 w-3" />
+                                                        Joined: {new Date(ref.created_at).toLocaleDateString()}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col gap-1.5">
+                                                        <div className="text-xs flex items-center gap-2 text-muted-foreground">
+                                                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                                                            <span className="truncate max-w-[200px] text-foreground">{ref.referred_user?.company_email || '—'}</span>
+                                                        </div>
+                                                        {ref.referred_user?.phone && (
+                                                            <div className="text-xs flex items-center gap-2 text-muted-foreground">
+                                                                <Phone className="h-3.5 w-3.5 shrink-0" />
+                                                                <span>{ref.referred_user.phone}</span>
+                                                            </div>
+                                                        )}
+                                                        {ref.referred_user?.country && (
+                                                            <div className="text-xs flex items-center gap-2 text-muted-foreground">
+                                                                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                                                <span>{ref.referred_user.country}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getReferralBadge(ref.status, ref.referred_user?.trial_ends_at || null)}`}>
+                                                        {getReferralLabel(ref.status, ref.referred_user?.trial_ends_at || null)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    {ref.status === 'subscribed' && ref.subscription_type ? (
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 capitalize flex items-center gap-1.5">
+                                                                <CreditCard className="h-3.5 w-3.5" />
+                                                                {ref.subscription_type} Plan
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground mt-0.5">
+                                                                {ref.subscription_type === 'monthly' ? '$19.00 / month' : '$190.00 / year'}
+                                                            </span>
+                                                        </div>
+                                                    ) : ref.status === 'signed_up' && ref.referred_user?.trial_ends_at && new Date(ref.referred_user?.trial_ends_at) > new Date() ? (
+                                                        <div className="text-xs text-muted-foreground flex flex-col items-end">
+                                                            <span>Free Trial Active</span>
+                                                            <span className="text-blue-500">Ends {new Date(ref.referred_user.trial_ends_at).toLocaleDateString()}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-muted-foreground text-sm">—</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                        <div className="p-4 bg-muted/30 border-t border-border flex justify-end">
+                            <button
+                                onClick={() => setSelectedAffiliateId(null)}
+                                className="px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg text-sm font-medium transition-colors border border-border"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
