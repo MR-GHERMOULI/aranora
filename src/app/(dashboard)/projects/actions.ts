@@ -106,7 +106,7 @@ export async function createProject(formData: FormData) {
   if (error || !project) {
     console.error('Error creating project:', error);
     const errorMessage = error?.message || 'Failed to create project';
-    throw new Error(errorMessage);
+    return { error: errorMessage };
   }
 
   // Handle collaborators
@@ -127,6 +127,7 @@ export async function createProject(formData: FormData) {
   }
 
   revalidatePath('/projects');
+  return { success: true, projectId: project.id };
 }
 
 
@@ -163,7 +164,7 @@ export async function updateProject(formData: FormData) {
 
   if (error) {
     console.error('Error updating project:', error);
-    throw new Error('Failed to update project');
+    return { error: 'Failed to update project' };
   }
 
   // Handle collaborators sync
@@ -205,6 +206,7 @@ export async function updateProject(formData: FormData) {
   if (updatedProject?.slug) {
     revalidatePath(`/projects/${updatedProject.slug}`);
   }
+  return { success: true };
 }
 
 export async function deleteProject(projectId: string) {

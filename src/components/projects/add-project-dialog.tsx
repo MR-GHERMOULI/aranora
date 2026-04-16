@@ -106,7 +106,13 @@ export function AddProjectDialog({ clients }: AddProjectDialogProps) {
             if (data.hourlyRate) formData.append("hourlyRate", data.hourlyRate)
             formData.append("collaboratorEmails", JSON.stringify(data.collaboratorEmails))
 
-            await createProject(formData)
+            const result = await createProject(formData)
+            
+            if (result && result.error) {
+                toast.error(result.error)
+                return
+            }
+
             toast.success("Project created successfully")
             setOpen(false)
             reset()
