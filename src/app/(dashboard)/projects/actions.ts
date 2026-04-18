@@ -332,6 +332,16 @@ export async function deleteProject(projectId: string) {
 
 import { v4 as uuidv4 } from 'uuid';
 
+// Generates a 10-character alphanumeric short-link token
+function generateShortToken() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 10; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 export async function toggleShareToken(projectId: string): Promise<{ share_token: string | null }> {
   await requireActiveSubscription();
   const supabase = await createClient();
@@ -348,7 +358,7 @@ export async function toggleShareToken(projectId: string): Promise<{ share_token
     throw new Error('Project not found');
   }
 
-  const newToken = project.share_token ? null : uuidv4();
+  const newToken = project.share_token ? null : generateShortToken();
 
   const { error } = await supabase
     .from('projects')
