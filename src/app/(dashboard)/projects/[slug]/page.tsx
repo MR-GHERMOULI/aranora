@@ -2,7 +2,7 @@ import { getProject } from "../get-project-action";
 import { getInvoices } from "../../invoices/actions";
 import { getTasks } from "../../tasks/actions";
 import { getProjectFiles } from "../file-actions";
-import { getTimeEntries } from "../../time-tracking/actions";
+import { getProjectTimeEntries } from "../../time-tracking/actions";
 import { getContracts } from "../../contracts/actions";
 import { ProjectTaskList } from "@/components/projects/project-task-list";
 import { ProjectFileList } from "@/components/projects/project-file-list";
@@ -48,11 +48,11 @@ export default async function ProjectPage({
         redirect(`/projects/${project.slug}`);
     }
 
-    const [invoices, tasks, files, timeEntries, collaborators, allContracts, profile, allSubmissions, allForms] = await Promise.all([
+    const [invoices, tasks, files, allTimeEntries, collaborators, allContracts, profile, allSubmissions, allForms] = await Promise.all([
         getInvoices(undefined, project.id),
         getTasks({ projectId: project.id }),
         getProjectFiles(project.id),
-        getTimeEntries({ projectId: project.id }),
+        getProjectTimeEntries(project.id),
         getProjectCollaborators(project.id),
         getContracts(),
         getProfile(),
@@ -227,7 +227,7 @@ export default async function ProjectPage({
                             <ProjectFileList files={files} projectId={project.id} />
                         </TabsContent>
                         <TabsContent value="time-tracking" className="mt-4">
-                            <ProjectTimeTrackingTab entries={timeEntries} projectId={project.id} />
+                            <ProjectTimeTrackingTab entries={allTimeEntries} projectId={project.id} isOwner={project.user_id === profile?.id} />
                         </TabsContent>
                         <TabsContent value="contracts" className="mt-4">
                             <ProjectContractsTab

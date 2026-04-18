@@ -297,3 +297,82 @@ export async function getTaskTotalTime(taskId: string) {
     }, 0);
 }
 
+/**
+ * Fetch ALL time entries for a project across every member (owner + collaborators).
+ * Returns entries enriched with the tracked-by user's profile.
+ * Only callable if the current user is the project owner or an active collaborator.
+ */
+export async function getProjectTimeEntries(projectId: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    // Use admin client to fetch all entries for this project regardless of user_id
+    const { createAdminClient } = await import("@/lib/supabase/server");
+    const adminSupabase = createAdminClient();
+
+    // Verify access: user must be project owner or active collaborator
+    const { data: project } = await adminSupabase
+        .from("projects")
+        .select("user_id")
+        .eq("id", projectId)
+        .single();
+
+    if (!project) throw new Error("Project not found");
+
+    const isOwner = project.user_id === user.id;
+
+    if (!isOwner) {
+        const { data: collabCheck } = await adminSupabase
+            .from("project_collaborators")
+            .select("id")
+            .eq("project_id", projectId)
+            .eq("collaborator_email", user.email)
+            .eq("status", "active")
+            .maybeSingle();
+
+        if (!collabCheck) throw new Error("Access denied");
+    }
+
+    // Fetch ALL time entries for this project from every user
+    const { data: entries, error } = await adminSupabase
+        .from("time_entries")
+        .select(`
+            *,
+            project:projects(title, user_id),
+            task:tasks(title)
+        `)
+        .eq("project_id", projectId)
+        .order("start_time", { ascending: false });
+
+    if (error) {
+        console.error("Error fetching project time entries:", error);
+        throw new Error("Failed to fetch project time entries");
+    }
+
+    if (!entries || entries.length === 0) return [];
+
+    // Collect unique user IDs and fetch their profiles
+    const userIds = [...new Set(entries.map(e => e.user_id))];
+    const { data: profiles } = await adminSupabase
+        .from("profiles")
+        .select("id, full_name, username, avatar_url")
+        .in("id", userIds);
+
+    const profileMap = new Map(
+        (profiles || []).map(p => [p.id, p])
+    );
+
+    // Enrich each entry with the member's profile
+    return entries.map(entry => ({
+        ...entry,
+        member: profileMap.get(entry.user_id) || {
+            id: entry.user_id,
+            full_name: "Unknown",
+            username: null,
+            avatar_url: null,
+        },
+    }));
+}
+

@@ -4,18 +4,31 @@ import { TimeEntry } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit2, Clock, Briefcase, ListTodo } from "lucide-react";
+import { Trash2, Edit2, Clock, Briefcase, ListTodo, User } from "lucide-react";
 import { format, differenceInSeconds } from "date-fns";
 import { formatDuration } from "@/lib/utils";
 import { deleteTimeEntry } from "@/app/(dashboard)/time-tracking/actions";
 import { toast } from "sonner";
 import { EditEntryDialog } from "./edit-entry-dialog";
+import Image from "next/image";
 
-interface TimeLogTableProps {
-    entries: TimeEntry[];
+interface MemberProfile {
+    id: string;
+    full_name: string;
+    username: string | null;
+    avatar_url: string | null;
 }
 
-export function TimeLogTable({ entries }: TimeLogTableProps) {
+type EnrichedTimeEntry = TimeEntry & {
+    member?: MemberProfile;
+};
+
+interface TimeLogTableProps {
+    entries: EnrichedTimeEntry[];
+    showMember?: boolean;
+}
+
+export function TimeLogTable({ entries, showMember = false }: TimeLogTableProps) {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this entry?")) return;
         try {
@@ -31,7 +44,7 @@ export function TimeLogTable({ entries }: TimeLogTableProps) {
         if (!acc[date]) acc[date] = [];
         acc[date].push(entry);
         return acc;
-    }, {} as Record<string, TimeEntry[]>);
+    }, {} as Record<string, EnrichedTimeEntry[]>);
 
     return (
         <div className="space-y-8">
@@ -56,6 +69,7 @@ export function TimeLogTable({ entries }: TimeLogTableProps) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        {showMember && <TableHead>Member</TableHead>}
                                         <TableHead>Description</TableHead>
                                         <TableHead>Project / Task</TableHead>
                                         <TableHead>Duration</TableHead>
@@ -71,6 +85,37 @@ export function TimeLogTable({ entries }: TimeLogTableProps) {
 
                                         return (
                                             <TableRow key={entry.id}>
+                                                {showMember && (
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="relative h-7 w-7 shrink-0 rounded-full overflow-hidden bg-muted border border-border">
+                                                                {entry.member?.avatar_url ? (
+                                                                    <Image
+                                                                        src={entry.member.avatar_url}
+                                                                        alt={entry.member.full_name}
+                                                                        fill
+                                                                        className="object-cover"
+                                                                        sizes="28px"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="h-full w-full flex items-center justify-center">
+                                                                        <User className="h-3 w-3 text-muted-foreground" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="text-xs font-medium truncate leading-tight">
+                                                                    {entry.member?.full_name || "Unknown"}
+                                                                </p>
+                                                                {entry.member?.username && (
+                                                                    <p className="text-[10px] text-muted-foreground truncate">
+                                                                        @{entry.member.username}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                )}
                                                 <TableCell className="font-medium">
                                                     {entry.description}
                                                     {entry.is_billable ? (
