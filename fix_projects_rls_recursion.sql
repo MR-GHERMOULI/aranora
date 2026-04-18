@@ -16,7 +16,7 @@
 --         project_collaborators to start clean
 -- ============================================================
 
--- Projects policies
+-- Projects policies (original ones)
 DROP POLICY IF EXISTS "Users can view own projects" ON public.projects;
 DROP POLICY IF EXISTS "Users can insert own projects" ON public.projects;
 DROP POLICY IF EXISTS "Users can update own projects" ON public.projects;
@@ -28,13 +28,24 @@ DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON public.pro
 DROP POLICY IF EXISTS "Enable update for users based on user_id" ON public.projects;
 DROP POLICY IF EXISTS "Enable delete for users based on user_id" ON public.projects;
 
--- Project collaborators policies
+-- Projects policies (new ones created in this script, for rerunnability)
+DROP POLICY IF EXISTS "Owners can view own projects" ON public.projects;
+DROP POLICY IF EXISTS "Anyone can view project by share token" ON public.projects;
+DROP POLICY IF EXISTS "Owners can insert own projects" ON public.projects;
+DROP POLICY IF EXISTS "Owners can update own projects" ON public.projects;
+DROP POLICY IF EXISTS "Owners can delete own projects" ON public.projects;
+
+
+-- Project collaborators policies (original ones)
 DROP POLICY IF EXISTS "Project owners can manage collaborators" ON public.project_collaborators;
 DROP POLICY IF EXISTS "Collaborators can view own records" ON public.project_collaborators;
 DROP POLICY IF EXISTS "Collaborators can update own records" ON public.project_collaborators;
 DROP POLICY IF EXISTS "Anyone can view invite by token" ON public.project_collaborators;
 DROP POLICY IF EXISTS "Users can manage collaborators on own projects" ON public.project_collaborators;
 DROP POLICY IF EXISTS "Enable all for project owners" ON public.project_collaborators;
+
+-- Project collaborators policies (new ones created in this script, for rerunnability)
+DROP POLICY IF EXISTS "Owners can manage project collaborators" ON public.project_collaborators;
 
 
 -- ============================================================
