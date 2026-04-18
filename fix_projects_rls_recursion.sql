@@ -69,7 +69,7 @@ AS $$
   SELECT EXISTS (
     SELECT 1
     FROM public.project_collaborators pc
-    JOIN public.profiles p ON p.company_email = pc.collaborator_email
+    JOIN public.profiles p ON (p.company_email = pc.collaborator_email OR p.email = pc.collaborator_email)
     WHERE pc.project_id = project_uuid
       AND pc.status = 'active'
       AND p.id = auth.uid()
@@ -84,7 +84,7 @@ SECURITY DEFINER
 STABLE
 SET search_path = public
 AS $$
-  SELECT company_email FROM public.profiles WHERE id = auth.uid() LIMIT 1;
+  SELECT COALESCE(company_email, email) FROM public.profiles WHERE id = auth.uid() LIMIT 1;
 $$;
 
 

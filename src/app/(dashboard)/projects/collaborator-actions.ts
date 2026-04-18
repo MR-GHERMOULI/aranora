@@ -46,10 +46,17 @@ export async function getProjectCollaborators(projectId: string) {
     
     // Fetch profiles of users who have signed up (using admin client to bypass RLS)
     const adminSupabase = createAdminClient();
-    const { data: profiles } = await adminSupabase
+    const { data: profilesByEmail } = await adminSupabase
         .from('profiles')
-        .select('username, full_name, company_email, avatar_url')
+        .select('username, full_name, company_email, email, avatar_url')
+        .in('email', emails);
+
+    const { data: profilesByCompany } = await adminSupabase
+        .from('profiles')
+        .select('username, full_name, company_email, email, avatar_url')
         .in('company_email', emails);
+
+    const profiles = [...(profilesByEmail || []), ...(profilesByCompany || [])];
 
     // Fetch matches from CRM directory
     const { data: crmEntries } = await supabase
@@ -60,7 +67,7 @@ export async function getProjectCollaborators(projectId: string) {
 
     const result = collaborators.map(coll => ({
         ...coll,
-        profile: profiles?.find(p => p.company_email === coll.collaborator_email),
+        profile: profiles?.find(p => p.company_email === coll.collaborator_email || p.email === coll.collaborator_email),
         crm_entry: crmEntries?.find(c => c.email === coll.collaborator_email)
     }));
 
@@ -110,7 +117,7 @@ export async function addCollaborator(formData: FormData) {
     const { data: existingUser } = await adminSupabase
         .from('profiles')
         .select('id, full_name, username')
-        .eq('company_email', email)
+        .or(`company_email.eq.${email},email.eq.${email}`)
         .maybeSingle();
 
     const { data: inviterProfile } = await adminSupabase
@@ -273,13 +280,18 @@ export async function getProjectMembers(projectId: string) {
     const emails = collaborators?.map(c => c.collaborator_email) || [];
     
     if (emails.length > 0) {
-        const { data: profiles } = await adminSupabase
+        const { data: profilesByEmail } = await adminSupabase
             .from('profiles')
-            .select('id, full_name, company_email')
+            .select('id, full_name, company_email, email')
+            .in('email', emails);
+
+        const { data: profilesByCompany } = await adminSupabase
+            .from('profiles')
+            .select('id, full_name, company_email, email')
             .in('company_email', emails);
             
-        if (profiles) {
-           collaboratorProfiles = profiles;
+        if (profilesByEmail || profilesByCompany) {
+           collaboratorProfiles = [...(profilesByEmail || []), ...(profilesByCompany || [])];
         }
     }
 

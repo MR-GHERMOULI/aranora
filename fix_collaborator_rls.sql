@@ -36,7 +36,7 @@ CREATE POLICY "Collaborators can view own records"
   FOR SELECT 
   USING (
     collaborator_email = (
-      SELECT company_email FROM public.profiles WHERE id = auth.uid()
+      SELECT COALESCE(company_email, email) FROM public.profiles WHERE id = auth.uid()
     )
   );
 
@@ -47,7 +47,7 @@ CREATE POLICY "Collaborators can update own records"
   FOR UPDATE 
   USING (
     collaborator_email = (
-      SELECT company_email FROM public.profiles WHERE id = auth.uid()
+      SELECT COALESCE(company_email, email) FROM public.profiles WHERE id = auth.uid()
     )
   );
 
@@ -74,7 +74,7 @@ CREATE POLICY "Collaborators can view assigned projects"
       WHERE pc.project_id = id
         AND pc.status = 'active'
         AND pc.collaborator_email = (
-          SELECT company_email FROM public.profiles WHERE profiles.id = auth.uid()
+          SELECT COALESCE(company_email, email) FROM public.profiles WHERE profiles.id = auth.uid()
         )
     )
   );
