@@ -11,10 +11,10 @@ export async function acceptInvite(token: string) {
         redirect(`/login?next=/invite/${token}`);
     }
 
-    // 1. Find the invite
+    // 1. Find the invite by token
     const { data: invite, error } = await supabase
         .from('project_collaborators')
-        .select('*, project:projects(title)')
+        .select('id, project_id, status, collaborator_email')
         .eq('invite_token', token)
         .single();
 
@@ -24,15 +24,16 @@ export async function acceptInvite(token: string) {
     }
 
     if (invite.status === 'active') {
+        // Already accepted — redirect to the project
         redirect(`/projects/${invite.project_id}`);
     }
 
-    // 2. Accept it
+    // 2. Accept it — update status and bind to the accepting user's email
     const { error: updateError } = await supabase
         .from('project_collaborators')
         .update({
             status: 'active',
-            invite_token: null, // Consume token
+            invite_token: null, // Consume token so it can't be reused
             collaborator_email: user.email // Ensure it matches the accepting user
         })
         .eq('id', invite.id);
@@ -48,19 +49,49 @@ export async function acceptInvite(token: string) {
 export async function getInviteDetails(token: string) {
     const supabase = await createClient();
 
-    // We might need to use a service role client here if RLS prevents reading un-accepted invites by random users.
-    // For MVP, assuming the token makes it unique enough, but strictly with RLS we might have issues if we don't have a "public" view policy for invites by token.
-    // SOLUTION: We'll attempt to read it using the current session (might be anon).
-    // If that fails due to RLS, we'd need to adjust RLS policies to allow reading `project_collaborators` where `invite_token` = input token.
-    // Let's assume we adjusted RLS or use the user's session if logged in.
-
+    // Read the invite by token — RLS policy "Anyone can view invite by token" allows this
     const { data: invite, error } = await supabase
         .from('project_collaborators')
-        .select('*, project:projects(title, description), inviter:projects(user:profiles(full_name))')
-        // Note: The above join is tricky depending on schema. 
-        // inviter is project.user_id -> profiles.
+        .select('id, project_id, collaborator_email, revenue_share, hourly_rate, payment_type, status, invite_token')
         .eq('invite_token', token)
         .single();
 
-    return { invite, error };
+    if (error || !invite) {
+        return { invite: null, error: error || new Error('Invite not found') };
+    }
+
+    // Fetch project details separately to avoid complex join issues
+    const { data: project } = await supabase
+        .from('projects')
+        .select('title, description')
+        .eq('id', invite.project_id)
+        .single();
+
+    // Fetch inviter info (project owner)
+    let inviterName = null;
+    if (project) {
+        const { data: projectWithOwner } = await supabase
+            .from('projects')
+            .select('user_id')
+            .eq('id', invite.project_id)
+            .single();
+
+        if (projectWithOwner) {
+            const { data: inviterProfile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', projectWithOwner.user_id)
+                .single();
+            inviterName = inviterProfile?.full_name;
+        }
+    }
+
+    return {
+        invite: {
+            ...invite,
+            project: project || { title: 'Unknown Project', description: '' },
+            inviterName
+        },
+        error: null
+    };
 }

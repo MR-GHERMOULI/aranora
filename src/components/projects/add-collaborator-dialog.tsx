@@ -78,7 +78,7 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
     const paymentType = watch("paymentType")
     const crmCollaboratorId = watch("crmCollaboratorId")
 
-    const [result, setResult] = useState<{ type: string, inviteLink?: string, message?: string } | null>(null)
+    const [result, setResult] = useState<{ type: string, inviteLink?: string, message?: string, username?: string } | null>(null)
 
     async function onSubmit(data: CollaboratorFormValues) {
         setLoading(true)
@@ -113,12 +113,28 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
             // @ts-ignore
             const response = await addCollaborator(formData)
 
-            if (response?.type === 'new') {
-                setResult(response)
+            if (response?.type === 'notified') {
+                // Registered user — notification sent successfully
+                toast.success(response.message || 'Notification sent!')
+                setOpen(false)
                 reset()
                 router.refresh()
-            } else {
-                setOpen(false)
+            } else if (response?.type === 'already_exists') {
+                // Already a collaborator
+                toast.warning(response.message || 'Already a collaborator')
+                if (response.inviteLink) {
+                    setResult(response)
+                } else {
+                    setOpen(false)
+                    reset()
+                }
+            } else if (response?.type === 'new') {
+                // Not registered — show invite link
+                if (response.message) {
+                    // Notification failed fallback
+                    toast.warning(response.message)
+                }
+                setResult(response)
                 reset()
                 router.refresh()
             }
@@ -152,19 +168,33 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
                     </DialogDescription>
                 </DialogHeader>
 
-                {result?.type === 'new' ? (
+                {result?.type === 'new' || result?.type === 'already_exists' ? (
                     <div className="py-4 space-y-4">
-                        <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200 text-sm">
-                            <p className="font-medium text-yellow-800 mb-1">User not found</p>
-                            <p className="text-yellow-700">This email isn&apos;t registered yet. Share this invite link with them:</p>
+                        <div className={`p-3 rounded-md border text-sm ${
+                            result.type === 'already_exists'
+                                ? 'bg-amber-50 border-amber-200'
+                                : 'bg-yellow-50 border-yellow-200'
+                        }`}>
+                            <p className={`font-medium mb-1 ${
+                                result.type === 'already_exists' ? 'text-amber-800' : 'text-yellow-800'
+                            }`}>
+                                {result.type === 'already_exists' ? 'Already Added' : 'User not found'}
+                            </p>
+                            <p className={result.type === 'already_exists' ? 'text-amber-700' : 'text-yellow-700'}>
+                                {result.type === 'already_exists'
+                                    ? result.message
+                                    : 'This email isn\'t registered yet. Share this invite link with them:'}
+                            </p>
                         </div>
-                        <div className="flex gap-2">
-                            <Input readOnly value={result.inviteLink} />
-                            <Button size="icon" variant="outline" onClick={copyLink}>
-                                <span className="sr-only">Copy</span>
-                                📋
-                            </Button>
-                        </div>
+                        {result.inviteLink && (
+                            <div className="flex gap-2">
+                                <Input readOnly value={result.inviteLink} />
+                                <Button size="icon" variant="outline" onClick={copyLink}>
+                                    <span className="sr-only">Copy</span>
+                                    📋
+                                </Button>
+                            </div>
+                        )}
                         <DialogFooter>
                             <Button onClick={() => { setOpen(false); setResult(null); }}>Done</Button>
                         </DialogFooter>

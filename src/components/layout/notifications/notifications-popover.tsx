@@ -31,12 +31,15 @@ export function NotificationsPopover() {
         if (n.type === 'invite') {
             setProcessingId(n.id)
             try {
-                await acceptNotificationInvite(n.id, n.payload.collaboratorId)
+                const result = await acceptNotificationInvite(n.id, n.payload.collaboratorId)
                 setNotifications(prev => prev.filter(item => item.id !== n.id))
                 toast.success(`Joined ${n.payload.projectName}`)
-                router.push(`/projects/${n.payload.projectId}`)
-            } catch (error) {
-                toast.error("Failed to accept")
+                // Use slug if available, fallback to projectId
+                const projectPath = n.payload.projectSlug || n.payload.projectId
+                router.push(`/projects/${projectPath}`)
+                router.refresh()
+            } catch (error: any) {
+                toast.error(error?.message || "Failed to accept invitation")
             } finally {
                 setProcessingId(null)
             }

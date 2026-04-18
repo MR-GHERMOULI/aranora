@@ -90,12 +90,17 @@ export async function addCollaborator(formData: FormData) {
         .maybeSingle();
 
     if (existingColl) {
-        // Just return the existing one
         return {
-            type: existingColl.status === 'invited' ? 'new' : 'existing',
-            inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${existingColl.invite_token}`,
-            token: existingColl.invite_token,
-            message: 'Already a collaborator'
+            type: 'already_exists',
+            status: existingColl.status,
+            inviteLink: existingColl.invite_token
+                ? `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${existingColl.invite_token}`
+                : undefined,
+            message: existingColl.status === 'active'
+                ? 'This person is already an active collaborator on this project.'
+                : existingColl.status === 'declined'
+                    ? 'This person previously declined the invitation.'
+                    : 'An invitation has already been sent to this person.'
         };
     }
 
@@ -150,26 +155,40 @@ export async function addCollaborator(formData: FormData) {
     }
 
     if (inviteType === 'notification' && existingUser) {
-        // Create notification
-        await supabase.from('notifications').insert({
+        // Create in-platform notification for the registered user
+        const { error: notifError } = await supabase.from('notifications').insert({
             user_id: existingUser.id,
             type: 'invite',
             payload: {
                 projectId,
+                projectSlug: projectInfo?.slug || projectId,
                 projectName: projectInfo?.title || 'a project',
                 inviterName: inviterProfile?.full_name || user.email,
                 inviterUsername: inviterProfile?.username,
-                collaboratorId: newCollaborator.id
+                collaboratorId: newCollaborator.id,
+                inviteToken: newCollaborator.invite_token
             }
         });
 
+        if (notifError) {
+            console.error('Error creating invite notification:', notifError);
+            // Notification failed but collaborator record was created — return invite link as fallback
+            return {
+                type: 'new',
+                inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${newCollaborator.invite_token}`,
+                token: newCollaborator.invite_token,
+                message: 'User found but notification failed. Share this invite link instead.'
+            };
+        }
+
         return {
-            type: 'existing',
-            message: `User @${existingUser.username} notified`,
-            username: existingUser.username
+            type: 'notified',
+            message: `Invitation sent to @${existingUser.username}`,
+            username: existingUser.username,
+            fullName: existingUser.full_name
         };
     } else {
-        // Return info for the link
+        // User not registered — return invite link
         return {
             type: 'new',
             inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${newCollaborator.invite_token}`,

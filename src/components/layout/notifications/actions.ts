@@ -38,25 +38,93 @@ export async function markAsRead(notificationId: string) {
 
 export async function acceptNotificationInvite(notificationId: string, collaboratorId: string) {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // Accept invite
-    await supabase.from('project_collaborators')
+    if (!user) {
+        throw new Error('Not authenticated');
+    }
+
+    // Verify this collaborator record belongs to the current user
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_email')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.company_email) {
+        throw new Error('Profile not found');
+    }
+
+    // Verify the collaborator record matches the user's email
+    const { data: collRecord } = await supabase
+        .from('project_collaborators')
+        .select('id, collaborator_email, project_id')
+        .eq('id', collaboratorId)
+        .single();
+
+    if (!collRecord || collRecord.collaborator_email !== profile.company_email) {
+        throw new Error('This invitation does not belong to you');
+    }
+
+    // Accept the invite — update status to active
+    const { error: updateError } = await supabase
+        .from('project_collaborators')
         .update({ status: 'active' })
         .eq('id', collaboratorId);
+
+    if (updateError) {
+        console.error('Error accepting invite:', updateError);
+        throw new Error('Failed to accept invitation');
+    }
 
     // Mark notification as read
     await supabase.from('notifications').update({ read: true }).eq('id', notificationId);
 
     revalidatePath('/dashboard');
+    revalidatePath('/projects');
+
+    return { projectId: collRecord.project_id };
 }
 
 export async function declineNotificationInvite(notificationId: string, collaboratorId: string) {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // Decline invite
-    await supabase.from('project_collaborators')
+    if (!user) {
+        throw new Error('Not authenticated');
+    }
+
+    // Verify this collaborator record belongs to the current user
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_email')
+        .eq('id', user.id)
+        .single();
+
+    if (!profile?.company_email) {
+        throw new Error('Profile not found');
+    }
+
+    const { data: collRecord } = await supabase
+        .from('project_collaborators')
+        .select('id, collaborator_email')
+        .eq('id', collaboratorId)
+        .single();
+
+    if (!collRecord || collRecord.collaborator_email !== profile.company_email) {
+        throw new Error('This invitation does not belong to you');
+    }
+
+    // Decline the invite
+    const { error: updateError } = await supabase
+        .from('project_collaborators')
         .update({ status: 'declined' })
         .eq('id', collaboratorId);
+
+    if (updateError) {
+        console.error('Error declining invite:', updateError);
+        throw new Error('Failed to decline invitation');
+    }
 
     // Mark notification as read
     await supabase.from('notifications').update({ read: true }).eq('id', notificationId);
