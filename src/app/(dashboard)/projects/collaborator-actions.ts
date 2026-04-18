@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { headers } from "next/headers";
 
 export interface Collaborator {
     id: string;
@@ -89,6 +90,16 @@ export async function addCollaborator(formData: FormData) {
     const hourlyRate = formData.get('hourlyRate') ? parseFloat(formData.get('hourlyRate') as string) : null;
     const paymentType = (formData.get('paymentType') as string) || 'revenue_share';
 
+    const headersList = await headers();
+    const host = headersList.get('x-forwarded-host') || headersList.get('host');
+    const protocol = headersList.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+    let baseUrl = `${protocol}://${host}`;
+    
+    // Fallback if host is completely missing
+    if (!host) {
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    }
+
     // Check if they are already a collaborator to avoid unique constraint error
     const { data: existingColl } = await supabase
         .from('project_collaborators')
@@ -102,7 +113,7 @@ export async function addCollaborator(formData: FormData) {
             type: 'already_exists',
             status: existingColl.status,
             inviteLink: existingColl.invite_token
-                ? `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${existingColl.invite_token}`
+                ? `${baseUrl}/invite/${existingColl.invite_token}`
                 : undefined,
             message: existingColl.status === 'active'
                 ? 'This person is already an active collaborator on this project.'
@@ -184,7 +195,7 @@ export async function addCollaborator(formData: FormData) {
             // Notification failed but collaborator record was created — return invite link as fallback
             return {
                 type: 'new',
-                inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${newCollaborator.invite_token}`,
+                inviteLink: `${baseUrl}/invite/${newCollaborator.invite_token}`,
                 token: newCollaborator.invite_token,
                 message: 'User found but notification failed. Share this invite link instead.'
             };
@@ -200,7 +211,7 @@ export async function addCollaborator(formData: FormData) {
         // User not registered — return invite link
         return {
             type: 'new',
-            inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/invite/${newCollaborator.invite_token}`,
+            inviteLink: `${baseUrl}/invite/${newCollaborator.invite_token}`,
             token: newCollaborator.invite_token
         };
     }
