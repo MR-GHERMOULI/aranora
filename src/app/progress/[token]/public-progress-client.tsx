@@ -101,81 +101,30 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                 <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-violet-500/5 blur-3xl" />
             </div>
 
-            <div className="relative max-w-3xl mx-auto px-4 py-10 sm:py-16">
-                {/* Header */}
-                {/* Owner Profile Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-8"
-                >
-                    <div className="flex flex-col items-center gap-6 p-6 sm:p-8 rounded-3xl bg-card/60 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden text-center">
-                        <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent pointer-events-none" />
+            <div className="relative max-w-6xl mx-auto px-4 py-10 sm:py-16">
+                
+                <div className="grid lg:grid-cols-3 gap-8 items-start">
+                    
+                    {/* LEFT COLUMN: Project Details & Progress */}
+                    <div className="lg:col-span-2 space-y-8">
                         
-                        <div className="relative mb-2">
-                            <div className="absolute inset-0 bg-brand-primary/20 blur-2xl rounded-full animate-pulse" />
-                            <div className="absolute -inset-1 bg-gradient-to-tr from-brand-primary to-violet-500 rounded-full opacity-20 animate-spin-slow" />
-                            {owner.logo_url ? (
-                                <img src={owner.logo_url} alt={owner.company || owner.name} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-background shadow-2xl relative z-10" />
-                            ) : (
-                                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center border-4 border-background shadow-2xl relative z-10">
-                                    <span className="text-4xl font-bold text-white">
-                                        {(owner.company || owner.name).charAt(0).toUpperCase()}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex flex-col items-center w-full space-y-4 relative z-10">
-                            <div className="flex flex-col items-center w-full">
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-wider mb-2">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-ping" />
-                                    Client Portal
-                                </div>
-                                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
-                                    {project.title}
-                                </h1>
-                                <p className="text-lg sm:text-xl text-muted-foreground font-medium mt-1">
-                                    by {owner.company || owner.name}
-                                </p>
+                        {/* Project Header */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            className="bg-card/60 backdrop-blur-xl border shadow-lg rounded-3xl p-6 sm:p-8"
+                        >
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-wider mb-4">
+                                <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-ping" />
+                                Client Portal
                             </div>
-
-                            {owner.bio && (
-                                <div className="relative max-w-xl mx-auto px-8 mt-2">
-                                    <Quote className="absolute top-0 left-0 h-4 w-4 text-brand-primary/20 rotate-180" />
-                                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed italic">
-                                        {owner.bio}
-                                    </p>
-                                    <Quote className="absolute bottom-0 right-0 h-4 w-4 text-brand-primary/20" />
-                                </div>
-                            )}
-
-                            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-                                {owner.portfolio_url && (
-                                    <a 
-                                        href={owner.portfolio_url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2.5 px-6 py-2 rounded-full bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary/90 shadow-lg shadow-brand-primary/20 transition-all hover:scale-105 active:scale-95 group"
-                                    >
-                                        <Globe className="h-4 w-4 group-hover:rotate-12 transition-transform" />
-                                        Explore Portfolio
-                                        <ExternalLink className="h-3.5 w-3.5 opacity-70" />
-                                    </a>
-                                )}
-                            </div>
-
-                            {owner.address && (
-                                <div className="flex justify-center w-full pt-2">
-                                    <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
-                                        <MapPin className="h-3.5 w-3.5 text-brand-primary" />
-                                        {owner.address}
-                                    </span>
-                                </div>
-                            )}
                             
-                            <div className="flex flex-wrap items-center justify-center gap-3 mt-4 pt-4 border-t border-border/50 min-w-[200px]">
+                            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70 mb-4">
+                                {project.title}
+                            </h1>
+                            
+                            <div className="flex flex-wrap items-center gap-3">
                                 <Badge className={`${config.color} text-xs border-none shadow-sm px-3 py-1`} variant="secondary">
                                     <config.icon className="h-3.5 w-3.5 mr-1.5" />
                                     {project.status}
@@ -188,100 +137,173 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                                     </span>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
+
+                        {/* Progress Bar */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                        >
+                            <ProjectProgressBar
+                                totalTasks={stats.total}
+                                completedTasks={stats.completed}
+                                inProgressTasks={stats.inProgress}
+                                todoTasks={stats.todo}
+                                variant="hero"
+                            />
+                        </motion.div>
+
+                        {/* Task List */}
+                        {tasks.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.4 }}
+                            >
+                                <Card className="border shadow-lg rounded-3xl overflow-hidden bg-card/60 backdrop-blur-xl">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-center gap-2 mb-6">
+                                            <ListTodo className="h-5 w-5 text-brand-primary" />
+                                            <h3 className="font-semibold text-lg tracking-tight">Task Breakdown</h3>
+                                            <span className="text-sm font-medium text-muted-foreground ml-auto bg-muted/50 px-3 py-1 rounded-full">
+                                                {stats.completed}/{stats.total}
+                                            </span>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {tasks.map((task, i) => {
+                                                const statusCfg = taskStatusIcons[task.status] || taskStatusIcons.Todo
+                                                const StatusIcon = statusCfg.icon
+                                                return (
+                                                    <motion.div
+                                                        key={task.id}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ duration: 0.3, delay: 0.5 + i * 0.05 }}
+                                                        className={`flex items-center gap-4 p-4 rounded-2xl border transition-all hover:shadow-md ${task.status === "Done" ? "bg-muted/30 opacity-70 border-muted" : "bg-background hover:border-brand-primary/30"
+                                                            }`}
+                                                    >
+                                                        <StatusIcon className={`h-5 w-5 shrink-0 ${statusCfg.color} ${task.status === "Done" ? "fill-current" : ""}`} />
+                                                        <span className={`text-base flex-1 min-w-0 truncate ${task.status === "Done" ? "line-through text-muted-foreground" : "font-medium"
+                                                            }`}>
+                                                            {task.title}
+                                                        </span>
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            {task.priority && (
+                                                                <Badge variant="secondary" className={`text-xs px-2 py-0.5 ${priorityColors[task.priority] || ""}`}>
+                                                                    {task.priority}
+                                                                </Badge>
+                                                            )}
+                                                            <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                                                {task.status}
+                                                            </Badge>
+                                                        </div>
+                                                    </motion.div>
+                                                )
+                                            })}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        )}
                     </div>
-                </motion.div>
 
-                {/* Progress Bar */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="mb-8"
-                >
-                    <ProjectProgressBar
-                        totalTasks={stats.total}
-                        completedTasks={stats.completed}
-                        inProgressTasks={stats.inProgress}
-                        todoTasks={stats.todo}
-                        variant="hero"
-                    />
-                </motion.div>
 
-                {/* Task List */}
-                {tasks.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                    >
-                        <Card className="border-0 shadow-lg shadow-black/5 dark:shadow-black/20">
-                            <CardContent className="p-5 sm:p-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <ListTodo className="h-4 w-4 text-muted-foreground" />
-                                    <h3 className="font-semibold text-sm">Task Breakdown</h3>
-                                    <span className="text-xs text-muted-foreground ml-auto">
-                                        {stats.completed}/{stats.total}
+                    {/* RIGHT COLUMN: Freelancer/Agency Profile Sidebar */}
+                    <div className="lg:col-span-1">
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.6, delay: 0.3 }}
+                            className="bg-card/80 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl p-6 sm:p-8 sticky top-8"
+                        >
+                            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-brand-primary/10 to-transparent rounded-t-3xl pointer-events-none" />
+                            
+                            <div className="flex flex-col items-center text-center relative z-10">
+                                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">Managed By</h3>
+                                
+                                <div className="relative mb-4 group cursor-default">
+                                    <div className="absolute inset-0 bg-brand-primary/20 blur-xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute -inset-1.5 bg-gradient-to-tr from-brand-primary to-violet-500 rounded-full opacity-20 animate-spin-slow group-hover:opacity-40 transition-opacity" />
+                                    {owner.logo_url ? (
+                                        <img src={owner.logo_url} alt={owner.company || owner.name} className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-background shadow-xl relative z-10 transition-transform group-hover:scale-105" />
+                                    ) : (
+                                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center border-4 border-background shadow-xl relative z-10 transition-transform group-hover:scale-105">
+                                            <span className="text-3xl font-bold text-white">
+                                                {(owner.company || owner.name).charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground mt-2">
+                                    {owner.company || owner.name}
+                                </h2>
+                                {owner.company && owner.name && owner.company !== owner.name && (
+                                    <p className="text-sm font-medium text-muted-foreground mt-1">
+                                        {owner.name}
+                                    </p>
+                                )}
+
+                                {owner.address && (
+                                    <span className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-widest mt-4">
+                                        <MapPin className="h-3.5 w-3.5 text-brand-primary/80" />
+                                        {owner.address}
                                     </span>
-                                </div>
-                                <div className="space-y-2">
-                                    {tasks.map((task, i) => {
-                                        const statusCfg = taskStatusIcons[task.status] || taskStatusIcons.Todo
-                                        const StatusIcon = statusCfg.icon
-                                        return (
-                                            <motion.div
-                                                key={task.id}
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ duration: 0.3, delay: 0.5 + i * 0.05 }}
-                                                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${task.status === "Done" ? "bg-muted/30 opacity-70" : "bg-card hover:bg-muted/30"
-                                                    }`}
-                                            >
-                                                <StatusIcon className={`h-4 w-4 shrink-0 ${statusCfg.color} ${task.status === "Done" ? "fill-current" : ""}`} />
-                                                <span className={`text-sm flex-1 min-w-0 truncate ${task.status === "Done" ? "line-through text-muted-foreground" : "font-medium"
-                                                    }`}>
-                                                    {task.title}
-                                                </span>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    {task.priority && (
-                                                        <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 ${priorityColors[task.priority] || ""}`}>
-                                                            {task.priority}
-                                                        </Badge>
-                                                    )}
-                                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
-                                                        {task.status}
-                                                    </Badge>
-                                                </div>
-                                            </motion.div>
-                                        )
-                                    })}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
+                                )}
+
+                                {owner.bio && (
+                                    <div className="relative w-full mt-6 pt-6 border-t border-border/50">
+                                        <Quote className="absolute top-4 left-0 h-4 w-4 text-brand-primary/20 rotate-180" />
+                                        <p className="text-sm text-foreground/80 leading-relaxed italic px-6">
+                                            {owner.bio}
+                                        </p>
+                                        <Quote className="absolute bottom-0 right-0 h-4 w-4 text-brand-primary/20" />
+                                    </div>
+                                )}
+
+                                {owner.portfolio_url && (
+                                    <div className="w-full mt-8">
+                                        <a 
+                                            href={owner.portfolio_url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center w-full gap-2 px-6 py-3 rounded-2xl bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary/90 shadow-lg shadow-brand-primary/25 transition-all hover:-translate-y-0.5 active:translate-y-0 group"
+                                        >
+                                            <Globe className="h-4 w-4 group-hover:animate-pulse" />
+                                            Explore Portfolio
+                                            <ExternalLink className="h-3.5 w-3.5 opacity-60 ml-1" />
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+
+                </div>
 
                 {/* Footer */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.8 }}
-                    className="mt-12 text-center"
+                    className="mt-16 text-center"
                 >
                     <a
                         href="https://www.aranora.com"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group px-4 py-2 rounded-full hover:bg-muted/50"
                     >
                         Powered by
                         <span className="font-semibold text-brand-primary group-hover:underline">
                             Aranora
                         </span>
-                        <ArrowUpRight className="h-3 w-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+                        <ArrowUpRight className="h-3 w-3 opacity-50 group-hover:opacity-100 transition-opacity group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </a>
                 </motion.div>
             </div>
         </div>
     )
 }
+
