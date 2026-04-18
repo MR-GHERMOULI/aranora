@@ -115,8 +115,7 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
 
             if (response?.type === 'notified') {
                 // Registered user — notification sent successfully
-                toast.success(response.message || 'Notification sent!')
-                setOpen(false)
+                setResult(response)
                 reset()
                 router.refresh()
             } else if (response?.type === 'already_exists') {
@@ -156,7 +155,7 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button>
                     <UserPlus className="mr-2 h-4 w-4" /> Add Collaborator
                 </Button>
             </DialogTrigger>
@@ -168,22 +167,40 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
                     </DialogDescription>
                 </DialogHeader>
 
-                {result?.type === 'new' || result?.type === 'already_exists' ? (
+                {result?.type === 'notified' || result?.type === 'new' || result?.type === 'already_exists' ? (
                     <div className="py-4 space-y-4">
                         <div className={`p-3 rounded-md border text-sm ${
-                            result.type === 'already_exists'
-                                ? 'bg-amber-50 border-amber-200'
-                                : 'bg-yellow-50 border-yellow-200'
+                            result.type === 'notified'
+                                ? 'bg-green-50 border-green-200'
+                                : result.type === 'already_exists'
+                                    ? 'bg-amber-50 border-amber-200'
+                                    : 'bg-yellow-50 border-yellow-200'
                         }`}>
                             <p className={`font-medium mb-1 ${
-                                result.type === 'already_exists' ? 'text-amber-800' : 'text-yellow-800'
+                                result.type === 'notified'
+                                    ? 'text-green-800'
+                                    : result.type === 'already_exists'
+                                        ? 'text-amber-800'
+                                        : 'text-yellow-800'
                             }`}>
-                                {result.type === 'already_exists' ? 'Already Added' : 'User not found'}
+                                {result.type === 'notified'
+                                    ? 'Collaborator Added!'
+                                    : result.type === 'already_exists'
+                                        ? 'Already Added'
+                                        : 'User not found'}
                             </p>
-                            <p className={result.type === 'already_exists' ? 'text-amber-700' : 'text-yellow-700'}>
-                                {result.type === 'already_exists'
+                            <p className={
+                                result.type === 'notified'
+                                    ? 'text-green-700'
+                                    : result.type === 'already_exists'
+                                        ? 'text-amber-700'
+                                        : 'text-yellow-700'
+                            }>
+                                {result.type === 'notified'
                                     ? result.message
-                                    : 'This email isn\'t registered yet. Share this invite link with them:'}
+                                    : result.type === 'already_exists'
+                                        ? result.message
+                                        : 'This email isn\'t registered yet. Share this invite link with them:'}
                             </p>
                         </div>
                         {result.inviteLink && (
