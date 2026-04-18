@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
     Calendar, CheckCircle2, Circle, Clock, AlertCircle,
-    ArrowUpRight, ListTodo
+    ArrowUpRight, ListTodo, Mail, MapPin
 } from "lucide-react"
 
 interface Task {
@@ -35,6 +35,9 @@ interface ProjectData {
     owner: {
         name: string
         company: string | null
+        logo_url: string | null
+        email: string | null
+        address: string | null
     }
 }
 
@@ -97,41 +100,73 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
 
             <div className="relative max-w-3xl mx-auto px-4 py-10 sm:py-16">
                 {/* Header */}
+                {/* Owner Profile Card */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-8 sm:mb-12"
+                    className="mb-8"
                 >
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.4, delay: 0.1 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/50 border text-xs text-muted-foreground mb-4"
-                    >
-                        <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-pulse" />
-                        Live Progress
-                    </motion.div>
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-                        {project.title}
-                    </h1>
-                    <div className="flex items-center justify-center gap-3 flex-wrap">
-                        <Badge className={`${config.color} text-xs`} variant="secondary">
-                            {project.status}
-                        </Badge>
-                        {project.start_date && (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {formatDate(project.start_date)}
-                                {project.end_date && ` — ${formatDate(project.end_date)}`}
-                            </span>
-                        )}
+                    <div className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 rounded-3xl bg-card/60 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent pointer-events-none" />
+                        
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-brand-primary/20 blur-xl rounded-full animate-pulse" />
+                            {owner.logo_url ? (
+                                <img src={owner.logo_url} alt={owner.company || owner.name} className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-background shadow-xl relative z-10" />
+                            ) : (
+                                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center border-4 border-background shadow-xl relative z-10">
+                                    <span className="text-3xl font-bold text-white">
+                                        {(owner.company || owner.name).charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex-1 text-center sm:text-left space-y-3 relative z-10">
+                            <div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-wider mb-2">
+                                    <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-ping" />
+                                    Live Progress
+                                </div>
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                                    {project.title}
+                                </h1>
+                                <p className="text-base sm:text-lg text-muted-foreground font-medium mt-1">
+                                    by {owner.company || owner.name}
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-muted-foreground">
+                                {owner.email && (
+                                    <a href={`mailto:${owner.email}`} className="flex items-center gap-1.5 hover:text-brand-primary transition-colors">
+                                        <Mail className="h-4 w-4" />
+                                        {owner.email}
+                                    </a>
+                                )}
+                                {owner.address && (
+                                    <span className="flex items-center gap-1.5">
+                                        <MapPin className="h-4 w-4" />
+                                        {owner.address}
+                                    </span>
+                                )}
+                            </div>
+                            
+                            <div className="flex items-center justify-center sm:justify-start gap-3 mt-4 pt-4 border-t border-border/50">
+                                <Badge className={`${config.color} text-xs border-none shadow-sm px-3 py-1`} variant="secondary">
+                                    <config.icon className="h-3.5 w-3.5 mr-1.5" />
+                                    {project.status}
+                                </Badge>
+                                {project.start_date && (
+                                    <span className="text-xs text-muted-foreground flex items-center gap-1.5 bg-muted/50 px-3 py-1 rounded-full">
+                                        <Calendar className="h-3.5 w-3.5" />
+                                        {formatDate(project.start_date)}
+                                        {project.end_date && ` — ${formatDate(project.end_date)}`}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                    {owner.name && (
-                        <p className="text-sm text-muted-foreground mt-3">
-                            by <span className="font-medium text-foreground">{owner.company || owner.name}</span>
-                        </p>
-                    )}
                 </motion.div>
 
                 {/* Progress Bar */}
