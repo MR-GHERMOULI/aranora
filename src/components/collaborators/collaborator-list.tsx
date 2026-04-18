@@ -9,6 +9,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { DeleteCollaboratorDialog } from "./delete-collaborator-dialog"
+import { EditCollaboratorDialog } from "./edit-collaborator-dialog"
 
 interface CollaboratorListProps {
     collaborators: CollaboratorCRM[]
@@ -59,10 +60,13 @@ export function CollaboratorList({ collaborators }: CollaboratorListProps) {
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-2">
-                                        <DeleteCollaboratorDialog 
-                                            collaboratorId={collaborator.id} 
-                                            collaboratorName={collaborator.full_name} 
-                                        />
+                                        <div className="flex items-center gap-1">
+                                            <EditCollaboratorDialog collaborator={collaborator} />
+                                            <DeleteCollaboratorDialog 
+                                                collaboratorId={collaborator.id} 
+                                                collaboratorName={collaborator.full_name} 
+                                            />
+                                        </div>
                                         {collaborator.country && (
                                             <Badge variant="outline" className="gap-1 bg-background/50 backdrop-blur-sm border-muted-foreground/20">
                                                 <MapPin className="h-3 w-3" /> {collaborator.country}

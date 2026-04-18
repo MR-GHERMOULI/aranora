@@ -11,7 +11,7 @@ export async function getCollaborators() {
 
     if (!user) return [];
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
         .from('collaborators_crm')
         .select('*')
         .eq('user_id', user.id)
@@ -20,6 +20,54 @@ export async function getCollaborators() {
     if (error) {
         console.error('Error fetching collaborators:', error);
         return [];
+    }
+
+    try {
+        // Auto-sync active project collaborators into CRM
+        const { data: projects } = await supabase.from('projects').select('id').eq('user_id', user.id);
+        
+        if (projects && projects.length > 0) {
+            const projectIds = projects.map(p => p.id);
+            const { data: activeCollabs } = await supabase
+                .from('project_collaborators')
+                .select('collaborator_email')
+                .in('project_id', projectIds)
+                .eq('status', 'active');
+                
+            if (activeCollabs && activeCollabs.length > 0) {
+                const existingEmails = data ? data.map(c => c.email).filter(Boolean) : [];
+                const newEmails = Array.from(new Set(activeCollabs.map(c => c.collaborator_email))).filter(email => !existingEmails.includes(email));
+                
+                if (newEmails.length > 0) {
+                    const { createAdminClient } = await import('@/lib/supabase/server');
+                    const adminClient = createAdminClient();
+                    
+                    const { data: profilesByEmail } = await adminClient.from('profiles').select('email, company_email, full_name, username').in('email', newEmails);
+                    const { data: profilesByCompany } = await adminClient.from('profiles').select('email, company_email, full_name, username').in('company_email', newEmails);
+                    
+                    const profiles = [...(profilesByEmail || []), ...(profilesByCompany || [])];
+                    
+                    const toInsert = newEmails.map(email => {
+                        const profile = profiles.find(p => p.email === email || p.company_email === email);
+                        return {
+                            user_id: user.id,
+                            email: email,
+                            full_name: profile?.full_name || profile?.username || email.split('@')[0],
+                        }
+                    });
+                    
+                    const { data: inserted, error: insertError } = await supabase.from('collaborators_crm').insert(toInsert).select();
+                    
+                    if (inserted && !insertError) {
+                        data = [...(data || []), ...inserted];
+                        // Re-sort alphabetically
+                        data.sort((a, b) => a.full_name.localeCompare(b.full_name));
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Auto-sync collaborators error:', e);
     }
 
     return data as CollaboratorCRM[];
