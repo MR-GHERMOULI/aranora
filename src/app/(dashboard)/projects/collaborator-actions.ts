@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
@@ -44,8 +44,9 @@ export async function getProjectCollaborators(projectId: string) {
 
     const emails = collaborators.map(c => c.collaborator_email);
     
-    // Fetch profiles of users who have signed up
-    const { data: profiles } = await supabase
+    // Fetch profiles of users who have signed up (using admin client to bypass RLS)
+    const adminSupabase = createAdminClient();
+    const { data: profiles } = await adminSupabase
         .from('profiles')
         .select('username, full_name, company_email, avatar_url')
         .in('company_email', emails);
@@ -104,14 +105,15 @@ export async function addCollaborator(formData: FormData) {
         };
     }
 
-    // Check if user exists (use maybeSingle to avoid PGRST116 errors on non-existent users)
-    const { data: existingUser } = await supabase
+    // Check if user exists (use admin client to bypass RLS)
+    const adminSupabase = createAdminClient();
+    const { data: existingUser } = await adminSupabase
         .from('profiles')
         .select('id, full_name, username')
         .eq('company_email', email)
         .maybeSingle();
 
-    const { data: inviterProfile } = await supabase
+    const { data: inviterProfile } = await adminSupabase
         .from('profiles')
         .select('full_name, username')
         .eq('id', user.id)
@@ -231,7 +233,8 @@ export async function getProjectMembers(projectId: string) {
 
     if (!project) return [];
 
-    const { data: ownerProfile } = await supabase
+    const adminSupabase = createAdminClient();
+    const { data: ownerProfile } = await adminSupabase
         .from('profiles')
         .select('id, full_name, company_email')
         .eq('id', project.user_id)
@@ -247,7 +250,7 @@ export async function getProjectMembers(projectId: string) {
             
         if (teamMembers && teamMembers.length > 0) {
             const userIds = teamMembers.map(tm => tm.user_id);
-            const { data: profiles } = await supabase
+            const { data: profiles } = await adminSupabase
                 .from('profiles')
                 .select('id, full_name, company_email')
                 .in('id', userIds);
@@ -270,7 +273,7 @@ export async function getProjectMembers(projectId: string) {
     const emails = collaborators?.map(c => c.collaborator_email) || [];
     
     if (emails.length > 0) {
-        const { data: profiles } = await supabase
+        const { data: profiles } = await adminSupabase
             .from('profiles')
             .select('id, full_name, company_email')
             .in('company_email', emails);
