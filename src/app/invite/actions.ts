@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function acceptInvite(token: string) {
@@ -11,8 +11,9 @@ export async function acceptInvite(token: string) {
         redirect(`/login?next=/invite/${token}`);
     }
 
-    // 1. Find the invite by token
-    const { data: invite, error } = await supabase
+    // 1. Find the invite by token using admin client to bypass RLS
+    const adminSupabase = createAdminClient();
+    const { data: invite, error } = await adminSupabase
         .from('project_collaborators')
         .select('id, project_id, status, collaborator_email')
         .eq('invite_token', token)
@@ -25,11 +26,16 @@ export async function acceptInvite(token: string) {
 
     if (invite.status === 'active') {
         // Already accepted — redirect to the project
-        redirect(`/projects/${invite.project_id}`);
+        const { data: project } = await adminSupabase
+            .from('projects')
+            .select('slug')
+            .eq('id', invite.project_id)
+            .single();
+        redirect(`/projects/${project?.slug || invite.project_id}`);
     }
 
     // 2. Accept it — update status and bind to the accepting user's email
-    const { error: updateError } = await supabase
+    const { error: updateError } = await adminSupabase
         .from('project_collaborators')
         .update({
             status: 'active',
@@ -43,14 +49,59 @@ export async function acceptInvite(token: string) {
         throw new Error('Failed to accept invitation');
     }
 
-    redirect(`/projects/${invite.project_id}`);
+    // Redirect to the project using slug if available
+    const { data: project } = await adminSupabase
+        .from('projects')
+        .select('slug')
+        .eq('id', invite.project_id)
+        .single();
+
+    redirect(`/projects/${project?.slug || invite.project_id}`);
+}
+
+export async function declineInvite(token: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect(`/login?next=/invite/${token}`);
+    }
+
+    const adminSupabase = createAdminClient();
+    const { data: invite, error } = await adminSupabase
+        .from('project_collaborators')
+        .select('id, status')
+        .eq('invite_token', token)
+        .single();
+
+    if (error || !invite) {
+        throw new Error('Invalid invitation');
+    }
+
+    if (invite.status === 'active') {
+        // Already accepted — can't decline
+        throw new Error('Invitation already accepted');
+    }
+
+    const { error: updateError } = await adminSupabase
+        .from('project_collaborators')
+        .update({ status: 'declined' })
+        .eq('id', invite.id);
+
+    if (updateError) {
+        console.error('Error declining invite:', updateError);
+        throw new Error('Failed to decline invitation');
+    }
+
+    redirect('/dashboard');
 }
 
 export async function getInviteDetails(token: string) {
-    const supabase = await createClient();
+    // Use admin client so unauthenticated visitors can still see full invite info
+    const adminSupabase = createAdminClient();
 
-    // Read the invite by token — RLS policy "Anyone can view invite by token" allows this
-    const { data: invite, error } = await supabase
+    // Read the invite by token
+    const { data: invite, error } = await adminSupabase
         .from('project_collaborators')
         .select('id, project_id, collaborator_email, revenue_share, hourly_rate, payment_type, status, invite_token')
         .eq('invite_token', token)
@@ -60,37 +111,36 @@ export async function getInviteDetails(token: string) {
         return { invite: null, error: error || new Error('Invite not found') };
     }
 
-    // Fetch project details separately to avoid complex join issues
-    const { data: project } = await supabase
+    // Fetch project details (admin client bypasses RLS for unauthenticated reads)
+    const { data: project } = await adminSupabase
         .from('projects')
-        .select('title, description')
+        .select('id, title, description, slug, user_id')
         .eq('id', invite.project_id)
         .single();
 
-    // Fetch inviter info (project owner)
-    let inviterName = null;
-    if (project) {
-        const { data: projectWithOwner } = await supabase
-            .from('projects')
-            .select('user_id')
-            .eq('id', invite.project_id)
+    // Fetch inviter profile (name, username, avatar)
+    let inviter: { full_name: string | null; username: string | null; avatar_url: string | null } | null = null;
+    if (project?.user_id) {
+        const { data: inviterProfile } = await adminSupabase
+            .from('profiles')
+            .select('full_name, username, avatar_url')
+            .eq('id', project.user_id)
             .single();
 
-        if (projectWithOwner) {
-            const { data: inviterProfile } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', projectWithOwner.user_id)
-                .single();
-            inviterName = inviterProfile?.full_name;
+        if (inviterProfile) {
+            inviter = {
+                full_name: inviterProfile.full_name || null,
+                username: inviterProfile.username || null,
+                avatar_url: inviterProfile.avatar_url || null,
+            };
         }
     }
 
     return {
         invite: {
             ...invite,
-            project: project || { title: 'Unknown Project', description: '' },
-            inviterName
+            project: project || { title: 'Unknown Project', description: '', slug: null },
+            inviter,
         },
         error: null
     };
