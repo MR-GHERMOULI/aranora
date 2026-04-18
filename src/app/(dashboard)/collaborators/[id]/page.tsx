@@ -14,7 +14,8 @@ interface CollaboratorPageProps {
 }
 
 export default async function CollaboratorPage({ params }: CollaboratorPageProps) {
-    const collaborator = await getCollaborator(params.id)
+    const { id } = await params
+    const collaborator = await getCollaborator(id)
 
     if (!collaborator) {
         notFound()
