@@ -94,11 +94,21 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-            {/* Background decoration */}
+        <div className="min-h-screen bg-background relative selection:bg-brand-primary/30">
+            {/* Premium SaaS Background Architecture */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-brand-primary/5 blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-violet-500/5 blur-3xl" />
+                {/* 1. Base Grid Pattern for that "technical/dev" SaaS feel */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+                
+                {/* 2. Massive Vibrant Brand Orbs */}
+                <div className="absolute -top-[15%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand-primary/15 dark:bg-brand-primary/20 blur-[120px] rounded-full mix-blend-multiply dark:mix-blend-screen opacity-100 animate-pulse" />
+                
+                <div className="absolute top-[40%] -left-[10%] w-[500px] h-[500px] bg-violet-500/10 dark:bg-violet-600/20 blur-[100px] rounded-full mix-blend-multiply dark:mix-blend-screen opacity-70" />
+                
+                <div className="absolute bottom-[-10%] -right-[10%] w-[600px] h-[600px] bg-fuchsia-500/10 dark:bg-fuchsia-600/15 blur-[120px] rounded-full mix-blend-multiply dark:mix-blend-screen opacity-70" />
+                
+                {/* 3. Wash overlay to ensure text contrast isn't destroyed */}
+                <div className="absolute inset-0 bg-background/40 backdrop-blur-[1px]" />
             </div>
 
             <div className="relative max-w-6xl mx-auto px-4 py-10 sm:py-16">
