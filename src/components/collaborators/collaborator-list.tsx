@@ -8,6 +8,7 @@ import { Star, Mail, Phone, ExternalLink, MapPin, Search } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
+import { DeleteCollaboratorDialog } from "./delete-collaborator-dialog"
 
 interface CollaboratorListProps {
     collaborators: CollaboratorCRM[]
@@ -45,7 +46,7 @@ export function CollaboratorList({ collaborators }: CollaboratorListProps) {
                             <div className="absolute top-0 left-0 w-1 h-full bg-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                             <CardHeader className="pb-2">
-                                <div className="flex justify-between items-start">
+                                <div className="flex justify-between items-start w-full">
                                     <div className="space-y-1">
                                         <CardTitle className="text-xl font-bold">{collaborator.full_name}</CardTitle>
                                         <div className="flex items-center gap-1">
@@ -57,11 +58,17 @@ export function CollaboratorList({ collaborators }: CollaboratorListProps) {
                                             ))}
                                         </div>
                                     </div>
-                                    {collaborator.country && (
-                                        <Badge variant="outline" className="gap-1 bg-background/50 backdrop-blur-sm border-muted-foreground/20">
-                                            <MapPin className="h-3 w-3" /> {collaborator.country}
-                                        </Badge>
-                                    )}
+                                    <div className="flex flex-col items-end gap-2">
+                                        <DeleteCollaboratorDialog 
+                                            collaboratorId={collaborator.id} 
+                                            collaboratorName={collaborator.full_name} 
+                                        />
+                                        {collaborator.country && (
+                                            <Badge variant="outline" className="gap-1 bg-background/50 backdrop-blur-sm border-muted-foreground/20">
+                                                <MapPin className="h-3 w-3" /> {collaborator.country}
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </CardHeader>
 
