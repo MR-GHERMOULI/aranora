@@ -20,28 +20,64 @@ export async function getProjects(clientId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  let query = supabase
+  // 1. Fetch projects owned by the current user
+  let ownedQuery = supabase
     .from('projects')
     .select('*, client:clients(name)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (clientId) {
-    query = query.eq('client_id', clientId);
+    ownedQuery = ownedQuery.eq('client_id', clientId);
   }
 
-  const { data, error } = await query;
+  const { data: ownedProjects, error: ownedError } = await ownedQuery;
 
-  if (error) {
-    console.error('Error fetching projects:', error);
-    return [];
+  if (ownedError) {
+    console.error('Error fetching owned projects:', ownedError);
   }
 
-  // Fetch task counts per project
+  // 2. Fetch projects where the user is an active collaborator
+  //    First get their collaborator records (matched by email)
+  const { data: collabRecords } = await supabase
+    .from('project_collaborators')
+    .select('project_id')
+    .eq('collaborator_email', user.email)
+    .eq('status', 'active');
+
+  let collabProjects: any[] = [];
+  if (collabRecords && collabRecords.length > 0) {
+    const collabProjectIds = collabRecords.map(c => c.project_id);
+    let collabQuery = supabase
+      .from('projects')
+      .select('*, client:clients(name)')
+      .in('id', collabProjectIds)
+      .order('created_at', { ascending: false });
+
+    if (clientId) {
+      collabQuery = collabQuery.eq('client_id', clientId);
+    }
+
+    const { data: cp, error: cpError } = await collabQuery;
+    if (cpError) {
+      console.error('Error fetching collaborator projects:', cpError);
+    }
+    collabProjects = cp || [];
+  }
+
+  // 3. Merge and deduplicate (owned projects first)
+  const ownedIds = new Set((ownedProjects || []).map(p => p.id));
+  const allProjects = [
+    ...(ownedProjects || []),
+    ...collabProjects.filter(p => !ownedIds.has(p.id)),
+  ];
+
+  // 4. Fetch task counts for all visible projects
+  const projectIds = allProjects.map(p => p.id);
   const { data: tasks } = await supabase
     .from('tasks')
     .select('project_id, status')
-    .eq('user_id', user.id);
+    .in('project_id', projectIds.length > 0 ? projectIds : ['__none__']);
 
   const taskCounts: Record<string, { total: number; completed: number }> = {};
   tasks?.forEach(task => {
@@ -52,7 +88,7 @@ export async function getProjects(clientId?: string) {
     }
   });
 
-  return (data || []).map(project => ({
+  return allProjects.map(project => ({
     ...project,
     task_count: taskCounts[project.id]?.total || 0,
     completed_task_count: taskCounts[project.id]?.completed || 0,

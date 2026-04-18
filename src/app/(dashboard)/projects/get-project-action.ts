@@ -14,10 +14,12 @@ export async function getProject(identifier: string) {
 
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier);
 
+    // Don't filter by user_id here — RLS policies on `projects` already
+    // enforce visibility (owner OR active collaborator OR share token).
+    // Filtering by user_id would block collaborators from seeing their projects.
     let query = supabase
         .from('projects')
-        .select('*, client:clients(name, email)')
-        .eq('user_id', user.id);
+        .select('*, client:clients(name, email)');
 
     if (isUUID) {
         query = query.eq('id', identifier);
