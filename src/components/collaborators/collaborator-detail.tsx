@@ -132,7 +132,7 @@ export function CollaboratorDetail({
                         <TabsTrigger value="notes" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Evaluation</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="projects" className="mt-6 space-y-4">
+                    <TabsContent value="projects" className="mt-6 space-y-6">
                         <div className="flex items-center justify-between">
                             <h3 className="text-lg font-bold flex items-center gap-2">
                                 <Briefcase className="h-5 w-5 text-cyan-600" />
@@ -146,35 +146,97 @@ export function CollaboratorDetail({
                                 <p className="text-sm text-muted-foreground">No shared projects found on this platform.</p>
                             </div>
                         ) : (
-                            <div className="grid gap-3">
-                                {projectHistory.map((item: any) => (
-                                    <Card key={item.id} className="group hover:bg-muted/30 transition-colors border-none bg-card/50">
-                                        <CardContent className="p-4 flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
-                                                    <Briefcase className="h-5 w-5 text-cyan-600" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold">{item.projects?.title}</h4>
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                                                        <Badge variant="outline" className="text-[10px] h-4">
-                                                            {item.projects?.status}
-                                                        </Badge>
-                                                        <span className="flex items-center gap-1">
-                                                            <DollarSign className="h-3 w-3" />
-                                                            {item.revenue_share}% share
-                                                        </span>
+                            <div className="space-y-6">
+                                {(() => {
+                                    const activeProjects = projectHistory.filter((item: any) => 
+                                        ['Planning', 'In Progress', 'On Hold'].includes(item.projects?.status)
+                                    );
+                                    const pastProjects = projectHistory.filter((item: any) => 
+                                        ['Completed', 'Cancelled'].includes(item.projects?.status)
+                                    );
+
+                                    return (
+                                        <>
+                                            {activeProjects.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                        Active Projects
+                                                    </h4>
+                                                    <div className="grid gap-3">
+                                                        {activeProjects.map((item: any) => (
+                                                            <Card key={item.id} className="group hover:bg-muted/30 transition-colors border-none bg-card/50">
+                                                                <CardContent className="p-4 flex items-center justify-between">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                                                                            <Briefcase className="h-5 w-5 text-cyan-600" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h4 className="font-bold">{item.projects?.title}</h4>
+                                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                                                                <Badge variant="outline" className="text-[10px] h-4">
+                                                                                    {item.projects?.status}
+                                                                                </Badge>
+                                                                                <span className="flex items-center gap-1">
+                                                                                    <DollarSign className="h-3 w-3" />
+                                                                                    {item.revenue_share}% share
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <Button variant="ghost" size="icon" asChild>
+                                                                        <Link href={`/projects/${item.projects?.id}`}>
+                                                                            <ExternalLink className="h-4 w-4" />
+                                                                        </Link>
+                                                                    </Button>
+                                                                </CardContent>
+                                                            </Card>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <Button variant="ghost" size="icon" asChild>
-                                                <Link href={`/projects/${item.projects?.id}`}>
-                                                    <ExternalLink className="h-4 w-4" />
-                                                </Link>
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                            )}
+
+                                            {pastProjects.length > 0 && (
+                                                <div className="space-y-3 pt-2">
+                                                    <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                                        <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+                                                        Past Projects
+                                                    </h4>
+                                                    <div className="grid gap-3 opacity-80">
+                                                        {pastProjects.map((item: any) => (
+                                                            <Card key={item.id} className="group hover:bg-muted/30 transition-colors border-none bg-muted/10">
+                                                                <CardContent className="p-4 flex items-center justify-between">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                                                                            <Briefcase className="h-5 w-5 text-slate-500" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <h4 className="font-bold line-through decoration-slate-400">{item.projects?.title}</h4>
+                                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                                                                <Badge variant="outline" className="text-[10px] h-4">
+                                                                                    {item.projects?.status}
+                                                                                </Badge>
+                                                                                <span className="flex items-center gap-1">
+                                                                                    <DollarSign className="h-3 w-3" />
+                                                                                    {item.revenue_share}% share
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <Button variant="ghost" size="icon" asChild>
+                                                                        <Link href={`/projects/${item.projects?.id}`}>
+                                                                            <ExternalLink className="h-4 w-4" />
+                                                                        </Link>
+                                                                    </Button>
+                                                                </CardContent>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         )}
                     </TabsContent>

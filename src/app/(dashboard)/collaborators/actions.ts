@@ -190,7 +190,7 @@ export async function getCollaboratorProjects(email: string) {
     // Fetch projects where this email is a collaborator
     const { data, error } = await supabase
         .from('project_collaborators')
-        .select('*, projects(title, id, status)')
+        .select('*, projects!inner(title, id, status, user_id)')
         .eq('collaborator_email', email);
 
     if (error) {
@@ -198,7 +198,8 @@ export async function getCollaboratorProjects(email: string) {
         return [];
     }
 
-    return data;
+    // Only return projects where the inner join succeeded (meaning the user has RLS access to it)
+    return data || [];
 }
 
 export async function getCollaboratorPayments(collaboratorId: string) {
