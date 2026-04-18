@@ -107,7 +107,7 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                     transition={{ duration: 0.6 }}
                     className="mb-8"
                 >
-                    <div className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 rounded-3xl bg-card/60 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden">
+                    <div className="flex flex-col items-center gap-6 p-6 sm:p-8 rounded-3xl bg-card/60 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden text-center">
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent pointer-events-none" />
                         
                         <div className="relative">
@@ -123,8 +123,8 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                             )}
                         </div>
 
-                        <div className="flex-1 text-center sm:text-left space-y-3 relative z-10">
-                            <div>
+                        <div className="flex flex-col items-center w-full space-y-3 relative z-10">
+                            <div className="flex flex-col items-center w-full">
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-wider mb-2">
                                     <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-ping" />
                                     Live Progress
@@ -137,22 +137,16 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                                 </p>
                             </div>
 
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-muted-foreground">
-                                {owner.email && (
-                                    <a href={`mailto:${owner.email}`} className="flex items-center gap-1.5 hover:text-brand-primary transition-colors">
-                                        <Mail className="h-4 w-4" />
-                                        {owner.email}
-                                    </a>
-                                )}
-                                {owner.address && (
-                                    <span className="flex items-center gap-1.5">
+                            {owner.address && (
+                                <div className="flex justify-center w-full">
+                                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                         <MapPin className="h-4 w-4" />
                                         {owner.address}
                                     </span>
-                                )}
-                            </div>
+                                </div>
+                            )}
                             
-                            <div className="flex items-center justify-center sm:justify-start gap-3 mt-4 pt-4 border-t border-border/50">
+                            <div className="flex flex-wrap items-center justify-center gap-3 mt-4 pt-4 border-t border-border/50 min-w-[200px]">
                                 <Badge className={`${config.color} text-xs border-none shadow-sm px-3 py-1`} variant="secondary">
                                     <config.icon className="h-3.5 w-3.5 mr-1.5" />
                                     {project.status}
