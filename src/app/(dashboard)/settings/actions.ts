@@ -37,7 +37,9 @@ export async function getProfile() {
         currency: data?.currency || 'USD',
         logo_url: data?.logo_url || null,
         default_paper_size: data?.default_paper_size || 'A4',
-        default_tax_rate: data?.default_tax_rate || 0
+        default_tax_rate: data?.default_tax_rate || 0,
+        bio: data?.bio || '',
+        portfolio_url: data?.portfolio_url || ''
     };
 }
 
@@ -56,6 +58,8 @@ export async function updateProfile(formData: FormData) {
     const address = formData.get('address') as string;
     const default_paper_size = formData.get('defaultPaperSize') as string;
     const default_tax_rate = Number(formData.get('defaultTaxRate')) || 0;
+    const bio = formData.get('bio') as string;
+    const portfolio_url = formData.get('portfolioUrl') as string;
 
     // Basic username validation
     if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
@@ -85,6 +89,8 @@ export async function updateProfile(formData: FormData) {
         address,
         default_paper_size,
         default_tax_rate,
+        bio,
+        portfolio_url,
         updated_at: new Date().toISOString(),
     };
 

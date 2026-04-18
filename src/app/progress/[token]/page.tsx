@@ -25,7 +25,7 @@ async function getProjectData(token: string) {
     // Fetch the owner's profile for branding
     const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, company_name, logo_url, company_email, address')
+        .select('full_name, company_name, logo_url, company_email, address, bio, portfolio_url')
         .eq('id', project.user_id)
         .single()
 
@@ -62,6 +62,8 @@ async function getProjectData(token: string) {
             logo_url: profile?.logo_url || null,
             email: profile?.company_email || null,
             address: profile?.address || null,
+            bio: profile?.bio || null,
+            portfolio_url: profile?.portfolio_url || null,
         }
     }
 }

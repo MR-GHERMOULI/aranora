@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
     Calendar, CheckCircle2, Circle, Clock, AlertCircle,
-    ArrowUpRight, ListTodo, Mail, MapPin
+    ArrowUpRight, ListTodo, Mail, MapPin, Globe, User
 } from "lucide-react"
 
 interface Task {
@@ -38,6 +38,8 @@ interface ProjectData {
         logo_url: string | null
         email: string | null
         address: string | null
+        bio: string | null
+        portfolio_url: string | null
     }
 }
 
@@ -135,6 +137,26 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                                 <p className="text-base sm:text-lg text-muted-foreground font-medium mt-1">
                                     by {owner.company || owner.name}
                                 </p>
+                            </div>
+
+                            {owner.bio && (
+                                <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed mt-2 italic px-4">
+                                    &quot;{owner.bio}&quot;
+                                </p>
+                            )}
+
+                            <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+                                {owner.portfolio_url && (
+                                    <a 
+                                        href={owner.portfolio_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-medium hover:bg-brand-primary/20 transition-colors"
+                                    >
+                                        <Globe className="h-3.5 w-3.5" />
+                                        View Portfolio
+                                    </a>
+                                )}
                             </div>
 
                             {owner.address && (

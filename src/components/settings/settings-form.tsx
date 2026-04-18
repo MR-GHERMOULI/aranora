@@ -23,6 +23,8 @@ const profileSchema = z.object({
     companyName: z.string().optional(),
     companyEmail: z.string().email("Invalid email").optional().or(z.literal("")),
     address: z.string().optional(),
+    bio: z.string().optional(),
+    portfolioUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
     defaultPaperSize: z.enum(["A4", "LETTER"]),
     defaultTaxRate: z.number().min(0).max(100),
 })
@@ -39,6 +41,8 @@ interface SettingsFormProps {
         address: string;
         currency: string;
         logo_url: string | null;
+        bio?: string;
+        portfolio_url?: string;
         default_paper_size: string;
         default_tax_rate: number;
     }
@@ -64,6 +68,8 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             companyName: profile.company_name,
             companyEmail: profile.company_email,
             address: profile.address,
+            bio: profile.bio || "",
+            portfolioUrl: profile.portfolio_url || "",
             defaultPaperSize: (profile.default_paper_size as "A4" | "LETTER") || "A4",
             defaultTaxRate: profile.default_tax_rate || 0,
         },
@@ -142,6 +148,8 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             formData.append("companyName", data.companyName || "")
             formData.append("companyEmail", data.companyEmail || "")
             formData.append("address", data.address || "")
+            formData.append("bio", data.bio || "")
+            formData.append("portfolioUrl", data.portfolioUrl || "")
             formData.append("defaultPaperSize", data.defaultPaperSize)
             formData.append("defaultTaxRate", String(data.defaultTaxRate))
 
@@ -290,6 +298,32 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                             placeholder="123 Business St, City, Country"
                             {...register("address")}
                         />
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="bio">Professional Bio / Resume Summary</Label>
+                        <textarea
+                            id="bio"
+                            className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder="Brief description about your background, skills, and professional experience..."
+                            {...register("bio")}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            This will be visible on pages you share with clients.
+                        </p>
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="portfolioUrl">Portfolio / Website Link</Label>
+                        <Input
+                            id="portfolioUrl"
+                            type="url"
+                            placeholder="https://my-portfolio.com"
+                            {...register("portfolioUrl")}
+                        />
+                        {errors.portfolioUrl && (
+                            <p className="text-sm text-red-500">{errors.portfolioUrl.message}</p>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-dashed">
