@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
     Calendar, CheckCircle2, Circle, Clock, AlertCircle,
-    ArrowUpRight, ListTodo, Mail, MapPin, Globe, User
+    ArrowUpRight, ListTodo, Mail, MapPin, Globe, User,
+    Quote, ExternalLink
 } from "lucide-react"
 
 interface Task {
@@ -112,57 +113,63 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                     <div className="flex flex-col items-center gap-6 p-6 sm:p-8 rounded-3xl bg-card/60 backdrop-blur-xl border border-white/10 shadow-2xl relative overflow-hidden text-center">
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent pointer-events-none" />
                         
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-brand-primary/20 blur-xl rounded-full animate-pulse" />
+                        <div className="relative mb-2">
+                            <div className="absolute inset-0 bg-brand-primary/20 blur-2xl rounded-full animate-pulse" />
+                            <div className="absolute -inset-1 bg-gradient-to-tr from-brand-primary to-violet-500 rounded-full opacity-20 animate-spin-slow" />
                             {owner.logo_url ? (
-                                <img src={owner.logo_url} alt={owner.company || owner.name} className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-background shadow-xl relative z-10" />
+                                <img src={owner.logo_url} alt={owner.company || owner.name} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-background shadow-2xl relative z-10" />
                             ) : (
-                                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center border-4 border-background shadow-xl relative z-10">
-                                    <span className="text-3xl font-bold text-white">
+                                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center border-4 border-background shadow-2xl relative z-10">
+                                    <span className="text-4xl font-bold text-white">
                                         {(owner.company || owner.name).charAt(0).toUpperCase()}
                                     </span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex flex-col items-center w-full space-y-3 relative z-10">
+                        <div className="flex flex-col items-center w-full space-y-4 relative z-10">
                             <div className="flex flex-col items-center w-full">
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-wider mb-2">
                                     <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-ping" />
-                                    Live Progress
+                                    Client Portal
                                 </div>
-                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
                                     {project.title}
                                 </h1>
-                                <p className="text-base sm:text-lg text-muted-foreground font-medium mt-1">
+                                <p className="text-lg sm:text-xl text-muted-foreground font-medium mt-1">
                                     by {owner.company || owner.name}
                                 </p>
                             </div>
 
                             {owner.bio && (
-                                <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed mt-2 italic px-4">
-                                    &quot;{owner.bio}&quot;
-                                </p>
+                                <div className="relative max-w-xl mx-auto px-8 mt-2">
+                                    <Quote className="absolute top-0 left-0 h-4 w-4 text-brand-primary/20 rotate-180" />
+                                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed italic">
+                                        {owner.bio}
+                                    </p>
+                                    <Quote className="absolute bottom-0 right-0 h-4 w-4 text-brand-primary/20" />
+                                </div>
                             )}
 
-                            <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+                            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
                                 {owner.portfolio_url && (
                                     <a 
                                         href={owner.portfolio_url} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-medium hover:bg-brand-primary/20 transition-colors"
+                                        className="inline-flex items-center gap-2.5 px-6 py-2 rounded-full bg-brand-primary text-white text-sm font-semibold hover:bg-brand-primary/90 shadow-lg shadow-brand-primary/20 transition-all hover:scale-105 active:scale-95 group"
                                     >
-                                        <Globe className="h-3.5 w-3.5" />
-                                        View Portfolio
+                                        <Globe className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                                        Explore Portfolio
+                                        <ExternalLink className="h-3.5 w-3.5 opacity-70" />
                                     </a>
                                 )}
                             </div>
 
                             {owner.address && (
-                                <div className="flex justify-center w-full">
-                                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                        <MapPin className="h-4 w-4" />
+                                <div className="flex justify-center w-full pt-2">
+                                    <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/60 uppercase tracking-widest">
+                                        <MapPin className="h-3.5 w-3.5 text-brand-primary" />
                                         {owner.address}
                                     </span>
                                 </div>
