@@ -466,29 +466,21 @@ export default function IntakeFormClient({ form, token }: IntakeFormClientProps)
 
             {/* Title */}
             <div className="text-center mb-10 max-w-2xl mx-auto">
-                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight">
-                        {form.title}
-                    </h1>
-                    {form.description && (
-                        <p className="text-muted-foreground text-base leading-relaxed">{form.description}</p>
-                    )}
-                    {form.settings?.welcomeMessage && currentSection === 0 && (
-                        <div className="mt-4 bg-rose-50 border border-rose-100 rounded-xl p-4 text-sm text-rose-800 font-medium">
-                            {form.settings.welcomeMessage}
-                        </div>
-                    )}
-                </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight">
+                    {form.title}
+                </h1>
+            </div>
 
-                {/* Error */}
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 max-w-2xl mx-auto">
-                        <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-                        <p className="text-sm text-red-800 font-medium">{error}</p>
-                        <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600 shrink-0">
-                            <X className="h-4 w-4" />
-                        </button>
-                    </div>
-                )}
+            {/* Error */}
+            {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 max-w-2xl mx-auto">
+                    <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-800 font-medium">{error}</p>
+                    <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600 shrink-0">
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
 
                 {/* Section Card */}
                 <div className="bg-card shadow-xl ring-1 ring-border rounded-2xl overflow-hidden max-w-2xl mx-auto">
