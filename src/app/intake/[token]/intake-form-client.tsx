@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import {
     CheckCircle, AlertCircle, Loader2, ShieldCheck, ArrowRight,
     ArrowLeft, User, Mail, Phone, Building2, FileText, Calendar,
-    DollarSign, Upload, ChevronDown, X, Info
+    DollarSign, Upload, ChevronDown, X, Info, Globe
 } from "lucide-react"
 import Link from "next/link"
 import { IntakeFormField } from "@/types"
@@ -16,7 +16,14 @@ interface FormData {
     fields: IntakeFormField[];
     settings: Record<string, any>;
     user_id: string;
-    profile?: { full_name?: string; company_name?: string; logo_url?: string | null } | null;
+    profile?: { 
+        full_name?: string; 
+        company_name?: string; 
+        logo_url?: string | null;
+        avatar_url?: string | null;
+        bio?: string | null;
+        portfolio_url?: string | null;
+    } | null;
 }
 
 interface IntakeFormClientProps {
@@ -405,8 +412,60 @@ export default function IntakeFormClient({ form, token }: IntakeFormClientProps)
                     style={{ width: `${progress}%` }}
                 />
             </div>
-                {/* Title */}
-                <div className="text-center mb-10 max-w-2xl mx-auto">
+
+            {/* Freelancer Profile */}
+            {form.profile && (
+                <div className="max-w-2xl mx-auto mb-10">
+                    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 ring-1 ring-border/50 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left transition-all hover:bg-card/80 hover:shadow-md">
+                        <div className="shrink-0 relative">
+                            {form.profile.avatar_url || form.profile.logo_url ? (
+                                <img 
+                                    src={(form.profile.avatar_url || form.profile.logo_url) as string} 
+                                    alt={form.profile.full_name || form.profile.company_name || 'Freelancer'} 
+                                    className="h-20 w-20 rounded-full object-cover ring-2 ring-primary/20 shadow-sm"
+                                />
+                            ) : (
+                                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20 shadow-sm">
+                                    <User className="h-8 w-8 text-primary" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                            <div>
+                                <h2 className="text-xl font-bold text-foreground">
+                                    {form.profile.full_name || form.profile.company_name || 'Service Provider'}
+                                </h2>
+                                {form.profile.company_name && form.profile.full_name && (
+                                    <p className="text-sm font-medium text-primary">
+                                        {form.profile.company_name}
+                                    </p>
+                                )}
+                            </div>
+                            {form.profile.bio && (
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {form.profile.bio}
+                                </p>
+                            )}
+                            {form.profile.portfolio_url && (
+                                <div className="pt-2">
+                                    <a 
+                                        href={form.profile.portfolio_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20"
+                                    >
+                                        <Globe className="h-4 w-4" />
+                                        View Portfolio
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Title */}
+            <div className="text-center mb-10 max-w-2xl mx-auto">
                     <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 leading-tight">
                         {form.title}
                     </h1>

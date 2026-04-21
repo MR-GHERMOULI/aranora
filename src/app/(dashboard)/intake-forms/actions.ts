@@ -344,7 +344,7 @@ export async function getIntakeFormByToken(token: string) {
     if (data?.user_id) {
         const { data: profileData } = await supabase
             .from('profiles')
-            .select('full_name, company_name, logo_url')
+            .select('full_name, company_name, logo_url, avatar_url, bio, portfolio_url')
             .eq('id', data.user_id)
             .single();
         profile = profileData;
