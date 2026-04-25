@@ -14,6 +14,14 @@ export default async function TermsPage() {
         .eq("slug", "terms")
         .single();
 
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    const siteName = brandingSetting?.value?.site_name || "Aranora";
+    const supportEmail = brandingSetting?.value?.support_email || "support@aranora.com";
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -48,7 +56,7 @@ export default async function TermsPage() {
                         <section className="mb-8">
                             <h2 className="text-xl font-semibold text-foreground mb-3">1. Acceptance of Terms</h2>
                             <p className="text-muted-foreground leading-relaxed">
-                                By accessing or using Aranora, you agree to be bound by these Terms of Service.
+                                By accessing or using {siteName}, you agree to be bound by these Terms of Service.
                                 If you do not agree to all of these terms, you may not use our services.
                             </p>
                         </section>
@@ -56,7 +64,7 @@ export default async function TermsPage() {
                         <section className="mb-8">
                             <h2 className="text-xl font-semibold text-foreground mb-3">2. Description of Service</h2>
                             <p className="text-muted-foreground leading-relaxed">
-                                Aranora provides a platform for freelancers and independent professionals to manage
+                                {siteName} provides a platform for freelancers and independent professionals to manage
                                 their clients, projects, invoices, contracts, and team collaboration. We reserve the
                                 right to modify or discontinue any aspect of the service at any time.
                             </p>
@@ -74,7 +82,7 @@ export default async function TermsPage() {
                         <section className="mb-8">
                             <h2 className="text-xl font-semibold text-foreground mb-3">4. Acceptable Use</h2>
                             <p className="text-muted-foreground leading-relaxed">
-                                You agree not to use Aranora for any unlawful purpose or in any way that could damage,
+                                You agree not to use {siteName} for any unlawful purpose or in any way that could damage,
                                 disable, or impair the service. You may not attempt to gain unauthorized access to
                                 any portion of the service or any systems or networks connected to the service.
                             </p>
@@ -92,8 +100,8 @@ export default async function TermsPage() {
                         <section className="mb-8">
                             <h2 className="text-xl font-semibold text-foreground mb-3">6. Intellectual Property</h2>
                             <p className="text-muted-foreground leading-relaxed">
-                                The Aranora platform and all content, features, and functionality are owned by
-                                Aranora and are protected by international copyright, trademark, and other
+                                The {siteName} platform and all content, features, and functionality are owned by
+                                {siteName} and are protected by international copyright, trademark, and other
                                 intellectual property laws.
                             </p>
                         </section>
@@ -101,7 +109,7 @@ export default async function TermsPage() {
                         <section className="mb-8">
                             <h2 className="text-xl font-semibold text-foreground mb-3">7. Limitation of Liability</h2>
                             <p className="text-muted-foreground leading-relaxed">
-                                Aranora shall not be liable for any indirect, incidental, special, consequential,
+                                {siteName} shall not be liable for any indirect, incidental, special, consequential,
                                 or punitive damages resulting from your use of or inability to use the service.
                             </p>
                         </section>
@@ -112,7 +120,7 @@ export default async function TermsPage() {
                                 For questions about these Terms of Service, please contact us at:
                             </p>
                             <p className="text-muted-foreground mt-2">
-                                Email: <a href="mailto:legal@aranora.com" className="text-brand-primary hover:underline">legal@aranora.com</a>
+                                Email: <a href={`mailto:${supportEmail}`} className="text-brand-primary hover:underline">{supportEmail}</a>
                             </p>
                         </section>
                     </div>

@@ -14,6 +14,7 @@ interface PiPTimerData {
     taskName?: string;
     description?: string;
     logoUrl?: string;
+    siteName?: string;
 }
 
 interface UsePiPTimerReturn {
@@ -200,7 +201,7 @@ export function usePiPTimer(
                 if ("mediaSession" in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
                         title: data.projectName || data.description || "Timer Running",
-                        artist: "Aranora",
+                        artist: data.siteName || "Aranora",
                         album: data.taskName || "Time Tracking",
                     });
 

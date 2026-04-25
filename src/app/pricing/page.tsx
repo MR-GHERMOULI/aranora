@@ -11,6 +11,13 @@ export default async function PricingPage() {
         .eq("key", "pricing_page")
         .single();
 
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    const siteName = brandingSetting?.value?.site_name || "Aranora";
+
     const defaultData: PricingPageData = {
         hero_title: "Simple, transparent pricing",
         hero_subtitle: "Start with your first month free. No credit card required. Upgrade when you're ready to take your freelance business to the next level.",
@@ -31,7 +38,7 @@ export default async function PricingPage() {
         faqs: [
             {
                 question: "What is included in the 30-day free trial?",
-                answer: "You get full, unrestricted access to all default features of Aranora during your trial. This includes unlimited clients, smart invoicing, contract generation, time tracking, and team collaboration."
+                answer: `You get full, unrestricted access to all default features of ${siteName} during your trial. This includes unlimited clients, smart invoicing, contract generation, time tracking, and team collaboration.`
             },
             {
                 question: "Do I need a credit card to sign up for the free trial?",
@@ -47,7 +54,7 @@ export default async function PricingPage() {
             },
             {
                 question: "Can I invite my team or collaborators?",
-                answer: "Yes, Aranora is built to scale with you. You can invite team members and assign specific tools, projects, and access permissions seamlessly."
+                answer: `Yes, ${siteName} is built to scale with you. You can invite team members and assign specific tools, projects, and access permissions seamlessly.`
             }
         ]
     };
@@ -59,7 +66,7 @@ export default async function PricingPage() {
     return (
         <>
             <PublicNavbar />
-            <PricingPageClientWrap data={content} />
+            <PricingPageClientWrap data={content} siteName={siteName} />
         </>
     );
 }

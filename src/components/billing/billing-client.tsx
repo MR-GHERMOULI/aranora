@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     CreditCard,
     Calendar,
@@ -20,6 +20,7 @@ import {
     RefreshCw,
 } from 'lucide-react';
 import type { UserBillingInfo } from '@/lib/billing';
+import { createClient } from '@/lib/supabase/client';
 
 interface BillingSubscriptionRecord {
     id: string;
@@ -102,6 +103,22 @@ function StatusChip({ status }: { status: string }) {
 export function BillingClient({ billing, history }: BillingClientProps) {
     const [portalLoading, setPortalLoading] = useState(false);
     const [portalError, setPortalError] = useState<string | null>(null);
+    const [supportEmail, setSupportEmail] = useState("support@aranora.com");
+
+    useEffect(() => {
+        const fetchBranding = async () => {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single();
+            if (data?.value?.support_email) {
+                setSupportEmail(data.value.support_email);
+            }
+        };
+        fetchBranding();
+    }, []);
 
     const handleManageBilling = async () => {
         setPortalLoading(true);
@@ -556,7 +573,7 @@ export function BillingClient({ billing, history }: BillingClientProps) {
                         </div>
                     </div>
                     <a
-                        href="mailto:support@aranora.com"
+                        href={`mailto:${supportEmail}`}
                         className="text-sm font-semibold whitespace-nowrap"
                         style={{ color: '#818cf8' }}
                         onMouseEnter={e => (e.currentTarget.style.textDecoration = 'underline')}

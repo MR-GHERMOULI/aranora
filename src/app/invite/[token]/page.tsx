@@ -151,7 +151,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
                                     <div className="min-w-0">
                                         <p className="text-xs text-muted-foreground mb-0.5">Invited by</p>
                                         <p className="font-semibold text-sm truncate leading-tight">
-                                            {inviter.full_name || inviter.username || 'Aranora User'}
+                                            {inviter.full_name || inviter.username || 'User'}
                                         </p>
                                         {inviter.username && (
                                             <p className="text-xs text-muted-foreground truncate">

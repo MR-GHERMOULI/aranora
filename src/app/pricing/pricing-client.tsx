@@ -39,7 +39,7 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
     );
 }
 
-function PricingContent({ data }: { data: PricingPageData }) {
+function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData; siteName?: string }) {
     const [isAnnual, setIsAnnual] = useState(true);
     const [loading, setLoading] = useState<string | null>(null);
     const searchParams = useSearchParams();
@@ -87,7 +87,7 @@ function PricingContent({ data }: { data: PricingPageData }) {
                     {expired && (
                         <FadeIn className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center max-w-4xl mx-auto shadow-md">
                             <p className="text-amber-700 dark:text-amber-200 font-medium flex items-center justify-center gap-2">
-                                <Clock className="h-5 w-5" /> Your free trial has ended. Choose a plan to continue using Aranora.
+                                <Clock className="h-5 w-5" /> Your free trial has ended. Choose a plan to continue using {siteName}.
                             </p>
                         </FadeIn>
                     )}
@@ -283,7 +283,7 @@ function PricingContent({ data }: { data: PricingPageData }) {
                     <FadeIn delay={0.5} className="max-w-3xl mx-auto mb-20">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl font-bold text-foreground mb-4">Frequently Asked Questions</h2>
-                            <p className="text-muted-foreground">Everything you need to know about Aranora's pricing and billing.</p>
+                            <p className="text-muted-foreground">Everything you need to know about {siteName}&apos;s pricing and billing.</p>
                         </div>
                         <div className="space-y-4">
                             {data.faqs.map((faq, index) => (
@@ -311,7 +311,7 @@ function PricingContent({ data }: { data: PricingPageData }) {
     );
 }
 
-export function PricingPageClientWrap({ data }: { data: PricingPageData }) {
+export function PricingPageClientWrap({ data, siteName }: { data: PricingPageData; siteName?: string }) {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-background flex flex-col pt-16">
@@ -324,7 +324,7 @@ export function PricingPageClientWrap({ data }: { data: PricingPageData }) {
                 </main>
             </div>
         }>
-            <PricingContent data={data} />
+            <PricingContent data={data} siteName={siteName} />
         </Suspense>
     );
 }

@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Mail, MapPin, Phone, Send, Loader2, CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Footer } from "@/components/layout/footer";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ContactPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
+    const [supportEmail, setSupportEmail] = useState("support@aranora.com")
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -20,6 +22,21 @@ export default function ContactPage() {
         subject: "",
         message: ""
     })
+
+    useEffect(() => {
+        const fetchBranding = async () => {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single();
+            if (data?.value?.support_email) {
+                setSupportEmail(data.value.support_email);
+            }
+        };
+        fetchBranding();
+    }, []);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -80,7 +97,7 @@ export default function ContactPage() {
                     <div className="space-y-8">
                         <div className="space-y-6">
                             {[
-                                { icon: Mail, label: "Email", value: "hello@aranora.com" },
+                                { icon: Mail, label: "Email", value: supportEmail },
                                 { icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
                                 { icon: MapPin, label: "Address", value: "123 Freelance Ave, San Francisco, CA 94102" }
                             ].map((item, i) => (

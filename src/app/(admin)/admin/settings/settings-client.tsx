@@ -17,6 +17,7 @@ interface SettingsClientProps {
             logo_url: string | null
             favicon_url: string | null
             site_name: string
+            support_email: string
             primary_color: string
             secondary_color: string
             font_family: string
@@ -391,6 +392,17 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                                 className="font-medium"
                                             />
                                             <p className="text-[10px] text-muted-foreground italic">This name appears in sidebars, footers, and emails.</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold">Support Email</Label>
+                                            <Input 
+                                                type="email" 
+                                                value={settings.branding.support_email || ''}
+                                                onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, support_email: e.target.value }})}
+                                                placeholder="e.g. support@yourdomain.com"
+                                                className="font-medium"
+                                            />
+                                            <p className="text-[10px] text-muted-foreground italic">Displayed on contact, billing, legal, and support pages.</p>
                                         </div>
                                     </div>
                                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

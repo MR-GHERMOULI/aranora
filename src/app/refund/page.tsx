@@ -14,6 +14,13 @@ export default async function RefundPage() {
         .eq("slug", "refund")
         .single();
 
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    const supportEmail = brandingSetting?.value?.support_email || "support@aranora.com";
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -47,8 +54,8 @@ export default async function RefundPage() {
                     <div className="prose prose-slate dark:prose-invert max-w-none">
                         <p className="text-muted-foreground leading-relaxed">
                             Our refund policy details are being prepared. Please contact us at{" "}
-                            <a href="mailto:support@aranora.com" className="text-brand-primary hover:underline">
-                                support@aranora.com
+                            <a href={`mailto:${supportEmail}`} className="text-brand-primary hover:underline">
+                                {supportEmail}
                             </a>{" "}
                             for any refund inquiries.
                         </p>

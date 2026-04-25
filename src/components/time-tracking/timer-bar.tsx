@@ -17,9 +17,10 @@ export function TimerBar() {
     }, [stopTimer]);
 
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [siteName, setSiteName] = useState<string>("Aranora");
 
     useEffect(() => {
-        const fetchLogo = async () => {
+        const fetchBranding = async () => {
             const supabase = createClient();
             const { data } = await supabase
                 .from("platform_settings")
@@ -29,8 +30,11 @@ export function TimerBar() {
             if (data?.value?.logo_url) {
                 setLogoUrl(data.value.logo_url);
             }
+            if (data?.value?.site_name) {
+                setSiteName(data.value.site_name);
+            }
         };
-        fetchLogo();
+        fetchBranding();
     }, []);
 
     const {
@@ -52,6 +56,7 @@ export function TimerBar() {
                     taskName: activeTimer.task?.title,
                     description: activeTimer.description || undefined,
                     logoUrl: logoUrl || undefined,
+                    siteName,
                 },
                 elapsedSeconds
             );

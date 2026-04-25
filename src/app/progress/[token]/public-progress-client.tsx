@@ -137,7 +137,7 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
                     </div>
                     <div className="pt-4 border-t border-border/50">
                         <a
-                            href="https://www.aranora.com"
+                            href="/"
                             className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-colors shadow-lg shadow-foreground/10"
                         >
                             Visit {platformSiteName} <ArrowUpRight className="h-4 w-4" />
@@ -183,7 +183,7 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5 }}
-                            href="https://www.aranora.com" 
+                            href="/" 
                             className="flex items-center gap-3 group"
                         >
                             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20 group-hover:shadow-brand-primary/40 group-hover:scale-105 transition-all duration-300 overflow-hidden">
@@ -444,7 +444,7 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
                             {/* Trust Badge / Powered By */}
                             <div className="flex flex-col items-center justify-center py-4 opacity-60 hover:opacity-100 transition-opacity">
                                 <span className="text-xs font-bold text-muted-foreground tracking-widest uppercase mb-2">Powered By</span>
-                                <a href="https://www.aranora.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
+                                <a href="/" className="flex items-center gap-2 group">
                                     <div className="h-6 w-6 rounded-md bg-foreground flex items-center justify-center group-hover:bg-brand-primary transition-colors overflow-hidden">
                                         {platformLogoUrl ? (
                                             <img src={platformLogoUrl} alt="Logo" className="h-full w-full object-contain p-0.5 bg-white" />

@@ -28,6 +28,7 @@ export default async function AdminSettingsPage() {
                     logo_url: null,
                     favicon_url: null,
                     site_name: "Aranora",
+                    support_email: "support@aranora.com",
                     primary_color: "#1E3A5F",
                     secondary_color: "#4ADE80",
                     font_family: "Inter",

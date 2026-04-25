@@ -14,6 +14,13 @@ export default async function PrivacyPage() {
         .eq("slug", "privacy")
         .single();
 
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    const supportEmail = brandingSetting?.value?.support_email || "support@aranora.com";
+
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -86,7 +93,7 @@ export default async function PrivacyPage() {
                             <p className="text-muted-foreground leading-relaxed">
                                 You have the right to access, correct, or delete your personal information at any time.
                                 You can also opt out of marketing communications. To exercise any of these rights,
-                                please contact us at privacy@aranora.com.
+                                please contact us at {supportEmail}.
                             </p>
                         </section>
 
@@ -96,7 +103,7 @@ export default async function PrivacyPage() {
                                 If you have any questions about this Privacy Policy, please contact us at:
                             </p>
                             <p className="text-muted-foreground mt-2">
-                                Email: <a href="mailto:privacy@aranora.com" className="text-brand-primary hover:underline">privacy@aranora.com</a>
+                                Email: <a href={`mailto:${supportEmail}`} className="text-brand-primary hover:underline">{supportEmail}</a>
                             </p>
                         </section>
                     </div>
