@@ -229,12 +229,17 @@ export function BillingClient({ billing, history }: BillingClientProps) {
                                 )}
 
                                 {billing.currentPeriodEnd && billing.status === 'active' && (
-                                    <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                                        Next billing date:{' '}
-                                        <strong style={{ color: 'var(--foreground)' }}>
-                                            {formatDate(billing.currentPeriodEnd)}
-                                        </strong>
-                                    </p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                                            Next billing date:{' '}
+                                            <strong style={{ color: 'var(--foreground)' }}>
+                                                {formatDate(billing.currentPeriodEnd)}
+                                            </strong>
+                                        </p>
+                                        <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(74,222,128,0.12)', color: '#4ade80', border: '1px solid rgba(74,222,128,0.2)' }}>
+                                            {Math.max(0, Math.ceil((new Date(billing.currentPeriodEnd).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days remaining
+                                        </span>
+                                    </div>
                                 )}
 
                                 {billing.cancelAtPeriodEnd && (
