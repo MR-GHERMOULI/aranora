@@ -59,12 +59,20 @@ export default function SignupForm({ promo }: { promo?: string }) {
 
     const strength = password.length > 0 ? getPasswordStrength(password) : null
 
-    const filteredCountries = useMemo(() =>
-        countries.filter(c =>
-            c.toLowerCase().includes(countrySearch.toLowerCase())
-        ),
-        [countrySearch]
-    )
+    const filteredCountries = useMemo(() => {
+        const query = countrySearch.toLowerCase()
+        if (!query) return countries
+
+        return countries
+            .filter(c => c.toLowerCase().includes(query))
+            .sort((a, b) => {
+                const aStarts = a.toLowerCase().startsWith(query)
+                const bStarts = b.toLowerCase().startsWith(query)
+                if (aStarts && !bStarts) return -1
+                if (!aStarts && bStarts) return 1
+                return a.localeCompare(b)
+            })
+    }, [countrySearch])
 
     // Read affiliate referral cookie on mount
     useEffect(() => {
