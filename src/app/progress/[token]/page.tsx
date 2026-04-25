@@ -71,16 +71,23 @@ async function getProjectData(token: string) {
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }) {
     const { token } = await params
     const data = await getProjectData(token)
+    const supabase = await createClient()
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single()
+    
+    const siteName = brandingSetting?.value?.site_name || "Aranora"
 
     if (data) {
         return {
-            title: `${data.project.title} — Project Progress | Aranora`,
+            title: `${data.project.title} — Project Progress | ${siteName}`,
             description: `Track the progress of ${data.project.title}. ${data.stats.percentage}% complete.`,
         }
     }
 
     return {
-        title: 'Project Progress | Aranora',
+        title: `Project Progress | ${siteName}`,
         description: 'Track project progress in real-time.',
     }
 }
@@ -96,6 +103,7 @@ export default async function PublicProgressPage({ params }: { params: Promise<{
         .eq("key", "branding")
         .single()
     const platformLogoUrl = brandingSetting?.value?.logo_url || null;
+    const platformSiteName = brandingSetting?.value?.site_name || "Aranora";
 
-    return <PublicProgressClient data={data} platformLogoUrl={platformLogoUrl} />
+    return <PublicProgressClient data={data} platformLogoUrl={platformLogoUrl} platformSiteName={platformSiteName} />
 }

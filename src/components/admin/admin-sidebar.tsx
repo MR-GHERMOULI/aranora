@@ -42,6 +42,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
 
     const [unreadCount, setUnreadCount] = useState(0)
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
+    const [siteName, setSiteName] = useState("Aranora")
 
     useEffect(() => {
         // Simple fetch for unread count and branding
@@ -62,6 +63,9 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             setUnreadCount(unreadRes.count || 0)
             if (brandingRes.data?.value?.logo_url) {
                 setLogoUrl(brandingRes.data.value.logo_url)
+            }
+            if (brandingRes.data?.value?.site_name) {
+                setSiteName(brandingRes.data.value.site_name)
             }
         }
         fetchData()
@@ -217,7 +221,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                             )}
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold">Aranora</h1>
+                             <h1 className="text-xl font-bold">{siteName}</h1>
                             <p className="text-xs text-slate-400">Admin Dashboard</p>
                         </div>
                     </Link>

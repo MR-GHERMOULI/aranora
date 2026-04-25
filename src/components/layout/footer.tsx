@@ -15,6 +15,7 @@ export function Footer({ simple = false }: FooterProps) {
     const [tagline, setTagline] = useState("The all-in-one platform for freelancers.")
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
     const [primaryColor, setPrimaryColor] = useState("#1E3A5F")
+    const [siteName, setSiteName] = useState("Aranora")
     const [socialLinks, setSocialLinks] = useState({
         twitter: "",
         linkedin: ""
@@ -53,7 +54,7 @@ export function Footer({ simple = false }: FooterProps) {
                 })
             }
 
-            // Fetch Branding Settings (Logo)
+            // Fetch Branding Settings (Logo, Site Name)
             const { data: brandingSetting } = await supabase
                 .from("platform_settings")
                 .select("value")
@@ -64,6 +65,9 @@ export function Footer({ simple = false }: FooterProps) {
             }
             if (brandingSetting?.value?.primary_color) {
                 setPrimaryColor(brandingSetting.value.primary_color)
+            }
+            if (brandingSetting?.value?.site_name) {
+                setSiteName(brandingSetting.value.site_name)
             }
         }
         fetchFooterData()
@@ -82,7 +86,7 @@ export function Footer({ simple = false }: FooterProps) {
                     </div>
                 )}
             </div>
-            <span className="text-xl font-bold tracking-tight" style={{ color: primaryColor }}>Aranora</span>
+            <span className="text-xl font-bold tracking-tight" style={{ color: primaryColor }}>{siteName}</span>
         </div>
     )
 
@@ -92,7 +96,7 @@ export function Footer({ simple = false }: FooterProps) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground">
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                         <Link href="/" className="hover:opacity-80 transition-opacity">
-                            <p>© {new Date().getFullYear()} Aranora. All rights reserved.</p>
+                            <p>© {new Date().getFullYear()} {siteName}. All rights reserved.</p>
                         </Link>
                         {links.length > 0 && (
                             <div className="flex items-center gap-4">
@@ -178,7 +182,7 @@ export function Footer({ simple = false }: FooterProps) {
                 <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
                     <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                         <div className="flex items-center gap-2">
-                            <p>© {new Date().getFullYear()} Aranora. All rights reserved.</p>
+                            <p>© {new Date().getFullYear()} {siteName}. All rights reserved.</p>
                             {developerCredit.text && (
                                 <>
                                     <span className="hidden md:inline text-border">|</span>

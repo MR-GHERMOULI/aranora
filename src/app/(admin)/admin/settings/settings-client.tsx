@@ -16,6 +16,7 @@ interface SettingsClientProps {
         branding: {
             logo_url: string | null
             favicon_url: string | null
+            site_name: string
             primary_color: string
             secondary_color: string
             font_family: string
@@ -377,8 +378,21 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                 {/* Colors & Typography */}
                                 <div className="space-y-4 p-4 rounded-xl border bg-muted/10">
                                     <h4 className="font-medium flex items-center gap-2">
-                                        <Palette className="h-4 w-4 text-primary" /> Colors & Typography
+                                        <Palette className="h-4 w-4 text-primary" /> General Branding
                                     </h4>
+                                    <div className="grid gap-6 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold">Site Name</Label>
+                                            <Input 
+                                                type="text" 
+                                                value={settings.branding.site_name || 'Aranora'}
+                                                onChange={(e) => setSettings({ ...settings, branding: { ...settings.branding, site_name: e.target.value }})}
+                                                placeholder="e.g. Aranora"
+                                                className="font-medium"
+                                            />
+                                            <p className="text-[10px] text-muted-foreground italic">This name appears in sidebars, footers, and emails.</p>
+                                        </div>
+                                    </div>
                                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                         <div className="space-y-2">
                                             <Label className="text-xs font-semibold">Primary Theme Color</Label>
@@ -453,7 +467,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                                 ) : (
                                                     <div className="h-6 w-6 rounded bg-primary/20" style={{ backgroundColor: `${settings.branding.primary_color}30` }} />
                                                 )}
-                                                <span className="font-bold text-sm tracking-tight" style={{ color: settings.branding.primary_color }}>Aranora</span>
+                                                <span className="font-bold text-sm tracking-tight" style={{ color: settings.branding.primary_color }}>{settings.branding.site_name || 'Aranora'}</span>
                                             </div>
                                             <div className="rounded px-3 py-1.5 text-[10px] font-semibold text-white" style={{ backgroundColor: settings.branding.primary_color }}>
                                                 Get Started

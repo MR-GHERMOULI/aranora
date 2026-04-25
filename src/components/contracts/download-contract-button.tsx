@@ -18,7 +18,16 @@ export function DownloadContractButton({ contract, profile }: DownloadContractBu
     const handleDownload = async () => {
         setIsGenerating(true);
         try {
-            const pdfDoc = <ContractPDF contract={contract} profile={profile} />;
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            const { data: branding } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single();
+            const platformName = branding?.value?.site_name || "Aranora";
+
+            const pdfDoc = <ContractPDF contract={contract} profile={profile} platformName={platformName} />;
             const asPdf = pdf(pdfDoc);
             const blob = await asPdf.toBlob();
 

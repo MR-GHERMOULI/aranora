@@ -125,6 +125,7 @@ interface InvoicePDFProps {
     invoice: Invoice & { items: any[]; client: any };
     profile: any;
     paperSize?: 'A4' | 'LETTER';
+    platformName?: string;
 }
 
 const formatDate = (dateString: string | null | undefined) => {
@@ -136,7 +137,7 @@ const formatDate = (dateString: string | null | undefined) => {
     }
 };
 
-export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFProps) => (
+export const InvoicePDF = ({ invoice, profile, paperSize = 'A4', platformName = 'Aranora' }: InvoicePDFProps) => (
     <Document>
         <Page size={paperSize} style={styles.page}>
             {/* Header */}
@@ -147,7 +148,7 @@ export const InvoicePDF = ({ invoice, profile, paperSize = 'A4' }: InvoicePDFPro
                     )}
                     <View>
                         <Text style={styles.title}>INVOICE</Text>
-                        <Text style={styles.brand}>{profile?.company_name || profile?.full_name || 'Aranora'}</Text>
+                        <Text style={styles.brand}>{profile?.company_name || profile?.full_name || platformName}</Text>
                     </View>
                 </View>
                 <View>

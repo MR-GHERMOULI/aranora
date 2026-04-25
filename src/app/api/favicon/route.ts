@@ -23,9 +23,11 @@ export async function GET() {
       console.error("Favicon Supabase fetch error:", error.message)
     }
 
-    if (data?.value?.favicon_url) {
+    const faviconUrl = data?.value?.favicon_url || data?.value?.logo_url
+
+    if (faviconUrl) {
       // Instead of redirecting which some browsers ignore for favicons, construct a reliable image response
-      const response = await fetch(data.value.favicon_url)
+      const response = await fetch(faviconUrl)
       
       if (response.ok) {
         const contentType = response.headers.get('content-type') || 'image/x-icon'

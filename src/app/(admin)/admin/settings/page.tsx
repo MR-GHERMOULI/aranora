@@ -27,6 +27,7 @@ export default async function AdminSettingsPage() {
                 branding: {
                     logo_url: null,
                     favicon_url: null,
+                    site_name: "Aranora",
                     primary_color: "#1E3A5F",
                     secondary_color: "#4ADE80",
                     font_family: "Inter",

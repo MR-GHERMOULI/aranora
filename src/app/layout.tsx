@@ -5,15 +5,28 @@ import "./globals.css";
 // Font loaded via CSS fallback stack in globals.css
 const inter = { variable: "font-sans" };
 
-export const metadata: Metadata = {
-  title: "Aranora | Freelancer Management Platform",
-  description: "Professional freelancer management platform for clients, projects, and invoices.",
-  icons: {
-    icon: "/api/favicon",
-    shortcut: "/api/favicon",
-    apple: "/api/favicon",
-  }
-};
+import { createClient } from "@/lib/supabase/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data: brandingSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "branding")
+    .single();
+  
+  const siteName = brandingSetting?.value?.site_name || "Aranora";
+
+  return {
+    title: `${siteName} | Freelancer Management Platform`,
+    description: `Professional freelancer management platform for clients, projects, and invoices. Built for ${siteName}.`,
+    icons: {
+      icon: "/api/favicon",
+      shortcut: "/api/favicon",
+      apple: "/api/favicon",
+    }
+  };
+}
 
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/sonner"

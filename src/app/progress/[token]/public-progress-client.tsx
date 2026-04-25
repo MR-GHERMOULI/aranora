@@ -112,7 +112,7 @@ const itemVariants: Variants = {
     }
 }
 
-export default function PublicProgressClient({ data, platformLogoUrl }: { data: ProjectData | null, platformLogoUrl?: string | null }) {
+export default function PublicProgressClient({ data, platformLogoUrl, platformSiteName = "Aranora" }: { data: ProjectData | null, platformLogoUrl?: string | null, platformSiteName?: string }) {
     if (!data) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
@@ -140,7 +140,7 @@ export default function PublicProgressClient({ data, platformLogoUrl }: { data: 
                             href="https://www.aranora.com"
                             className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-foreground text-background text-sm font-semibold hover:bg-foreground/90 transition-colors shadow-lg shadow-foreground/10"
                         >
-                            Visit Aranora <ArrowUpRight className="h-4 w-4" />
+                            Visit {platformSiteName} <ArrowUpRight className="h-4 w-4" />
                         </a>
                     </div>
                 </motion.div>
@@ -195,7 +195,7 @@ export default function PublicProgressClient({ data, platformLogoUrl }: { data: 
                                     </svg>
                                 )}
                             </div>
-                            <span className="text-xl font-extrabold text-foreground tracking-tight">Aranora</span>
+                            <span className="text-xl font-extrabold text-foreground tracking-tight">{platformSiteName}</span>
                         </motion.a>
                         
                         <motion.div 
@@ -454,7 +454,7 @@ export default function PublicProgressClient({ data, platformLogoUrl }: { data: 
                                             </svg>
                                         )}
                                     </div>
-                                    <span className="font-extrabold text-foreground tracking-tight group-hover:text-brand-primary transition-colors">Aranora</span>
+                                    <span className="font-extrabold text-foreground tracking-tight group-hover:text-brand-primary transition-colors">{platformSiteName}</span>
                                 </a>
                             </div>
 

@@ -17,9 +17,24 @@ interface DownloadInvoiceButtonProps {
 
 export function DownloadInvoiceButton({ invoice, profile }: DownloadInvoiceButtonProps) {
     const [isMounted, setIsMounted] = useState(false);
+    const [platformName, setPlatformName] = useState("Aranora");
 
     useEffect(() => {
         setIsMounted(true);
+        
+        const fetchBranding = async () => {
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            const { data } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single();
+            if (data?.value?.site_name) {
+                setPlatformName(data.value.site_name);
+            }
+        };
+        fetchBranding();
     }, []);
 
     if (!isMounted) {
@@ -33,7 +48,7 @@ export function DownloadInvoiceButton({ invoice, profile }: DownloadInvoiceButto
 
     return (
         <PDFDownloadLink
-            document={<InvoicePDF invoice={invoice} profile={profile} paperSize={invoice.paper_size || 'A4'} />}
+            document={<InvoicePDF invoice={invoice} profile={profile} paperSize={invoice.paper_size || 'A4'} platformName={platformName} />}
             fileName={`${invoice.invoice_number}.pdf`}
             className={buttonVariants({ variant: "outline" })}
             onClick={() => {

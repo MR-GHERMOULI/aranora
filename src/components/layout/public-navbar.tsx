@@ -12,7 +12,8 @@ export default async function PublicNavbar() {
     .eq("key", "branding")
     .single()
   const logoUrl = brandingSetting?.value?.logo_url
-
+  const siteName = brandingSetting?.value?.site_name || "Aranora"
+  
   // Fetch homepage settings for CTA text
   const { data: homepageSetting } = await supabase
     .from("platform_settings")
@@ -45,7 +46,7 @@ export default async function PublicNavbar() {
                 )}
               </div>
               <span className="text-xl font-bold text-brand-primary tracking-tight">
-                Aranora
+                {siteName}
               </span>
             </Link>
           </div>

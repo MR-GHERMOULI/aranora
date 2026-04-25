@@ -126,6 +126,8 @@ export function AffiliateDashboard() {
     const [copied, setCopied] = useState(false);
     const [payoutLoading, setPayoutLoading] = useState(false);
 
+    const [siteName, setSiteName] = useState("Aranora");
+
     const fetchData = useCallback(async () => {
         try {
             const res = await fetch('/api/affiliates/dashboard');
@@ -141,6 +143,17 @@ export function AffiliateDashboard() {
                 setReferrals(json.referrals || []);
                 setPayouts(json.payouts || []);
                 setClickChartData(json.clickChartData || []);
+            }
+            
+            // Fetch branding for site name
+            const supabase = createClient()
+            const { data: branding } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single()
+            if (branding?.value?.site_name) {
+                setSiteName(branding.value.site_name)
             }
         } catch {
             console.error('Failed to fetch affiliate data');
@@ -195,7 +208,7 @@ export function AffiliateDashboard() {
     };
 
     const shareOnTwitter = () => {
-        const text = encodeURIComponent('Stop juggling clients and deadlines — Aranora keeps your freelance business organized in one place. Try it free');
+        const text = encodeURIComponent(`Stop juggling clients and deadlines — ${siteName} keeps your freelance business organized in one place. Try it free`);
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(referralLink)}`, '_blank');
     };
 
@@ -204,8 +217,8 @@ export function AffiliateDashboard() {
     };
 
     const shareViaEmail = () => {
-        const subject = encodeURIComponent('Try Aranora — Freelance Management Platform');
-        const body = encodeURIComponent(`Hey! I've been using Aranora to manage my freelance business and thought you might like it too. Check it out: ${referralLink}`);
+        const subject = encodeURIComponent(`Try ${siteName} — Freelance Management Platform`);
+        const body = encodeURIComponent(`Hey! I've been using ${siteName} to manage my freelance business and thought you might like it too. Check it out: ${referralLink}`);
         window.open(`mailto:?subject=${subject}&body=${body}`);
     };
 
@@ -293,7 +306,7 @@ export function AffiliateDashboard() {
                     <h2 className="text-3xl font-bold text-foreground mb-4 tracking-tight">Become a Partner</h2>
                     <p className="text-muted-foreground mb-8 max-w-md mx-auto text-lg leading-relaxed">
                         Earn a massive <span className="text-primary font-semibold">30% recurring commission</span> for every referral.
-                        Grow with Aranora.
+                        Grow with {siteName}.
                     </p>
                     <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto my-8">
                         <div className="bg-muted rounded-2xl p-5 border border-border transition-transform hover:scale-105">

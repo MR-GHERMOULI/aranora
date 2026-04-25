@@ -23,6 +23,7 @@ export default async function AuthLayout({
         .eq("key", "branding")
         .single();
     const logoUrl = brandingSetting?.value?.logo_url;
+    const siteName = brandingSetting?.value?.site_name || "Aranora";
 
     const testimonials = dbTestimonials && dbTestimonials.length > 0
         ? dbTestimonials.map((t) => ({
@@ -37,7 +38,7 @@ export default async function AuthLayout({
             {
                 name: "Sarah Chen",
                 role: "UI/UX Designer",
-                quote: "Aranora transformed how I manage my freelance business. It's like having a personal assistant that handles invoicing, contracts, and client management — all in one place.",
+                quote: `{siteName} transformed how I manage my freelance business. It's like having a personal assistant that handles invoicing, contracts, and client management — all in one place.`,
                 avatar: "SC",
                 rating: 5,
             }
@@ -93,7 +94,7 @@ export default async function AuthLayout({
                                     </svg>
                                 )}
                             </div>
-                            <span className="text-2xl font-bold tracking-tight">Aranora</span>
+                            <span className="text-2xl font-bold tracking-tight">{siteName}</span>
                         </Link>
                     </div>
 
@@ -109,7 +110,7 @@ export default async function AuthLayout({
                                 managed.
                             </h2>
                             <p className="text-white/60 text-base leading-relaxed">
-                                Join thousands of freelancers who use Aranora to manage clients, projects, invoices, contracts, and team collaboration — all from one beautiful dashboard.
+                                Join thousands of freelancers who use {siteName} to manage clients, projects, invoices, contracts, and team collaboration — all from one beautiful dashboard.
                             </p>
                         </div>
 
@@ -121,7 +122,7 @@ export default async function AuthLayout({
 
                     {/* Footer */}
                     <div className="flex items-center gap-8 text-xs text-white/40">
-                        <span>© {new Date().getFullYear()} Aranora</span>
+                        <span>© {new Date().getFullYear()} {siteName}</span>
                         <Link href="/privacy" className="hover:text-white/70 transition-colors">Privacy</Link>
                         <Link href="/terms" className="hover:text-white/70 transition-colors">Terms</Link>
                     </div>
@@ -142,7 +143,7 @@ export default async function AuthLayout({
                                 </svg>
                             )}
                         </div>
-                        <span className="text-xl font-bold text-brand-primary">Aranora</span>
+                        <span className="text-xl font-bold text-brand-primary">{siteName}</span>
                     </Link>
                 </div>
 

@@ -42,6 +42,7 @@ export function Sidebar({ className }: SidebarProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [broadcastsCount, setBroadcastsCount] = useState(0)
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
+    const [siteName, setSiteName] = useState("Aranora")
     const [isAffiliate, setIsAffiliate] = useState(false)
 
     useEffect(() => {
@@ -61,6 +62,9 @@ export function Sidebar({ className }: SidebarProps) {
             setBroadcastsCount(count)
             if (brandingData?.value?.logo_url) {
                 setLogoUrl(brandingData.value.logo_url)
+            }
+            if (brandingData?.value?.site_name) {
+                setSiteName(brandingData.value.site_name)
             }
 
             // Check if the user is an affiliate marketer
@@ -219,7 +223,7 @@ export function Sidebar({ className }: SidebarProps) {
                                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                 </svg>
                             )}
-                            Aranora
+                            {siteName}
                         </div>
                     </div>
                     <Button size="icon" variant="ghost" onClick={() => setIsOpen(!isOpen)}>
@@ -244,7 +248,7 @@ export function Sidebar({ className }: SidebarProps) {
                                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                     </svg>
                                 )}
-                                Aranora
+                                {siteName}
                             </div>
                         </Link>
 
@@ -304,7 +308,7 @@ export function Sidebar({ className }: SidebarProps) {
                                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                             </svg>
                         )}
-                        Aranora
+                        {siteName}
                     </div>
                 </div>
                 <Button size="icon" variant="ghost" onClick={() => setIsOpen(!isOpen)}>
@@ -338,7 +342,7 @@ export function Sidebar({ className }: SidebarProps) {
                                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                 </svg>
                             )}
-                            Aranora
+                            {siteName}
                         </div>
                     </Link>
 

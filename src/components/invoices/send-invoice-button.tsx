@@ -10,9 +10,18 @@ interface SendInvoiceButtonProps {
 }
 
 export function SendInvoiceButton({ invoice, profile }: SendInvoiceButtonProps) {
-    const handleSend = () => {
+    const handleSend = async () => {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: branding } = await supabase
+            .from("platform_settings")
+            .select("value")
+            .eq("key", "branding")
+            .single();
+        const platformName = branding?.value?.site_name || "Aranora";
+
         const clientEmail = invoice.client?.email || "";
-        const subject = encodeURIComponent(`Invoice ${invoice.invoice_number} from ${profile?.company_name || profile?.full_name || 'Aranora'}`);
+        const subject = encodeURIComponent(`Invoice ${invoice.invoice_number} from ${profile?.company_name || profile?.full_name || platformName}`);
 
         const body = encodeURIComponent(
             `Hello ${invoice.client?.name || 'Client'},\n\n` +
@@ -22,7 +31,7 @@ export function SendInvoiceButton({ invoice, profile }: SendInvoiceButtonProps) 
             `Due Date: ${invoice.due_date || 'On Receipt'}\n\n` +
             `Please download the attached PDF for full details.\n\n` +
             `Thank you,\n` +
-            `${profile?.company_name || profile?.full_name || 'Aranora'}`
+            `${profile?.company_name || profile?.full_name || platformName}`
         );
 
         window.location.href = `mailto:${clientEmail}?subject=${subject}&body=${body}`;
