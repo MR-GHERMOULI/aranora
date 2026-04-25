@@ -246,7 +246,7 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                                         </h1>
                                         
                                         <div className="flex flex-wrap items-center gap-3">
-                                            <Badge variant="secondary" className={\`\${config.color} text-sm font-bold px-4 py-1.5 border shadow-sm\`}>
+                                            <Badge variant="secondary" className={`${config.color} text-sm font-bold px-4 py-1.5 border shadow-sm`}>
                                                 <StatusIcon className="h-4 w-4 mr-2" />
                                                 {config.label}
                                             </Badge>
@@ -290,7 +290,7 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                                 { label: "To Do", value: stats.todo, icon: Target, gradient: "from-amber-500 to-amber-400" },
                             ].map((stat, i) => (
                                 <div key={i} className="group relative p-6 rounded-3xl border border-border/50 bg-card overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                    <div className={\`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br \${stat.gradient} opacity-[0.03] dark:opacity-[0.05] rounded-full blur-2xl group-hover:scale-150 group-hover:opacity-10 transition-all duration-500\`} />
+                                    <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.gradient} opacity-[0.03] dark:opacity-[0.05] rounded-full blur-2xl group-hover:scale-150 group-hover:opacity-10 transition-all duration-500`} />
                                     <div className="relative z-10">
                                         <div className="h-10 w-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                                             <stat.icon className="h-5 w-5 text-foreground/70" />
@@ -322,7 +322,7 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                                                 <motion.div
                                                     className="h-full rounded-full bg-foreground"
                                                     initial={{ width: "0%" }}
-                                                    animate={{ width: \`\${stats.percentage}%\` }}
+                                                    animate={{ width: `${stats.percentage}%` }}
                                                     transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
                                                 />
                                             </div>
@@ -388,7 +388,7 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
 
                                     <div className="mt-8 space-y-4">
                                         {owner.email && (
-                                            <a href={\`mailto:\${owner.email}\`} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/50 transition-colors group">
+                                            <a href={`mailto:${owner.email}`} className="flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/50 transition-colors group">
                                                 <div className="h-10 w-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:border-brand-primary group-hover:text-white transition-all">
                                                     <Mail className="h-4 w-4" />
                                                 </div>
@@ -480,7 +480,7 @@ function TaskSection({
     return (
         <div className="bg-card/40 rounded-2xl border border-border/40 p-2">
             <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 mb-2">
-                <span className={\`h-2.5 w-2.5 rounded-full \${accentConfig[accent]} shadow-[0_0_8px_rgba(0,0,0,0.2)] dark:shadow-[0_0_8px_rgba(255,255,255,0.2)]\`} />
+                <span className={`h-2.5 w-2.5 rounded-full ${accentConfig[accent]} shadow-[0_0_8px_rgba(0,0,0,0.2)] dark:shadow-[0_0_8px_rgba(255,255,255,0.2)]`} />
                 <h4 className="text-sm font-bold text-foreground tracking-wide uppercase">{title}</h4>
                 <Badge variant="secondary" className="ml-auto text-xs font-bold bg-muted/50 border-border/50">{tasks.length}</Badge>
             </div>
@@ -498,20 +498,20 @@ function TaskSection({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: i * 0.05 }}
-                            className={\`flex items-center gap-4 px-4 py-3 rounded-xl transition-all group hover:bg-muted/50 \${isDone ? "opacity-60" : ""}\`}
+                            className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all group hover:bg-muted/50 ${isDone ? "opacity-60" : ""}`}
                         >
-                            <div className={\`h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 \${isDone ? "bg-emerald-500/10 border-emerald-500/20" : "bg-card border-border/50"}\`}>
-                                <TaskStatusIcon className={\`h-4 w-4 \${statusCfg.color}\`} />
+                            <div className={`h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 ${isDone ? "bg-emerald-500/10 border-emerald-500/20" : "bg-card border-border/50"}`}>
+                                <TaskStatusIcon className={`h-4 w-4 ${statusCfg.color}`} />
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                                <p className={\`text-sm font-semibold truncate \${isDone ? "line-through text-muted-foreground" : "text-foreground"}\`}>
+                                <p className={`text-sm font-semibold truncate ${isDone ? "line-through text-muted-foreground" : "text-foreground"}`}>
                                     {task.title}
                                 </p>
                             </div>
 
                             {task.priority && pCfg && !isDone && (
-                                <Badge variant="outline" className={\`text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider \${pCfg.color} shrink-0\`}>
+                                <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 border uppercase tracking-wider ${pCfg.color} shrink-0`}>
                                     {task.priority}
                                 </Badge>
                             )}
