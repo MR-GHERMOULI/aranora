@@ -9,12 +9,21 @@ export interface SubscriptionStatus {
     subscriptionStatus: string;
     /** Days remaining in trial (0 if trial is over or user is on a paid plan) */
     trialDaysRemaining: number;
+    /** The type of plan the user is on (e.g., pro, owner) */
+    planType?: string | null;
+    /** The end date of the current billing period */
+    currentPeriodEnd?: string | null;
+    /** The end date of the trial */
+    trialEndsAt?: string | null;
 }
 
 const SubscriptionContext = createContext<SubscriptionStatus>({
     isReadOnly: false,
     subscriptionStatus: 'active',
     trialDaysRemaining: 0,
+    planType: null,
+    currentPeriodEnd: null,
+    trialEndsAt: null,
 });
 
 export function SubscriptionStatusProvider({

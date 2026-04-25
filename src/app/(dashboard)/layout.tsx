@@ -27,6 +27,9 @@ export default async function DashboardLayout({
     isReadOnly: billingInfo ? !billingInfo.isActive : false,
     subscriptionStatus: billingInfo?.status || 'active',
     trialDaysRemaining: billingInfo?.trialDaysRemaining || 0,
+    planType: billingInfo?.planType || null,
+    currentPeriodEnd: billingInfo?.currentPeriodEnd || null,
+    trialEndsAt: billingInfo?.trialEndsAt || null,
   };
 
   return (

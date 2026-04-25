@@ -33,6 +33,7 @@ import { LogoutButton } from "./logout-button"
 import { NotificationsPopover } from "./notifications/notifications-popover"
 import { useEffect } from "react"
 import { getUnreadBroadcastsCount } from "./notifications/actions"
+import { SubscriptionDisclaimer } from "./subscription-disclaimer"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -390,6 +391,8 @@ export function Sidebar({ className }: SidebarProps) {
                         ))}
                     </div>
                 </div>
+
+                <SubscriptionDisclaimer />
 
                 <div className="px-3 py-2 mt-auto border-t border-white/10 bg-slate-900/50 backdrop-blur-sm shrink-0">
                     <Link
