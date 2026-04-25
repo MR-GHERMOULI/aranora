@@ -134,16 +134,20 @@ export function NotificationsPopover() {
                         ))
                     )}
                 </div>
-                {notifications.length > 0 && (
+                {notifications.some(n => n.type === 'invite') && (
                     <div className="p-2 border-t bg-muted/50">
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="w-full text-xs text-brand-primary hover:bg-brand-primary/10"
+                            className="w-full text-xs text-brand-primary hover:bg-brand-primary/10 gap-2"
                             asChild
+                            onClick={() => setOpen(false)}
                         >
                             <Link href="/invitations">
                                 View All Invitations
+                                <span className="ml-auto flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-[9px] font-bold text-white">
+                                    {notifications.filter(n => n.type === 'invite').length}
+                                </span>
                             </Link>
                         </Button>
                     </div>

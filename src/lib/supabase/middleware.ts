@@ -57,6 +57,7 @@ export async function updateSession(request: NextRequest) {
         "/intake-forms",
         "/admin",
         "/affiliates",
+        "/invitations",
     ];
 
     const isProtectedRoute = PROTECTED_PREFIXES.some(prefix =>

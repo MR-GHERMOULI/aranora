@@ -73,7 +73,8 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/reports') || pathname.startsWith('/calendar') ||
         pathname.startsWith('/time-tracking') || pathname.startsWith('/collaborators') ||
         pathname.startsWith('/settings') || pathname.startsWith('/subscriptions') ||
-        pathname.startsWith('/broadcasts') || pathname.startsWith('/intake-forms')) {
+        pathname.startsWith('/broadcasts') || pathname.startsWith('/intake-forms') ||
+        pathname.startsWith('/invitations')) {
 
         // Skip billing page — users need access to manage/upgrade
         if (pathname.startsWith('/billing')) {
