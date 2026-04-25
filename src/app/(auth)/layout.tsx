@@ -9,13 +9,20 @@ export default async function AuthLayout({
 }) {
     const supabase = await createClient();
     
-    // Fetch active testimonials
     const { data: dbTestimonials } = await supabase
         .from("testimonials")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
         .limit(5);
+
+    // Fetch branding setting for logo
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    const logoUrl = brandingSetting?.value?.logo_url;
 
     const testimonials = dbTestimonials && dbTestimonials.length > 0
         ? dbTestimonials.map((t) => ({
@@ -77,10 +84,14 @@ export default async function AuthLayout({
                     {/* Logo */}
                     <div>
                         <Link href="/" className="inline-flex items-center gap-3 group">
-                            <div className="h-11 w-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-all duration-300">
-                                <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
+                            <div className="h-11 w-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-all duration-300 overflow-hidden p-1">
+                                {logoUrl ? (
+                                    <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                                ) : (
+                                    <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                    </svg>
+                                )}
                             </div>
                             <span className="text-2xl font-bold tracking-tight">Aranora</span>
                         </Link>
@@ -122,10 +133,14 @@ export default async function AuthLayout({
                 {/* Mobile header */}
                 <div className="lg:hidden p-5 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-20">
                     <Link href="/" className="inline-flex items-center gap-2.5 group">
-                        <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center">
-                            <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
+                        <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center overflow-hidden">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Logo" className="h-full w-full object-contain bg-white" />
+                            ) : (
+                                <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                </svg>
+                            )}
                         </div>
                         <span className="text-xl font-bold text-brand-primary">Aranora</span>
                     </Link>

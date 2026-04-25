@@ -89,5 +89,13 @@ export default async function PublicProgressPage({ params }: { params: Promise<{
     const { token } = await params
     const data = await getProjectData(token)
 
-    return <PublicProgressClient data={data} />
+    const supabase = await createClient()
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single()
+    const platformLogoUrl = brandingSetting?.value?.logo_url || null;
+
+    return <PublicProgressClient data={data} platformLogoUrl={platformLogoUrl} />
 }

@@ -9,6 +9,7 @@ export interface PiPDocumentData {
     taskName?: string;
     description?: string;
     elapsedSeconds: number;
+    logoUrl?: string;
 }
 
 function formatTime(seconds: number): string {
@@ -99,10 +100,12 @@ export function buildPiPDocument(
             opacity: 0.6;
         }
 
-        .pip-brand svg {
+        .pip-brand svg, .pip-brand img {
             width: 14px;
             height: 14px;
             color: #4ade80;
+            object-fit: contain;
+            border-radius: 2px;
         }
 
         .pip-brand span {
@@ -275,9 +278,12 @@ export function buildPiPDocument(
         
         <div class="pip-header">
             <div class="pip-brand">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+                ${data.logoUrl 
+                    ? `<img src="${escapeHtml(data.logoUrl)}" alt="Logo" />`
+                    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                       </svg>`
+                }
                 <span>Aranora</span>
             </div>
             <div class="pip-recording">

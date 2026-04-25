@@ -6,7 +6,8 @@ import { formatDuration, cn } from "@/lib/utils";
 import { Square, Timer, Briefcase, ListTodo, PictureInPicture2, ArrowDownToLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export function TimerBar() {
     const { activeTimer, elapsedSeconds, stopTimer, isLoading } = useTimeTracker();
@@ -14,6 +15,23 @@ export function TimerBar() {
     const handleStopTimer = useCallback(() => {
         stopTimer();
     }, [stopTimer]);
+
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchLogo = async () => {
+            const supabase = createClient();
+            const { data } = await supabase
+                .from("platform_settings")
+                .select("value")
+                .eq("key", "branding")
+                .single();
+            if (data?.value?.logo_url) {
+                setLogoUrl(data.value.logo_url);
+            }
+        };
+        fetchLogo();
+    }, []);
 
     const {
         isPiPActive,
@@ -33,6 +51,7 @@ export function TimerBar() {
                     projectName: activeTimer.project?.title,
                     taskName: activeTimer.task?.title,
                     description: activeTimer.description || undefined,
+                    logoUrl: logoUrl || undefined,
                 },
                 elapsedSeconds
             );

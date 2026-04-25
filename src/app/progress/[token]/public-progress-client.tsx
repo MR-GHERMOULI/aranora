@@ -112,7 +112,7 @@ const itemVariants: Variants = {
     }
 }
 
-export default function PublicProgressClient({ data }: { data: ProjectData | null }) {
+export default function PublicProgressClient({ data, platformLogoUrl }: { data: ProjectData | null, platformLogoUrl?: string | null }) {
     if (!data) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
@@ -186,10 +186,14 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                             href="https://www.aranora.com" 
                             className="flex items-center gap-3 group"
                         >
-                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20 group-hover:shadow-brand-primary/40 group-hover:scale-105 transition-all duration-300">
-                                <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
+                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20 group-hover:shadow-brand-primary/40 group-hover:scale-105 transition-all duration-300 overflow-hidden">
+                                {platformLogoUrl ? (
+                                    <img src={platformLogoUrl} alt="Logo" className="h-full w-full object-contain p-1" />
+                                ) : (
+                                    <svg className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                    </svg>
+                                )}
                             </div>
                             <span className="text-xl font-extrabold text-foreground tracking-tight">Aranora</span>
                         </motion.a>
@@ -441,10 +445,14 @@ export default function PublicProgressClient({ data }: { data: ProjectData | nul
                             <div className="flex flex-col items-center justify-center py-4 opacity-60 hover:opacity-100 transition-opacity">
                                 <span className="text-xs font-bold text-muted-foreground tracking-widest uppercase mb-2">Powered By</span>
                                 <a href="https://www.aranora.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
-                                    <div className="h-6 w-6 rounded-md bg-foreground flex items-center justify-center group-hover:bg-brand-primary transition-colors">
-                                        <svg className="h-3.5 w-3.5 text-background" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                        </svg>
+                                    <div className="h-6 w-6 rounded-md bg-foreground flex items-center justify-center group-hover:bg-brand-primary transition-colors overflow-hidden">
+                                        {platformLogoUrl ? (
+                                            <img src={platformLogoUrl} alt="Logo" className="h-full w-full object-contain p-0.5 bg-white" />
+                                        ) : (
+                                            <svg className="h-3.5 w-3.5 text-background" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                            </svg>
+                                        )}
                                     </div>
                                     <span className="font-extrabold text-foreground tracking-tight group-hover:text-brand-primary transition-colors">Aranora</span>
                                 </a>

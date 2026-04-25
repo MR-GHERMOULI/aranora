@@ -13,6 +13,7 @@ interface PiPTimerData {
     projectName?: string;
     taskName?: string;
     description?: string;
+    logoUrl?: string;
 }
 
 interface UsePiPTimerReturn {
@@ -127,6 +128,7 @@ export function usePiPTimer(
                         projectName: data.projectName,
                         taskName: data.taskName,
                         description: data.description,
+                        logoUrl: data.logoUrl,
                         elapsedSeconds,
                     },
                     () => {
