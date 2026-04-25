@@ -93,7 +93,7 @@ const defaultContent: HomepageContent = {
     "Start with your first month free. No credit card required. Upgrade when you're ready.",
   testimonials_title: "Trusted by Freelancers Worldwide",
   testimonials_subtitle:
-    "See how Aranora is helping freelancers run their businesses with confidence.",
+    "See how {siteName} is helping freelancers run their businesses with confidence.",
   affiliate_title: "Earn by Spreading the Word",
   affiliate_subtitle:
     "Join our affiliate program and earn recurring commissions on every customer you refer.",
@@ -108,7 +108,7 @@ const defaultContent: HomepageContent = {
   ],
   cta_title: "Ready to Run Your Freelance Business Like a Pro?",
   cta_subtitle:
-    "Join a growing community of freelancers who trust Aranora to manage every aspect of their business.",
+    "Join a growing community of freelancers who trust {siteName} to manage every aspect of their business.",
   stats_min_threshold: 50,
   features: [
     {
@@ -186,6 +186,15 @@ const stepIcons = [UserPlus, FolderOpen, Briefcase];
 export default async function LandingPage() {
   const supabase = await createClient();
 
+  // Fetch branding settings
+  const { data: brandingSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "branding")
+    .single();
+  
+  const siteName = brandingSetting?.value?.site_name || "Aranora";
+
   // Fetch homepage content from settings
   const { data: homepageSetting } = await supabase
     .from("platform_settings")
@@ -193,15 +202,14 @@ export default async function LandingPage() {
     .eq("key", "homepage")
     .single();
 
-  const { data: brandingSetting } = await supabase
-    .from("platform_settings")
-    .select("value")
-    .eq("key", "branding")
-    .single();
-
   const content: HomepageContent = homepageSetting?.value
     ? { ...defaultContent, ...homepageSetting.value }
     : defaultContent;
+
+  // Replace placeholders in content
+  const processPlaceholder = (text: string) => text.replace(/\{siteName\}/g, siteName);
+  content.testimonials_subtitle = processPlaceholder(content.testimonials_subtitle);
+  content.cta_subtitle = processPlaceholder(content.cta_subtitle);
 
   const branding = brandingSetting?.value || {};
   const logoUrl = branding.logo_url;
@@ -287,7 +295,7 @@ export default async function LandingPage() {
           name: "Sarah Chen",
           role: "UI/UX Designer",
           quote:
-            "Aranora transformed how I manage my freelance business. The invoicing feature alone saved me hours every week.",
+            `$\{siteName\} transformed how I manage my freelance business. The invoicing feature alone saved me hours every week.`,
           avatar: "SC",
           avatarUrl: "",
           rating: 5,
@@ -305,7 +313,7 @@ export default async function LandingPage() {
           name: "Elena Rodriguez",
           role: "Content Strategist",
           quote:
-            "The smart reminders keep me on top of everything. I've never missed a deadline since using Aranora.",
+            `The smart reminders keep me on top of everything. I've never missed a deadline since using $\{siteName\}.`,
           avatar: "ER",
           avatarUrl: "",
           rating: 5,

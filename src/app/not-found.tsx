@@ -2,11 +2,25 @@ import PublicNavbar from "@/components/layout/public-navbar";
 import { Footer } from "@/components/layout/footer";
 import NotFoundContent from "@/components/not-found-content";
 
-export const metadata = {
-  title: "404 — Page Not Found | Aranora",
-  description:
-    "The page you're looking for doesn't exist or has been moved. Navigate back to Aranora to manage your freelance business.",
-};
+import { Metadata } from "next";
+import { createClient } from "@/lib/supabase/server";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data: brandingSetting } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "branding")
+    .single();
+  
+  const siteName = brandingSetting?.value?.site_name || "Aranora";
+
+  return {
+    title: `404 — Page Not Found | ${siteName}`,
+    description:
+      `The page you're looking for doesn't exist or has been moved. Navigate back to ${siteName} to manage your freelance business.`,
+  };
+}
 
 export default function NotFound() {
   return (

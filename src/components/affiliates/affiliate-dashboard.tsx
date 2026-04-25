@@ -129,6 +129,22 @@ export function AffiliateDashboard() {
 
     const [siteName, setSiteName] = useState("Aranora");
 
+    useEffect(() => {
+        const fetchBranding = async () => {
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('platform_settings')
+                .select('value')
+                .eq('key', 'branding')
+                .single();
+            if (data?.value?.site_name) {
+                setSiteName(data.value.site_name);
+            }
+        };
+        fetchBranding();
+    }, []);
+
     const fetchData = useCallback(async () => {
         try {
             const res = await fetch('/api/affiliates/dashboard');
@@ -767,7 +783,7 @@ export function AffiliateDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm relative">
                                 <div className="hidden md:block absolute top-[28px] left-[15%] w-[70%] h-px bg-muted" />
                                 {[
-                                    { step: 1, title: 'Share & Promote', desc: 'Promote Aranora using your unique link on social media.' },
+                                    { step: 1, title: 'Share & Promote', desc: `Promote $\{siteName\} using your unique link on social media.` },
                                     { step: 2, title: 'They Convert', desc: 'When businesses sign up and subscribe, they get tracked.' },
                                     { step: 3, title: 'You Earn', desc: 'Receive 30% recurring for a year, or $57 flat on annual plans.' }
                                 ].map((s, i) => (
@@ -1123,7 +1139,7 @@ export function AffiliateDashboard() {
                             {/* Graphic Asset 1 */}
                             <Card className="flex flex-col rounded-2xl overflow-hidden group hover:border-brand-primary/20 transition-all border-none bg-muted/30">
                                 <div className="h-40 bg-zinc-100 dark:bg-zinc-900 border-b border-border flex flex-col items-center justify-center p-4 relative">
-                                    <div className="text-3xl font-black text-brand-primary tracking-tighter drop-shadow-sm">Aranora</div>
+                                    <div className="text-3xl font-black text-brand-primary tracking-tighter drop-shadow-sm">{siteName}</div>
                                     <div className="text-[10px] text-brand-secondary font-bold uppercase tracking-[0.2em] mt-2">Identity Pack</div>
                                     <div className="absolute top-2 right-2">
                                         <Badge className="bg-brand-primary text-[9px] uppercase">SVG/PNG</Badge>
@@ -1207,7 +1223,7 @@ export function AffiliateDashboard() {
                                     </h4>
                                     <p className="text-sm text-muted-foreground mb-4 leading-relaxed max-w-3xl">
                                         We value transparency and integrity. Please ensure you always disclose your affiliate status (like using <span className="text-brand-primary font-mono font-bold">#ad</span> or <span className="text-brand-primary font-mono font-bold">#partner</span>). 
-                                        Note that bidding on branded keywords (&quot;Aranora&quot;) in PPC campaigns is strictly prohibited and may lead to account suspension.
+                                        Note that bidding on branded keywords ("{siteName}") in PPC campaigns is strictly prohibited and may lead to account suspension.
                                     </p>
                                     <Button variant="link" className="p-0 h-auto text-brand-primary font-bold">
                                         Review full program terms &amp; conditions →

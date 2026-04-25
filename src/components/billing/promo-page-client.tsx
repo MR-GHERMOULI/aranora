@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Gift, Clock, ArrowRight, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+import { useEffect } from 'react';
+
 interface PromoPageClientProps {
     code: string;
     promo: {
@@ -19,6 +21,31 @@ interface PromoPageClientProps {
 export function PromoPageClient({ code, promo }: PromoPageClientProps) {
     const isValid = promo && promo.is_active && promo.times_used < promo.max_uses;
     const isExpired = promo?.expires_at && new Date(promo.expires_at) < new Date();
+
+    const [branding, setBranding] = useState<{site_name: string, logo_url: string | null}>({
+        site_name: 'Aranora',
+        logo_url: null
+    });
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('platform_settings')
+                .select('value')
+                .eq('key', 'branding')
+                .single();
+            
+            if (data?.value) {
+                setBranding({
+                    site_name: data.value.site_name || 'Aranora',
+                    logo_url: data.value.logo_url || null
+                });
+            }
+        };
+        fetchSettings();
+    }, []);
 
     if (!promo || !isValid || isExpired) {
         return (
@@ -75,14 +102,18 @@ export function PromoPageClient({ code, promo }: PromoPageClientProps) {
                         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-primary to-brand-secondary"></div>
 
                         <div className="text-center mb-8">
-                            <div className="w-20 h-20 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-primary/20">
-                                <Gift className="h-10 w-10 text-white" />
+                            <div className="w-20 h-20 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-brand-primary/20 overflow-hidden p-0.5">
+                                {branding.logo_url ? (
+                                    <img src={branding.logo_url} alt="Logo" className="w-full h-full object-contain rounded-xl bg-white" />
+                                ) : (
+                                    <Gift className="h-10 w-10 text-white" />
+                                )}
                             </div>
                             <h1 className="text-3xl font-bold text-foreground mb-3">
                                 You&apos;re Invited!
                             </h1>
                             <p className="text-muted-foreground text-lg">
-                                Get <span className="text-brand-primary font-semibold">{freeMonthsLabel} free</span> on Aranora
+                                Get <span className="text-brand-primary font-semibold">{freeMonthsLabel} free</span> on {branding.site_name}
                             </p>
                         </div>
 

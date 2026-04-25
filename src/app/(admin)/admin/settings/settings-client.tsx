@@ -1115,7 +1115,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                         <Input
                                             value={settings.homepage.cta_subtitle}
                                             onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, cta_subtitle: e.target.value }})}
-                                            placeholder="Join thousands of freelancers who trust Aranora"
+                                            placeholder={`Join thousands of freelancers who trust ${settings.branding.site_name || 'Aranora'}`}
                                         />
                                     </div>
                                 </div>
@@ -1146,7 +1146,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                             <Input
                                                 value={settings.homepage.twitter_url}
                                                 onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, twitter_url: e.target.value }})}
-                                                placeholder="https://twitter.com/aranora"
+                                                placeholder={`https://twitter.com/${settings.branding.site_name?.toLowerCase().replace(/\s+/g, '') || 'aranora'}`}
                                             />
                                         </div>
                                         <div className="space-y-3">
@@ -1156,7 +1156,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                             <Input
                                                 value={settings.homepage.linkedin_url}
                                                 onChange={(e) => setSettings({ ...settings, homepage: { ...settings.homepage, linkedin_url: e.target.value }})}
-                                                placeholder="https://linkedin.com/company/aranora"
+                                                placeholder={`https://linkedin.com/company/${settings.branding.site_name?.toLowerCase().replace(/\s+/g, '') || 'aranora'}`}
                                             />
                                         </div>
                                     </div>
@@ -1191,7 +1191,7 @@ export function SettingsClient({ initialSettings, adminCount }: SettingsClientPr
                                                 ) : (
                                                     <div className="h-6 w-6 rounded bg-primary/20" />
                                                 )}
-                                                <span className="font-bold text-sm tracking-tight" style={{ color: settings.branding.primary_color }}>Aranora</span>
+                                                <span className="font-bold text-sm tracking-tight" style={{ color: settings.branding.primary_color }}>{settings.branding.site_name || 'Aranora'}</span>
                                             </div>
                                             <p className="opacity-70 leading-relaxed">{settings.homepage.footer_tagline || "The all-in-one platform for freelancers."}</p>
                                         </div>

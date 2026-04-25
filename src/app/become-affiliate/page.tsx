@@ -16,6 +16,31 @@ export default function BecomeAffiliatePage() {
     const [error, setError] = useState('');
     const [loginForm, setLoginForm] = useState({ email: '', password: '' });
     const [signupForm, setSignupForm] = useState({ fullName: '', email: '', password: '' });
+    
+    const [branding, setBranding] = useState<{site_name: string, logo_url: string | null}>({
+        site_name: 'Aranora',
+        logo_url: null
+    });
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const { createClient } = await import('@/lib/supabase/client');
+            const supabase = createClient();
+            const { data } = await supabase
+                .from('platform_settings')
+                .select('value')
+                .eq('key', 'branding')
+                .single();
+            
+            if (data?.value) {
+                setBranding({
+                    site_name: data.value.site_name || 'Aranora',
+                    logo_url: data.value.logo_url || null
+                });
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -107,8 +132,8 @@ export default function BecomeAffiliatePage() {
                                     Passive Income
                                 </span>
                             </h1>
-                            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                                Refer customers to Aranora and earn 30% of every subscription for 12 months.
+                             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+                                Refer customers to {branding.site_name} and earn 30% of every subscription for 12 months.
                                 No platform subscription required — just sign up and start sharing.
                             </p>
 

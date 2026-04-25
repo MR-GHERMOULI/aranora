@@ -5,14 +5,31 @@ import type { Metadata } from "next"
 import PublicNavbar from "@/components/layout/public-navbar"
 import { Footer } from "@/components/layout/footer"
 
-export const metadata: Metadata = {
-    title: "Blog | Aranora — Tips for Freelancers",
-    description:
-        "Read professional articles about freelancing, invoicing, project management, and growing your freelance business with Aranora.",
+export async function generateMetadata(): Promise<Metadata> {
+    const supabase = await createClient();
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    
+    const siteName = brandingSetting?.value?.site_name || "Aranora";
+
+    return {
+        title: `Blog | ${siteName} — Tips for Freelancers`,
+        description:
+            `Read professional articles about freelancing, invoicing, project management, and growing your freelance business with ${siteName}.`,
+    }
 }
 
 export default async function BlogPage() {
     const supabase = await createClient()
+
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
 
     const { data: articles } = await supabase
         .from("articles")
@@ -43,7 +60,7 @@ export default async function BlogPage() {
 
                     <div className="text-center">
                         <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                            The Aranora Blog
+                            The {brandingSetting?.value?.site_name || "Aranora"} Blog
                         </h1>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                             Expert tips, insights, and guides to help you thrive as a freelancer.

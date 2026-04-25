@@ -21,12 +21,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         .eq("status", "published")
         .single()
 
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
+    
+    const siteName = brandingSetting?.value?.site_name || "Aranora";
+
     if (!article) {
-        return { title: "Article Not Found | Aranora" }
+        return { title: `Article Not Found | ${siteName}` }
     }
 
     return {
-        title: `${article.title} | Aranora Blog`,
+        title: `${article.title} | ${siteName} Blog`,
         description: article.meta_description || article.excerpt || "",
     }
 }
@@ -35,12 +43,11 @@ export default async function ArticlePage({ params }: PageProps) {
     const { slug } = await params
     const supabase = await createClient()
 
-    const { data: article, error } = await supabase
-        .from("articles")
-        .select("*")
-        .eq("slug", slug)
-        .eq("status", "published")
-        .single()
+    const { data: brandingSetting } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "branding")
+        .single();
 
     if (error || !article) return notFound()
 
@@ -144,7 +151,7 @@ export default async function ArticlePage({ params }: PageProps) {
                             Ready to streamline your freelance business?
                         </h3>
                         <p className="text-muted-foreground mb-4">
-                            Try Aranora free for 30 days. No credit card required.
+                            Try {brandingSetting?.value?.site_name || "Aranora"} free for 30 days. No credit card required.
                         </p>
                         <Link
                             href="/signup"
