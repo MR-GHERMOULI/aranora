@@ -21,7 +21,23 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-    // 1. Intercept "via" affiliate code gracefully on ANY route
+    // 1. Intercept Supabase OAuth callbacks that incorrectly fallback to the root URL
+    if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code')) {
+        const code = request.nextUrl.searchParams.get('code');
+        const callbackUrl = new URL('/api/auth/callback', request.url);
+        callbackUrl.searchParams.set('code', code!);
+        
+        // Preserve other params like 'next' if they exist
+        request.nextUrl.searchParams.forEach((value, key) => {
+            if (key !== 'code') {
+                callbackUrl.searchParams.set(key, value);
+            }
+        });
+        
+        return NextResponse.redirect(callbackUrl);
+    }
+
+    // 2. Intercept "via" affiliate code gracefully on ANY route
     const viaCode = request.nextUrl.searchParams.get('via');
     if (viaCode && viaCode.length >= 3) {
         const cleanUrl = new URL(request.url);
