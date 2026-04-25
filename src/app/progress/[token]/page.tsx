@@ -72,6 +72,7 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
     const { token } = await params
     const data = await getProjectData(token)
     const supabase = await createClient()
+    const { data: brandingSetting } = await supabase
         .from("platform_settings")
         .select("value")
         .eq("key", "branding")
