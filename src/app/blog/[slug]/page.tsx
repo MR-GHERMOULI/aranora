@@ -43,6 +43,13 @@ export default async function ArticlePage({ params }: PageProps) {
     const { slug } = await params
     const supabase = await createClient()
 
+    const { data: article, error } = await supabase
+        .from("articles")
+        .select("*")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single()
+
     const { data: brandingSetting } = await supabase
         .from("platform_settings")
         .select("value")
