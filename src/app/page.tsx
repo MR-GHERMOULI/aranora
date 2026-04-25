@@ -352,10 +352,7 @@ export default async function LandingPage() {
         </div>
         <div className="max-w-7xl mx-auto relative">
           <FadeIn delay={0.2} className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary/10 dark:bg-brand-primary/20 text-brand-primary text-sm font-semibold mb-8 border border-brand-primary/20 hover:scale-105 transition-transform duration-300">
-              <Sparkles className="h-4 w-4" />
-              {content.hero_badge_text}
-            </div>
+
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight">
               {content.hero_title.includes("Professionally") ? (
                 <>
@@ -480,10 +477,7 @@ export default async function LandingPage() {
       <section id="features" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-secondary/10 text-brand-secondary-dark dark:text-brand-secondary text-sm font-semibold mb-4">
-              <Zap className="h-4 w-4" />
-              Complete Toolkit
-            </div>
+
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
               {content.features_title}
             </h2>
