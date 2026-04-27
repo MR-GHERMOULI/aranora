@@ -37,12 +37,23 @@ export async function login(formData: FormData) {
 
     if (user) {
         // Always require OTP for a new manual password login attempt
-        await supabase.auth.signInWithOtp({
+        const { createServerClient } = await import('@supabase/ssr')
+        const anonSupabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { getAll() { return [] }, setAll() { } } }
+        )
+
+        const { error: otpError } = await anonSupabase.auth.signInWithOtp({
             email: user.email!,
             options: {
                 shouldCreateUser: false,
             }
         })
+        
+        if (otpError) {
+            console.error('Failed to send OTP:', otpError)
+        }
 
         revalidatePath('/', 'layout')
         redirect('/verify-otp')

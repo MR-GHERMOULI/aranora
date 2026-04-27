@@ -10,8 +10,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Trigger Supabase to send the OTP email natively
-        const { error } = await supabase.auth.signInWithOtp({
+        // Trigger Supabase to send the OTP email natively using an anonymous client
+        const { createServerClient } = await import('@supabase/ssr')
+        const anonSupabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { getAll() { return [] }, setAll() { } } }
+        )
+
+        const { error } = await anonSupabase.auth.signInWithOtp({
             email: user.email,
             options: {
                 shouldCreateUser: false,
