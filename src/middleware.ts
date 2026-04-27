@@ -5,7 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 // Routes that don't require subscription
 const PUBLIC_ROUTES = [
     '/', '/about', '/contact', '/privacy', '/terms', '/refund', '/blog',
-    '/login', '/signup', '/forgot-password',
+    '/login', '/signup', '/forgot-password', '/verify-otp',
     '/pricing', '/error', '/become-affiliate',
 ];
 
@@ -126,6 +126,14 @@ export async function middleware(request: NextRequest) {
                 const { data: { user } } = await supabase.auth.getUser();
 
                 if (user) {
+                    // ── MFA cookie check ──
+                    // If the user is authenticated but hasn't completed OTP this session/month,
+                    // redirect them to the OTP verification page.
+                    const mfaCookie = request.cookies.get('aranora_mfa_verified')
+                    if (!mfaCookie || mfaCookie.value !== user.id) {
+                        return NextResponse.redirect(new URL('/verify-otp', request.url))
+                    }
+
                     const { data: profile } = await supabase
                         .from('profiles')
                         .select('trial_ends_at, subscription_status, is_admin')

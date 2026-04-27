@@ -36,25 +36,39 @@ export async function login(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_admin, subscription_status')
-            .eq('id', user.id)
-            .single()
+        // Check if MFA cookie is valid for this user (set when they last completed OTP)
+        const { cookies } = await import('next/headers')
+        const cookieStore = await cookies()
+        const mfaCookie = cookieStore.get('aranora_mfa_verified')
 
-        if (profile?.is_admin) {
+        if (mfaCookie?.value === user.id) {
+            // Cookie valid — skip OTP, go straight to dashboard
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('is_admin, subscription_status')
+                .eq('id', user.id)
+                .single()
+
+            if (profile?.is_admin) {
+                revalidatePath('/', 'layout')
+                redirect('/admin')
+            }
+            if (profile?.subscription_status === 'affiliate') {
+                revalidatePath('/', 'layout')
+                redirect('/affiliates')
+            }
+
             revalidatePath('/', 'layout')
-            redirect('/admin')
+            redirect('/dashboard')
         }
 
-        if (profile?.subscription_status === 'affiliate') {
-            revalidatePath('/', 'layout')
-            redirect('/affiliates')
-        }
+        // No valid MFA cookie — require OTP verification
+        revalidatePath('/', 'layout')
+        redirect('/verify-otp')
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    redirect('/verify-otp')
 }
 
 export async function signup(formData: FormData) {
