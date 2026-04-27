@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify your email address</title>
+    <style>
+        /* Base Resets */
+        body, p, h1, h2, h3, h4, h5, h6 {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f6f9fc;
+            color: #333333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 0;
+        }
+
+        /* Container */
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #f6f9fc;
+            padding-bottom: 60px;
+        }
+        .main {
+            background-color: #ffffff;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            border-spacing: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-top: 40px;
+        }
+
+        /* Header */
+        .header {
+            padding: 40px 40px 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid #eaeaea;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111111;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        /* Body */
+        .content {
+            padding: 40px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111111;
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+        .text {
+            font-size: 16px;
+            color: #555555;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        
+        /* Button */
+        .button-container {
+            text-align: left;
+            margin: 32px 0;
+        }
+        .button {
+            background-color: #000000;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background-color: #eaeaea;
+            margin: 32px 0;
+        }
+
+        /* Footer */
+        .footer-text {
+            font-size: 14px;
+            color: #888888;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .footer-link {
+            color: #555555;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        
+        /* Outer Footer */
+        .outer-footer {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .outer-footer p {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        @media screen and (max-width: 600px) {
+            .main {
+                border-radius: 0;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+            .header {
+                padding: 30px 20px 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <center class="wrapper">
+        <table class="main" width="100%">
+            <!-- Header -->
+            <tr>
+                <td class="header">
+                    <!-- You can replace this text with an <img src="..."> tag if you have an absolute URL to your logo -->
+                    <a href="{{ .SiteURL }}" class="logo">Aranora</a>
+                </td>
+            </tr>
+            
+            <!-- Content -->
+            <tr>
+                <td class="content">
+                    <h1 class="title">Verify your email address</h1>
+                    <p class="text">
+                        Hello! Thank you for signing up for Aranora. We're excited to have you on board.
+                    </p>
+                    <p class="text">
+                        To get started, please confirm your email address by clicking the button below. This ensures we have the right email to secure your account.
+                    </p>
+
+                    <!-- CTA Button -->
+                    <div class="button-container">
+                        <!-- Supabase injects the confirmation URL here -->
+                        <a href="{{ .ConfirmationURL }}" class="button">Verify Email Address</a>
+                    </div>
+
+                    <p class="text">
+                        If you didn't create an account with Aranora, you can safely ignore this email.
+                    </p>
+
+                    <div class="divider"></div>
+
+                    <!-- Fallback Link -->
+                    <p class="footer-text">
+                        If the button doesn't work, copy and paste this link into your web browser:
+                        <br>
+                        <a href="{{ .ConfirmationURL }}" class="footer-link">{{ .ConfirmationURL }}</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Outer Footer -->
+        <div class="outer-footer">
+            <p>&copy; 2026 Aranora. All rights reserved.</p>
+        </div>
+    </center>
+</body>
+</html>

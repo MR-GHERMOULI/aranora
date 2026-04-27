@@ -117,7 +117,6 @@ export async function signup(formData: FormData) {
         }
     }
 
-    // --- Step 1: Try normal signup ---
     const { data: signupData, error } = await supabase.auth.signUp({
         email,
         password,
@@ -126,7 +125,8 @@ export async function signup(formData: FormData) {
                 full_name: fullName,
                 phone: phone,
                 country: country
-            }
+            },
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`
         }
     })
 

@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
             password,
             options: {
                 data: { full_name: fullName },
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`
             },
         });
 
