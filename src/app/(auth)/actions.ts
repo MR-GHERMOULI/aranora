@@ -36,34 +36,7 @@ export async function login(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
-        // Check if MFA cookie is valid for this user (set when they last completed OTP)
-        const { cookies } = await import('next/headers')
-        const cookieStore = await cookies()
-        const mfaCookie = cookieStore.get('aranora_mfa_verified')
-
-        if (mfaCookie?.value === user.id) {
-            // Cookie valid — skip OTP, go straight to dashboard
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('is_admin, subscription_status')
-                .eq('id', user.id)
-                .single()
-
-            if (profile?.is_admin) {
-                revalidatePath('/', 'layout')
-                redirect('/admin')
-            }
-            if (profile?.subscription_status === 'affiliate') {
-                revalidatePath('/', 'layout')
-                redirect('/affiliates')
-            }
-
-            revalidatePath('/', 'layout')
-            redirect('/dashboard')
-        }
-
-        // No valid MFA cookie — require OTP verification
-        // Send the OTP before redirecting!
+        // Always require OTP for a new manual password login attempt
         await supabase.auth.signInWithOtp({
             email: user.email!,
             options: {
@@ -361,5 +334,11 @@ export async function updatePassword(formData: FormData) {
 export async function logout() {
     const supabase = await createClient()
     await supabase.auth.signOut()
+    
+    // Clear the MFA cookie to ensure the next login requires a fresh OTP
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    cookieStore.delete('aranora_mfa_verified')
+    
     redirect('/login')
 }
