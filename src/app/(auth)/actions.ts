@@ -18,7 +18,7 @@ export async function login(formData: FormData) {
         return { error: 'Only Gmail addresses (@gmail.com) are allowed to sign in.' }
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     })
@@ -33,10 +33,19 @@ export async function login(formData: FormData) {
         return { error: error.message }
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = data.user
 
     if (user) {
-        // Always require OTP for a new manual password login attempt
+        // 1. Clear any existing MFA verification for this device/session immediately.
+        // This ensures that even if the user was recently verified, a new login attempt
+        // will require a fresh OTP code.
+        const { cookies } = await import('next/headers')
+        const cookieStore = await cookies()
+        cookieStore.delete('aranora_mfa_verified')
+
+        // 2. Trigger a fresh OTP send using an anonymous client.
+        // Using an anonymous client (no cookies) ensures that Supabase treats this as 
+        // a new request and dispatches a fresh OTP email to the registered account.
         const { createServerClient } = await import('@supabase/ssr')
         const anonSupabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,12 +62,17 @@ export async function login(formData: FormData) {
         
         if (otpError) {
             console.error('Failed to send OTP:', otpError)
+            // If it's a rate limit error, inform the user they need to wait
+            if (otpError.message.toLowerCase().includes('rate limit')) {
+                return { error: 'A code was recently sent to your email. Please wait a moment before trying again.' }
+            }
         }
 
         revalidatePath('/', 'layout')
         redirect('/verify-otp')
     }
 
+    // Fallback: if user is somehow not found but no error was thrown
     revalidatePath('/', 'layout')
     redirect('/verify-otp')
 }

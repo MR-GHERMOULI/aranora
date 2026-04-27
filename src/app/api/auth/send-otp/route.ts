@@ -10,7 +10,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Trigger Supabase to send the OTP email natively using an anonymous client
+        // 1. Invalidate any existing MFA verification for this session to ensure
+        // that the user MUST verify the fresh code.
+        const { cookies } = await import('next/headers')
+        const cookieStore = await cookies()
+        cookieStore.delete('aranora_mfa_verified')
+
+        // 2. Trigger Supabase to send the OTP email natively using an anonymous client
         const { createServerClient } = await import('@supabase/ssr')
         const anonSupabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
