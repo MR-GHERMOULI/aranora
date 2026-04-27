@@ -18,8 +18,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Verify the OTP natively using Supabase
-        const { data, error } = await supabase.auth.verifyOtp({
+        // Verify the OTP natively using Supabase WITHOUT sending current cookies
+        // This avoids conflicts where Supabase rejects verification because a session already exists
+        const { createServerClient } = await import('@supabase/ssr')
+        const anonSupabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { getAll() { return [] }, setAll() { } } }
+        )
+
+        const { error } = await anonSupabase.auth.verifyOtp({
             email: user.email,
             token: code,
             type: 'email' // 'email' type verifies the 6-digit OTP

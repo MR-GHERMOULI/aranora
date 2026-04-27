@@ -25,14 +25,6 @@ export default async function VerifyOtpPage() {
         redirect('/dashboard')
     }
 
-    // Trigger Supabase to send the OTP email natively
-    await supabase.auth.signInWithOtp({
-        email: user.email,
-        options: {
-            shouldCreateUser: false,
-        }
-    })
-
     const maskedEmail = maskEmail(user.email)
 
     return <OtpForm maskedEmail={maskedEmail} />
