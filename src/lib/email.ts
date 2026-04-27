@@ -1,6 +1,13 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+function getResend() {
+  if (!resend && process.env.RESEND_API_KEY) {
+    resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resend;
+}
 
 interface SendEmailProps {
   to: string | string[];
@@ -10,13 +17,15 @@ interface SendEmailProps {
 }
 
 export async function sendEmail({ to, subject, html, from }: SendEmailProps) {
-  if (!process.env.RESEND_API_KEY) {
+  const resendInstance = getResend();
+  
+  if (!resendInstance) {
     console.error('RESEND_API_KEY is not set');
     return { error: 'RESEND_API_KEY is not set' };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await resendInstance.emails.send({
       from: from || 'Aranora <noreply@aranora.com>',
       to: Array.isArray(to) ? to : [to],
       subject,
@@ -29,7 +38,7 @@ export async function sendEmail({ to, subject, html, from }: SendEmailProps) {
       // If domain not verified, try fallback to onboarding@resend.dev for testing
       if (error.message.includes('not verified') || error.message.includes('restricted')) {
         console.log('Attempting fallback to onboarding@resend.dev...');
-        const fallback = await resend.emails.send({
+        const fallback = await resendInstance.emails.send({
           from: 'Aranora <onboarding@resend.dev>',
           to: Array.isArray(to) ? to : [to],
           subject: subject + ' (Fallback)',
