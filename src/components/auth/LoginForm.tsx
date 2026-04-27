@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { login } from '@/app/(auth)/actions'
 import { createClient } from '@/lib/supabase/client'
@@ -23,8 +23,27 @@ export default function LoginForm() {
     const [isPending, startTransition] = useTransition()
     const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            const err = params.get('error')
+            if (err === 'gmail_only') {
+                setError('Only Gmail addresses (@gmail.com) are allowed to sign in.')
+            } else if (err === 'auth') {
+                setError('Authentication failed. Please try again.')
+            }
+        }
+    }, [])
+
     async function handleSubmit(formData: FormData) {
         setError(null)
+        
+        const email = formData.get('email') as string
+        if (!email.toLowerCase().endsWith('@gmail.com')) {
+            setError('Only Gmail addresses (@gmail.com) are allowed to sign in.')
+            return
+        }
+
         startTransition(async () => {
             const result = await login(formData)
             if (result?.error) {

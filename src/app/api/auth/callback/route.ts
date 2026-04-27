@@ -16,6 +16,11 @@ export async function GET(request: Request) {
             // Check if user is admin or affiliate
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
+                if (user.email && !user.email.toLowerCase().endsWith('@gmail.com')) {
+                    await supabase.auth.signOut()
+                    return NextResponse.redirect(`${origin}/login?error=gmail_only`)
+                }
+                
                 // --- Track affiliate referral for OAuth signups ---
                 try {
                     const cookieStore = await cookies();

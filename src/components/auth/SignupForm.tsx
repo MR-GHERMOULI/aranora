@@ -104,10 +104,28 @@ export default function SignupForm({ promo }: { promo?: string }) {
         }
     }, [selectedCountry])
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            const err = params.get('error')
+            if (err === 'gmail_only') {
+                setError('Registration is strictly limited to Gmail addresses (@gmail.com) only.')
+            } else if (err === 'auth') {
+                setError('Google sign-up failed. Please try again.')
+            }
+        }
+    }, [])
+
     async function handleSubmit(formData: FormData) {
         setError(null)
 
         // Client-side validation
+        const email = formData.get('email') as string
+        if (!email.toLowerCase().endsWith('@gmail.com')) {
+            setError('Registration is strictly limited to Gmail addresses (@gmail.com) only.')
+            return
+        }
+
         const pw = formData.get('password') as string
         if (pw.length < 8) {
             setError('Password must be at least 8 characters.')

@@ -14,6 +14,10 @@ export async function login(formData: FormData) {
         return { error: 'Please provide both email and password.' }
     }
 
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+        return { error: 'Only Gmail addresses (@gmail.com) are allowed to sign in.' }
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -66,6 +70,10 @@ export async function signup(formData: FormData) {
 
     if (!email || !password || !fullName) {
         return { error: 'Please fill in all required fields.' }
+    }
+
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+        return { error: 'Registration is limited to Gmail addresses (@gmail.com) only.' }
     }
 
     if (password.length < 8) {
