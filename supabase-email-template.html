@@ -1,440 +1,89 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Verify your email — Aranora</title>
-    <!--[if mso]>
-    <noscript>
-        <xml>
-            <o:OfficeDocumentSettings>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-        </xml>
-    </noscript>
-    <![endif]-->
+    <title>Verify your email - Aranora</title>
     <style>
-        /* ========== BASE RESETS ========== */
-        body, p, h1, h2, h3, h4, h5, h6 {
+        body {
+            font-family: sans-serif;
+            background-color: #F1F5F9;
+            color: #1E293B;
             margin: 0;
             padding: 0;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #F1F5F9;
-            color: #1E293B;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
-        table {
-            border-spacing: 0;
-            border-collapse: collapse;
-            mso-table-lspace: 0pt;
-            mso-table-rspace: 0pt;
-        }
-        td {
-            padding: 0;
-        }
-        img {
-            border: 0;
-            line-height: 100%;
-            outline: none;
-            text-decoration: none;
-            -ms-interpolation-mode: bicubic;
-        }
-        a {
-            text-decoration: none;
-        }
 
-        /* ========== WRAPPER ========== */
         .wrapper {
             width: 100%;
-            table-layout: fixed;
+            padding: 40px 0;
             background-color: #F1F5F9;
-            padding: 40px 0 60px 0;
         }
 
-        /* ========== MAIN CARD ========== */
         .main {
             background-color: #FFFFFF;
             margin: 0 auto;
-            width: 100%;
             max-width: 600px;
-            border-spacing: 0;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(30, 58, 95, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
-        /* ========== HEADER ========== */
         .header {
-            background: linear-gradient(135deg, #1E3A5F 0%, #2E5A8F 100%);
-            padding: 36px 40px;
+            background: #1E3A5F;
+            padding: 36px;
             text-align: center;
-        }
-        .logo-text {
-            font-size: 28px;
-            font-weight: 800;
             color: #FFFFFF;
-            letter-spacing: -0.5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .logo-dot {
-            color: #4ADE80;
-        }
-        .header-tagline {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 6px;
-            letter-spacing: 0.5px;
-            font-weight: 500;
         }
 
-        /* ========== ICON BADGE ========== */
-        .icon-badge-row {
-            text-align: center;
-            padding-top: 36px;
-        }
-        .icon-badge {
-            display: inline-block;
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #EBF5FF 0%, #E0F2FE 100%);
-            border: 1px solid #BFDBFE;
-            text-align: center;
-            line-height: 64px;
-        }
-
-        /* ========== CONTENT ========== */
         .content {
-            padding: 0 40px 40px 40px;
-        }
-        .title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1E293B;
-            margin-top: 24px;
-            margin-bottom: 8px;
-            line-height: 1.3;
-            text-align: center;
-        }
-        .subtitle {
-            font-size: 15px;
-            color: #64748B;
-            line-height: 1.6;
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .text {
-            font-size: 15px;
-            color: #475569;
-            line-height: 1.7;
-            margin-bottom: 20px;
-        }
-        .greeting {
-            font-weight: 600;
-            color: #1E293B;
+            padding: 40px;
         }
 
-        /* ========== CTA BUTTON ========== */
-        .button-container {
-            text-align: center;
-            margin: 32px 0;
-        }
         .button {
-            background: linear-gradient(135deg, #1E3A5F 0%, #2E5A8F 100%);
+            background: #1E3A5F;
             color: #FFFFFF !important;
-            text-decoration: none;
             padding: 16px 40px;
             border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
             display: inline-block;
-            letter-spacing: 0.3px;
-            mso-padding-alt: 16px 40px;
-            box-shadow: 0 4px 14px rgba(30, 58, 95, 0.25);
-            transition: all 0.2s ease;
-        }
-        .button:hover {
-            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.35);
+            text-decoration: none;
         }
 
-        /* ========== TRUST SECTION ========== */
-        .trust-section {
-            background-color: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            padding: 20px 24px;
-            margin: 28px 0;
-        }
-        .trust-row {
-            margin-bottom: 12px;
-        }
-        .trust-row:last-child {
-            margin-bottom: 0;
-        }
-        .trust-icon {
-            color: #22C55E;
-            font-size: 14px;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        .trust-text {
-            font-size: 13px;
-            color: #64748B;
-            line-height: 1.5;
-            vertical-align: middle;
-        }
-
-        /* ========== DIVIDER ========== */
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #E2E8F0, transparent);
-            margin: 28px 0;
-        }
-
-        /* ========== SECURITY NOTE ========== */
-        .security-note {
-            background-color: #FFFBEB;
-            border: 1px solid #FDE68A;
-            border-radius: 10px;
-            padding: 14px 18px;
-            margin: 24px 0;
-        }
-        .security-icon {
-            font-size: 14px;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        .security-text {
-            font-size: 13px;
-            color: #92400E;
-            line-height: 1.5;
-            vertical-align: middle;
-        }
-
-        /* ========== FALLBACK LINK ========== */
-        .fallback-text {
-            font-size: 13px;
-            color: #94A3B8;
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
-        .fallback-link {
-            color: #1E3A5F;
-            text-decoration: underline;
-            word-break: break-all;
-            font-size: 12px;
-        }
-
-        /* ========== FOOTER ========== */
         .footer {
-            background-color: #F8FAFC;
-            border-top: 1px solid #E2E8F0;
-            padding: 28px 40px;
+            background: #F8FAFC;
+            padding: 28px;
             text-align: center;
-        }
-        .footer-brand {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1E3A5F;
-            margin-bottom: 8px;
-        }
-        .footer-links {
-            margin: 12px 0;
-        }
-        .footer-link {
-            font-size: 12px;
             color: #64748B;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        .footer-link:hover {
-            color: #1E3A5F;
-        }
-        .footer-separator {
-            color: #CBD5E1;
             font-size: 12px;
-        }
-        .footer-copyright {
-            font-size: 11px;
-            color: #94A3B8;
-            margin-top: 12px;
-            line-height: 1.5;
-        }
-        .footer-address {
-            font-size: 11px;
-            color: #94A3B8;
-            margin-top: 4px;
-        }
-
-        /* ========== SOCIAL ICONS ========== */
-        .social-row {
-            margin: 16px 0;
-        }
-        .social-icon {
-            display: inline-block;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background-color: #E2E8F0;
-            margin: 0 4px;
-            text-align: center;
-            line-height: 32px;
-            font-size: 14px;
-            color: #64748B;
-            text-decoration: none;
-        }
-        .social-icon:hover {
-            background-color: #1E3A5F;
-            color: #FFFFFF;
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media screen and (max-width: 600px) {
-            .wrapper {
-                padding: 20px 0 40px 0;
-            }
-            .main {
-                border-radius: 0;
-            }
-            .header {
-                padding: 28px 24px;
-            }
-            .content {
-                padding: 0 24px 32px 24px;
-            }
-            .footer {
-                padding: 24px 24px;
-            }
-            .title {
-                font-size: 20px;
-            }
-            .button {
-                padding: 14px 32px;
-                font-size: 15px;
-            }
-            .trust-section {
-                padding: 16px 18px;
-            }
         }
     </style>
 </head>
+
 <body>
-    <center class="wrapper">
-        <table class="main" width="100%" role="presentation">
-
-            <!-- ====== HEADER ====== -->
-            <tr>
-                <td class="header">
-                    <a href="https://www.aranora.com" class="logo-text">
-                        Aranora<span class="logo-dot">.</span>
-                    </a>
-                    <p class="header-tagline">Your Freelance Business, Professionally Managed</p>
-                </td>
-            </tr>
-
-            <!-- ====== CONTENT ====== -->
-            <tr>
-                <td class="content">
-                    <div class="icon-badge-row">
-                        <div class="icon-badge">
-                            <span style="font-size: 32px; line-height: 64px;">🛡️</span>
-                        </div>
-                    </div>
-
-                    <h1 class="title">Verify Your Email Address</h1>
-                    <p class="subtitle">One quick step to activate your Aranora account</p>
-
-                    <p class="text">
-                        <span class="greeting">Welcome aboard!</span><br>
-                        Thank you for creating your Aranora account. We're thrilled to have you join thousands of professionals who manage their business smarter.
-                    </p>
-
-                    <p class="text">
-                        To complete your registration and unlock all features, please verify your email address by clicking the button below:
-                    </p>
-
-                    <!-- CTA Button -->
-                    <div class="button-container">
-                        <!--[if mso]>
-                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ .ConfirmationURL }}" style="height:48px;v-text-anchor:middle;width:240px;" arcsize="20%" strokecolor="#1E3A5F" fillcolor="#1E3A5F">
-                            <w:anchorlock/>
-                            <center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:600;">Verify Email Address</center>
-                        </v:roundrect>
-                        <![endif]-->
-                        <!--[if !mso]><!-->
-                        <a href="{{ .ConfirmationURL }}" class="button">
-                            ✓&nbsp;&nbsp;Verify Email Address
-                        </a>
-                        <!--<![endif]-->
-                    </div>
-
-                    <!-- Trust Section -->
-                    <div class="trust-section">
-                        <div class="trust-row">
-                            <span class="trust-icon">✓</span>
-                            <span class="trust-text"><strong>30-day free trial</strong> — no credit card required</span>
-                        </div>
-                        <div class="trust-row">
-                            <span class="trust-icon">✓</span>
-                            <span class="trust-text">Invoicing, contracts, and time tracking</span>
-                        </div>
-                        <div class="trust-row">
-                            <span class="trust-icon">✓</span>
-                            <span class="trust-text">Manage unlimited projects and clients</span>
-                        </div>
-                    </div>
-
-                    <!-- Security Note -->
-                    <div class="security-note">
-                        <span class="security-icon">🔒</span>
-                        <span class="security-text">
-                            If you didn't create an account with Aranora, you can safely ignore this email. No action will be taken on your behalf.
-                        </span>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <!-- Fallback Link -->
-                    <p class="fallback-text">
-                        If the button above doesn't work, copy and paste this link into your browser:
-                    </p>
-                    <p>
-                        <a href="{{ .ConfirmationURL }}" class="fallback-link">{{ .ConfirmationURL }}</a>
-                    </p>
-                </td>
-            </tr>
-
-            <!-- ====== FOOTER ====== -->
-            <tr>
-                <td class="footer">
-                    <p class="footer-brand">Aranora<span style="color: #4ADE80;">.</span></p>
-
-                    <div class="footer-links">
-                        <a href="https://www.aranora.com" class="footer-link">Website</a>
-                        <span class="footer-separator">•</span>
-                        <a href="https://www.aranora.com/terms" class="footer-link">Terms</a>
-                        <span class="footer-separator">•</span>
-                        <a href="https://www.aranora.com/privacy" class="footer-link">Privacy</a>
-                        <span class="footer-separator">•</span>
-                        <a href="https://www.aranora.com/contact" class="footer-link">Contact</a>
-                    </div>
-
-                    <p class="footer-copyright">
-                        &copy; 2026 Aranora. All rights reserved.
-                    </p>
-                    <p class="footer-address">
-                        You're receiving this because you signed up at aranora.com
-                    </p>
-                </td>
-            </tr>
-        </table>
-    </center>
+    <div class="wrapper">
+        <div class="main">
+            <div class="header">
+                <h1>Aranora.</h1>
+                <p>Your Freelance Business, Professionally Managed</p>
+            </div>
+            <div class="content">
+                <h2>Verify Your Email Address</h2>
+                <p>Welcome aboard! Thank you for creating your Aranora account.</p>
+                <p>To complete your registration, please verify your email address by clicking the button below:</p>
+                <div style="text-align: center; margin: 32px 0;">
+                    <a href="{{ .ConfirmationURL }}" class="button">Verify Email Address</a>
+                </div>
+                <div
+                    style="background: #F8FAFC; border-radius: 12px; padding: 20px; margin: 28px 0; color: #64748B; font-size: 13px;">
+                    <p>- 30-day free trial</p>
+                    <p>- Invoicing and contracts</p>
+                    <p>- Manage unlimited projects</p>
+                </div>
+            </div>
+            <div class="footer">
+                <p>&copy; 2026 Aranora. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>

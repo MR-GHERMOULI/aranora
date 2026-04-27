@@ -322,7 +322,7 @@ export async function resetPassword(formData: FormData) {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.aranora.com'}/login`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.aranora.com'}/api/auth/callback?next=/update-password`,
     })
 
     if (error) {
@@ -330,6 +330,24 @@ export async function resetPassword(formData: FormData) {
     }
 
     return { success: true }
+}
+
+export async function updatePassword(formData: FormData) {
+    const supabase = await createClient()
+
+    const password = formData.get('password') as string
+
+    if (!password || password.length < 8) {
+        return { error: 'Password must be at least 8 characters long.' }
+    }
+
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    redirect('/dashboard')
 }
 
 export async function logout() {
