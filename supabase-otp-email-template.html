@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your OTP Verification Code - Aranora</title>
+    <style>
+        body { font-family: sans-serif; background-color: #F1F5F9; color: #1E293B; margin: 0; padding: 0; }
+        .wrapper { width: 100%; padding: 40px 0; background-color: #F1F5F9; }
+        .main { background-color: #FFFFFF; margin: 0 auto; max-width: 600px; border-radius: 16px; overflow: hidden; }
+        .header { background: #1E3A5F; padding: 36px; text-align: center; color: #FFFFFF; }
+        .content { padding: 40px; }
+        .code-box { text-align: center; margin: 32px 0; }
+        .code-display { display: inline-block; background: linear-gradient(135deg, #F8FAFC, #EFF6FF); border: 2px solid #BFDBFE; border-radius: 12px; padding: 20px 40px; font-size: 36px; font-weight: bold; letter-spacing: 12px; color: #1E3A5F; font-family: monospace; }
+        .info-box { background: #F8FAFC; border-radius: 12px; padding: 20px; margin: 28px 0; color: #64748B; font-size: 13px; line-height: 1.6; }
+        .footer { background: #F8FAFC; padding: 28px; text-align: center; color: #64748B; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="main">
+            <div class="header">
+                <h1 style="margin: 0; font-size: 28px;">Aranora.</h1>
+                <p style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.7); font-size: 14px;">Your Freelance Business, Professionally Managed</p>
+            </div>
+            
+            <div class="content">
+                <h2 style="margin-top: 0;">Your Verification Code</h2>
+                <p>Hello,</p>
+                <p>Please use the verification code below to complete your sign-in process safely.</p>
+                
+                <!-- OTP Code Display -->
+                <div class="code-box">
+                    <div class="code-display">{{ .Token }}</div>
+                </div>
+                
+                <div class="info-box">
+                    <p style="margin-top: 0; color: #1E293B; font-weight: bold;">Security Notice:</p>
+                    <p style="margin-bottom: 0;">This code will expire in <strong>10 minutes</strong>. Do not share this code with anyone. If you didn't request this code, you can safely ignore this email.</p>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p style="margin: 0;">&copy; 2026 Aranora. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
