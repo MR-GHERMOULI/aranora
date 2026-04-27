@@ -65,7 +65,7 @@ export async function login(formData: FormData) {
         // No valid MFA cookie — require OTP verification
         // Send the OTP before redirecting!
         await supabase.auth.signInWithOtp({
-            email: user.email,
+            email: user.email!,
             options: {
                 shouldCreateUser: false,
             }
