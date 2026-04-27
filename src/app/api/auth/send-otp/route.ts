@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServerClient } from '@supabase/ssr'
 import crypto from 'crypto'
+import { sendEmail } from '@/lib/email'
 
 function hashCode(code: string): string {
     return crypto.createHash('sha256').update(code).digest('hex')
@@ -86,56 +87,26 @@ function maskEmail(email: string): string {
 
 async function sendOtpEmail(to: string, code: string, html: string): Promise<boolean> {
     try {
-        // Use Supabase's SMTP via their admin API
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-        const res = await fetch(`${supabaseUrl}/functions/v1/send-otp-email`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${serviceKey}`,
-            },
-            body: JSON.stringify({ to, code, html }),
+        const { error } = await sendEmail({
+            to,
+            subject: 'Your Aranora login code',
+            html,
         })
-
-        // If edge function isn't deployed, fall back to Resend if available
-        if (!res.ok) {
-            return await sendViaResend(to, code, html)
+        
+        if (error) {
+            console.error('Email send error:', error)
+            
+            // Fallback for dev environment if email fails
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`\n🔐 OTP CODE for ${to}: ${code}\n`)
+                return true
+            }
+            return false
         }
+        
         return true
-    } catch {
-        return await sendViaResend(to, code, html)
-    }
-}
-
-async function sendViaResend(to: string, code: string, html: string): Promise<boolean> {
-    const resendKey = process.env.RESEND_API_KEY
-    if (!resendKey) {
-        // Last resort: log code to server console in development
-        if (process.env.NODE_ENV === 'development') {
-            console.log(`\n🔐 OTP CODE for ${to}: ${code}\n`)
-            return true
-        }
-        return false
-    }
-
-    try {
-        const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${resendKey}`,
-            },
-            body: JSON.stringify({
-                from: 'Aranora <noreply@aranora.com>',
-                to: [to],
-                subject: 'Your Aranora login code',
-                html,
-            }),
-        })
-        return res.ok
-    } catch {
+    } catch (err) {
+        console.error('sendOtpEmail error:', err)
         return false
     }
 }

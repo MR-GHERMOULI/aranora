@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import OtpForm from '@/components/auth/OtpForm'
 import { createServerClient } from '@supabase/ssr'
 import crypto from 'crypto'
+import { sendEmail } from '@/lib/email'
 
 function maskEmail(email: string): string {
     const [local, domain] = email.split('@')
@@ -65,19 +66,11 @@ export default async function VerifyOtpPage() {
     if (resendKey) {
         const digits = code.split('')
         const html = buildOtpEmail(code, user.email, digits)
-        await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${resendKey}`,
-            },
-            body: JSON.stringify({
-                from: 'Aranora <noreply@aranora.com>',
-                to: [user.email],
-                subject: 'Your Aranora login code',
-                html,
-            }),
-        }).catch(() => { /* non-blocking */ })
+        await sendEmail({
+            to: user.email,
+            subject: 'Your Aranora login code',
+            html,
+        })
     } else if (process.env.NODE_ENV === 'development') {
         console.log(`\n🔐 OTP CODE for ${user.email}: ${code}\n`)
     }
