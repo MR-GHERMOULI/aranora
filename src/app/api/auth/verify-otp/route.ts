@@ -18,25 +18,33 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Verify the OTP natively using Supabase WITHOUT sending current cookies
-        // This avoids conflicts where Supabase rejects verification because a session already exists
-        const { createServerClient } = await import('@supabase/ssr')
-        const anonSupabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { cookies: { getAll() { return [] }, setAll() { } } }
-        )
+        // Verify the custom OTP stored in user metadata
+        const userMetadata = user.user_metadata || {}
+        const storedCode = userMetadata.otp_code
+        const expiresAt = userMetadata.otp_expires_at
 
-        const { error } = await anonSupabase.auth.verifyOtp({
-            email: user.email,
-            token: code,
-            type: 'email' // 'email' type verifies the 6-digit OTP
-        })
-
-        if (error) {
-            console.error('Supabase OTP Verification error:', error.message)
-            return NextResponse.json({ error: 'Incorrect or expired code. Please try again.' }, { status: 400 })
+        if (!storedCode || !expiresAt) {
+            return NextResponse.json({ error: 'No verification code found. Please try logging in again.' }, { status: 400 })
         }
+
+        if (new Date() > new Date(expiresAt)) {
+            return NextResponse.json({ error: 'Verification code has expired. Please try logging in again.' }, { status: 400 })
+        }
+
+        if (storedCode !== code) {
+            return NextResponse.json({ error: 'Incorrect verification code. Please try again.' }, { status: 400 })
+        }
+
+        // Clear the OTP from metadata after successful verification using Admin Client
+        const { createAdminClient } = await import('@/lib/supabase/server')
+        const adminSupabase = createAdminClient()
+        await adminSupabase.auth.admin.updateUserById(user.id, {
+            user_metadata: {
+                ...userMetadata,
+                otp_code: null,
+                otp_expires_at: null,
+            }
+        })
 
         // Build the response and set the MFA cookie
         const response = NextResponse.json({ success: true })

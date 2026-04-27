@@ -2,7 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/email'
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -43,29 +44,47 @@ export async function login(formData: FormData) {
         const cookieStore = await cookies()
         cookieStore.delete('aranora_mfa_verified')
 
-        // 2. Trigger a fresh OTP send using an anonymous client.
-        // Using an anonymous client (no cookies) ensures that Supabase treats this as 
-        // a new request and dispatches a fresh OTP email to the registered account.
-        const { createServerClient } = await import('@supabase/ssr')
-        const anonSupabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { cookies: { getAll() { return [] }, setAll() { } } }
-        )
+        // 2. Generate a fresh 6-digit OTP
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
 
-        const { error: otpError } = await anonSupabase.auth.signInWithOtp({
-            email: user.email!,
-            options: {
-                shouldCreateUser: false,
+        // 3. Store OTP in user metadata using the Admin Client (securely on the server)
+        const adminSupabase = createAdminClient()
+        const { error: updateError } = await adminSupabase.auth.admin.updateUserById(user.id, {
+            user_metadata: {
+                ...user.user_metadata,
+                otp_code: otpCode,
+                otp_expires_at: otpExpiresAt,
             }
         })
-        
-        if (otpError) {
-            console.error('Failed to send OTP:', otpError)
-            // If it's a rate limit error, inform the user they need to wait
-            if (otpError.message.toLowerCase().includes('rate limit')) {
-                return { error: 'A code was recently sent to your email. Please wait a moment before trying again.' }
-            }
+
+        if (updateError) {
+            console.error('Failed to store OTP in metadata:', updateError)
+            return { error: 'Failed to initialize verification. Please try again.' }
+        }
+
+        // 4. Send the OTP email via Resend (highly reliable)
+        const { error: emailError } = await sendEmail({
+            to: user.email!,
+            subject: `${otpCode} is your Aranora verification code`,
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <h2 style="color: #1E3A5F; margin-top: 0;">Verification Code</h2>
+                    <p>Hello,</p>
+                    <p>Use the code below to complete your sign-in to Aranora:</p>
+                    <div style="background: #f8fafc; border: 2px solid #bfdbfe; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+                        <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1E3A5F;">${otpCode}</span>
+                    </div>
+                    <p style="color: #64748b; font-size: 14px;">This code will expire in 10 minutes. If you didn't request this, please ignore this email.</p>
+                    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;" />
+                    <p style="color: #94a3b8; font-size: 12px; text-align: center;">&copy; 2026 Aranora. All rights reserved.</p>
+                </div>
+            `
+        })
+
+        if (emailError) {
+            console.error('Failed to send OTP email via Resend:', emailError)
+            return { error: 'Failed to send verification email. Please try again or contact support.' }
         }
 
         revalidatePath('/', 'layout')
