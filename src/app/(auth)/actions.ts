@@ -208,6 +208,10 @@ export async function signup(formData: FormData) {
                 console.error('Profile verification error (non-blocking):', profileError)
             }
         }
+
+        if (!signupData?.session && signupData?.user) {
+            return { needsEmailConfirmation: true, message: 'Account created! Please check your email to verify your account.' }
+        }
     }
 
     // --- Handle promo code — extend trial if valid ---

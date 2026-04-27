@@ -49,6 +49,7 @@ export default function SignupForm({ promo }: { promo?: string }) {
     const [showPassword, setShowPassword] = useState(false)
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
+    const [successMessage, setSuccessMessage] = useState<string | null>(null)
     const [isPending, startTransition] = useTransition()
     const [isGoogleLoading, setIsGoogleLoading] = useState(false)
     const [showPromo, setShowPromo] = useState(!!promo)
@@ -139,6 +140,8 @@ export default function SignupForm({ promo }: { promo?: string }) {
             const result = await signup(formData)
             if (result?.error) {
                 setError(result.error)
+            } else if (result?.needsEmailConfirmation) {
+                setSuccessMessage(result.message)
             }
         })
     }
@@ -186,7 +189,17 @@ export default function SignupForm({ promo }: { promo?: string }) {
                 </div>
             )}
 
-            {/* Google Sign-Up */}
+            {/* Success Alert */}
+            {successMessage && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm animate-slide-up">
+                    <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                    <span>{successMessage}</span>
+                </div>
+            )}
+
+            {!successMessage && (
+                <>
+                    {/* Google Sign-Up */}
             <Button
                 type="button"
                 variant="outline"
@@ -489,6 +502,8 @@ export default function SignupForm({ promo }: { promo?: string }) {
                     Sign in
                 </Link>
             </p>
+                </>
+            )}
         </div>
     )
 }
