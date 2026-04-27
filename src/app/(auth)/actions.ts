@@ -126,7 +126,7 @@ export async function signup(formData: FormData) {
                 phone: phone,
                 country: country
             },
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/callback`
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.aranora.com'}/api/auth/confirm`
         }
     })
 

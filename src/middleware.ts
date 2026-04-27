@@ -21,19 +21,28 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-    // 1. Intercept Supabase OAuth callbacks that incorrectly fallback to the root URL
+    // 1a. Intercept email confirmation links that land on root URL (token_hash + type)
+    if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('token_hash')) {
+        const confirmUrl = new URL('/api/auth/confirm', request.url);
+        request.nextUrl.searchParams.forEach((value, key) => {
+            confirmUrl.searchParams.set(key, value);
+        });
+        return NextResponse.redirect(confirmUrl);
+    }
+
+    // 1b. Intercept OAuth callbacks that fallback to the root URL (code)
     if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code')) {
         const code = request.nextUrl.searchParams.get('code');
         const callbackUrl = new URL('/api/auth/callback', request.url);
         callbackUrl.searchParams.set('code', code!);
-        
+
         // Preserve other params like 'next' if they exist
         request.nextUrl.searchParams.forEach((value, key) => {
             if (key !== 'code') {
                 callbackUrl.searchParams.set(key, value);
             }
         });
-        
+
         return NextResponse.redirect(callbackUrl);
     }
 
