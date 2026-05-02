@@ -26,7 +26,7 @@ export async function sendEmail({ to, subject, html, from }: SendEmailProps) {
 
   try {
     const { data, error } = await resendInstance.emails.send({
-      from: from || 'Aranora <noreply@aranora.com>',
+      from: from || 'Aranora <support@aranora.com>',
       to: Array.isArray(to) ? to : [to],
       subject,
       html,

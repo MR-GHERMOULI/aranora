@@ -46,11 +46,11 @@ async function sendOtpEmail(to: string, code: string, html: string): Promise<{ s
     const resend = new Resend(apiKey)
     const subject = `${code} is your Aranora verification code`
 
-    // Try primary sender: noreply@aranora.com
+    // Try primary sender: support@aranora.com
     try {
-        console.log(`[OTP] Sending OTP email to ${to} via noreply@aranora.com...`)
+        console.log(`[OTP] Sending OTP email to ${to} via support@aranora.com...`)
         const { data, error } = await resend.emails.send({
-            from: 'Aranora <noreply@aranora.com>',
+            from: 'Aranora <support@aranora.com>',
             to: [to],
             subject,
             html,
