@@ -7,6 +7,7 @@ import { SubscriptionStatusProvider } from "@/components/providers/subscription-
 import { ReadOnlyBanner } from "@/components/billing/read-only-banner";
 import { getUserBillingInfo } from "@/lib/billing";
 import { createClient } from "@/lib/supabase/server";
+import { AccessLogger } from "@/components/security/access-logger";
 
 export default async function DashboardLayout({
   children,
@@ -45,6 +46,7 @@ export default async function DashboardLayout({
           </main>
           <SubscriptionNotifier renewingSubs={upcomingRenewals} />
           <TimerBar />
+          <AccessLogger />
         </div>
       </SubscriptionStatusProvider>
     </TimeTrackerProvider>

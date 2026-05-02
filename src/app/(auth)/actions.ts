@@ -43,6 +43,30 @@ export async function login(formData: FormData) {
 
         // 1. Check if the user is already MFA verified on this device (e.g. "Remember me" is active)
         if (mfaCookie && mfaCookie.value === user.id) {
+            // Log access even on MFA-bypass path
+            try {
+                const { headers } = await import('next/headers')
+                const headerList = await headers()
+                const forwardedFor = headerList.get('x-forwarded-for')
+                const realIp = headerList.get('x-real-ip')
+                const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : (realIp || '127.0.0.1')
+                const ua = headerList.get('user-agent') || 'unknown'
+
+                const serviceClient = createAdminClient()
+                await serviceClient.from('user_access_logs').insert({
+                    user_id: user.id,
+                    ip_address: ip,
+                    user_agent: ua
+                })
+                await serviceClient.from('profiles').update({
+                    last_ip: ip,
+                    last_ua: ua,
+                    last_login_at: new Date().toISOString()
+                }).eq('id', user.id)
+            } catch (logErr) {
+                console.error('Failed to log MFA-bypass access:', logErr)
+            }
+
             // User is already verified, bypass OTP to save resources and improve UX
             revalidatePath('/', 'layout')
             redirect('/dashboard')

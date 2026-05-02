@@ -8,11 +8,7 @@ import { SecurityTable } from "@/components/admin/security-table"
 export default async function AdminSecurityPage() {
     const supabaseAdmin = createAdminClient()
 
-    // 1. Fetch access logs grouped by IP to find shared addresses
-    const { data: sharedIpData } = await supabaseAdmin
-        .rpc('get_shared_ips') // We'll need to define this RPC or use a complex query
-
-    // Since I can't easily define RPCs without the user, I'll use a standard query and process in JS
+    // Fetch all access logs with profile data
     const { data: allLogs } = await supabaseAdmin
         .from('user_access_logs')
         .select(`
