@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
+if (!process.env.STRIPE_SECRET_KEY && process.env.NODE_ENV === 'development') {
   console.warn('⚠️ STRIPE_SECRET_KEY is not set. Stripe features will not work.');
 }
 

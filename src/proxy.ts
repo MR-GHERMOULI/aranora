@@ -20,7 +20,7 @@ function isPublicRoute(pathname: string): boolean {
     return PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     // 1a. Intercept email confirmation links that land on root URL (token_hash + type)
     if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('token_hash')) {
         const confirmUrl = new URL('/api/auth/confirm', request.url);
@@ -93,7 +93,7 @@ export async function middleware(request: NextRequest) {
 
     // 2. Check subscription for dashboard routes
     if (pathname.startsWith('/dashboard') || pathname.startsWith('/projects') ||
-        pathname.startsWith('/clients') || pathname.startsWith('/invoices') ||
+        pathname.startsWith('/clients') || pathname.startsWith('/id') ||
         pathname.startsWith('/contracts') || pathname.startsWith('/tasks') ||
         pathname.startsWith('/reports') || pathname.startsWith('/calendar') ||
         pathname.startsWith('/time-tracking') || pathname.startsWith('/collaborators') ||
