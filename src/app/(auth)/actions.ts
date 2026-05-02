@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { generateAndSendOtp } from '@/lib/otp'
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -36,34 +37,27 @@ export async function login(formData: FormData) {
     const user = data.user
 
     if (user) {
-        // 1. Clear any existing MFA verification for this device/session immediately.
-        // This ensures that even if the user was recently verified, a new login attempt
-        // will require a fresh OTP code.
         const { cookies } = await import('next/headers')
         const cookieStore = await cookies()
+        const mfaCookie = cookieStore.get('aranora_mfa_verified')
+
+        // 1. Check if the user is already MFA verified on this device (e.g. "Remember me" is active)
+        if (mfaCookie && mfaCookie.value === user.id) {
+            // User is already verified, bypass OTP to save resources and improve UX
+            revalidatePath('/', 'layout')
+            redirect('/dashboard')
+        }
+
+        // 2. Clear any stale MFA verification for this device/session immediately.
+        // This ensures a clean state before sending a fresh OTP.
         cookieStore.delete('aranora_mfa_verified')
 
-        // 2. Trigger a fresh OTP send using an anonymous client.
-        // We use an anonymous client to ensure Supabase triggers a fresh OTP email 
-        // regardless of the current session state.
-        const { createServerClient } = await import('@supabase/ssr')
-        const anonSupabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { cookies: { getAll() { return [] }, setAll() { } } }
-        )
+        // 3. Generate and send a fresh OTP code via Resend email
+        const otpResult = await generateAndSendOtp(user.email!)
 
-        const { error: otpError } = await anonSupabase.auth.signInWithOtp({
-            email: user.email!,
-            options: {
-                shouldCreateUser: false,
-            }
-        })
-        
-        if (otpError) {
-            console.error('Failed to send OTP:', otpError)
-            // Return the full error message to help the user diagnose the issue
-            return { error: `Verification error: ${otpError.message}` }
+        if (!otpResult.success) {
+            console.error('Failed to send OTP:', otpResult.error)
+            return { error: `Verification error: ${otpResult.error}` }
         }
 
         revalidatePath('/', 'layout')

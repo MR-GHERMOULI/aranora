@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { generateAndSendOtp } from '@/lib/otp'
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,24 +17,12 @@ export async function POST(request: NextRequest) {
         const cookieStore = await cookies()
         cookieStore.delete('aranora_mfa_verified')
 
-        // 2. Trigger Supabase to send the OTP email natively using an anonymous client
-        const { createServerClient } = await import('@supabase/ssr')
-        const anonSupabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { cookies: { getAll() { return [] }, setAll() { } } }
-        )
+        // 2. Generate a new OTP and send it via Resend
+        const result = await generateAndSendOtp(user.email)
 
-        const { error } = await anonSupabase.auth.signInWithOtp({
-            email: user.email,
-            options: {
-                shouldCreateUser: false,
-            }
-        })
-
-        if (error) {
-            console.error('Supabase send OTP error:', error)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+        if (!result.success) {
+            console.error('Send OTP error:', result.error)
+            return NextResponse.json({ error: result.error || 'Failed to send verification code.' }, { status: 500 })
         }
 
         const maskedEmail = maskEmail(user.email)
