@@ -164,11 +164,13 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
             <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <a href="/" className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-[#1E3A5F] flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+                        <div className="h-10 w-10 rounded-xl bg-white dark:bg-[#1E3A5F] flex items-center justify-center shadow-lg border border-slate-200/60 dark:border-slate-800/60 overflow-hidden shrink-0">
                             {platformLogoUrl ? (
-                                <img src={platformLogoUrl} alt="Logo" className="h-full w-full object-contain p-1" />
+                                <img src={platformLogoUrl} alt="Logo" className="h-full w-full object-contain p-1.5" />
                             ) : (
-                                <Layout className="h-6 w-6 text-white" />
+                                <div className="w-full h-full bg-[#1E3A5F] flex items-center justify-center">
+                                    <Layout className="h-6 w-6 text-white" />
+                                </div>
                             )}
                         </div>
                         <span className="text-xl font-bold tracking-tight text-[#1E3A5F] dark:text-white hidden sm:block">{platformSiteName}</span>
@@ -375,19 +377,12 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
                                     )}
 
                                     {owner.bio && (
-                                        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium line-clamp-4">
+                                        <p className="mt-6 text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium line-clamp-6">
                                             {owner.bio}
                                         </p>
                                     )}
 
-                                    <div className="mt-10 space-y-3">
-                                        {owner.email && (
-                                            <a href={`mailto:${owner.email}`} className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-[#1E3A5F] hover:bg-[#1E3A5F]/5 transition-all group">
-                                                <Mail className="h-4 w-4 text-slate-400 group-hover:text-[#1E3A5F]" />
-                                                <span className="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-[#1E3A5F]">{owner.email}</span>
-                                            </a>
-                                        )}
-                                        
+                                    <div className="mt-10">
                                         {owner.portfolio_url && (
                                             <a
                                                 href={owner.portfolio_url}
