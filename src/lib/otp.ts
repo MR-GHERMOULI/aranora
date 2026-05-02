@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { sendEmail } from '@/lib/email'
+import { Resend } from 'resend'
 
 // OTP code length
 const OTP_LENGTH = 6
@@ -33,20 +33,80 @@ function getAdminClient() {
 }
 
 /**
- * Generate a new OTP, store it in the database, and send it via email
+ * Send OTP email directly via Resend SDK (bypasses shared helper for reliability).
+ * Tries the primary sender first, falls back to onboarding@resend.dev if needed.
+ */
+async function sendOtpEmail(to: string, code: string, html: string): Promise<{ success: boolean; error?: string }> {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+        console.error('[OTP] RESEND_API_KEY is not set in environment variables!')
+        return { success: false, error: 'Email service is not configured (missing API key).' }
+    }
+
+    const resend = new Resend(apiKey)
+    const subject = `${code} is your Aranora verification code`
+
+    // Try primary sender: noreply@aranora.com
+    try {
+        console.log(`[OTP] Sending OTP email to ${to} via noreply@aranora.com...`)
+        const { data, error } = await resend.emails.send({
+            from: 'Aranora <noreply@aranora.com>',
+            to: [to],
+            subject,
+            html,
+        })
+
+        if (!error && data?.id) {
+            console.log(`[OTP] ✅ Email sent successfully via primary sender. Resend ID: ${data.id}`)
+            return { success: true }
+        }
+
+        console.warn(`[OTP] Primary sender failed:`, error)
+    } catch (err) {
+        console.warn(`[OTP] Primary sender threw exception:`, err)
+    }
+
+    // Fallback: try onboarding@resend.dev
+    try {
+        console.log(`[OTP] Retrying with fallback sender onboarding@resend.dev...`)
+        const { data, error } = await resend.emails.send({
+            from: 'Aranora <onboarding@resend.dev>',
+            to: [to],
+            subject,
+            html,
+        })
+
+        if (!error && data?.id) {
+            console.log(`[OTP] ✅ Email sent successfully via fallback sender. Resend ID: ${data.id}`)
+            return { success: true }
+        }
+
+        const errorMsg = error?.message || JSON.stringify(error)
+        console.error(`[OTP] ❌ Fallback sender also failed:`, errorMsg)
+        return { success: false, error: `Email delivery failed: ${errorMsg}` }
+    } catch (err) {
+        console.error(`[OTP] ❌ Fallback sender threw exception:`, err)
+        return { success: false, error: 'Email service encountered an unexpected error.' }
+    }
+}
+
+/**
+ * Generate a new OTP, send it via email, and store it in the database ONLY after
+ * the email is confirmed sent. This prevents orphaned codes that block future attempts.
  */
 export async function generateAndSendOtp(email: string): Promise<{ success: boolean; error?: string }> {
     const admin = getAdminClient()
     const code = generateOtpCode()
     const expiresAt = new Date(Date.now() + OTP_VALIDITY_MINUTES * 60 * 1000).toISOString()
 
+    console.log(`[OTP] Starting OTP flow for ${email.substring(0, 3)}***`)
+
     try {
-        // 1. Prevent email spam and conserve resources by rate-limiting OTP generation.
-        // If an OTP was generated within the last 60 seconds, do not send a new one.
+        // 1. Rate-limit: if an OTP was sent within the last 60 seconds, don't send another.
         const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString()
         const { data: recentOtp } = await admin
             .from('otp_codes')
-            .select('id')
+            .select('id, created_at')
             .eq('email', email.toLowerCase())
             .eq('used', false)
             .gte('created_at', oneMinuteAgo)
@@ -55,19 +115,27 @@ export async function generateAndSendOtp(email: string): Promise<{ success: bool
             .maybeSingle()
 
         if (recentOtp) {
-            // Silently return success to allow the flow to continue to the verify screen,
-            // but the user will just use the code they already received.
+            console.log(`[OTP] Rate-limited — recent code exists (created ${recentOtp.created_at}). Skipping send.`)
             return { success: true }
         }
 
-        // 2. Invalidate any existing unused OTP codes for this email
+        // 2. Send the email FIRST — don't touch the DB until we know the email went out.
+        console.log(`[OTP] Sending email with code to ${email}...`)
+        const emailResult = await sendOtpEmail(email, code, buildOtpEmailHtml(code))
+
+        if (!emailResult.success) {
+            console.error(`[OTP] ❌ Email send failed: ${emailResult.error}`)
+            return { success: false, error: emailResult.error || 'Failed to send verification email.' }
+        }
+
+        // 3. Email confirmed sent — now invalidate old codes and store the new one.
+        console.log(`[OTP] Email sent. Storing code in database...`)
         await admin
             .from('otp_codes')
             .update({ used: true })
             .eq('email', email.toLowerCase())
             .eq('used', false)
 
-        // 2. Store the new OTP code
         const { error: insertError } = await admin
             .from('otp_codes')
             .insert({
@@ -78,39 +146,17 @@ export async function generateAndSendOtp(email: string): Promise<{ success: bool
             })
 
         if (insertError) {
-            console.error('Failed to store OTP code:', insertError)
-            return { success: false, error: 'Failed to generate verification code.' }
+            console.error('[OTP] ⚠️ Code was emailed but failed to store in DB:', insertError)
+            // Email was sent but DB storage failed — this is a non-fatal error.
+            // The user received the code but verification will fail. 
+            // Return success so they can at least try, and request a resend if needed.
+            return { success: false, error: 'Code was sent but could not be saved. Please request a new code.' }
         }
 
-        // 3. Send the OTP via Resend
-        const emailResult = await sendEmail({
-            to: email,
-            subject: `${code} is your Aranora verification code`,
-            html: buildOtpEmailHtml(code),
-        })
-
-        if (emailResult.error) {
-            console.error('Failed to send OTP email:', emailResult.error)
-            // Rollback: Delete the unused code we just inserted so it doesn't trigger
-            // the rate limiter on the user's next immediate attempt.
-            await admin
-                .from('otp_codes')
-                .delete()
-                .eq('email', email.toLowerCase())
-                .eq('code', code)
-                .eq('used', false)
-            
-            // Extract a helpful error message for the user/developer
-            const errorDetail = typeof emailResult.error === 'string' 
-                ? emailResult.error 
-                : (emailResult.error as any).message || 'Unknown email delivery error';
-
-            return { success: false, error: `Email error: ${errorDetail}` }
-        }
-
+        console.log(`[OTP] ✅ OTP flow complete for ${email.substring(0, 3)}***`)
         return { success: true }
     } catch (err) {
-        console.error('OTP generation error:', err)
+        console.error('[OTP] ❌ Unexpected error in OTP flow:', err)
         return { success: false, error: 'An unexpected error occurred.' }
     }
 }
