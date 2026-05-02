@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { generateAndSendOtp } from '@/lib/otp'
 
 export async function login(formData: FormData) {
@@ -63,11 +63,7 @@ export async function login(formData: FormData) {
             const ip = headerList.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
             const ua = headerList.get('user-agent') || 'unknown'
             
-            const serviceClient = createServerClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY!,
-                { cookies: { getAll() { return [] }, setAll() { } } }
-            )
+            const serviceClient = createAdminClient()
             
             await serviceClient.from('user_access_logs').insert({
                 user_id: user.id,
