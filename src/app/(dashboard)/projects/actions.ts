@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Project } from "@/types";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 
 function slugify(text: string): string {
   return text
@@ -190,6 +191,7 @@ export async function createProject(formData: FormData) {
     }
   }
 
+  fireEvent(user.id, 'project.create')
   revalidatePath('/projects');
   return { success: true, projectId: project.id };
 }
@@ -302,6 +304,7 @@ export async function updateProject(formData: FormData) {
     }
   }
 
+  fireEvent(user.id, 'project.update')
   revalidatePath('/projects');
   revalidatePath(`/projects/${id}`);
   const { data: updatedProject } = await supabase.from('projects').select('slug').eq('id', id).single();

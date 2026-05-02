@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Invoice } from "@/types";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 
 export async function getInvoices(clientId?: string, projectId?: string) {
   const supabase = await createClient();
@@ -181,6 +182,7 @@ export async function createInvoice(formData: FormData) {
     // For MVP we assume success.
   }
 
+  fireEvent(user.id, 'invoice.create')
   revalidatePath('/invoices');
   return invoice;
 }
@@ -264,6 +266,7 @@ export async function updateInvoice(formData: FormData) {
     console.error('Error inserting new items:', itemsError);
   }
 
+  fireEvent(user.id, 'invoice.update')
   revalidatePath('/invoices');
   revalidatePath(`/invoices/${updatedInvoice.invoice_number}`);
   return updatedInvoice;

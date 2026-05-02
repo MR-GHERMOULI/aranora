@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { IntakeForm, IntakeSubmission, IntakeFormField } from "@/types";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 
 // ============================================
 // INTAKE FORM CRUD
@@ -87,6 +88,7 @@ export async function createIntakeForm(formData: {
         throw new Error('Failed to create intake form');
     }
 
+    fireEvent(user.id, 'intake_form.create')
     revalidatePath('/intake-forms');
     return data as IntakeForm;
 }
@@ -124,6 +126,7 @@ export async function updateIntakeForm(id: string, formData: {
         throw new Error('Failed to update intake form');
     }
 
+    fireEvent(user.id, 'intake_form.update')
     revalidatePath('/intake-forms');
     revalidatePath(`/intake-forms/${id}`);
 }

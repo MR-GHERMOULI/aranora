@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { TimeEntry } from "@/types";
 import { revalidatePath } from "next/cache";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 
 export async function getTimeEntries(filters?: {
     projectId?: string;
@@ -118,6 +119,7 @@ export async function startTimeEntry(data: {
         throw new Error("Failed to start timer");
     }
 
+    fireEvent(user.id, 'time.start')
     revalidatePath("/time-tracking");
 }
 
@@ -141,6 +143,7 @@ export async function stopTimeEntry(id: string) {
         throw new Error("Failed to stop timer");
     }
 
+    fireEvent(user.id, 'time.stop')
     revalidatePath("/time-tracking");
 }
 
@@ -217,6 +220,7 @@ export async function createTimeEntry(data: {
         throw new Error("Failed to create time entry");
     }
 
+    fireEvent(user.id, 'time.create')
     revalidatePath("/time-tracking");
 }
 

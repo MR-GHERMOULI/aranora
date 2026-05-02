@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireActiveSubscription } from '@/lib/subscription-guard';
+import { fireEvent } from '@/lib/analytics/event-tracker';
 
 // ── Types ──────────────────────────────────────────────
 export interface TaskFilters {
@@ -247,6 +248,7 @@ export async function createTask(formData: FormData, pathToRevalidate?: string) 
         return { error: error.message };
     }
 
+    fireEvent(user.id, 'task.create')
     revalidateAll(pathToRevalidate);
     return { success: true };
 }
@@ -280,6 +282,12 @@ export async function updateTask(taskId: string, data: any, pathToRevalidate?: s
         return { error: 'Task not found or access denied' };
     }
 
+    // Track task completion vs general update
+    if (data.status === 'Done') {
+        fireEvent(user.id, 'task.complete')
+    } else {
+        fireEvent(user.id, 'task.update')
+    }
     revalidateAll(pathToRevalidate);
     return { success: true };
 }

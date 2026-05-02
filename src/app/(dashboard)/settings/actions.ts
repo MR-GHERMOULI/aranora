@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 
 export async function getProfile() {
     const supabase = await createClient();
@@ -104,6 +105,7 @@ export async function updateProfile(formData: FormData) {
         throw new Error('Failed to update profile');
     }
 
+    fireEvent(user.id, 'settings.update')
     revalidatePath('/settings');
 }
 

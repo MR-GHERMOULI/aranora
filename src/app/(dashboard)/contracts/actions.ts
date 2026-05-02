@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Contract, ContractTemplate, ContractStructuredData } from "@/types";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 // ... (rest of imports)
 
 // Generates a 10-character alphanumeric short-link token
@@ -97,6 +98,7 @@ export async function createContract(formData: FormData) {
         throw new Error('Failed to create contract');
     }
 
+    fireEvent(user.id, 'contract.create')
     revalidatePath('/contracts');
 }
 
@@ -132,6 +134,7 @@ export async function createSmartContract(data: {
         throw new Error('Failed to create contract');
     }
 
+    fireEvent(user.id, 'contract.create')
     revalidatePath('/contracts');
 }
 
@@ -263,6 +266,7 @@ export async function sendContract(id: string) {
         throw new Error('Failed to send contract');
     }
 
+    fireEvent(user.id, 'contract.send')
     revalidatePath(`/contracts/${id}`);
     return signingToken;
 }

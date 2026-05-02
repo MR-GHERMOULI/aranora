@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Client } from "@/types";
@@ -53,6 +54,7 @@ export async function createClient(formData: FormData) {
         throw new Error('Failed to create client');
     }
 
+    fireEvent(user.id, 'client.create')
     revalidatePath('/clients');
 }
 
@@ -86,6 +88,7 @@ export async function updateClient(formData: FormData) {
         throw new Error('Failed to update client');
     }
 
+    fireEvent(user.id, 'client.create')
     revalidatePath('/clients');
     revalidatePath(`/clients/${id}`);
 }

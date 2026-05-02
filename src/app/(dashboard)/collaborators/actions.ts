@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { CollaboratorCRM, CollaboratorPayment } from "@/types";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
+import { fireEvent } from "@/lib/analytics/event-tracker";
 
 export async function getCollaborators() {
     const supabase = await createClient();
@@ -125,6 +126,7 @@ export async function createCollaborator(formData: FormData) {
         throw new Error('Failed to create collaborator');
     }
 
+    fireEvent(user.id, 'collaborator.create')
     revalidatePath('/collaborators');
     return data;
 }

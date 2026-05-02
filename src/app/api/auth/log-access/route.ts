@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { trackEvent } from '@/lib/analytics/event-tracker'
 
 export async function POST(request: NextRequest) {
     try {
@@ -30,6 +31,9 @@ export async function POST(request: NextRequest) {
             last_ua: ua,
             last_login_at: new Date().toISOString()
         }).eq('id', user.id)
+
+        // Track login event for engagement analytics
+        trackEvent(user.id, 'login').catch(() => {})
 
         // Set a cookie so middleware doesn't call this again for 24 hours
         const response = NextResponse.json({ success: true })
