@@ -91,7 +91,21 @@ export async function generateAndSendOtp(email: string): Promise<{ success: bool
 
         if (emailResult.error) {
             console.error('Failed to send OTP email:', emailResult.error)
-            return { success: false, error: 'Failed to send verification email. Please try again.' }
+            // Rollback: Delete the unused code we just inserted so it doesn't trigger
+            // the rate limiter on the user's next immediate attempt.
+            await admin
+                .from('otp_codes')
+                .delete()
+                .eq('email', email.toLowerCase())
+                .eq('code', code)
+                .eq('used', false)
+            
+            // Extract a helpful error message for the user/developer
+            const errorDetail = typeof emailResult.error === 'string' 
+                ? emailResult.error 
+                : (emailResult.error as any).message || 'Unknown email delivery error';
+
+            return { success: false, error: `Email error: ${errorDetail}` }
         }
 
         return { success: true }
