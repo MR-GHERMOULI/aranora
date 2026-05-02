@@ -40,6 +40,34 @@ export async function POST(request: NextRequest) {
             maxAge,
         })
 
+        // Log access for security tracking
+        try {
+            const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
+            const ua = request.headers.get('user-agent') || 'unknown'
+            
+            // Use service role for logging to bypass RLS if necessary
+            const { createServerClient } = await import('@supabase/ssr')
+            const serviceClient = createServerClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                { cookies: { getAll() { return [] }, setAll() { } } }
+            )
+
+            await serviceClient.from('user_access_logs').insert({
+                user_id: user.id,
+                ip_address: ip,
+                user_agent: ua
+            })
+
+            await serviceClient.from('profiles').update({
+                last_ip: ip,
+                last_ua: ua,
+                last_login_at: new Date().toISOString()
+            }).eq('id', user.id)
+        } catch (logErr) {
+            console.error('Failed to log verification access:', logErr)
+        }
+
         return response
     } catch (err) {
         console.error('Verify OTP error:', err)

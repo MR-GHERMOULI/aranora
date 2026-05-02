@@ -19,7 +19,8 @@ import {
     Radio,
     CreditCard,
     Link2,
-    UserPlus
+    UserPlus,
+    ShieldAlert
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -172,6 +173,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             icon: Activity,
             href: "/admin/activity",
             color: "text-amber-500",
+        },
+        {
+            label: "Security",
+            labelAr: "الأمن",
+            icon: ShieldAlert,
+            href: "/admin/security",
+            color: "text-red-500",
         },
     ]
 

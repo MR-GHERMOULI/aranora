@@ -56,6 +56,34 @@ export async function login(formData: FormData) {
             return { error: `Verification error: ${otpResult.error}` }
         }
 
+        // 2b. Log access for security tracking
+        try {
+            const { headers } = await import('next/headers')
+            const headerList = await headers()
+            const ip = headerList.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
+            const ua = headerList.get('user-agent') || 'unknown'
+            
+            const serviceClient = createServerClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                { cookies: { getAll() { return [] }, setAll() { } } }
+            )
+            
+            await serviceClient.from('user_access_logs').insert({
+                user_id: user.id,
+                ip_address: ip,
+                user_agent: ua
+            })
+
+            await serviceClient.from('profiles').update({
+                last_ip: ip,
+                last_ua: ua,
+                last_login_at: new Date().toISOString()
+            }).eq('id', user.id)
+        } catch (logErr) {
+            console.error('Failed to log access:', logErr)
+        }
+
         revalidatePath('/', 'layout')
         redirect('/verify-otp')
     }
