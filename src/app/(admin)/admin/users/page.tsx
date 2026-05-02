@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/server"
 import { UsersTable } from "@/components/admin/users-table"
 import { StatsCard } from "@/components/admin/stats-card"
+import { AdminDashboardStats } from "@/components/admin/admin-dashboard-stats"
 
 export default async function AdminUsersPage() {
     const supabaseAdmin = createAdminClient()
@@ -40,8 +41,26 @@ export default async function AdminUsersPage() {
 
     // Build a map of billing subscriptions: userId -> subscription
     const billingMap: Record<string, { status: string; plan_type: string; current_period_end: string | null }> = {}
+    let monthlyActive = 0
+    let yearlyActive = 0
+    let duplicateSubscriptions = 0
+    const seenUsers = new Set<string>()
+
     if (billingSubscriptions) {
         billingSubscriptions.forEach(sub => {
+            if (sub.status === 'active' || sub.status === 'trialing') {
+                if (seenUsers.has(sub.user_id)) {
+                    duplicateSubscriptions++
+                }
+                seenUsers.add(sub.user_id)
+                
+                if (sub.status === 'active') {
+                    if (sub.plan_type === 'monthly') monthlyActive++
+                    else if (sub.plan_type === 'yearly') yearlyActive++
+                }
+            }
+
+            // Always keep the latest one for the table map
             billingMap[sub.user_id] = {
                 status: sub.status,
                 plan_type: sub.plan_type,
@@ -97,11 +116,31 @@ export default async function AdminUsersPage() {
     })
 
     // Stats
+    const totalUsers = users.length
     const ownerCount = users.filter(u => u.tier === "owner").length
     const promoCount = users.filter(u => u.tier === "promo").length
     const trialCount = users.filter(u => u.tier === "trial").length
     const paidCount = users.filter(u => u.tier === "paid").length
     const expiredCount = users.filter(u => u.tier === "expired").length
+    
+    const freeAccounts = trialCount + promoCount + expiredCount
+    const monthlyRevenue = monthlyActive * 19
+    const annualRevenue = yearlyActive * 190
+    const totalMRR = monthlyRevenue + (annualRevenue / 12)
+    const conversionRate = totalUsers > ownerCount ? (paidCount / (totalUsers - ownerCount)) * 100 : 0
+
+    const dashboardStats = {
+        totalUsers,
+        freeAccounts,
+        monthlyActive,
+        yearlyActive,
+        totalPaid: paidCount,
+        monthlyRevenue,
+        annualRevenue,
+        totalMRR,
+        conversionRate,
+        duplicateSubscriptions
+    }
 
     return (
         <div className="space-y-8">
@@ -113,7 +152,10 @@ export default async function AdminUsersPage() {
                 </p>
             </div>
 
-            {/* Stats */}
+            {/* Advanced Stats Dashboard */}
+            <AdminDashboardStats stats={dashboardStats} />
+
+            {/* Quick Stats Grid */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <StatsCard
                     title="Owners"
