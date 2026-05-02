@@ -9,7 +9,7 @@ export default function OtpForm({ maskedEmail }: { maskedEmail: string }) {
     const [digits, setDigits] = useState<string[]>(Array(6).fill(''))
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
-    const [rememberMe, setRememberMe] = useState(false)
+    const [rememberMe, setRememberMe] = useState(true)
     const [resendCooldown, setResendCooldown] = useState(0)
     const [isVerifying, startVerifying] = useTransition()
     const [isResending, setIsResending] = useState(false)
@@ -192,8 +192,8 @@ export default function OtpForm({ maskedEmail }: { maskedEmail: string }) {
                     )}
                 </div>
                 <div>
-                    <span className="text-sm font-medium text-foreground">Remember me for 30 days</span>
-                    <p className="text-xs text-muted-foreground">Skip this verification on this device for 30 days</p>
+                    <span className="text-sm font-medium text-foreground">Stay verified for 30 days</span>
+                    <p className="text-xs text-muted-foreground">You won't be asked for a code on this device for the next month</p>
                 </div>
             </label>
 

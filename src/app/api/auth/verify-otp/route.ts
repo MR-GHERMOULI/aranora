@@ -29,14 +29,15 @@ export async function POST(request: NextRequest) {
         // Build the response and set the MFA cookie
         const response = NextResponse.json({ success: true })
 
-        const maxAge = rememberMe ? THIRTY_DAYS : undefined // session cookie if no remember me
+        // Always set for 30 days as per user request ("once a month")
+        const maxAge = THIRTY_DAYS
 
         response.cookies.set('aranora_mfa_verified', user.id, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/',
-            ...(maxAge ? { maxAge } : {}),
+            maxAge,
         })
 
         return response

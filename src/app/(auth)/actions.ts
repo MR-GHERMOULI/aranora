@@ -48,10 +48,6 @@ export async function login(formData: FormData) {
             redirect('/dashboard')
         }
 
-        // 2. Clear any stale MFA verification for this device/session immediately.
-        // This ensures a clean state before sending a fresh OTP.
-        cookieStore.delete('aranora_mfa_verified')
-
         // 3. Generate and send a fresh OTP code via Resend email
         const otpResult = await generateAndSendOtp(user.email!)
 
@@ -352,10 +348,9 @@ export async function logout() {
     const supabase = await createClient()
     await supabase.auth.signOut()
     
-    // Clear the MFA cookie to ensure the next login requires a fresh OTP
-    const { cookies } = await import('next/headers')
-    const cookieStore = await cookies()
-    cookieStore.delete('aranora_mfa_verified')
+    // We NO LONGER clear the MFA cookie on logout.
+    // This allows the "Remember for 30 days" feature to persist across sessions
+    // on the same device, satisfying the user request for once-a-month verification.
     
     redirect('/login')
 }
