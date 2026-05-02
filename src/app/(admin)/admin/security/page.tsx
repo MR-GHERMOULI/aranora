@@ -35,22 +35,36 @@ export default async function AdminSecurityPage() {
     const uaGroups: Record<string, any[]> = {}
 
     allLogs?.forEach(log => {
-        if (!ipGroups[log.ip_address]) ipGroups[log.ip_address] = []
-        if (!ipGroups[log.ip_address].some((u: any) => u.id === log.user_id)) {
-            ipGroups[log.ip_address].push({
-                ...log.profiles,
-                last_access: log.created_at,
-                ua: log.user_agent
-            })
+        // If profile is missing, create a placeholder from user_id
+        const userProfile = log.profiles || { 
+            id: log.user_id, 
+            full_name: 'Unknown User', 
+            company_email: 'N/A', 
+            account_status: 'active' 
         }
 
-        if (!uaGroups[log.user_agent]) uaGroups[log.user_agent] = []
-        if (!uaGroups[log.user_agent].some((u: any) => u.id === log.user_id)) {
-            uaGroups[log.user_agent].push({
-                ...log.profiles,
-                last_access: log.created_at,
-                ip: log.ip_address
-            })
+        if (log.ip_address) {
+            if (!ipGroups[log.ip_address]) ipGroups[log.ip_address] = []
+            if (!ipGroups[log.ip_address].some((u: any) => u.id === log.user_id)) {
+                ipGroups[log.ip_address].push({
+                    ...userProfile,
+                    id: log.user_id, // Ensure id is always present
+                    last_access: log.created_at,
+                    ua: log.user_agent
+                })
+            }
+        }
+
+        if (log.user_agent && log.user_agent !== 'unknown') {
+            if (!uaGroups[log.user_agent]) uaGroups[log.user_agent] = []
+            if (!uaGroups[log.user_agent].some((u: any) => u.id === log.user_id)) {
+                uaGroups[log.user_agent].push({
+                    ...userProfile,
+                    id: log.user_id,
+                    last_access: log.created_at,
+                    ip: log.ip_address
+                })
+            }
         }
     })
 
@@ -84,6 +98,14 @@ export default async function AdminSecurityPage() {
                 <p className="text-muted-foreground mt-1">
                     Detect and manage accounts shared across the same device or IP address
                 </p>
+                <div className="mt-2 flex gap-2">
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                        {allLogs?.length || 0} Access Logs Collected
+                    </Badge>
+                    <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                        Monitoring Active
+                    </Badge>
+                </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">

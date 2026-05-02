@@ -60,7 +60,9 @@ export async function login(formData: FormData) {
         try {
             const { headers } = await import('next/headers')
             const headerList = await headers()
-            const ip = headerList.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
+            const forwardedFor = headerList.get('x-forwarded-for')
+            const realIp = headerList.get('x-real-ip')
+            const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : (realIp || '127.0.0.1')
             const ua = headerList.get('user-agent') || 'unknown'
             
             const serviceClient = createAdminClient()

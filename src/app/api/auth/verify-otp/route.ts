@@ -42,7 +42,9 @@ export async function POST(request: NextRequest) {
 
         // Log access for security tracking
         try {
-            const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1'
+            const forwardedFor = request.headers.get('x-forwarded-for')
+            const realIp = request.headers.get('x-real-ip')
+            const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : (realIp || '127.0.0.1')
             const ua = request.headers.get('user-agent') || 'unknown'
             
             // Use service role for logging to bypass RLS if necessary
