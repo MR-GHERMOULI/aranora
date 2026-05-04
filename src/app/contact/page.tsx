@@ -14,7 +14,12 @@ import { createClient } from "@/lib/supabase/client";
 export default function ContactPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [isSuccess, setIsSuccess] = useState(false)
-    const [supportEmail, setSupportEmail] = useState("support@aranora.com")
+    const [contactInfo, setContactInfo] = useState({
+        email: "",
+        phone: "",
+        address: "",
+        hours: ""
+    })
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -24,18 +29,38 @@ export default function ContactPage() {
     })
 
     useEffect(() => {
-        const fetchBranding = async () => {
+        const fetchData = async () => {
             const supabase = createClient();
-            const { data } = await supabase
+            
+            // Fetch branding as fallback email
+            const { data: brandingData } = await supabase
                 .from("platform_settings")
                 .select("value")
                 .eq("key", "branding")
                 .single();
-            if (data?.value?.support_email) {
-                setSupportEmail(data.value.support_email);
+                
+            let defaultEmail = "support@aranora.com";
+            if (brandingData?.value?.support_email) {
+                defaultEmail = brandingData.value.support_email;
             }
+
+            // Fetch contact page data
+            const { data: pageData } = await supabase
+                .from("static_pages")
+                .select("contact_info")
+                .eq("slug", "contact")
+                .single();
+
+            const info = pageData?.contact_info || {};
+
+            setContactInfo({
+                email: info.email || defaultEmail,
+                phone: info.phone || "",
+                address: info.address || "",
+                hours: info.hours || ""
+            });
         };
-        fetchBranding();
+        fetchData();
     }, []);
 
     async function handleSubmit(e: React.FormEvent) {
@@ -97,10 +122,12 @@ export default function ContactPage() {
                     <div className="space-y-8">
                         <div className="space-y-6">
                             {[
-                                { icon: Mail, label: "Email", value: supportEmail },
-                                { icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
-                                { icon: MapPin, label: "Address", value: "123 Freelance Ave, San Francisco, CA 94102" }
-                            ].map((item, i) => (
+                                { icon: Mail, label: "Email", value: contactInfo.email },
+                                { icon: Phone, label: "Phone", value: contactInfo.phone },
+                                { icon: MapPin, label: "Address", value: contactInfo.address }
+                            ]
+                            .filter(item => item.value && item.value.trim() !== "")
+                            .map((item, i) => (
                                 <div key={i} className="flex items-start gap-4">
                                     <div className="h-10 w-10 rounded-lg bg-brand-primary/10 flex items-center justify-center flex-shrink-0">
                                         <item.icon className="h-5 w-5 text-brand-primary" />
@@ -113,11 +140,14 @@ export default function ContactPage() {
                             ))}
                         </div>
 
-                        <div className="pt-6 border-t border-border">
-                            <h3 className="font-semibold text-foreground mb-2">Office Hours</h3>
-                            <p className="text-muted-foreground">Monday - Friday: 9am - 6pm PST</p>
-                            <p className="text-muted-foreground">Saturday - Sunday: Closed</p>
-                        </div>
+                        {contactInfo.hours && contactInfo.hours.trim() !== "" && (
+                            <div className="pt-6 border-t border-border">
+                                <h3 className="font-semibold text-foreground mb-2">Office Hours</h3>
+                                {contactInfo.hours.split('\n').map((line, i) => (
+                                    <p key={i} className="text-muted-foreground">{line}</p>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Contact Form */}
