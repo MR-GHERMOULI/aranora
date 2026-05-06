@@ -29,12 +29,53 @@ interface NexusCanvasProps {
 export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [shapes, setShapes] = useState<NexusShape[]>([]);
   const [connections, setConnections] = useState<NexusConnection[]>([]);
+  const [paths, setPaths] = useState<NexusPath[]>([]);
   const [canvasName, setCanvasName] = useState('Untitled Canvas');
   const [canvasId, setCanvasId] = useState<string>('');
+
+  // ── History (Undo/Redo) ──────────────────────────────
+  const [history, setHistory] = useState<{ shapes: NexusShape[], connections: NexusConnection[], paths: NexusPath[] }[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  const saveToHistory = useCallback((s: NexusShape[], c: NexusConnection[], p: NexusPath[]) => {
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      return [...newHistory, { shapes: s, connections: c, paths: p }];
+    });
+    setHistoryIndex(prev => prev + 1);
+  }, [historyIndex]);
+
+  const undo = useCallback(() => {
+    if (historyIndex > 0) {
+      const state = history[historyIndex - 1];
+      setShapes(state.shapes);
+      setConnections(state.connections);
+      setPaths(state.paths);
+      setHistoryIndex(prev => prev - 1);
+    } else if (historyIndex === 0) {
+      setShapes([]); setConnections([]); setPaths([]);
+      setHistoryIndex(-1);
+    }
+  }, [historyIndex, history]);
+
+  const redo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const state = history[historyIndex + 1];
+      setShapes(state.shapes);
+      setConnections(state.connections);
+      setPaths(state.paths);
+      setHistoryIndex(prev => prev + 1);
+    }
+  }, [historyIndex, history]);
 
   const [activeTool, setActiveTool] = useState<ToolMode>('select');
   const [activeColor, setActiveColor] = useState(SHAPE_COLOR_PRESETS[0]);
   const [connectionColor, setConnectionColor] = useState('#3b82f6');
+  const [penConfig, setPenConfig] = useState<{ type: 'pen' | 'illustration' | 'highlighter', color: string, width: number }>({
+    type: 'pen',
+    color: '#000000',
+    width: 2
+  });
 
   const [viewport, setViewport] = useState<CanvasViewport>({ x: 0, y: 0, zoom: 1 });
   const svgRef = useRef<SVGSVGElement>(null);
@@ -48,6 +89,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [panning, setPanning] = useState<{ startX: number; startY: number; startVpX: number; startVpY: number } | null>(null);
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [tempLine, setTempLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [activePath, setActivePath] = useState<NexusPath | null>(null);
 
   const [generatedTasks, setGeneratedTasks] = useState<GeneratedTask[] | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -73,6 +115,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         // Always cancel any pending action and return to select
         setConnectFrom(null);
         setTempLine(null);
+        setActivePath(null);
         setSelectedShapeId(null);
         setSelectedConnId(null);
         setEditingShapeId(null);
@@ -80,8 +123,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         setActiveTool('select');
         return;
       }
+      if ((e.ctrlKey || e.metaKey) && key === 'z') {
+        if (e.shiftKey) redo(); else undo();
+        e.preventDefault();
+      }
       if (key === 'v') setActiveTool('select');
       else if (key === 'h') setActiveTool('pan');
+      else if (key === 'p') setActiveTool('pen');
       else if (key === 'r') setActiveTool('rectangle');
       else if (key === 'c') setActiveTool('circle');
       else if (key === 'd') setActiveTool('diamond');
@@ -131,10 +179,26 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
     if (shapeTools.includes(activeTool as any)) {
       const newShape = createShape(activeTool as NexusShape['type'], x, y, activeColor.fill, activeColor.border, activeColor.text);
-      setShapes(prev => [...prev, newShape]);
+      setShapes(prev => {
+        const next = [...prev, newShape];
+        saveToHistory(next, connections, paths);
+        return next;
+      });
       setSelectedShapeId(newShape.id);
       setEditingShapeId(newShape.id);
       setActiveTool('select');
+      return;
+    }
+    if (activeTool === 'pen') {
+      const newPath: NexusPath = {
+        id: crypto.randomUUID(),
+        points: [{ x, y }],
+        color: penConfig.color,
+        strokeWidth: penConfig.type === 'illustration' ? penConfig.width * 2.5 : penConfig.width,
+        type: penConfig.type,
+        opacity: penConfig.type === 'highlighter' ? 0.35 : 1
+      };
+      setActivePath(newPath);
       return;
     }
     if (activeTool === 'pan') {
@@ -222,9 +286,24 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         setTempLine({ x1: fromShape.x + fromShape.width / 2, y1: fromShape.y + fromShape.height / 2, x2: x, y2: y });
       }
     }
+    if (activePath) {
+      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      setActivePath(prev => prev ? { ...prev, points: [...prev.points, { x, y }] } : null);
+    }
   };
 
-  const handleMouseUp = () => { setDragging(null); setPanning(null); };
+  const handleMouseUp = () => { 
+    if (activePath) {
+      setPaths(prev => {
+        const next = [...prev, activePath];
+        saveToHistory(shapes, connections, next);
+        return next;
+      });
+      setActivePath(null);
+    }
+    setDragging(null); 
+    setPanning(null); 
+  };
   const handleDoubleClick = (shapeId: string) => { 
     setEditingShapeId(shapeId); 
     setEditingConnId(null);
@@ -265,7 +344,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
   const deleteSelectedShape = () => {
     if (!selectedShapeId) return;
-    setShapes(prev => prev.filter(s => s.id !== selectedShapeId));
+    setShapes(prev => {
+      const next = prev.filter(s => s.id !== selectedShapeId);
+      saveToHistory(next, connections, paths);
+      return next;
+    });
     setConnections(prev => prev.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId));
     setSelectedShapeId(null);
   };
@@ -436,6 +519,12 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         connectionCount={connections.length}
         isConverting={isConverting}
         connectFrom={connectFrom}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={historyIndex >= 0}
+        canRedo={historyIndex < history.length - 1}
+        penConfig={penConfig}
+        onPenConfigChange={setPenConfig}
       />
 
       {/* Zoom controls - Moved to top left since dock is at bottom */}
@@ -516,6 +605,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           <rect x={0} y={0} width="100%" height="100%" fill="url(#dot-grid)" />
 
           <g transform={`translate(${viewport.x}, ${viewport.y}) scale(${viewport.zoom})`}>
+            {/* Freehand paths */}
+            {[...paths, ...(activePath ? [activePath] : [])].map(path => (
+              <path
+                key={path.id}
+                d={path.points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
+                fill="none"
+                stroke={path.color}
+                strokeWidth={path.strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={path.opacity}
+                style={{ pointerEvents: 'none' }}
+              />
+            ))}
+
             {/* Connections below shapes */}
             {renderConnections()}
 

@@ -38,11 +38,21 @@ export interface NexusConnection {
   animated?: boolean;
 }
 
+export interface NexusPath {
+  id: string;
+  points: { x: number; y: number }[];
+  color: string;
+  strokeWidth: number;
+  type: 'pen' | 'illustration' | 'highlighter';
+  opacity: number;
+}
+
 export interface NexusCanvas {
   id: string;
   name: string;
   shapes: NexusShape[];
   connections: NexusConnection[];
+  paths: NexusPath[];
   createdAt: string;
   updatedAt: string;
 }
@@ -62,6 +72,7 @@ export type ToolMode =
   | 'hexagon'
   | 'parallelogram'
   | 'connect'
+  | 'pen'
   | 'text';
 
 export interface GeneratedTask {
