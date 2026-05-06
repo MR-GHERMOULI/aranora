@@ -30,6 +30,7 @@ export function createNewCanvas(name: string): NexusCanvasData {
     name,
     shapes: [],
     connections: [],
+    paths: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
