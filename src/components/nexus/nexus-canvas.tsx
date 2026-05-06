@@ -559,21 +559,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       )}
 
       {/* Empty canvas hint */}
-      {shapes.length === 0 && (
+      {shapes.length === 0 && paths.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="text-center space-y-4">
-            <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-50 to-blue-50 border-2 border-dashed border-violet-200 flex items-center justify-center">
-              <Sparkles className="h-10 w-10 text-violet-300" />
+          <div className="text-center space-y-6">
+            <div className="mx-auto w-24 h-24 rounded-[2rem] bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-2xl shadow-blue-500/10 flex items-center justify-center animate-bounce-slow">
+              <Sparkles className="h-10 w-10 text-blue-500" />
             </div>
-            <div>
-              <h3 className="text-gray-400 text-lg font-medium">Start Your Nexus</h3>
-              <p className="text-gray-300 text-sm mt-1 max-w-xs mx-auto">
-                Select a shape tool from the toolbar above, then click to place shapes
+            <div className="space-y-2">
+              <h3 className="text-gray-900 text-2xl font-bold tracking-tight">Nexus Tools</h3>
+              <p className="text-gray-500 text-base max-w-sm mx-auto leading-relaxed font-medium">
+                These are nexus tools from our <span className="text-blue-600 font-bold">Aranora platform</span>. Select a tool below to begin your creative journey.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-4 text-[11px] text-gray-300">
-              <span className="flex items-center gap-1"><MousePointer2 className="h-3 w-3" /> Click to place</span>
-              <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Double-click to edit</span>
+            <div className="flex items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold text-gray-400">
+              <span className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm"><MousePointer2 className="h-3.5 w-3.5 text-blue-500" /> Click to Create</span>
+              <span className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm"><Sparkles className="h-3.5 w-3.5 text-amber-500" /> Professional Suite</span>
             </div>
           </div>
         </div>
