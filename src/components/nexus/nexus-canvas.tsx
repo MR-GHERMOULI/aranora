@@ -14,6 +14,7 @@ import {
 import { convertCanvasToTasks } from '@/lib/nexus/converter';
 import { NexusToolbar } from './nexus-toolbar';
 import { ShapeRenderer } from './shape-renderer';
+import { ShapeProperties } from './shape-properties';
 import { TaskPanel } from './task-panel';
 import { CanvasList } from './canvas-list';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
@@ -237,6 +238,25 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   const handleTextChange = (shapeId: string, text: string) => setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, text } : s));
+
+  const updateShapeColor = (shapeId: string, fill: string, border: string, text: string) => {
+    setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, color: fill, borderColor: border, textColor: text } : s));
+  };
+
+  const updateShapeType = (shapeId: string, type: NexusShape['type']) => {
+    setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, type } : s));
+  };
+
+  const updateShapeFontSize = (shapeId: string, fontSize: number) => {
+    setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, fontSize } : s));
+  };
+
+  const deleteSelectedShape = () => {
+    if (!selectedShapeId) return;
+    setShapes(prev => prev.filter(s => s.id !== selectedShapeId));
+    setConnections(prev => prev.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId));
+    setSelectedShapeId(null);
+  };
 
   // ── Convert ──────────────────────────────────────────
   const handleConvert = async () => {
@@ -516,6 +536,18 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           </g>
         </svg>
       </div>
+
+      {selectedShapeId && shapes.find(s => s.id === selectedShapeId) && activeTool === 'select' && (
+        <ShapeProperties
+          shape={shapes.find(s => s.id === selectedShapeId)!}
+          onColorChange={(f, b, t) => updateShapeColor(selectedShapeId, f, b, t)}
+          onTypeChange={(t) => updateShapeType(selectedShapeId, t)}
+          onDelete={deleteSelectedShape}
+          onFontSizeChange={(size) => updateShapeFontSize(selectedShapeId, size)}
+          zoom={viewport.zoom}
+          viewport={viewport}
+        />
+      )}
 
       {generatedTasks && (
         <TaskPanel tasks={generatedTasks} onClose={() => setGeneratedTasks(null)}
