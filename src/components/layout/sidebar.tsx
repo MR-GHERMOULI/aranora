@@ -23,7 +23,8 @@ import {
     UserCog,
     Wallet,
     TrendingUp,
-    ClipboardList
+    ClipboardList,
+    Workflow
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -140,6 +141,12 @@ export function Sidebar({ className }: SidebarProps) {
         {
             title: "Workspace",
             routes: [
+                {
+                    label: "Nexus",
+                    icon: Workflow,
+                    href: "/nexus",
+                    color: "text-violet-500",
+                },
                 {
                     label: "Tasks",
                     icon: ListTodo,
