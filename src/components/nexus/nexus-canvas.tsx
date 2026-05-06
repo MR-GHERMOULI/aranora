@@ -384,28 +384,28 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   const handleSave = () => {
-    const canvas: NexusCanvasData = { id: canvasId || crypto.randomUUID(), name: canvasName, shapes, connections, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const canvas: NexusCanvasData = { id: canvasId || crypto.randomUUID(), name: canvasName, shapes, connections, paths, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     if (!canvasId) setCanvasId(canvas.id);
     saveCanvas(canvas);
     toast.success('Canvas saved!');
   };
 
   const handleLoadCanvas = (canvas: NexusCanvasData) => {
-    setShapes(canvas.shapes); setConnections(canvas.connections);
+    setShapes(canvas.shapes); setConnections(canvas.connections); setPaths(canvas.paths || []);
     setCanvasName(canvas.name); setCanvasId(canvas.id);
     setShowCanvasList(false); setSelectedShapeId(null); setEditingShapeId(null);
     toast.success(`Loaded "${canvas.name}"`);
   };
 
   const handleNewCanvas = () => {
-    setShapes([]); setConnections([]); setCanvasName('Untitled Canvas');
+    setShapes([]); setConnections([]); setPaths([]); setCanvasName('Untitled Canvas');
     setCanvasId(''); setSelectedShapeId(null); setEditingShapeId(null);
     setGeneratedTasks(null); setViewport({ x: 0, y: 0, zoom: 1 });
   };
 
   const handleClear = () => {
-    if (shapes.length === 0) return;
-    setShapes([]); setConnections([]);
+    if (shapes.length === 0 && paths.length === 0) return;
+    setShapes([]); setConnections([]); setPaths([]);
     setSelectedShapeId(null); setEditingShapeId(null);
     toast.info('Canvas cleared');
   };
