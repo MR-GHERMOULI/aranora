@@ -11,12 +11,13 @@ interface ShapeRendererProps {
   onMouseDown: (e: React.MouseEvent, shapeId: string) => void;
   onDoubleClick: (shapeId: string) => void;
   onTextChange: (shapeId: string, text: string) => void;
+  onContextMenu: (e: React.MouseEvent, shapeId: string) => void;
   editingShapeId: string | null;
 }
 
 export function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
-  onMouseDown, onDoubleClick, onTextChange, editingShapeId,
+  onMouseDown, onDoubleClick, onTextChange, onContextMenu, editingShapeId,
 }: ShapeRendererProps) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const isEditing = editingShapeId === shape.id;
@@ -65,6 +66,7 @@ export function ShapeRenderer({
       fontStyle: shape.fontStyle || 'normal',
       textAlign: shape.textAlign || 'center',
       fontFamily: fonts[shape.fontFamily || 'sans'],
+      direction: shape.direction || 'ltr',
       lineHeight: '1.4',
     };
   }, [shape]);
@@ -91,6 +93,7 @@ export function ShapeRenderer({
       style={{ cursor: isEditing ? 'text' : 'grab' }}
       onMouseDown={e => { if (!isEditing) onMouseDown(e, shape.id); }}
       onDoubleClick={() => onDoubleClick(shape.id)}
+      onContextMenu={e => { e.preventDefault(); onContextMenu(e, shape.id); }}
     >
       <defs>
         <filter id={shadowId} x="-20%" y="-20%" width="140%" height="160%">

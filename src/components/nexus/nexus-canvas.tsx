@@ -237,6 +237,14 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setSelectedConnId(connId);
   };
 
+  const handleShapeContextMenu = (e: React.MouseEvent, shapeId: string) => {
+    // Right click triggers selection to show property ribbon
+    setSelectedShapeId(shapeId);
+    setSelectedConnId(null);
+    setEditingShapeId(null);
+    setEditingConnId(null);
+  };
+
   const handleTextChange = (shapeId: string, text: string) => setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, text } : s));
 
   const updateShapeColor = (shapeId: string, fill: string, border: string, text: string) => {
@@ -534,6 +542,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onMouseDown={handleShapeMouseDown}
                 onDoubleClick={handleDoubleClick}
                 onTextChange={handleTextChange}
+                onContextMenu={handleShapeContextMenu}
                 editingShapeId={editingShapeId}
               />
             ))}

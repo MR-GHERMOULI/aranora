@@ -6,9 +6,10 @@ import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import {
   Square, Circle, Diamond, Hexagon,
   Trash2, Type, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
-  Baseline
+  Baseline, Languages, Hash, ArrowRightLeft
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 interface ShapePropertiesProps {
   shape: NexusShape;
@@ -28,12 +29,20 @@ const shapeTypes: { type: ShapeType; icon: any; label: string }[] = [
   { type: 'hexagon', icon: Hexagon, label: 'Hex' },
 ];
 
+const symbols = ['[ ]', '{ }', '( )', '→', '•', '★', '✔', '✖', '●', '■', '▲'];
+
 export function ShapeProperties({
   shape, onColorChange, onTypeChange, onDelete, onFontSizeChange,
   onPropertyChange, zoom, viewport
 }: ShapePropertiesProps) {
+  const [showSymbols, setShowSymbols] = useState(false);
+  
   const x = (shape.x * zoom) + viewport.x;
-  const y = (shape.y * zoom) + viewport.y - 72; // Increased offset from 64 to 72 for better clearance
+  const y = (shape.y * zoom) + viewport.y - 72;
+
+  const insertSymbol = (s: string) => {
+    onPropertyChange({ text: (shape.text || '') + s });
+  };
 
   return (
     <motion.div
@@ -58,25 +67,22 @@ export function ShapeProperties({
         ))}
       </div>
 
-      {/* Font & Formatting */}
+      {/* Formatting & Direction */}
       <div className="flex items-center gap-0.5 px-1 border-r border-gray-100">
         <button
           onClick={() => onPropertyChange({ fontWeight: shape.fontWeight === 'bold' ? 'normal' : 'bold' })}
-          className={cn(
-            "p-2 rounded-lg transition-all",
-            shape.fontWeight === 'bold' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:bg-gray-50"
-          )}
+          className={cn("p-2 rounded-lg transition-all", shape.fontWeight === 'bold' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:bg-gray-50")}
         >
           <Bold className="h-4 w-4" />
         </button>
+        
         <button
-          onClick={() => onPropertyChange({ fontStyle: shape.fontStyle === 'italic' ? 'normal' : 'italic' })}
-          className={cn(
-            "p-2 rounded-lg transition-all",
-            shape.fontStyle === 'italic' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:bg-gray-50"
-          )}
+          onClick={() => onPropertyChange({ direction: shape.direction === 'rtl' ? 'ltr' : 'rtl', textAlign: shape.direction === 'rtl' ? 'center' : 'right' })}
+          className={cn("p-2 rounded-lg transition-all flex items-center gap-1", shape.direction === 'rtl' ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+          title="Toggle RTL"
         >
-          <Italic className="h-4 w-4" />
+          <ArrowRightLeft className="h-4 w-4" />
+          <span className="text-[9px] font-bold">RTL</span>
         </button>
         
         <div className="w-px h-4 bg-gray-100 mx-1" />
@@ -101,27 +107,45 @@ export function ShapeProperties({
         </button>
       </div>
 
-      {/* Font Family & Size */}
-      <div className="flex items-center gap-2 px-2 border-r border-gray-100">
-        <Baseline className="h-3.5 w-3.5 text-gray-400" />
+      {/* Symbols & Fonts */}
+      <div className="flex items-center gap-1.5 px-2 border-r border-gray-100 relative">
+        <button
+          onClick={() => setShowSymbols(!showSymbols)}
+          className={cn("p-2 rounded-lg transition-all", showSymbols ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+          title="Insert Symbol"
+        >
+          <Hash className="h-4 w-4" />
+        </button>
+        
+        <AnimatePresence>
+          {showSymbols && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+              className="absolute bottom-[calc(100%+12px)] left-0 p-2 rounded-xl bg-white border border-gray-200 shadow-xl grid grid-cols-4 gap-1 min-w-[120px]"
+            >
+              {symbols.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { insertSymbol(s); setShowSymbols(false); }}
+                  className="p-1.5 rounded-md hover:bg-blue-50 hover:text-blue-600 text-xs font-bold transition-all border border-transparent hover:border-blue-100"
+                >
+                  {s}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <select
           value={shape.fontFamily || 'sans'}
           onChange={e => onPropertyChange({ fontFamily: e.target.value as any })}
-          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600"
+          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600 ml-1"
         >
           <option value="sans">Sans</option>
           <option value="serif">Serif</option>
           <option value="mono">Mono</option>
-        </select>
-        <div className="w-px h-4 bg-gray-100 mx-1" />
-        <select
-          value={shape.fontSize}
-          onChange={e => onFontSizeChange(Number(e.target.value))}
-          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600"
-        >
-          {[12, 14, 16, 18, 20, 24, 32].map(s => (
-            <option key={s} value={s}>{s}px</option>
-          ))}
         </select>
       </div>
 

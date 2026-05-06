@@ -24,6 +24,7 @@ export interface NexusShape {
   fontStyle?: 'normal' | 'italic';
   textAlign?: 'left' | 'center' | 'right';
   fontFamily?: 'sans' | 'serif' | 'mono';
+  direction?: 'ltr' | 'rtl';
 }
 
 export interface NexusConnection {

@@ -88,6 +88,7 @@ export function createShape(
     fontStyle: 'normal',
     textAlign: 'center',
     fontFamily: 'sans',
+    direction: 'ltr',
   };
 }
 
