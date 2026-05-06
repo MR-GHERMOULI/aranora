@@ -6,7 +6,7 @@ import { SHAPE_COLOR_PRESETS, CONNECTION_COLORS } from '@/types/nexus';
 import {
   MousePointer2, Hand, Square, Circle, Diamond, Hexagon,
   Link2, Sparkles, Save, Trash2, FolderOpen, Plus, ChevronUp,
-  Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush
+  Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +46,7 @@ const tools: { mode: ToolMode; icon: any; label: string; shortcut: string }[] = 
   { mode: 'hexagon',     icon: Hexagon,       label: 'Hexagon',     shortcut: 'X' },
   { mode: 'connect',     icon: Link2,         label: 'Connect',     shortcut: 'L' },
   { mode: 'pen',         icon: PenLine,       label: 'Pen Tool',    shortcut: 'P' },
+  { mode: 'eraser',      icon: Eraser,        label: 'Eraser',      shortcut: 'E' },
 ];
 
 export function NexusToolbar({
@@ -218,6 +219,24 @@ export function NexusToolbar({
                       </button>
                     ))}
                   </div>
+
+                  {/* Thickness */}
+                  <div className="mb-4 px-1">
+                    <div className="flex justify-between items-center mb-1 text-[9px] font-bold text-gray-500 uppercase">
+                      <span>Thickness</span>
+                      <span>{penConfig.width}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="20"
+                      value={penConfig.width}
+                      onChange={e => onPenConfigChange({ ...penConfig, width: parseInt(e.target.value) })}
+                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                    />
+                  </div>
+
+                  {/* Colors */}
                   <div className="grid grid-cols-6 gap-2">
                     {CONNECTION_COLORS.concat(['#000000']).map(c => (
                       <button key={c} onClick={() => onPenConfigChange({ ...penConfig, color: c })}

@@ -130,6 +130,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       if (key === 'v') setActiveTool('select');
       else if (key === 'h') setActiveTool('pan');
       else if (key === 'p') setActiveTool('pen');
+      else if (key === 'e') setActiveTool('eraser');
       else if (key === 'r') setActiveTool('rectangle');
       else if (key === 'c') setActiveTool('circle');
       else if (key === 'd') setActiveTool('diamond');
@@ -352,6 +353,18 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setConnections(prev => prev.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId));
     setSelectedShapeId(null);
   };
+
+  const handleErasePath = (pathId: string) => {
+    setPaths(prev => {
+      const next = prev.filter(p => p.id !== pathId);
+      if (next.length !== prev.length) {
+        saveToHistory(shapes, connections, next);
+      }
+      return next;
+    });
+  };
+
+  const handleZoom = (delta: number) => setViewport(prev => ({ ...prev, zoom: Math.min(Math.max(0.1, prev.zoom + delta), 3) }));
 
   // ── Convert ──────────────────────────────────────────
   const handleConvert = async () => {
@@ -615,8 +628,18 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 strokeWidth={path.strokeWidth}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity={path.opacity}
-                style={{ pointerEvents: 'none' }}
+                opacity={activeTool === 'eraser' ? path.opacity * 0.5 : path.opacity}
+                style={{ 
+                  pointerEvents: activeTool === 'eraser' ? 'stroke' : 'none',
+                  cursor: activeTool === 'eraser' ? 'crosshair' : 'default',
+                  transition: 'opacity 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeTool === 'eraser' && e.buttons === 1) handleErasePath(path.id);
+                }}
+                onMouseDown={(e) => {
+                  if (activeTool === 'eraser') handleErasePath(path.id);
+                }}
               />
             ))}
 

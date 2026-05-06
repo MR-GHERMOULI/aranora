@@ -73,6 +73,7 @@ export type ToolMode =
   | 'parallelogram'
   | 'connect'
   | 'pen'
+  | 'eraser'
   | 'text';
 
 export interface GeneratedTask {
