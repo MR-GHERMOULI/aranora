@@ -541,7 +541,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         </svg>
       </div>
 
-      {selectedShapeId && shapes.find(s => s.id === selectedShapeId) && activeTool === 'select' && (
+      {selectedShapeId && shapes.find(s => s.id === selectedShapeId) && activeTool === 'select' && !editingShapeId && (
         <ShapeProperties
           shape={shapes.find(s => s.id === selectedShapeId)!}
           onColorChange={(f, b, t) => updateShapeColor(selectedShapeId, f, b, t)}

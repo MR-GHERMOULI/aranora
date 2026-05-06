@@ -33,7 +33,7 @@ export function ShapeProperties({
   onPropertyChange, zoom, viewport
 }: ShapePropertiesProps) {
   const x = (shape.x * zoom) + viewport.x;
-  const y = (shape.y * zoom) + viewport.y - 64;
+  const y = (shape.y * zoom) + viewport.y - 72; // Increased offset from 64 to 72 for better clearance
 
   return (
     <motion.div
@@ -127,8 +127,8 @@ export function ShapeProperties({
 
       {/* Colors */}
       <div className="flex items-center gap-1.5 px-2 border-r border-gray-100">
-        <div className="grid grid-cols-4 gap-1">
-          {SHAPE_COLOR_PRESETS.slice(0, 4).map(p => (
+        <div className="grid grid-cols-6 gap-1">
+          {SHAPE_COLOR_PRESETS.slice(0, 12).map(p => (
             <button
               key={p.name}
               onClick={() => onColorChange(p.fill, p.border, p.text)}
@@ -136,6 +136,7 @@ export function ShapeProperties({
                 "w-4 h-4 rounded-full border border-black/10 transition-transform hover:scale-125",
                 shape.color === p.fill ? "ring-2 ring-blue-500 ring-offset-2 scale-110" : ""
               )}
+              title={p.name}
               style={{ background: p.fill }}
             />
           ))}

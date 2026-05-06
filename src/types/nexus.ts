@@ -96,6 +96,12 @@ export const SHAPE_COLOR_PRESETS: ColorPreset[] = [
   { name: 'Soft Rose',  fill: '#ffe4e6', border: '#f43f5e', text: '#881337' },
   { name: 'Soft Amber', fill: '#fef3c7', border: '#f59e0b', text: '#78350f' },
   { name: 'Soft Purple',fill: '#ede9fe', border: '#8b5cf6', text: '#4c1d95' },
+  // Basic / Standard Colors
+  { name: 'White',      fill: '#ffffff', border: '#e2e8f0', text: '#0f172a' },
+  { name: 'Yellow',     fill: '#fef9c3', border: '#ca8a04', text: '#713f12' },
+  { name: 'Light Gray', fill: '#f8fafc', border: '#cbd5e1', text: '#475569' },
+  { name: 'Bright Blue',fill: '#eff6ff', border: '#3b82f6', text: '#1e40af' },
+  { name: 'Bright Green',fill: '#f0fdf4', border: '#22c55e', text: '#166534' },
 ];
 
 export const CONNECTION_COLORS = [
