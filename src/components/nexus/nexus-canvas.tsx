@@ -8,7 +8,7 @@ import type {
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import { cn } from '@/lib/utils';
 import {
-  createShape, createConnection, getConnectionPoints,
+  createShape, createConnection, getConnectionPoints, getConnectionPath,
   saveCanvas, loadCanvases, deleteCanvas as deleteCanvasStorage,
 } from '@/lib/nexus/canvas-helpers';
 import { convertCanvasToTasks } from '@/lib/nexus/converter';
@@ -307,6 +307,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       const isSelected = selectedConnId === conn.id;
       const isEditing = editingConnId === conn.id;
       const dashArray = conn.style === 'dashed' ? '8 4' : conn.style === 'dotted' ? '3 3' : 'none';
+      const pathData = getConnectionPath(pts.x1, pts.y1, pts.x2, pts.y2);
 
       return (
         <g 
@@ -314,27 +315,28 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           onDoubleClick={(e) => { e.stopPropagation(); handleConnDoubleClick(conn.id); }}
         >
           {/* Invisible wide hit area for click */}
-          <line
-            x1={pts.x1} y1={pts.y1} x2={pts.x2} y2={pts.y2}
-            stroke="transparent" strokeWidth={20}
+          <path
+            d={pathData}
+            stroke="transparent" strokeWidth={24} fill="none"
             style={{ cursor: 'pointer' }}
             onClick={e => handleConnClick(e, conn.id)}
           />
           
           {/* Selection Glow */}
           {isSelected && (
-            <line
-              x1={pts.x1} y1={pts.y1} x2={pts.x2} y2={pts.y2}
-              stroke="#3b82f6" strokeWidth={conn.strokeWidth + 6}
+            <path
+              d={pathData}
+              stroke="#3b82f6" strokeWidth={conn.strokeWidth + 8} fill="none"
               strokeOpacity={0.2}
               style={{ pointerEvents: 'none' }}
+              className="transition-all duration-300"
             />
           )}
 
           {/* Visible line: dot start, arrow end */}
-          <line
-            x1={pts.x1} y1={pts.y1} x2={pts.x2} y2={pts.y2}
-            stroke={isSelected ? '#3b82f6' : conn.color}
+          <path
+            d={pathData}
+            stroke={isSelected ? '#3b82f6' : conn.color} fill="none"
             strokeWidth={isSelected ? conn.strokeWidth + 1 : conn.strokeWidth}
             strokeDasharray={dashArray}
             markerStart={`url(#dot-${conn.id})`}
@@ -360,13 +362,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                     onChange={(e) => setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, label: e.target.value } : c))}
                     onBlur={() => setEditingConnId(null)}
                     onKeyDown={(e) => { if (e.key === 'Enter') setEditingConnId(null); }}
-                    className="w-28 px-2 py-0.5 bg-white border-2 border-blue-500 rounded-lg text-[10px] font-bold text-center shadow-xl outline-none"
+                    className="w-28 px-3 py-1 bg-white/90 backdrop-blur border-2 border-blue-500 rounded-xl text-[11px] font-bold text-center shadow-2xl outline-none"
                     placeholder="Label..."
                   />
                 ) : (
                   <div className={cn(
                     "px-3 py-1 bg-white border rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap transition-all",
-                    isSelected ? "border-blue-500 text-blue-600 scale-105" : "border-gray-200 text-gray-700"
+                    isSelected ? "border-blue-500 text-blue-600 scale-110 shadow-md" : "border-gray-200 text-gray-700"
                   )}>
                     {conn.label}
                   </div>
@@ -404,20 +406,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         connectFrom={connectFrom}
       />
 
-      {/* Zoom controls */}
-      <div className="absolute bottom-6 left-6 z-40 flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-gray-200 shadow-md text-gray-500 text-xs font-medium">
-        <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(3, v.zoom * 1.2) }))} className="hover:text-gray-900 transition text-base leading-none">+</button>
-        <span className="w-12 text-center font-mono text-gray-700">{Math.round(viewport.zoom * 100)}%</span>
-        <button onClick={() => setViewport(v => ({ ...v, zoom: Math.max(0.15, v.zoom / 1.2) }))} className="hover:text-gray-900 transition text-base leading-none">−</button>
-        <div className="w-px h-4 bg-gray-200" />
-        <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} className="hover:text-gray-900 transition">Reset</button>
+      {/* Zoom controls - Moved to top left since dock is at bottom */}
+      <div className="absolute top-6 left-6 z-40 flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-sm text-gray-600 text-xs font-bold tracking-tight">
+        <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(3, v.zoom * 1.2) }))} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition text-sm leading-none">+</button>
+        <span className="w-10 text-center font-mono">{Math.round(viewport.zoom * 100)}%</span>
+        <button onClick={() => setViewport(v => ({ ...v, zoom: Math.max(0.15, v.zoom / 1.2) }))} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition text-sm leading-none">−</button>
+        <div className="w-px h-4 bg-gray-200 mx-1" />
+        <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition uppercase text-[9px] tracking-widest">Reset</button>
       </div>
 
-      {/* Connect mode banner */}
+      {/* Connect mode banner - Moved to top center */}
       {connectFrom && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-5 py-3 rounded-2xl bg-amber-50 border border-amber-300 shadow-lg text-amber-800 text-sm font-medium">
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          Click a second shape to connect — or press <kbd className="ml-1 px-2 py-0.5 rounded bg-amber-100 border border-amber-300 text-xs font-mono">Esc</kbd> to cancel
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-6 py-3 rounded-full bg-gray-900/95 backdrop-blur-md shadow-2xl text-white text-sm font-medium animate-in slide-in-from-top-4 duration-300">
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse ring-4 ring-blue-500/20" />
+          Click a second shape to connect
+          <kbd className="ml-2 px-2 py-0.5 rounded-md bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider">Esc</kbd> to cancel
         </div>
       )}
 
@@ -486,12 +489,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
             {/* Temp line */}
             {tempLine && (
-              <line
-                x1={tempLine.x1} y1={tempLine.y1} x2={tempLine.x2} y2={tempLine.y2}
-                stroke={connectionColor} strokeWidth={2} strokeDasharray="6 4" opacity={0.7}
+              <path
+                d={getConnectionPath(tempLine.x1, tempLine.y1, tempLine.x2, tempLine.y2)}
+                stroke={connectionColor} strokeWidth={2} strokeDasharray="6 4" opacity={0.7} fill="none"
                 markerStart={`url(#dot-${connectFrom})`}
                 markerEnd="url(#temp-arrow)"
                 style={{ pointerEvents: 'none' }}
+                className="animate-[dash_1s_linear_infinite]"
               />
             )}
 

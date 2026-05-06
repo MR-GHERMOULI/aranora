@@ -131,6 +131,25 @@ export function getConnectionPoints(
   };
 }
 
+export function getConnectionPath(
+  x1: number, y1: number, x2: number, y2: number
+): string {
+  // Create a smooth S-curve
+  const dx = Math.abs(x2 - x1);
+  const dy = Math.abs(y2 - y1);
+  
+  // If it's mostly horizontal, curve horizontally. If vertical, curve vertically.
+  const isHorizontal = dx > dy;
+  
+  if (isHorizontal) {
+    const cx = (x1 + x2) / 2;
+    return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+  } else {
+    const cy = (y1 + y2) / 2;
+    return `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+  }
+}
+
 function getEdgePoint(
   shape: NexusShape,
   center: { x: number; y: number },
