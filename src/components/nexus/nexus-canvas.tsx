@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type {
-  NexusShape, NexusConnection, ToolMode, GeneratedTask,
+  NexusShape, NexusConnection, NexusPath, ToolMode, GeneratedTask,
   CanvasViewport, NexusCanvas as NexusCanvasData,
 } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
