@@ -81,18 +81,13 @@ export function ShapeRenderer({
       onDoubleClick={() => onDoubleClick(shape.id)}
     >
       <defs>
-        {/* Subtle vertical gradient for depth */}
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={lightenColor(shape.color, 18)} />
-          <stop offset="100%" stopColor={darkenColor(shape.color, 8)} />
-        </linearGradient>
-        {/* Drop shadow filter */}
+        {/* Soft, professional drop shadow */}
         <filter id={shadowId} x="-20%" y="-20%" width="140%" height="160%">
           <feDropShadow
-            dx="0" dy={isSelected ? 6 : 3}
-            stdDeviation={isSelected ? 10 : 5}
-            floodColor={isSelected ? '#3b82f6' : '#00000022'}
-            floodOpacity={isSelected ? 0.35 : 0.22}
+            dx="0" dy={isSelected ? 4 : 2}
+            stdDeviation={isSelected ? 8 : 4}
+            floodColor={isSelected ? '#3b82f6' : '#000000'}
+            floodOpacity={isSelected ? 0.2 : 0.06}
           />
         </filter>
       </defs>
@@ -103,34 +98,26 @@ export function ShapeRenderer({
           <ellipse
             cx={shape.width / 2} cy={shape.height / 2}
             rx={shape.width / 2 - 2} ry={shape.height / 2 - 2}
-            fill={`url(#${gradId})`}
+            fill={shape.color}
             stroke={strokeColor} strokeWidth={strokeWidth}
           />
         ) : shape.type === 'rectangle' ? (
           <rect
             x={2} y={2} width={shape.width - 4} height={shape.height - 4}
             rx={12} ry={12}
-            fill={`url(#${gradId})`}
+            fill={shape.color}
             stroke={strokeColor} strokeWidth={strokeWidth}
           />
         ) : (
           <path
             d={getSvgPath()}
-            fill={`url(#${gradId})`}
+            fill={shape.color}
             stroke={strokeColor} strokeWidth={strokeWidth}
           />
         )}
       </g>
 
-      {/* ── Highlight sheen (top gloss) ── */}
-      {shape.type === 'rectangle' && (
-        <rect
-          x={4} y={4} width={shape.width - 8} height={Math.min(28, shape.height / 3)}
-          rx={10} ry={10}
-          fill="rgba(255,255,255,0.12)"
-          style={{ pointerEvents: 'none' }}
-        />
-      )}
+      {/* (Gloss removed for modern flat design) */}
 
       {/* ── Selection dashed outline ── */}
       {(isSelected || isConnectSource) && (
