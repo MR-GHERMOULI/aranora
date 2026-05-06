@@ -5,8 +5,8 @@ import type { NexusShape, ShapeType } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import {
   Square, Circle, Diamond, Hexagon,
-  Trash2, Type, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
-  Baseline, Languages, Hash, ArrowRightLeft
+  Trash2, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
+  Languages, Hash, ArrowRightLeft, Type
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -36,8 +36,9 @@ export function ShapeProperties({
   onPropertyChange, zoom, viewport
 }: ShapePropertiesProps) {
   const [showSymbols, setShowSymbols] = useState(false);
+  const [showColorGrid, setShowColorGrid] = useState(false);
   
-  const x = (shape.x * zoom) + viewport.x;
+  const x = (shape.x * zoom) + viewport.x + (shape.width * zoom / 2);
   const y = (shape.y * zoom) + viewport.y - 72;
 
   const insertSymbol = (s: string) => {
@@ -46,90 +47,135 @@ export function ShapeProperties({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      className="fixed z-[60] flex items-center gap-1 p-1.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-gray-200 shadow-2xl ring-1 ring-black/5"
+      initial={{ opacity: 0, y: 10, scale: 0.95, x: '-50%' }}
+      animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+      className="fixed z-[60] flex items-center p-1.5 rounded-[2rem] bg-white/95 backdrop-blur-2xl border border-black/[0.06] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/[0.02]"
       style={{ left: x, top: Math.max(80, y) }}
     >
-      {/* Type Switcher */}
-      <div className="flex items-center gap-0.5 px-1 border-r border-gray-100">
+      {/* Group 1: Morphing */}
+      <div className="flex items-center gap-0.5 px-1.5 border-r border-black/[0.04]">
         {shapeTypes.map(t => (
           <button
             key={t.type}
             onClick={() => onTypeChange(t.type)}
             className={cn(
-              "p-2 rounded-lg transition-all",
-              shape.type === t.type ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50 hover:text-gray-900"
+              "p-2.5 rounded-2xl transition-all",
+              shape.type === t.type ? "bg-gray-900 text-white shadow-lg shadow-gray-900/20" : "text-gray-400 hover:bg-black/[0.04] hover:text-gray-900"
             )}
+            title={t.label}
           >
             <t.icon className="h-4 w-4" />
           </button>
         ))}
       </div>
 
-      {/* Formatting & Direction */}
-      <div className="flex items-center gap-0.5 px-1 border-r border-gray-100">
+      {/* Group 2: Typography */}
+      <div className="flex items-center gap-0.5 px-1.5 border-r border-black/[0.04]">
         <button
           onClick={() => onPropertyChange({ fontWeight: shape.fontWeight === 'bold' ? 'normal' : 'bold' })}
-          className={cn("p-2 rounded-lg transition-all", shape.fontWeight === 'bold' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:bg-gray-50")}
+          className={cn("p-2.5 rounded-2xl transition-all", shape.fontWeight === 'bold' ? "bg-gray-100 text-gray-900 font-bold" : "text-gray-400 hover:bg-black/[0.04]")}
         >
           <Bold className="h-4 w-4" />
         </button>
         
         <button
           onClick={() => onPropertyChange({ direction: shape.direction === 'rtl' ? 'ltr' : 'rtl', textAlign: shape.direction === 'rtl' ? 'center' : 'right' })}
-          className={cn("p-2 rounded-lg transition-all flex items-center gap-1", shape.direction === 'rtl' ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+          className={cn("p-2.5 rounded-2xl transition-all flex items-center gap-1", shape.direction === 'rtl' ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-black/[0.04]")}
           title="Toggle RTL"
         >
-          <ArrowRightLeft className="h-4 w-4" />
-          <span className="text-[9px] font-bold">RTL</span>
+          <span className="text-[10px] font-black leading-none">RTL</span>
         </button>
         
-        <div className="w-px h-4 bg-gray-100 mx-1" />
+        <div className="w-px h-5 bg-black/[0.04] mx-1" />
 
-        <button
-          onClick={() => onPropertyChange({ textAlign: 'left' })}
-          className={cn("p-2 rounded-lg transition-all", shape.textAlign === 'left' ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
-        >
-          <AlignLeft className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => onPropertyChange({ textAlign: 'center' })}
-          className={cn("p-2 rounded-lg transition-all", shape.textAlign === 'center' || !shape.textAlign ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
-        >
-          <AlignCenter className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => onPropertyChange({ textAlign: 'right' })}
-          className={cn("p-2 rounded-lg transition-all", shape.textAlign === 'right' ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
-        >
-          <AlignRight className="h-4 w-4" />
-        </button>
+        <div className="flex bg-black/[0.03] p-0.5 rounded-2xl">
+          {[
+            { align: 'left', icon: AlignLeft },
+            { align: 'center', icon: AlignCenter },
+            { align: 'right', icon: AlignRight }
+          ].map(a => (
+            <button
+              key={a.align}
+              onClick={() => onPropertyChange({ textAlign: a.align as any })}
+              className={cn(
+                "p-2 rounded-xl transition-all",
+                (shape.textAlign === a.align || (!shape.textAlign && a.align === 'center')) ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"
+              )}
+            >
+              <a.icon className="h-4 w-4" />
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Symbols & Fonts */}
-      <div className="flex items-center gap-1.5 px-2 border-r border-gray-100 relative">
+      {/* Group 3: Styling & Symbols */}
+      <div className="flex items-center gap-2 px-1.5 border-r border-black/[0.04] relative">
+        <button
+          onClick={() => setShowColorGrid(!showColorGrid)}
+          className={cn("p-2 rounded-2xl transition-all border border-black/10 ring-2 ring-white shadow-sm hover:scale-110")}
+          style={{ background: shape.color }}
+        />
+
         <button
           onClick={() => setShowSymbols(!showSymbols)}
-          className={cn("p-2 rounded-lg transition-all", showSymbols ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+          className={cn("p-2.5 rounded-2xl transition-all", showSymbols ? "bg-amber-50 text-amber-600" : "text-gray-400 hover:bg-black/[0.04]")}
           title="Insert Symbol"
         >
           <Hash className="h-4 w-4" />
         </button>
+
+        <select
+          value={shape.fontFamily || 'sans'}
+          onChange={e => onPropertyChange({ fontFamily: e.target.value as any })}
+          className="bg-black/[0.04] text-[10px] font-bold text-gray-700 outline-none cursor-pointer hover:bg-black/[0.06] py-1.5 px-2.5 rounded-xl transition-all"
+        >
+          <option value="sans">Sans</option>
+          <option value="serif">Serif</option>
+          <option value="mono">Mono</option>
+        </select>
+
+        {/* Color Grid Flyout */}
+        <AnimatePresence>
+          {showColorGrid && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="absolute bottom-full mb-4 left-0 p-4 rounded-[2rem] bg-white border border-black/[0.06] shadow-2xl z-[100] w-64"
+            >
+              <div className="px-2 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Shape Color Card</div>
+              <div className="grid grid-cols-6 gap-2">
+                {SHAPE_COLOR_PRESETS.slice(0, 18).map(p => (
+                  <button
+                    key={p.name}
+                    onClick={() => { onColorChange(p.fill, p.border, p.text); setShowColorGrid(false); }}
+                    className={cn(
+                      "w-7 h-7 rounded-full border border-black/5 transition-all hover:scale-125 ring-offset-4 ring-gray-900",
+                      shape.color === p.fill ? "ring-2" : ""
+                    )}
+                    title={p.name}
+                    style={{ background: p.fill }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
+        {/* Symbols Flyout */}
         <AnimatePresence>
           {showSymbols && (
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 5, scale: 0.95 }}
-              className="absolute bottom-[calc(100%+12px)] left-0 p-2 rounded-xl bg-white border border-gray-200 shadow-xl grid grid-cols-4 gap-1 min-w-[120px]"
+              className="absolute bottom-full mb-4 left-0 p-3 rounded-[1.5rem] bg-white border border-black/[0.06] shadow-2xl grid grid-cols-4 gap-1 min-w-[140px] z-[100]"
             >
               {symbols.map(s => (
                 <button
                   key={s}
                   onClick={() => { insertSymbol(s); setShowSymbols(false); }}
-                  className="p-1.5 rounded-md hover:bg-blue-50 hover:text-blue-600 text-xs font-bold transition-all border border-transparent hover:border-blue-100"
+                  className="p-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-600 text-xs font-bold transition-all"
                 >
                   {s}
                 </button>
@@ -137,48 +183,20 @@ export function ShapeProperties({
             </motion.div>
           )}
         </AnimatePresence>
-
-        <select
-          value={shape.fontFamily || 'sans'}
-          onChange={e => onPropertyChange({ fontFamily: e.target.value as any })}
-          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600 ml-1"
-        >
-          <option value="sans">Sans</option>
-          <option value="serif">Serif</option>
-          <option value="mono">Mono</option>
-        </select>
       </div>
 
-      {/* Colors */}
-      <div className="flex items-center gap-1.5 px-2 border-r border-gray-100">
-        <div className="grid grid-cols-6 gap-1">
-          {SHAPE_COLOR_PRESETS.slice(0, 12).map(p => (
-            <button
-              key={p.name}
-              onClick={() => onColorChange(p.fill, p.border, p.text)}
-              className={cn(
-                "w-4 h-4 rounded-full border border-black/10 transition-transform hover:scale-125",
-                shape.color === p.fill ? "ring-2 ring-blue-500 ring-offset-2 scale-110" : ""
-              )}
-              title={p.name}
-              style={{ background: p.fill }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="px-1">
+      {/* Group 4: Actions */}
+      <div className="px-1.5">
         <button
           onClick={onDelete}
-          className="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
+          className="p-2.5 rounded-2xl text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all active:scale-90"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
       {/* Arrow pointing down */}
-      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-gray-200 rotate-45" />
+      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-black/[0.06] rotate-45" />
     </motion.div>
   );
 }

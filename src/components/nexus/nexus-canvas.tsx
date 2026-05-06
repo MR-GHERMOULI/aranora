@@ -86,6 +86,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [editingShapeId, setEditingShapeId] = useState<string | null>(null);
   const [editingConnId, setEditingConnId] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ shapeId: string; offsetX: number; offsetY: number } | null>(null);
+  const [resizing, setResizing] = useState<{ shapeId: string; handle: string; startX: number; startY: number; startWidth: number; startHeight: number; startShapeX: number; startShapeY: number } | null>(null);
   const [panning, setPanning] = useState<{ startX: number; startY: number; startVpX: number; startVpY: number } | null>(null);
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [tempLine, setTempLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -257,6 +258,22 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setDragging({ shapeId, offsetX: x - shape.x, offsetY: y - shape.y });
   };
 
+  const handleResizeStart = (e: React.MouseEvent, shapeId: string, handle: string) => {
+    e.stopPropagation();
+    const shape = shapes.find(s => s.id === shapeId);
+    if (!shape) return;
+    setResizing({
+      shapeId,
+      handle,
+      startX: e.clientX,
+      startY: e.clientY,
+      startWidth: shape.width,
+      startHeight: shape.height,
+      startShapeX: shape.x,
+      startShapeY: shape.y
+    });
+  };
+
   const handleConnClick = (e: React.MouseEvent, connId: string) => {
     e.stopPropagation();
     setSelectedConnId(connId);
@@ -280,6 +297,36 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       ));
       return;
     }
+    if (resizing) {
+      const dx = (e.clientX - resizing.startX) / viewport.zoom;
+      const dy = (e.clientY - resizing.startY) / viewport.zoom;
+      const minSize = 40;
+
+      setShapes(prev => prev.map(s => {
+        if (s.id !== resizing.shapeId) return s;
+        let { x, y, width, height } = s;
+
+        if (resizing.handle.includes('e')) width = Math.max(minSize, resizing.startWidth + dx);
+        if (resizing.handle.includes('s')) height = Math.max(minSize, resizing.startHeight + dy);
+        if (resizing.handle.includes('w')) {
+          const newWidth = Math.max(minSize, resizing.startWidth - dx);
+          if (newWidth > minSize) {
+            width = newWidth;
+            x = resizing.startShapeX + dx;
+          }
+        }
+        if (resizing.handle.includes('n')) {
+          const newHeight = Math.max(minSize, resizing.startHeight - dy);
+          if (newHeight > minSize) {
+            height = newHeight;
+            y = resizing.startShapeY + dy;
+          }
+        }
+
+        return { ...s, x, y, width, height };
+      }));
+      return;
+    }
     if (connectFrom) {
       const { x, y } = screenToCanvas(e.clientX, e.clientY);
       const fromShape = shapes.find(s => s.id === connectFrom);
@@ -301,6 +348,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         return next;
       });
       setActivePath(null);
+    }
+    if (resizing) {
+      saveToHistory(shapes, connections, paths);
+      setResizing(null);
     }
     setDragging(null); 
     setPanning(null); 
@@ -670,6 +721,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onDoubleClick={handleDoubleClick}
                 onTextChange={handleTextChange}
                 onContextMenu={handleShapeContextMenu}
+                onResizeStart={handleResizeStart}
                 editingShapeId={editingShapeId}
               />
             ))}

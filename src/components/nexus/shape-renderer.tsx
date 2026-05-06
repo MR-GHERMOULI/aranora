@@ -12,12 +12,13 @@ interface ShapeRendererProps {
   onDoubleClick: (shapeId: string) => void;
   onTextChange: (shapeId: string, text: string) => void;
   onContextMenu: (e: React.MouseEvent, shapeId: string) => void;
+  onResizeStart: (e: React.MouseEvent, shapeId: string, handle: string) => void;
   editingShapeId: string | null;
 }
 
 export function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
-  onMouseDown, onDoubleClick, onTextChange, onContextMenu, editingShapeId,
+  onMouseDown, onDoubleClick, onTextChange, onContextMenu, onResizeStart, editingShapeId,
 }: ShapeRendererProps) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const isEditing = editingShapeId === shape.id;
@@ -189,6 +190,22 @@ export function ShapeRenderer({
           fill="#3b82f6" stroke="white" strokeWidth={1.5}
           style={{ cursor: 'nwse-resize' }}
         />
+      )}
+      {/* Resizing Handles */}
+      {isSelected && !isEditing && (
+        <g>
+          {/* Corners */}
+          <rect x={-4} y={-4} width={8} height={8} className="fill-white stroke-blue-600 cursor-nwse-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'nw'); }} />
+          <rect x={shape.width - 4} y={-4} width={8} height={8} className="fill-white stroke-blue-600 cursor-nesw-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'ne'); }} />
+          <rect x={-4} y={shape.height - 4} width={8} height={8} className="fill-white stroke-blue-600 cursor-nesw-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'sw'); }} />
+          <rect x={shape.width - 4} y={shape.height - 4} width={8} height={8} className="fill-white stroke-blue-600 cursor-nwse-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'se'); }} />
+          
+          {/* Edges */}
+          <rect x={shape.width / 2 - 4} y={-4} width={8} height={8} className="fill-white stroke-blue-600 cursor-ns-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'n'); }} />
+          <rect x={shape.width / 2 - 4} y={shape.height - 4} width={8} height={8} className="fill-white stroke-blue-600 cursor-ns-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 's'); }} />
+          <rect x={-4} y={shape.height / 2 - 4} width={8} height={8} className="fill-white stroke-blue-600 cursor-ew-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'w'); }} />
+          <rect x={shape.width - 4} y={shape.height / 2 - 4} width={8} height={8} className="fill-white stroke-blue-600 cursor-ew-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'e'); }} />
+        </g>
       )}
     </g>
   );
