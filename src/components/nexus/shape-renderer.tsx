@@ -1,7 +1,7 @@
 'use client';
 
 import type { NexusShape } from '@/types/nexus';
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 
 interface ShapeRendererProps {
   shape: NexusShape;
@@ -28,7 +28,6 @@ export function ShapeRenderer({
     }
   }, [isEditing]);
 
-  // ── Shape path builders ──────────────────────────────
   const getSvgPath = useCallback(() => {
     const w = shape.width;
     const h = shape.height;
@@ -48,30 +47,43 @@ export function ShapeRenderer({
     }
   }, [shape.type, shape.width, shape.height]);
 
-  // ── Border color based on state ──────────────────────
-  const strokeColor = isSelected
-    ? '#3b82f6'
-    : isConnectSource
-    ? '#f59e0b'
-    : shape.borderColor;
+  const strokeColor = isSelected ? '#3b82f6' : isConnectSource ? '#f59e0b' : shape.borderColor;
   const strokeWidth = isSelected || isConnectSource ? 2.5 : 1.5;
-
-  // ── Gradient ID (unique per shape) ───────────────────
-  const gradId = `grad-${shape.id}`;
   const shadowId = `shadow-${shape.id}`;
 
-  // ── Text area for foreignObject ──────────────────────
-  const textPadX = shape.type === 'diamond' ? shape.width * 0.2
-    : shape.type === 'parallelogram' ? shape.width * 0.14
-    : 12;
-  const textWidth = shape.type === 'diamond' ? shape.width * 0.6
-    : shape.type === 'parallelogram' ? shape.width * 0.72
-    : shape.width - 24;
-  const textPadY = 10;
-  const textHeight = shape.height - textPadY * 2;
+  // ── Text Formatting & Layout ────────────────────────
+  const textStyles = useMemo(() => {
+    const fonts = {
+      sans: "'Inter', system-ui, sans-serif",
+      serif: "Georgia, serif",
+      mono: "monospace",
+    };
+    return {
+      color: shape.textColor,
+      fontSize: `${shape.fontSize}px`,
+      fontWeight: shape.fontWeight || 'normal',
+      fontStyle: shape.fontStyle || 'normal',
+      textAlign: shape.textAlign || 'center',
+      fontFamily: fonts[shape.fontFamily || 'sans'],
+      lineHeight: '1.4',
+    };
+  }, [shape]);
 
-  // Parse color to lighter tone for gradient top
-  const isLight = isLightColor(shape.color);
+  // Dynamic padding based on shape type to prevent text cutoff
+  const layout = useMemo(() => {
+    let px = 12;
+    let py = 12;
+    if (shape.type === 'diamond') { px = shape.width * 0.25; py = shape.height * 0.25; }
+    if (shape.type === 'circle') { px = shape.width * 0.15; py = shape.height * 0.15; }
+    if (shape.type === 'hexagon') { px = shape.width * 0.25; }
+    
+    return {
+      x: px,
+      y: py,
+      width: shape.width - px * 2,
+      height: shape.height - py * 2
+    };
+  }, [shape.type, shape.width, shape.height]);
 
   return (
     <g
@@ -81,7 +93,6 @@ export function ShapeRenderer({
       onDoubleClick={() => onDoubleClick(shape.id)}
     >
       <defs>
-        {/* Soft, professional drop shadow */}
         <filter id={shadowId} x="-20%" y="-20%" width="140%" height="160%">
           <feDropShadow
             dx="0" dy={isSelected ? 4 : 2}
@@ -92,7 +103,7 @@ export function ShapeRenderer({
         </filter>
       </defs>
 
-      {/* ── Main shape body ── */}
+      {/* Main body */}
       <g filter={`url(#${shadowId})`}>
         {shape.type === 'circle' ? (
           <ellipse
@@ -117,9 +128,7 @@ export function ShapeRenderer({
         )}
       </g>
 
-      {/* (Gloss removed for modern flat design) */}
-
-      {/* ── Selection dashed outline ── */}
+      {/* Selection dashed outline */}
       {(isSelected || isConnectSource) && (
         <rect
           x={-6} y={-6}
@@ -136,63 +145,40 @@ export function ShapeRenderer({
         </rect>
       )}
 
-      {/* ── Connect source pulse ring ── */}
-      {isConnectSource && (
-        <ellipse
-          cx={shape.width / 2} cy={shape.height / 2}
-          rx={shape.width / 2 + 12} ry={shape.height / 2 + 12}
-          fill="none" stroke="#f59e0b" strokeWidth={2} opacity={0.4}
-          style={{ pointerEvents: 'none' }}
-        >
-          <animate attributeName="r" values="0;1" dur="0" />
-          <animate attributeName="opacity" values="0.5;0" dur="1.2s" repeatCount="indefinite" />
-          <animate attributeName="rx" values={`${shape.width / 2 + 4};${shape.width / 2 + 18}`} dur="1.2s" repeatCount="indefinite" />
-          <animate attributeName="ry" values={`${shape.height / 2 + 4};${shape.height / 2 + 18}`} dur="1.2s" repeatCount="indefinite" />
-        </ellipse>
-      )}
-
-      {/* ── Text / Edit area ── */}
-      <foreignObject x={textPadX} y={textPadY} width={textWidth} height={textHeight}>
+      {/* Text / Edit area */}
+      <foreignObject x={layout.x} y={layout.y} width={layout.width} height={layout.height}>
         {isEditing ? (
           <textarea
             ref={textRef}
             value={shape.text}
             onChange={e => onTextChange(shape.id, e.target.value)}
             onMouseDown={e => e.stopPropagation()}
-            className="w-full h-full bg-transparent border-none outline-none resize-none text-center"
+            className="w-full h-full bg-transparent border-none outline-none resize-none p-0 flex items-center justify-center custom-scrollbar"
             style={{
-              color: shape.textColor,
-              fontSize: `${shape.fontSize}px`,
-              fontFamily: "'Inter', system-ui, sans-serif",
-              lineHeight: '1.4',
-              padding: '2px',
+              ...textStyles,
               display: 'flex',
               alignItems: 'center',
             }}
-            placeholder="Type here…"
+            placeholder="Type..."
           />
         ) : (
           <div
-            className="w-full h-full flex items-center justify-center text-center overflow-hidden select-none"
+            className="w-full h-full flex items-center justify-center overflow-hidden select-none"
             style={{
-              color: shape.textColor,
-              fontSize: `${shape.fontSize}px`,
-              fontFamily: "'Inter', system-ui, sans-serif",
-              lineHeight: '1.4',
-              fontWeight: 500,
+              ...textStyles,
               wordBreak: 'break-word',
             }}
           >
             {shape.text || (
-              <span style={{ opacity: 0.35, fontSize: '11px', fontWeight: 400 }}>
-                Double-click to edit
+              <span style={{ opacity: 0.35, fontSize: '11px', fontWeight: 400, fontStyle: 'normal' }}>
+                Double-click
               </span>
             )}
           </div>
         )}
       </foreignObject>
 
-      {/* ── Resize handle (selected, not editing) ── */}
+      {/* Resize handle */}
       {isSelected && !isEditing && (
         <rect
           x={shape.width - 6} y={shape.height - 6}
@@ -203,37 +189,4 @@ export function ShapeRenderer({
       )}
     </g>
   );
-}
-
-// ── Color utilities ───────────────────────────────────
-
-function hexToRgb(hex: string): [number, number, number] {
-  const clean = hex.replace('#', '');
-  const full = clean.length === 3
-    ? clean.split('').map(c => c + c).join('')
-    : clean;
-  const n = parseInt(full, 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-
-function rgbToHex(r: number, g: number, b: number): string {
-  return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('');
-}
-
-function lightenColor(hex: string, amount: number): string {
-  if (!hex.startsWith('#')) return hex;
-  const [r, g, b] = hexToRgb(hex);
-  return rgbToHex(r + amount, g + amount, b + amount);
-}
-
-function darkenColor(hex: string, amount: number): string {
-  if (!hex.startsWith('#')) return hex;
-  const [r, g, b] = hexToRgb(hex);
-  return rgbToHex(r - amount, g - amount, b - amount);
-}
-
-function isLightColor(hex: string): boolean {
-  if (!hex.startsWith('#')) return false;
-  const [r, g, b] = hexToRgb(hex);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 128;
 }

@@ -251,6 +251,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, fontSize } : s));
   };
 
+  const handleUpdateShapeProperty = (shapeId: string, updates: Partial<NexusShape>) => {
+    setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, ...updates } : s));
+  };
+
   const deleteSelectedShape = () => {
     if (!selectedShapeId) return;
     setShapes(prev => prev.filter(s => s.id !== selectedShapeId));
@@ -544,6 +548,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           onTypeChange={(t) => updateShapeType(selectedShapeId, t)}
           onDelete={deleteSelectedShape}
           onFontSizeChange={(size) => updateShapeFontSize(selectedShapeId, size)}
+          onPropertyChange={(updates) => handleUpdateShapeProperty(selectedShapeId, updates)}
           zoom={viewport.zoom}
           viewport={viewport}
         />

@@ -84,6 +84,10 @@ export function createShape(
     textColor,
     fontSize: 14,
     zIndex: Date.now(),
+    fontWeight: 'normal',
+    fontStyle: 'normal',
+    textAlign: 'center',
+    fontFamily: 'sans',
   };
 }
 

@@ -1,13 +1,14 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { NexusShape, ShapeType, ColorPreset } from '@/types/nexus';
+import type { NexusShape, ShapeType } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import {
   Square, Circle, Diamond, Hexagon,
-  Trash2, Type, Palette
+  Trash2, Type, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
+  Baseline
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface ShapePropertiesProps {
   shape: NexusShape;
@@ -15,6 +16,7 @@ interface ShapePropertiesProps {
   onTypeChange: (type: ShapeType) => void;
   onDelete: () => void;
   onFontSizeChange: (size: number) => void;
+  onPropertyChange: (updates: Partial<NexusShape>) => void;
   zoom: number;
   viewport: { x: number; y: number };
 }
@@ -28,20 +30,19 @@ const shapeTypes: { type: ShapeType; icon: any; label: string }[] = [
 
 export function ShapeProperties({
   shape, onColorChange, onTypeChange, onDelete, onFontSizeChange,
-  zoom, viewport
+  onPropertyChange, zoom, viewport
 }: ShapePropertiesProps) {
-  // Calculate position in screen space
   const x = (shape.x * zoom) + viewport.x;
-  const y = (shape.y * zoom) + viewport.y - 60; // 60px above the shape
+  const y = (shape.y * zoom) + viewport.y - 64;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className="fixed z-[60] flex items-center gap-1 p-1.5 rounded-2xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-2xl ring-1 ring-black/5"
+      className="fixed z-[60] flex items-center gap-1 p-1.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-gray-200 shadow-2xl ring-1 ring-black/5"
       style={{ left: x, top: Math.max(80, y) }}
     >
-      {/* Shape Type Switcher */}
+      {/* Type Switcher */}
       <div className="flex items-center gap-0.5 px-1 border-r border-gray-100">
         {shapeTypes.map(t => (
           <button
@@ -49,19 +50,85 @@ export function ShapeProperties({
             onClick={() => onTypeChange(t.type)}
             className={cn(
               "p-2 rounded-lg transition-all",
-              shape.type === t.type ? "bg-gray-100 text-blue-600 shadow-inner" : "text-gray-400 hover:bg-gray-50 hover:text-gray-900"
+              shape.type === t.type ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50 hover:text-gray-900"
             )}
-            title={t.label}
           >
             <t.icon className="h-4 w-4" />
           </button>
         ))}
       </div>
 
-      {/* Quick Colors */}
+      {/* Font & Formatting */}
+      <div className="flex items-center gap-0.5 px-1 border-r border-gray-100">
+        <button
+          onClick={() => onPropertyChange({ fontWeight: shape.fontWeight === 'bold' ? 'normal' : 'bold' })}
+          className={cn(
+            "p-2 rounded-lg transition-all",
+            shape.fontWeight === 'bold' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:bg-gray-50"
+          )}
+        >
+          <Bold className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => onPropertyChange({ fontStyle: shape.fontStyle === 'italic' ? 'normal' : 'italic' })}
+          className={cn(
+            "p-2 rounded-lg transition-all",
+            shape.fontStyle === 'italic' ? "bg-gray-100 text-gray-900" : "text-gray-400 hover:bg-gray-50"
+          )}
+        >
+          <Italic className="h-4 w-4" />
+        </button>
+        
+        <div className="w-px h-4 bg-gray-100 mx-1" />
+
+        <button
+          onClick={() => onPropertyChange({ textAlign: 'left' })}
+          className={cn("p-2 rounded-lg transition-all", shape.textAlign === 'left' ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+        >
+          <AlignLeft className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => onPropertyChange({ textAlign: 'center' })}
+          className={cn("p-2 rounded-lg transition-all", shape.textAlign === 'center' || !shape.textAlign ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+        >
+          <AlignCenter className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => onPropertyChange({ textAlign: 'right' })}
+          className={cn("p-2 rounded-lg transition-all", shape.textAlign === 'right' ? "bg-gray-100 text-blue-600" : "text-gray-400 hover:bg-gray-50")}
+        >
+          <AlignRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Font Family & Size */}
+      <div className="flex items-center gap-2 px-2 border-r border-gray-100">
+        <Baseline className="h-3.5 w-3.5 text-gray-400" />
+        <select
+          value={shape.fontFamily || 'sans'}
+          onChange={e => onPropertyChange({ fontFamily: e.target.value as any })}
+          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600"
+        >
+          <option value="sans">Sans</option>
+          <option value="serif">Serif</option>
+          <option value="mono">Mono</option>
+        </select>
+        <div className="w-px h-4 bg-gray-100 mx-1" />
+        <select
+          value={shape.fontSize}
+          onChange={e => onFontSizeChange(Number(e.target.value))}
+          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600"
+        >
+          {[12, 14, 16, 18, 20, 24, 32].map(s => (
+            <option key={s} value={s}>{s}px</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Colors */}
       <div className="flex items-center gap-1.5 px-2 border-r border-gray-100">
-        <div className="grid grid-cols-6 gap-1">
-          {SHAPE_COLOR_PRESETS.slice(0, 6).map(p => (
+        <div className="grid grid-cols-4 gap-1">
+          {SHAPE_COLOR_PRESETS.slice(0, 4).map(p => (
             <button
               key={p.name}
               onClick={() => onColorChange(p.fill, p.border, p.text)}
@@ -75,26 +142,11 @@ export function ShapeProperties({
         </div>
       </div>
 
-      {/* Font Size */}
-      <div className="flex items-center gap-2 px-2 border-r border-gray-100">
-        <Type className="h-3.5 w-3.5 text-gray-400" />
-        <select
-          value={shape.fontSize}
-          onChange={e => onFontSizeChange(Number(e.target.value))}
-          className="bg-transparent text-[11px] font-bold text-gray-700 outline-none cursor-pointer hover:text-blue-600 transition-colors"
-        >
-          {[12, 14, 16, 18, 20, 24, 32].map(s => (
-            <option key={s} value={s}>{s}px</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Delete Action */}
-      <div className="pl-1 pr-1">
+      {/* Actions */}
+      <div className="px-1">
         <button
           onClick={onDelete}
           className="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
-          title="Delete Shape"
         >
           <Trash2 className="h-4 w-4" />
         </button>

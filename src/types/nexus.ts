@@ -19,6 +19,11 @@ export interface NexusShape {
   priority?: 'Low' | 'Medium' | 'High';
   /** Optional label tags */
   labels?: string[];
+  // Typography
+  fontWeight?: 'normal' | 'bold';
+  fontStyle?: 'normal' | 'italic';
+  textAlign?: 'left' | 'center' | 'right';
+  fontFamily?: 'sans' | 'serif' | 'mono';
 }
 
 export interface NexusConnection {
