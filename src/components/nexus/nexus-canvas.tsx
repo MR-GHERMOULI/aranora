@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import { Sparkles, MousePointer2, Zap, Pencil } from 'lucide-react';
 import rough from 'roughjs';
 
-const generator = rough.generator();
+const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
 
 interface NexusCanvasProps {
   projects: { id: string; title: string }[];
@@ -518,6 +518,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
           {/* Hand-Drawn Connection Line */}
           {useMemo(() => {
+            if (!roughGenerator) return null;
+            const generator = roughGenerator;
             const drawable = generator.path(pathData, {
               stroke: isSelected ? '#3b82f6' : conn.color,
               strokeWidth: isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth,

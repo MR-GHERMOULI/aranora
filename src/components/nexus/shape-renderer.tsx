@@ -4,7 +4,7 @@ import type { NexusShape } from '@/types/nexus';
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 import rough from 'roughjs';
 
-const generator = rough.generator();
+const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
 
 interface ShapeRendererProps {
   shape: NexusShape;
@@ -113,6 +113,8 @@ export function ShapeRenderer({
       {/* Main body - Hand-Drawn Style */}
       <g filter={`url(#${shadowId})`}>
         {useMemo(() => {
+          if (!roughGenerator) return null;
+          const generator = roughGenerator;
           const options = {
             seed: 1, // Fixed seed for stability
             stroke: strokeColor,
