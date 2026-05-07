@@ -527,7 +527,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             return generator.toPaths(drawable).map((p, i) => (
               <path
                 key={`line-${i}`}
-                d={p}
+                d={p.d}
                 stroke={isSelected ? '#3b82f6' : conn.color}
                 fill="none"
                 strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
