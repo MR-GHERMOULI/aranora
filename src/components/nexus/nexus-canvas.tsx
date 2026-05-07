@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import type {
   NexusShape, NexusConnection, NexusPath, ToolMode, GeneratedTask,
   CanvasViewport, NexusCanvas as NexusCanvasData,
