@@ -518,29 +518,44 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
           {/* Hand-Drawn Connection Line */}
           {useMemo(() => {
-            if (!roughGenerator) return null;
+            if (!roughGenerator || !pathData) return null;
             const generator = roughGenerator;
-            const drawable = generator.path(pathData, {
-              stroke: isSelected ? '#3b82f6' : conn.color,
-              strokeWidth: isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth,
-              roughness: 0.8,
-              bowing: 1.2,
-              seed: 1,
-            });
-            return generator.toPaths(drawable).map((p, i) => (
-              <path
-                key={`line-${i}`}
-                d={p.d}
-                stroke={isSelected ? '#3b82f6' : conn.color}
-                fill="none"
-                strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
-                strokeLinecap="round"
-                markerStart={i === 0 ? `url(#dot-${conn.id})` : 'none'}
-                markerEnd={i === 0 ? `url(#arrow-${conn.id})` : 'none'}
-                style={{ pointerEvents: 'none' }}
-              />
-            ));
-          }, [pathData, isSelected, conn.color, conn.strokeWidth])}
+            try {
+              const drawable = generator.path(pathData, {
+                stroke: isSelected ? '#3b82f6' : conn.color,
+                strokeWidth: isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth,
+                roughness: 0.8,
+                bowing: 1.2,
+                seed: 1,
+              });
+              return generator.toPaths(drawable).map((p, i) => (
+                <path
+                  key={`line-${i}`}
+                  d={p.d}
+                  stroke={isSelected ? '#3b82f6' : conn.color}
+                  fill="none"
+                  strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
+                  strokeLinecap="round"
+                  markerStart={i === 0 ? `url(#dot-${conn.id})` : 'none'}
+                  markerEnd={i === 0 ? `url(#arrow-${conn.id})` : 'none'}
+                  style={{ pointerEvents: 'none' }}
+                />
+              ));
+            } catch (error) {
+              // Fallback to standard SVG path if roughjs crashes on weird vectors
+              return (
+                <path
+                  d={pathData}
+                  stroke={isSelected ? '#3b82f6' : conn.color}
+                  fill="none"
+                  strokeWidth={isSelected ? conn.strokeWidth + 1 : conn.strokeWidth}
+                  markerStart={`url(#dot-${conn.id})`}
+                  markerEnd={`url(#arrow-${conn.id})`}
+                  style={{ pointerEvents: 'none' }}
+                />
+              );
+            }
+          }, [pathData, isSelected, conn.color, conn.strokeWidth, conn.id])}
 
           {/* Label pill in the middle */}
           {(conn.label || isEditing) && (

@@ -165,10 +165,10 @@ export function getConnectionPath(
 
   if (isHorizontal) {
     const cx = (x1 + x2) / 2;
-    return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+    return `M ${x1} ${y1} C ${cx} ${y1} ${cx} ${y2} ${x2} ${y2}`;
   } else {
     const cy = (y1 + y2) / 2;
-    return `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+    return `M ${x1} ${y1} C ${x1} ${cy} ${x2} ${cy} ${x2} ${y2}`;
   }
 }
 
