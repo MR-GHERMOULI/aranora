@@ -19,7 +19,7 @@ import { TaskPanel } from './task-panel';
 import { CanvasList } from './canvas-list';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { toast } from 'sonner';
-import { Sparkles, MousePointer2, Zap } from 'lucide-react';
+import { Sparkles, MousePointer2, Zap, Pencil } from 'lucide-react';
 
 interface NexusCanvasProps {
   projects: { id: string; title: string }[];
