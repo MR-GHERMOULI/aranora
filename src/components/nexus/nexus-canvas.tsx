@@ -196,7 +196,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     }
     if (activeTool === 'pen') {
       const newPath: NexusPath = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         points: [{ x, y }],
         color: penConfig.color,
         strokeWidth: penConfig.type === 'illustration' ? penConfig.width * 2.5 : penConfig.width,
@@ -451,7 +451,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   const handleSave = () => {
-    const canvas: NexusCanvasData = { id: canvasId || crypto.randomUUID(), name: canvasName, shapes, connections, paths, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const canvas: NexusCanvasData = { id: canvasId || uuidv4(), name: canvasName, shapes, connections, paths, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
     if (!canvasId) setCanvasId(canvas.id);
     saveCanvas(canvas);
     toast.success('Canvas saved!');

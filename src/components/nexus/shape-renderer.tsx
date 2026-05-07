@@ -144,11 +144,12 @@ export function ShapeRenderer({
           }
 
           if (!drawable) return null;
+          const paths = generator.toPaths(drawable);
 
           return drawable.sets.map((set: any, i: number) => (
             <path
               key={i}
-              d={generator.toPaths(drawable)[i].d}
+              d={paths[i]?.d || ''}
               fill={set.type === 'fillPath' ? shape.color : 'none'}
               stroke={set.type === 'path' ? strokeColor : 'none'}
               strokeWidth={strokeWidth}

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useSidebar } from "@/components/providers/sidebar-context";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -17,6 +18,11 @@ interface DashboardWrapperProps {
 
 export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrapperProps) {
   const { isCollapsed, toggleSidebar } = useSidebar();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="h-full relative flex overflow-hidden bg-gray-50 w-full">
@@ -24,7 +30,7 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
       <div 
         className={cn(
           "hidden h-full md:flex md:flex-col transition-all duration-300 ease-in-out z-40",
-          isCollapsed ? "w-0 overflow-hidden opacity-0" : "w-72 opacity-100"
+          (mounted && isCollapsed) ? "w-0 overflow-hidden opacity-0" : "w-72 opacity-100"
         )}
       >
         <Sidebar className="w-72 shrink-0" />
