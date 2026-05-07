@@ -612,19 +612,40 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       {/* Empty canvas hint */}
       {shapes.length === 0 && paths.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="text-center space-y-6">
-            <div className="mx-auto w-24 h-24 rounded-[2rem] bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-2xl shadow-blue-500/10 flex items-center justify-center animate-bounce-slow">
-              <Sparkles className="h-10 w-10 text-blue-500" />
+          <div className="text-center space-y-8 animate-in fade-in zoom-in duration-700">
+            {/* Indicative Logo Composition */}
+            <div className="relative mx-auto w-32 h-32">
+              <div className="absolute inset-0 bg-blue-500/10 rounded-[2.5rem] blur-2xl animate-pulse" />
+              <div className="relative w-full h-full rounded-[2.5rem] bg-gradient-to-br from-white to-gray-50 border border-blue-100 shadow-2xl flex items-center justify-center overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+                <div className="flex items-center justify-center relative">
+                  <Pencil className="h-10 w-10 text-blue-600 rotate-[-15deg] absolute -translate-x-4 -translate-y-2 opacity-20" />
+                  <MousePointer2 className="h-12 w-12 text-blue-600 relative z-10" />
+                  <Sparkles className="h-8 w-8 text-amber-500 absolute translate-x-6 translate-y-4" />
+                </div>
+              </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-gray-900 text-2xl font-bold tracking-tight">Nexus Tools</h3>
-              <p className="text-gray-500 text-base max-w-sm mx-auto leading-relaxed font-medium">
-                These are nexus tools from our <span className="text-blue-600 font-bold">Aranora platform</span>. Select a tool below to begin your creative journey.
+
+            <div className="space-y-4">
+              <h3 className="text-gray-900 text-4xl font-extrabold tracking-tight">
+                Aranora <span className="text-blue-600">Nexus</span>
+              </h3>
+              <p className="text-gray-500 text-lg max-w-lg mx-auto leading-relaxed font-medium">
+                Elevate your raw ideas into <span className="text-gray-900">structured reality</span>. 
+                Our professional suite combines precision geometry with fluid freehand tools to help you 
+                visualize complex workflows on the <span className="text-blue-600 font-bold underline decoration-blue-200 underline-offset-4">Aranora platform</span>.
               </p>
             </div>
-            <div className="flex items-center justify-center gap-6 text-[10px] uppercase tracking-widest font-bold text-gray-400">
-              <span className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm"><MousePointer2 className="h-3.5 w-3.5 text-blue-500" /> Click to Create</span>
-              <span className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm"><Sparkles className="h-3.5 w-3.5 text-amber-500" /> Professional Suite</span>
+
+            <div className="flex items-center justify-center gap-8 text-[11px] uppercase tracking-[0.2em] font-black text-gray-400">
+              <span className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white shadow-xl shadow-black/5 border border-black/[0.03]">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                Precision Design
+              </span>
+              <span className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white shadow-xl shadow-black/5 border border-black/[0.03]">
+                <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                AI-Ready Suite
+              </span>
             </div>
           </div>
         </div>
