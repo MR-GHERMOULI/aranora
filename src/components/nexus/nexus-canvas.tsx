@@ -489,7 +489,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       const isSelected = selectedConnId === conn.id;
       const isEditing = editingConnId === conn.id;
       const dashArray = conn.style === 'dashed' ? '8 4' : conn.style === 'dotted' ? '3 3' : 'none';
-      const pathData = getConnectionPath(pts.x1, pts.y1, pts.x2, pts.y2);
+      const pathData = getConnectionPath(pts.x1, pts.y1, pts.x2, pts.y2, conn.routing);
+      if (!pathData) return null;
 
       return (
         <g 
@@ -567,6 +568,34 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                     {conn.label}
                   </div>
                 )}
+              </div>
+            </foreignObject>
+          )}
+
+          {/* Connection Settings Popover */}
+          {isSelected && !isEditing && (
+            <foreignObject
+              x={midX - 75}
+              y={midY + 20}
+              width={150}
+              height={40}
+              style={{ pointerEvents: 'all' }}
+            >
+              <div className="flex items-center justify-center h-full">
+                <div className="flex items-center gap-1 p-1 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-black/5">
+                  <button
+                    onClick={() => setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, routing: 'curved' } : c))}
+                    className={cn("px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all", (!conn.routing || conn.routing === 'curved') ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50")}
+                  >
+                    Free
+                  </button>
+                  <button
+                    onClick={() => setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, routing: 'orthogonal' } : c))}
+                    className={cn("px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all", conn.routing === 'orthogonal' ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50")}
+                  >
+                    Regulated
+                  </button>
+                </div>
               </div>
             </foreignObject>
           )}
@@ -736,7 +765,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             {/* Temp line */}
             {tempLine && (
               <path
-                d={getConnectionPath(tempLine.x1, tempLine.y1, tempLine.x2, tempLine.y2)}
+                d={getConnectionPath(tempLine.x1, tempLine.y1, tempLine.x2, tempLine.y2) || ''}
                 stroke={connectionColor} strokeWidth={2} strokeDasharray="6 4" opacity={0.7} fill="none"
                 markerStart={`url(#dot-${connectFrom})`}
                 markerEnd="url(#temp-arrow)"

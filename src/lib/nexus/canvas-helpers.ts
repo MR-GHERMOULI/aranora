@@ -96,7 +96,8 @@ export function createShape(
 export function createConnection(
   fromShapeId: string,
   toShapeId: string,
-  color: string = '#3b82f6'
+  color: string = '#3b82f6',
+  routing: 'curved' | 'orthogonal' = 'curved'
 ): NexusConnection {
   return {
     id: uuidv4(),
@@ -106,6 +107,7 @@ export function createConnection(
     strokeWidth: 2,
     style: 'solid',
     animated: false,
+    routing,
   };
 }
 
@@ -123,7 +125,11 @@ export function getConnectionPoints(
   to: NexusShape
 ): { x1: number; y1: number; x2: number; y2: number } {
   const fc = getShapeCenter(from);
-  const tc = getShapeCenter(to);
+  let tc = getShapeCenter(to);
+
+  if (fc.x === tc.x && fc.y === tc.y) {
+    tc = { x: tc.x + 1, y: tc.y + 1 };
+  }
 
   // Calculate intersection with shape boundary
   const fromPoint = getEdgePoint(from, fc, tc);
@@ -138,15 +144,25 @@ export function getConnectionPoints(
 }
 
 export function getConnectionPath(
-  x1: number, y1: number, x2: number, y2: number
+  x1: number, y1: number, x2: number, y2: number, routing: 'curved' | 'orthogonal' = 'curved'
 ): string {
-  // Create a smooth S-curve
+  // Prevent NaN path data
+  if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return '';
+
   const dx = Math.abs(x2 - x1);
   const dy = Math.abs(y2 - y1);
-  
-  // If it's mostly horizontal, curve horizontally. If vertical, curve vertically.
   const isHorizontal = dx > dy;
   
+  if (routing === 'orthogonal') {
+    if (isHorizontal) {
+      const cx = (x1 + x2) / 2;
+      return `M ${x1} ${y1} L ${cx} ${y1} L ${cx} ${y2} L ${x2} ${y2}`;
+    } else {
+      const cy = (y1 + y2) / 2;
+      return `M ${x1} ${y1} L ${x1} ${cy} L ${x2} ${cy} L ${x2} ${y2}`;
+    }
+  }
+
   if (isHorizontal) {
     const cx = (x1 + x2) / 2;
     return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;

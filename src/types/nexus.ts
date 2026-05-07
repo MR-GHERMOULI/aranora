@@ -36,6 +36,7 @@ export interface NexusConnection {
   label?: string;
   style: 'solid' | 'dashed' | 'dotted';
   animated?: boolean;
+  routing?: 'curved' | 'orthogonal';
 }
 
 export interface NexusPath {
