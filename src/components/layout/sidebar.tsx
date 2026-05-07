@@ -35,11 +35,13 @@ import { NotificationsPopover } from "./notifications/notifications-popover"
 import { useEffect } from "react"
 import { getUnreadBroadcastsCount } from "./notifications/actions"
 import { SubscriptionDisclaimer } from "./subscription-disclaimer"
+import { useSidebar } from "@/components/providers/sidebar-context"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
+    const { isCollapsed } = useSidebar();
     const [isOpen, setIsOpen] = useState(false)
     const [broadcastsCount, setBroadcastsCount] = useState(0)
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
@@ -325,8 +327,9 @@ export function Sidebar({ className }: SidebarProps) {
 
             <div
                 className={cn(
-                    "space-y-4 py-4 flex flex-col h-full bg-slate-900 text-white fixed inset-y-0 left-0 z-50 w-72 transition-transform transform md:relative md:translate-x-0",
+                    "space-y-4 py-4 flex flex-col h-full bg-slate-900 text-white fixed inset-y-0 left-0 z-50 w-72 transition-all duration-300 transform md:relative",
                     isOpen ? "translate-x-0" : "-translate-x-full",
+                    isCollapsed ? "md:w-0 md:-translate-x-full md:opacity-0" : "md:w-72 md:translate-x-0 md:opacity-100",
                     className
                 )}
             >
