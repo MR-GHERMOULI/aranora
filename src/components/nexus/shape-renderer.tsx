@@ -2,6 +2,9 @@
 
 import type { NexusShape } from '@/types/nexus';
 import { useRef, useEffect, useCallback, useMemo } from 'react';
+import rough from 'roughjs';
+
+const generator = rough.generator();
 
 interface ShapeRendererProps {
   shape: NexusShape;
@@ -107,29 +110,51 @@ export function ShapeRenderer({
         </filter>
       </defs>
 
-      {/* Main body */}
+      {/* Main body - Hand-Drawn Style */}
       <g filter={`url(#${shadowId})`}>
-        {shape.type === 'circle' ? (
-          <ellipse
-            cx={shape.width / 2} cy={shape.height / 2}
-            rx={shape.width / 2 - 2} ry={shape.height / 2 - 2}
-            fill={shape.color}
-            stroke={strokeColor} strokeWidth={strokeWidth}
-          />
-        ) : shape.type === 'rectangle' ? (
-          <rect
-            x={2} y={2} width={shape.width - 4} height={shape.height - 4}
-            rx={12} ry={12}
-            fill={shape.color}
-            stroke={strokeColor} strokeWidth={strokeWidth}
-          />
-        ) : (
-          <path
-            d={getSvgPath()}
-            fill={shape.color}
-            stroke={strokeColor} strokeWidth={strokeWidth}
-          />
-        )}
+        {useMemo(() => {
+          const options = {
+            seed: 1, // Fixed seed for stability
+            stroke: strokeColor,
+            strokeWidth: strokeWidth,
+            fill: shape.color,
+            fillStyle: 'solid',
+            roughness: 1.2,
+            bowing: 1.5,
+          } as any;
+
+          let drawable;
+          const w = shape.width;
+          const h = shape.height;
+
+          if (shape.type === 'circle') {
+            drawable = generator.ellipse(w / 2, h / 2, w - 8, h - 8, options);
+          } else if (shape.type === 'rectangle') {
+            drawable = generator.rectangle(4, 4, w - 8, h - 8, options);
+          } else if (shape.type === 'diamond') {
+            drawable = generator.polygon([[w / 2, 4], [w - 4, h / 2], [w / 2, h - 4], [4, h / 2]], options);
+          } else if (shape.type === 'hexagon') {
+            const inset = w * 0.22;
+            drawable = generator.polygon([[inset, 4], [w - inset, 4], [w - 4, h / 2], [w - inset, h - 4], [inset, h - 4], [4, h / 2]], options);
+          } else if (shape.type === 'parallelogram') {
+            const sk = w * 0.16;
+            drawable = generator.polygon([[sk, 4], [w - 4, 4], [w - sk, h - 4], [4, h - 4]], options);
+          }
+
+          if (!drawable) return null;
+
+          return drawable.sets.map((set: any, i: number) => (
+            <path
+              key={i}
+              d={generator.toPaths(drawable)[i]}
+              fill={set.type === 'fillPath' ? shape.color : 'none'}
+              stroke={set.type === 'path' ? strokeColor : 'none'}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ));
+        }, [shape.type, shape.width, shape.height, shape.color, strokeColor, strokeWidth])}
       </g>
 
       {/* Selection dashed outline */}

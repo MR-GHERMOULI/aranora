@@ -20,6 +20,9 @@ import { CanvasList } from './canvas-list';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { toast } from 'sonner';
 import { Sparkles, MousePointer2, Zap, Pencil } from 'lucide-react';
+import rough from 'roughjs';
+
+const generator = rough.generator();
 
 interface NexusCanvasProps {
   projects: { id: string; title: string }[];
@@ -512,17 +515,29 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             />
           )}
 
-          {/* Visible line: dot start, arrow end */}
-          <path
-            d={pathData}
-            stroke={isSelected ? '#3b82f6' : conn.color} fill="none"
-            strokeWidth={isSelected ? conn.strokeWidth + 1 : conn.strokeWidth}
-            strokeDasharray={dashArray}
-            markerStart={`url(#dot-${conn.id})`}
-            markerEnd={`url(#arrow-${conn.id})`}
-            style={{ pointerEvents: 'none' }}
-            className="transition-colors duration-200"
-          />
+          {/* Hand-Drawn Connection Line */}
+          {useMemo(() => {
+            const drawable = generator.path(pathData, {
+              stroke: isSelected ? '#3b82f6' : conn.color,
+              strokeWidth: isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth,
+              roughness: 0.8,
+              bowing: 1.2,
+              seed: 1,
+            });
+            return generator.toPaths(drawable).map((p, i) => (
+              <path
+                key={`line-${i}`}
+                d={p}
+                stroke={isSelected ? '#3b82f6' : conn.color}
+                fill="none"
+                strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
+                strokeLinecap="round"
+                markerStart={i === 0 ? `url(#dot-${conn.id})` : 'none'}
+                markerEnd={i === 0 ? `url(#arrow-${conn.id})` : 'none'}
+                style={{ pointerEvents: 'none' }}
+              />
+            ));
+          }, [pathData, isSelected, conn.color, conn.strokeWidth])}
 
           {/* Label pill in the middle */}
           {(conn.label || isEditing) && (
