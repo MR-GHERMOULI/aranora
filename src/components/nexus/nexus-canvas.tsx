@@ -21,6 +21,7 @@ import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { toast } from 'sonner';
 import { Sparkles, MousePointer2, Zap, Pencil } from 'lucide-react';
 import rough from 'roughjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
 
