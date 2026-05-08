@@ -9,7 +9,7 @@ import {
   Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser,
   GripHorizontal, Palette, Settings2, Scissors, Type
 } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ToolbarProps {
@@ -93,7 +93,23 @@ export function NexusToolbar({
   canvasTheme, onThemeChange,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
-  const [showConfig, setShowConfig] = useState<string | null>(null);
+  const [showConfig, setShowConfig] = useState<'style' | 'actions' | null>(null);
+
+  // Close menus when active tool changes (e.g. via keyboard shortcuts)
+  useEffect(() => {
+    setActiveGroup(null);
+  }, [activeTool]);
+
+  // Ensure mutual exclusivity between flyouts and config popovers
+  const toggleGroup = (groupId: string) => {
+    setActiveGroup(activeGroup === groupId ? null : groupId);
+    setShowConfig(null);
+  };
+
+  const toggleConfig = (config: 'style' | 'actions') => {
+    setShowConfig(showConfig === config ? null : config);
+    setActiveGroup(null);
+  };
   const constraintsRef = useRef(null);
 
   return (
@@ -139,7 +155,7 @@ export function NexusToolbar({
                 <button
                   onClick={() => {
                     if (group.tools.length === 1) onToolChange(group.tools[0].mode as ToolMode);
-                    else setActiveGroup(activeGroup === group.id ? null : group.id);
+                    else toggleGroup(group.id);
                   }}
                   onDoubleClick={() => onToolChange(currentTool.mode as ToolMode)}
                   className={cn(
@@ -201,7 +217,7 @@ export function NexusToolbar({
         <div className="flex items-center gap-1.5 px-2">
           {/* Palette (Color & Pen) */}
           <button 
-            onClick={() => setShowConfig(showConfig === 'style' ? null : 'style')}
+            onClick={() => toggleConfig('style')}
             className={cn(
               "p-3.5 rounded-2xl transition-all",
               showConfig === 'style' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
@@ -212,7 +228,7 @@ export function NexusToolbar({
 
           {/* Quick Actions (Save, Load, etc) */}
           <button 
-            onClick={() => setShowConfig(showConfig === 'actions' ? null : 'actions')}
+            onClick={() => toggleConfig('actions')}
             className={cn(
               "p-3.5 rounded-2xl transition-all",
               showConfig === 'actions' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
@@ -227,7 +243,7 @@ export function NexusToolbar({
         {/* AI Magic Button */}
         <div className="px-2">
           <button 
-            onClick={onConvert}
+            onClick={() => { onConvert(); setActiveGroup(null); setShowConfig(null); }}
             disabled={shapeCount === 0 || isConverting}
             className={cn(
               'flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all relative overflow-hidden group shadow-lg shadow-gray-900/10',
@@ -251,7 +267,7 @@ export function NexusToolbar({
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block text-center">Geometric Colors</span>
               <div className="grid grid-cols-4 gap-2.5">
                 {SHAPE_COLOR_PRESETS.slice(0, 12).map(p => (
-                  <button key={p.name} onClick={() => onColorChange(p.fill, p.border, p.text)}
+                  <button key={p.name} onClick={() => { onColorChange(p.fill, p.border, p.text); setShowConfig(null); }}
                     className={cn('w-8 h-8 rounded-full border border-black/5 transition-all hover:scale-125 ring-offset-4 ring-gray-900', activeColor.fill === p.fill ? "ring-2" : "")}
                     style={{ background: p.fill }} />
                 ))}
@@ -265,7 +281,7 @@ export function NexusToolbar({
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block text-center">Art Config</span>
               <div className="flex gap-2.5">
                 {[{ id: 'pen', icon: PenLine, label: 'Pen' }, { id: 'illustration', icon: Pencil, label: 'Brush' }, { id: 'highlighter', icon: Highlighter, label: 'Glow' }].map(t => (
-                  <button key={t.id} onClick={() => onPenConfigChange({ ...penConfig, type: t.id as any })}
+                  <button key={t.id} onClick={() => { onPenConfigChange({ ...penConfig, type: t.id as any }); setShowConfig(null); }}
                     className={cn("flex flex-col items-center gap-1.5 p-3 rounded-2xl border transition-all", penConfig.type === t.id ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "border-gray-100 text-gray-400 hover:bg-gray-50")}>
                     <t.icon className="h-4 w-4" />
                     <span className="text-[8px] font-bold uppercase">{t.label}</span>
@@ -286,7 +302,7 @@ export function NexusToolbar({
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block text-center">Editor Settings</span>
               <div className="flex flex-col gap-2">
                 <button
-                  onClick={() => onSnapToGridChange(!snapToGrid)}
+                  onClick={() => { onSnapToGridChange(!snapToGrid); setShowConfig(null); }}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-xs font-bold",
                     snapToGrid ? "bg-blue-50 border-blue-200 text-blue-600" : "border-gray-100 text-gray-400 hover:bg-gray-50"
@@ -298,7 +314,7 @@ export function NexusToolbar({
 
                 <div className="p-1.5 bg-gray-50 rounded-2xl flex gap-1">
                   <button
-                    onClick={() => onThemeChange('flat')}
+                    onClick={() => { onThemeChange('flat'); setShowConfig(null); }}
                     className={cn(
                       "flex-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all",
                       canvasTheme === 'flat' ? "bg-white shadow-sm text-blue-600" : "text-gray-400 hover:text-gray-600"
@@ -307,7 +323,7 @@ export function NexusToolbar({
                     Elegant
                   </button>
                   <button
-                    onClick={() => onThemeChange('hand-drawn')}
+                    onClick={() => { onThemeChange('hand-drawn'); setShowConfig(null); }}
                     className={cn(
                       "flex-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all",
                       canvasTheme === 'hand-drawn' ? "bg-white shadow-sm text-blue-600" : "text-gray-400 hover:text-gray-600"
