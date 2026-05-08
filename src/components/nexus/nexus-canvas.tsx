@@ -212,16 +212,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       }
       else if ((e.ctrlKey || e.metaKey) && key === 'd' && selectedShapeId) {
         e.preventDefault();
-        const shape = shapes.find(s => s.id === selectedShapeId);
-        if (shape) {
-          const newShape = { ...shape, id: uuidv4(), x: shape.x + 20, y: shape.y + 20, zIndex: Date.now() };
-          setShapes(prev => {
-            const next = [...prev, newShape];
-            saveToHistory(next, connections, paths);
-            return next;
-          });
-          setSelectedShapeId(newShape.id);
-        }
+        handleDuplicateShape(selectedShapeId);
       }
     };
     window.addEventListener('keydown', handler);
@@ -525,6 +516,18 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
   const handleUpdateShapeProperty = (shapeId: string, updates: Partial<NexusShape>) => {
     setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, ...updates } : s));
+  };
+
+  const handleDuplicateShape = (shapeId: string) => {
+    const shape = shapes.find(s => s.id === shapeId);
+    if (!shape) return;
+    const newShape = { ...shape, id: uuidv4(), x: shape.x + 20, y: shape.y + 20, zIndex: Date.now() };
+    setShapes(prev => {
+      const next = [...prev, newShape];
+      saveToHistory(next, connections, paths);
+      return next;
+    });
+    setSelectedShapeId(newShape.id);
   };
 
   const deleteSelectedShape = () => {
@@ -868,6 +871,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onTextChange={handleTextChange}
                 onContextMenu={handleShapeContextMenu}
                 onResizeStart={handleResizeStart}
+                onDuplicate={() => handleDuplicateShape(shape.id)}
                 editingShapeId={editingShapeId}
                 canvasTheme={canvasTheme}
               />
@@ -906,6 +910,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           onColorChange={(f, b, t) => updateShapeColor(selectedShapeId, f, b, t)}
           onTypeChange={(t) => updateShapeType(selectedShapeId, t)}
           onDelete={deleteSelectedShape}
+          onDuplicate={() => handleDuplicateShape(selectedShapeId)}
           onFontSizeChange={(size) => updateShapeFontSize(selectedShapeId, size)}
           onPropertyChange={(updates) => handleUpdateShapeProperty(selectedShapeId, updates)}
           zoom={viewport.zoom}

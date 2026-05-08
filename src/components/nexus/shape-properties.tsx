@@ -6,7 +6,7 @@ import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import {
   Square, Circle, Diamond, Hexagon,
   Trash2, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
-  Languages, Hash, ArrowRightLeft, Type
+  Languages, Hash, ArrowRightLeft, Type, Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -16,6 +16,7 @@ interface ShapePropertiesProps {
   onColorChange: (fill: string, border: string, text: string) => void;
   onTypeChange: (type: ShapeType) => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onFontSizeChange: (size: number) => void;
   onPropertyChange: (updates: Partial<NexusShape>) => void;
   zoom: number;
@@ -34,7 +35,7 @@ const shapeTypes: { type: ShapeType; icon: any; label: string }[] = [
 const symbols = ['[ ]', '{ }', '( )', '→', '•', '★', '✔', '✖', '●', '■', '▲'];
 
 export function ShapeProperties({
-  shape, onColorChange, onTypeChange, onDelete, onFontSizeChange,
+  shape, onColorChange, onTypeChange, onDelete, onDuplicate, onFontSizeChange,
   onPropertyChange, zoom, viewport
 }: ShapePropertiesProps) {
   const [showSymbols, setShowSymbols] = useState(false);
@@ -200,10 +201,18 @@ export function ShapeProperties({
       </div>
 
       {/* Group 4: Actions */}
-      <div className="px-1.5">
+      <div className="flex items-center gap-0.5 px-1.5">
+        <button
+          onClick={onDuplicate}
+          className="p-2.5 rounded-2xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-all active:scale-90"
+          title="Duplicate"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
         <button
           onClick={onDelete}
           className="p-2.5 rounded-2xl text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all active:scale-90"
+          title="Delete"
         >
           <Trash2 className="h-4 w-4" />
         </button>
