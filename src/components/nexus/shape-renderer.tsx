@@ -1,6 +1,6 @@
 'use client';
 
-import type { NexusShape } from '@/types/nexus';
+import type { NexusShape, CanvasTheme } from '@/types/nexus';
 import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import rough from 'roughjs';
 
@@ -17,11 +17,13 @@ interface ShapeRendererProps {
   onContextMenu: (e: React.MouseEvent, shapeId: string) => void;
   onResizeStart: (e: React.MouseEvent, shapeId: string, handle: string) => void;
   editingShapeId: string | null;
+  canvasTheme: CanvasTheme;
 }
 
 export const ShapeRenderer = React.memo(function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
   onMouseDown, onDoubleClick, onTextChange, onContextMenu, onResizeStart, editingShapeId,
+  canvasTheme,
 }: ShapeRendererProps) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const isEditing = editingShapeId === shape.id;
@@ -110,13 +112,46 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
         </filter>
       </defs>
 
-      {/* Main body - Hand-Drawn Style */}
-      <g filter={`url(#${shadowId})`}>
+      {/* Main body */}
+      <g filter={canvasTheme === 'hand-drawn' ? `url(#${shadowId})` : 'none'}>
         {useMemo(() => {
+          const w = shape.width;
+          const h = shape.height;
+
+          if (canvasTheme === 'flat') {
+            // Standard SVG geometric shapes
+            const commonProps = {
+              fill: shape.color,
+              stroke: strokeColor,
+              strokeWidth: strokeWidth,
+              className: "transition-colors duration-200"
+            };
+
+            switch (shape.type) {
+              case 'rectangle':
+                return <rect x={4} y={4} width={w - 8} height={h - 8} rx={8} {...commonProps} />;
+              case 'circle':
+                return <ellipse cx={w / 2} cy={h / 2} rx={w / 2 - 4} ry={h / 2 - 4} {...commonProps} />;
+              case 'diamond':
+                return <path d={`M ${w / 2} 4 L ${w - 4} ${h / 2} L ${w / 2} ${h - 4} L 4 ${h / 2} Z`} {...commonProps} />;
+              case 'hexagon': {
+                const inset = w * 0.22;
+                return <path d={`M ${inset} 4 L ${w - inset} 4 L ${w - 4} ${h / 2} L ${w - inset} ${h - 4} L ${inset} ${h - 4} L 4 ${h / 2} Z`} {...commonProps} />;
+              }
+              case 'parallelogram': {
+                const sk = w * 0.16;
+                return <path d={`M ${sk} 4 L ${w - 4} 4 L ${w - sk} ${h - 4} L 4 ${h - 4} Z`} {...commonProps} />;
+              }
+              default:
+                return null;
+            }
+          }
+
+          // Rough.js Hand-Drawn Style
           if (!roughGenerator) return null;
           const generator = roughGenerator;
           const options = {
-            seed: 1, // Fixed seed for stability
+            seed: 1,
             stroke: strokeColor,
             strokeWidth: strokeWidth,
             fill: shape.color,
@@ -126,9 +161,6 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
           } as any;
 
           let drawable;
-          const w = shape.width;
-          const h = shape.height;
-
           if (shape.type === 'circle') {
             drawable = generator.ellipse(w / 2, h / 2, w - 8, h - 8, options);
           } else if (shape.type === 'rectangle') {
@@ -157,7 +189,7 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
               strokeLinejoin="round"
             />
           ));
-        }, [shape.type, shape.width, shape.height, shape.color, strokeColor, strokeWidth])}
+        }, [shape.type, shape.width, shape.height, shape.color, strokeColor, strokeWidth, canvasTheme])}
       </g>
 
       {/* Selection dashed outline */}
@@ -234,6 +266,7 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
     prevProps.isConnectSource === nextProps.isConnectSource &&
     prevProps.zoom === nextProps.zoom &&
     prevProps.editingShapeId === nextProps.editingShapeId &&
+    prevProps.canvasTheme === nextProps.canvasTheme &&
     prevProps.shape === nextProps.shape
   );
 });

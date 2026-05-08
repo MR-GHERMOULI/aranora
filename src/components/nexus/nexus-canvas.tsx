@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type {
   NexusShape, NexusConnection, NexusPath, ToolMode, GeneratedTask,
-  CanvasViewport, NexusCanvas as NexusCanvasData,
+  CanvasViewport, NexusCanvas as NexusCanvasData, CanvasTheme,
 } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import { cn } from '@/lib/utils';
@@ -113,6 +113,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [clipboard, setClipboard] = useState<NexusShape | null>(null);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [alignmentLines, setAlignmentLines] = useState<{ x?: number, y?: number }[]>([]);
+  const [canvasTheme, setCanvasTheme] = useState<CanvasTheme>('hand-drawn');
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -644,6 +645,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         canRedo={historyIndexRef.current < historyRef.current.length - 1}
         penConfig={penConfig}
         onPenConfigChange={setPenConfig}
+        canvasTheme={canvasTheme}
+        onThemeChange={setCanvasTheme}
       />
 
       {/* Zoom controls - Moved to top left since dock is at bottom */}
@@ -741,10 +744,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             <marker id="temp-dot" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
               <circle cx="3" cy="3" r="2.5" fill={connectionColor} opacity="0.6" />
             </marker>
+
+            {/* Paper Texture Filter */}
+            <filter id="paper-texture" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise" />
+              <feDiffuseLighting in="noise" lightingColor="#fffcf5" surfaceScale="2">
+                <feDistantLight azimuth="45" elevation="60" />
+              </feDiffuseLighting>
+            </filter>
           </defs>
 
           {/* White background + dot grid */}
-          <rect x={0} y={0} width="100%" height="100%" fill="white" />
+          <rect x={0} y={0} width="100%" height="100%" 
+            fill={canvasTheme === 'hand-drawn' ? '#fffcf5' : 'white'} 
+            filter={canvasTheme === 'hand-drawn' ? 'url(#paper-texture)' : 'none'}
+          />
           <rect x={0} y={0} width="100%" height="100%" fill="url(#dot-grid)" />
 
           <g transform={`translate(${viewport.x}, ${viewport.y}) scale(${viewport.zoom})`}>
@@ -786,6 +800,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onUpdateConn={handleUpdateConn}
                 onLabelChange={handleConnLabelChange}
                 onFinishEditing={handleFinishEditingConn}
+                canvasTheme={canvasTheme}
               />
             ))}
 
@@ -815,6 +830,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onContextMenu={handleShapeContextMenu}
                 onResizeStart={handleResizeStart}
                 editingShapeId={editingShapeId}
+                canvasTheme={canvasTheme}
               />
             ))}
 

@@ -64,6 +64,8 @@ export interface CanvasViewport {
   zoom: number;
 }
 
+export type CanvasTheme = 'flat' | 'hand-drawn';
+
 export type ToolMode =
   | 'select'
   | 'pan'

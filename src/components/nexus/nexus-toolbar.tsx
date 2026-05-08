@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { ToolMode } from '@/types/nexus';
+import type { ToolMode, CanvasTheme } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS, CONNECTION_COLORS } from '@/types/nexus';
 import {
   MousePointer2, Hand, Square, Circle, Diamond, Hexagon,
@@ -39,6 +39,8 @@ interface ToolbarProps {
   canRedo: boolean;
   penConfig: { type: 'pen' | 'illustration' | 'highlighter', color: string, width: number };
   onPenConfigChange: (config: { type: 'pen' | 'illustration' | 'highlighter', color: string, width: number }) => void;
+  canvasTheme: CanvasTheme;
+  onThemeChange: (theme: CanvasTheme) => void;
 }
 
 const toolGroups = [
@@ -86,6 +88,7 @@ export function NexusToolbar({
   isConverting, connectFrom,
   onUndo, onRedo, canUndo, canRedo,
   penConfig, onPenConfigChange,
+  canvasTheme, onThemeChange,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState<string | null>(null);
@@ -290,6 +293,27 @@ export function NexusToolbar({
                   <div className={cn("w-2 h-2 rounded-full", snapToGrid ? "bg-blue-500" : "bg-gray-300")} />
                   Snap to Grid
                 </button>
+
+                <div className="p-1.5 bg-gray-50 rounded-2xl flex gap-1">
+                  <button
+                    onClick={() => onThemeChange('flat')}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all",
+                      canvasTheme === 'flat' ? "bg-white shadow-sm text-blue-600" : "text-gray-400 hover:text-gray-600"
+                    )}
+                  >
+                    Elegant
+                  </button>
+                  <button
+                    onClick={() => onThemeChange('hand-drawn')}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all",
+                      canvasTheme === 'hand-drawn' ? "bg-white shadow-sm text-blue-600" : "text-gray-400 hover:text-gray-600"
+                    )}
+                  >
+                    Sketch
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

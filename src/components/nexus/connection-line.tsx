@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { NexusConnection, NexusShape } from '@/types/nexus';
+import type { NexusConnection, NexusShape, CanvasTheme } from '@/types/nexus';
 import { cn } from '@/lib/utils';
 import { getConnectionPoints, getConnectionPath } from '@/lib/nexus/canvas-helpers';
 import rough from 'roughjs';
@@ -18,6 +18,7 @@ interface ConnectionLineProps {
   onUpdateConn: (connId: string, updates: Partial<NexusConnection>) => void;
   onLabelChange: (connId: string, label: string) => void;
   onFinishEditing: () => void;
+  canvasTheme: CanvasTheme;
 }
 
 /**
@@ -30,6 +31,7 @@ interface ConnectionLineProps {
 export function ConnectionLine({
   conn, shapes, isSelected, isEditing,
   onSelect, onDoubleClick, onUpdateConn, onLabelChange, onFinishEditing,
+  canvasTheme,
 }: ConnectionLineProps) {
   const from = shapes.find(s => s.id === conn.fromShapeId);
   const to = shapes.find(s => s.id === conn.toShapeId);
@@ -86,20 +88,22 @@ export function ConnectionLine({
         />
       )}
 
-      {/* Hand-drawn line (or fallback) */}
-      {roughPaths ? roughPaths.map(p => (
-        <path
-          key={p.key}
-          d={p.d}
-          stroke={isSelected ? '#3b82f6' : conn.color}
-          fill="none"
-          strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
-          strokeLinecap="round"
-          markerStart={p.isFirst ? `url(#dot-${conn.id})` : 'none'}
-          markerEnd={p.isFirst ? `url(#arrow-${conn.id})` : 'none'}
-          style={{ pointerEvents: 'none' }}
-        />
-      )) : (
+      {/* Connection line */}
+      {canvasTheme === 'hand-drawn' && roughPaths ? (
+        roughPaths.map(p => (
+          <path
+            key={p.key}
+            d={p.d}
+            stroke={isSelected ? '#3b82f6' : conn.color}
+            fill="none"
+            strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
+            strokeLinecap="round"
+            markerStart={p.isFirst ? `url(#dot-${conn.id})` : 'none'}
+            markerEnd={p.isFirst ? `url(#arrow-${conn.id})` : 'none'}
+            style={{ pointerEvents: 'none' }}
+          />
+        ))
+      ) : (
         <path
           d={pathData}
           stroke={isSelected ? '#3b82f6' : conn.color}
@@ -108,6 +112,7 @@ export function ConnectionLine({
           markerStart={`url(#dot-${conn.id})`}
           markerEnd={`url(#arrow-${conn.id})`}
           style={{ pointerEvents: 'none' }}
+          className={canvasTheme === 'flat' ? "transition-all duration-200" : ""}
         />
       )}
 
