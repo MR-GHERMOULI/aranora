@@ -121,7 +121,24 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       const { width, height } = containerRef.current.getBoundingClientRect();
       setContainerDimensions({ width, height });
     }
+    // Load preferences
+    const savedTheme = localStorage.getItem('nexus-theme');
+    if (savedTheme === 'flat' || savedTheme === 'hand-drawn') {
+      setCanvasTheme(savedTheme as CanvasTheme);
+    }
+    const savedGrid = localStorage.getItem('nexus-snap');
+    if (savedGrid) {
+      setSnapToGrid(savedGrid === 'true');
+    }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('nexus-theme', canvasTheme);
+  }, [canvasTheme]);
+
+  useEffect(() => {
+    localStorage.setItem('nexus-snap', snapToGrid.toString());
+  }, [snapToGrid]);
 
   const screenToCanvas = useCallback((clientX: number, clientY: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
