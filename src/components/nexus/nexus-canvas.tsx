@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { Sparkles, MousePointer2, Pencil } from 'lucide-react';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
+import { recognizeShape } from '@/lib/shape-recognition';
 
 const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
 
@@ -462,12 +463,44 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
   const handleMouseUp = () => { 
     if (activePath) {
-      setPaths(prev => {
-        const next = [...prev, activePath];
-        saveToHistory(shapes, connections, next);
-        return next;
-      });
-      setActivePath(null);
+      // SMART DRAWING: Analyze if the path looks like a geometric shape
+      const recognized = recognizeShape(activePath.points);
+      
+      if (recognized && activeTool === 'pen') {
+        const newShape: NexusShape = {
+          id: uuidv4(),
+          type: recognized.type,
+          x: recognized.x,
+          y: recognized.y,
+          width: recognized.width,
+          height: recognized.height,
+          text: '',
+          color: activeColor.fill,
+          borderColor: activeColor.border,
+          textColor: activeColor.text,
+          fontSize: 14,
+          zIndex: Date.now(),
+        };
+        
+        setShapes(prev => {
+          const next = [...prev, newShape];
+          saveToHistory(next, connections, paths);
+          return next;
+        });
+        
+        toast.success(`Converted to ${recognized.type}`, {
+          icon: '✨',
+          description: 'Smart Drawing recognized your shape.'
+        });
+        setActivePath(null);
+      } else {
+        setPaths(prev => {
+          const next = [...prev, activePath];
+          saveToHistory(shapes, connections, next);
+          return next;
+        });
+        setActivePath(null);
+      }
     }
     if (resizing) {
       saveToHistory(shapes, connections, paths);
