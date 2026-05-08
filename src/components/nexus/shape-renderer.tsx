@@ -1,7 +1,7 @@
 'use client';
 
 import type { NexusShape } from '@/types/nexus';
-import { useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import rough from 'roughjs';
 
 const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
@@ -19,7 +19,7 @@ interface ShapeRendererProps {
   editingShapeId: string | null;
 }
 
-export function ShapeRenderer({
+export const ShapeRenderer = React.memo(function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
   onMouseDown, onDoubleClick, onTextChange, onContextMenu, onResizeStart, editingShapeId,
 }: ShapeRendererProps) {
@@ -210,15 +210,6 @@ export function ShapeRenderer({
         )}
       </foreignObject>
 
-      {/* Resize handle */}
-      {isSelected && !isEditing && (
-        <rect
-          x={shape.width - 6} y={shape.height - 6}
-          width={10} height={10} rx={2}
-          fill="#3b82f6" stroke="white" strokeWidth={1.5}
-          style={{ cursor: 'nwse-resize' }}
-        />
-      )}
       {/* Resizing Handles */}
       {isSelected && !isEditing && (
         <g>
@@ -237,4 +228,12 @@ export function ShapeRenderer({
       )}
     </g>
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isConnectSource === nextProps.isConnectSource &&
+    prevProps.zoom === nextProps.zoom &&
+    prevProps.editingShapeId === nextProps.editingShapeId &&
+    prevProps.shape === nextProps.shape
+  );
+});

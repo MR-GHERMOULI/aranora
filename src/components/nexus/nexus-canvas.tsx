@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type {
   NexusShape, NexusConnection, NexusPath, ToolMode, GeneratedTask,
   CanvasViewport, NexusCanvas as NexusCanvasData,
@@ -8,7 +8,7 @@ import type {
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import { cn } from '@/lib/utils';
 import {
-  createShape, createConnection, getConnectionPoints, getConnectionPath,
+  createShape, createConnection, getConnectionPath,
   saveCanvas, loadCanvases, deleteCanvas as deleteCanvasStorage,
 } from '@/lib/nexus/canvas-helpers';
 import { convertCanvasToTasks } from '@/lib/nexus/converter';
@@ -17,9 +17,11 @@ import { ShapeRenderer } from './shape-renderer';
 import { ShapeProperties } from './shape-properties';
 import { TaskPanel } from './task-panel';
 import { CanvasList } from './canvas-list';
+import { ConnectionLine } from './connection-line';
+import { CanvasMinimap } from './canvas-minimap';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { toast } from 'sonner';
-import { Sparkles, MousePointer2, Zap, Pencil } from 'lucide-react';
+import { Sparkles, MousePointer2, Pencil } from 'lucide-react';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -38,39 +40,47 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [canvasId, setCanvasId] = useState<string>('');
 
   // ── History (Undo/Redo) ──────────────────────────────
+  // Refs are the source of truth — prevents stale-closure bugs
+  // when saveToHistory is called inside batched state updates.
   const [history, setHistory] = useState<{ shapes: NexusShape[], connections: NexusConnection[], paths: NexusPath[] }[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const historyRef = useRef<typeof history>([]);
+  const historyIndexRef = useRef(-1);
 
   const saveToHistory = useCallback((s: NexusShape[], c: NexusConnection[], p: NexusPath[]) => {
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      return [...newHistory, { shapes: s, connections: c, paths: p }];
-    });
-    setHistoryIndex(prev => prev + 1);
-  }, [historyIndex]);
+    const newHistory = historyRef.current.slice(0, historyIndexRef.current + 1);
+    newHistory.push({ shapes: s, connections: c, paths: p });
+    historyRef.current = newHistory;
+    historyIndexRef.current = newHistory.length - 1;
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, []);
 
   const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      const state = history[historyIndex - 1];
+    if (historyIndexRef.current > 0) {
+      historyIndexRef.current -= 1;
+      const state = historyRef.current[historyIndexRef.current];
       setShapes(state.shapes);
       setConnections(state.connections);
       setPaths(state.paths);
-      setHistoryIndex(prev => prev - 1);
-    } else if (historyIndex === 0) {
+      setHistoryIndex(historyIndexRef.current);
+    } else if (historyIndexRef.current === 0) {
+      historyIndexRef.current = -1;
       setShapes([]); setConnections([]); setPaths([]);
       setHistoryIndex(-1);
     }
-  }, [historyIndex, history]);
+  }, []);
 
   const redo = useCallback(() => {
-    if (historyIndex < history.length - 1) {
-      const state = history[historyIndex + 1];
+    if (historyIndexRef.current < historyRef.current.length - 1) {
+      historyIndexRef.current += 1;
+      const state = historyRef.current[historyIndexRef.current];
       setShapes(state.shapes);
       setConnections(state.connections);
       setPaths(state.paths);
-      setHistoryIndex(prev => prev + 1);
+      setHistoryIndex(historyIndexRef.current);
     }
-  }, [historyIndex, history]);
+  }, []);
 
   const [activeTool, setActiveTool] = useState<ToolMode>('select');
   const [activeColor, setActiveColor] = useState(SHAPE_COLOR_PRESETS[0]);
@@ -100,6 +110,17 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [isConverting, setIsConverting] = useState(false);
   const [isPushing, setIsPushing] = useState(false);
   const [showCanvasList, setShowCanvasList] = useState(false);
+  const [clipboard, setClipboard] = useState<NexusShape | null>(null);
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [alignmentLines, setAlignmentLines] = useState<{ x?: number, y?: number }[]>([]);
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      setContainerDimensions({ width, height });
+    }
+  }, []);
 
   const screenToCanvas = useCallback((clientX: number, clientY: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -143,18 +164,49 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       else if (key === 'l') setActiveTool('connect');
       else if (key === 'delete' || key === 'backspace') {
         if (selectedConnId) {
-          setConnections(prev => prev.filter(c => c.id !== selectedConnId));
+          const newConns = connections.filter(c => c.id !== selectedConnId);
+          setConnections(newConns);
+          saveToHistory(shapes, newConns, paths);
           setSelectedConnId(null);
         } else if (selectedShapeId) {
-          setShapes(prev => prev.filter(s => s.id !== selectedShapeId));
-          setConnections(prev => prev.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId));
+          const newShapes = shapes.filter(s => s.id !== selectedShapeId);
+          const newConns = connections.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId);
+          setShapes(newShapes);
+          setConnections(newConns);
+          saveToHistory(newShapes, newConns, paths);
           setSelectedShapeId(null);
+        }
+      }
+      else if ((e.ctrlKey || e.metaKey) && key === 'c' && selectedShapeId) {
+        const shape = shapes.find(s => s.id === selectedShapeId);
+        if (shape) setClipboard(shape);
+      }
+      else if ((e.ctrlKey || e.metaKey) && key === 'v' && clipboard) {
+        const newShape = { ...clipboard, id: uuidv4(), x: clipboard.x + 20, y: clipboard.y + 20, zIndex: Date.now() };
+        setShapes(prev => {
+          const next = [...prev, newShape];
+          saveToHistory(next, connections, paths);
+          return next;
+        });
+        setSelectedShapeId(newShape.id);
+      }
+      else if ((e.ctrlKey || e.metaKey) && key === 'd' && selectedShapeId) {
+        e.preventDefault();
+        const shape = shapes.find(s => s.id === selectedShapeId);
+        if (shape) {
+          const newShape = { ...shape, id: uuidv4(), x: shape.x + 20, y: shape.y + 20, zIndex: Date.now() };
+          setShapes(prev => {
+            const next = [...prev, newShape];
+            saveToHistory(next, connections, paths);
+            return next;
+          });
+          setSelectedShapeId(newShape.id);
         }
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [editingShapeId, selectedShapeId, selectedConnId]);
+  }, [editingShapeId, selectedShapeId, selectedConnId, undo, redo, shapes, connections, paths, saveToHistory]);
 
   // ── Wheel zoom ───────────────────────────────────────
   useEffect(() => {
@@ -296,8 +348,34 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     }
     if (dragging) {
       const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      let newX = x - dragging.offsetX;
+      let newY = y - dragging.offsetY;
+
+      if (snapToGrid) {
+        newX = Math.round(newX / gridSize) * gridSize;
+        newY = Math.round(newY / gridSize) * gridSize;
+      }
+
+      // Smart Alignment logic
+      const guides: { x?: number, y?: number }[] = [];
+      shapes.forEach(other => {
+        if (other.id === dragging.shapeId) return;
+        const thresh = 5;
+        if (Math.abs(newX - other.x) < thresh) { newX = other.x; guides.push({ x: other.x }); }
+        if (Math.abs(newX + shapes.find(s => s.id === dragging.shapeId)!.width - (other.x + other.width)) < thresh) { 
+          newX = other.x + other.width - shapes.find(s => s.id === dragging.shapeId)!.width; 
+          guides.push({ x: other.x + other.width }); 
+        }
+        if (Math.abs(newY - other.y) < thresh) { newY = other.y; guides.push({ y: other.y }); }
+        if (Math.abs(newY + shapes.find(s => s.id === dragging.shapeId)!.height - (other.y + other.height)) < thresh) { 
+          newY = other.y + other.height - shapes.find(s => s.id === dragging.shapeId)!.height; 
+          guides.push({ y: other.y + other.height }); 
+        }
+      });
+      setAlignmentLines(guides);
+
       setShapes(prev => prev.map(s =>
-        s.id === dragging.shapeId ? { ...s, x: x - dragging.offsetX, y: y - dragging.offsetY } : s
+        s.id === dragging.shapeId ? { ...s, x: newX, y: newY } : s
       ));
       return;
     }
@@ -325,6 +403,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             height = newHeight;
             y = resizing.startShapeY + dy;
           }
+        }
+
+        if (snapToGrid) {
+          x = Math.round(x / gridSize) * gridSize;
+          y = Math.round(y / gridSize) * gridSize;
+          width = Math.round(width / gridSize) * gridSize;
+          height = Math.round(height / gridSize) * gridSize;
         }
 
         return { ...s, x, y, width, height };
@@ -357,7 +442,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       saveToHistory(shapes, connections, paths);
       setResizing(null);
     }
-    setDragging(null); 
+    if (dragging) {
+      saveToHistory(shapes, connections, paths);
+      setDragging(null);
+    }
+    setAlignmentLines([]);
     setPanning(null); 
   };
   const handleDoubleClick = (shapeId: string) => { 
@@ -400,12 +489,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
   const deleteSelectedShape = () => {
     if (!selectedShapeId) return;
-    setShapes(prev => {
-      const next = prev.filter(s => s.id !== selectedShapeId);
-      saveToHistory(next, connections, paths);
-      return next;
-    });
-    setConnections(prev => prev.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId));
+    const newShapes = shapes.filter(s => s.id !== selectedShapeId);
+    const newConns = connections.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId);
+    setShapes(newShapes);
+    setConnections(newConns);
+    saveToHistory(newShapes, newConns, paths);
     setSelectedShapeId(null);
   };
 
@@ -473,154 +561,56 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
   const handleClear = () => {
     if (shapes.length === 0 && paths.length === 0) return;
+    saveToHistory(shapes, connections, paths);
     setShapes([]); setConnections([]); setPaths([]);
     setSelectedShapeId(null); setEditingShapeId(null);
     toast.info('Canvas cleared');
   };
 
-  // ── Render connections ───────────────────────────────
-  const renderConnections = () => {
-    return connections.map(conn => {
-      const from = shapes.find(s => s.id === conn.fromShapeId);
-      const to = shapes.find(s => s.id === conn.toShapeId);
-      if (!from || !to) return null;
-      const pts = getConnectionPoints(from, to);
-      const midX = (pts.x1 + pts.x2) / 2;
-      const midY = (pts.y1 + pts.y2) / 2;
-      const isSelected = selectedConnId === conn.id;
-      const isEditing = editingConnId === conn.id;
-      const dashArray = conn.style === 'dashed' ? '8 4' : conn.style === 'dotted' ? '3 3' : 'none';
-      const pathData = getConnectionPath(pts.x1, pts.y1, pts.x2, pts.y2, conn.routing);
-      if (!pathData) return null;
+  // ── Connection callbacks for ConnectionLine component ──
+  const handleUpdateConn = useCallback((connId: string, updates: Partial<NexusConnection>) => {
+    setConnections(prev => prev.map(c => c.id === connId ? { ...c, ...updates } : c));
+  }, []);
 
-      return (
-        <g 
-          key={conn.id}
-          onDoubleClick={(e) => { e.stopPropagation(); handleConnDoubleClick(conn.id); }}
-        >
-          {/* Invisible wide hit area for click */}
-          <path
-            d={pathData}
-            stroke="transparent" strokeWidth={24} fill="none"
-            style={{ cursor: 'pointer' }}
-            onClick={e => handleConnClick(e, conn.id)}
-          />
-          
-          {/* Selection Glow */}
-          {isSelected && (
-            <path
-              d={pathData}
-              stroke="#3b82f6" strokeWidth={conn.strokeWidth + 8} fill="none"
-              strokeOpacity={0.2}
-              style={{ pointerEvents: 'none' }}
-              className="transition-all duration-300"
-            />
-          )}
+  const handleConnLabelChange = useCallback((connId: string, label: string) => {
+    setConnections(prev => prev.map(c => c.id === connId ? { ...c, label } : c));
+  }, []);
 
-          {/* Hand-Drawn Connection Line */}
-          {useMemo(() => {
-            if (!roughGenerator || !pathData) return null;
-            const generator = roughGenerator;
-            try {
-              const drawable = generator.path(pathData, {
-                stroke: isSelected ? '#3b82f6' : conn.color,
-                strokeWidth: isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth,
-                roughness: 0.8,
-                bowing: 1.2,
-                seed: 1,
-              });
-              return generator.toPaths(drawable).map((p, i) => (
-                <path
-                  key={`line-${i}`}
-                  d={p.d}
-                  stroke={isSelected ? '#3b82f6' : conn.color}
-                  fill="none"
-                  strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
-                  strokeLinecap="round"
-                  markerStart={i === 0 ? `url(#dot-${conn.id})` : 'none'}
-                  markerEnd={i === 0 ? `url(#arrow-${conn.id})` : 'none'}
-                  style={{ pointerEvents: 'none' }}
-                />
-              ));
-            } catch (error) {
-              // Fallback to standard SVG path if roughjs crashes on weird vectors
-              return (
-                <path
-                  d={pathData}
-                  stroke={isSelected ? '#3b82f6' : conn.color}
-                  fill="none"
-                  strokeWidth={isSelected ? conn.strokeWidth + 1 : conn.strokeWidth}
-                  markerStart={`url(#dot-${conn.id})`}
-                  markerEnd={`url(#arrow-${conn.id})`}
-                  style={{ pointerEvents: 'none' }}
-                />
-              );
-            }
-          }, [pathData, isSelected, conn.color, conn.strokeWidth, conn.id])}
+  const handleFinishEditingConn = useCallback(() => {
+    setEditingConnId(null);
+  }, []);
 
-          {/* Label pill in the middle */}
-          {(conn.label || isEditing) && (
-            <foreignObject
-              x={midX - 60}
-              y={midY - 15}
-              width={120}
-              height={30}
-              style={{ pointerEvents: isEditing ? 'all' : 'none' }}
-            >
-              <div className="flex items-center justify-center h-full">
-                {isEditing ? (
-                  <input
-                    autoFocus
-                    value={conn.label || ''}
-                    onChange={(e) => setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, label: e.target.value } : c))}
-                    onBlur={() => setEditingConnId(null)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setEditingConnId(null); }}
-                    className="w-28 px-3 py-1 bg-white/90 backdrop-blur border-2 border-blue-500 rounded-xl text-[11px] font-bold text-center shadow-2xl outline-none"
-                    placeholder="Label..."
-                  />
-                ) : (
-                  <div className={cn(
-                    "px-3 py-1 bg-white border rounded-full text-[10px] font-bold shadow-sm whitespace-nowrap transition-all",
-                    isSelected ? "border-blue-500 text-blue-600 scale-110 shadow-md" : "border-gray-200 text-gray-700"
-                  )}>
-                    {conn.label}
-                  </div>
-                )}
-              </div>
-            </foreignObject>
-          )}
-
-          {/* Connection Settings Popover */}
-          {isSelected && !isEditing && (
-            <foreignObject
-              x={midX - 75}
-              y={midY + 20}
-              width={150}
-              height={40}
-              style={{ pointerEvents: 'all' }}
-            >
-              <div className="flex items-center justify-center h-full">
-                <div className="flex items-center gap-1 p-1 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-black/5">
-                  <button
-                    onClick={() => setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, routing: 'curved' } : c))}
-                    className={cn("px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all", (!conn.routing || conn.routing === 'curved') ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50")}
-                  >
-                    Free
-                  </button>
-                  <button
-                    onClick={() => setConnections(prev => prev.map(c => c.id === conn.id ? { ...c, routing: 'orthogonal' } : c))}
-                    className={cn("px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all", conn.routing === 'orthogonal' ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50")}
-                  >
-                    Regulated
-                  </button>
-                </div>
-              </div>
-            </foreignObject>
-          )}
-        </g>
-      );
-    });
+  const handleExportPNG = async () => {
+    if (!svgRef.current) return;
+    const svg = svgRef.current;
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(svg);
+    if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+      source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = svg.clientWidth;
+      canvas.height = svg.clientHeight;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+      const pngUrl = canvas.toDataURL("image/png");
+      const downloadLink = document.createElement("a");
+      downloadLink.href = pngUrl;
+      downloadLink.download = `${canvasName}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
   };
+
+  // Canvas list refresh key (replaces setTimeout hack)
+  const [canvasListKey, setCanvasListKey] = useState(0);
 
   const gridSize = 28;
 
@@ -639,6 +629,9 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         onClear={handleClear}
         onNewCanvas={handleNewCanvas}
         onLoadCanvas={() => setShowCanvasList(true)}
+        onExport={handleExportPNG}
+        snapToGrid={snapToGrid}
+        onSnapToGridChange={setSnapToGrid}
         canvasName={canvasName}
         onCanvasNameChange={setCanvasName}
         shapeCount={shapes.length}
@@ -647,8 +640,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         connectFrom={connectFrom}
         onUndo={undo}
         onRedo={redo}
-        canUndo={historyIndex >= 0}
-        canRedo={historyIndex < history.length - 1}
+        canUndo={historyIndexRef.current >= 0}
+        canRedo={historyIndexRef.current < historyRef.current.length - 1}
         penConfig={penConfig}
         onPenConfigChange={setPenConfig}
       />
@@ -745,6 +738,9 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             <marker id="temp-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
               <path d="M 0 0 L 10 4 L 0 8 z" fill={connectionColor} opacity="0.6" />
             </marker>
+            <marker id="temp-dot" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <circle cx="3" cy="3" r="2.5" fill={connectionColor} opacity="0.6" />
+            </marker>
           </defs>
 
           {/* White background + dot grid */}
@@ -778,14 +774,27 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             ))}
 
             {/* Connections below shapes */}
-            {renderConnections()}
+            {connections.map(conn => (
+              <ConnectionLine
+                key={conn.id}
+                conn={conn}
+                shapes={shapes}
+                isSelected={selectedConnId === conn.id}
+                isEditing={editingConnId === conn.id}
+                onSelect={handleConnClick}
+                onDoubleClick={handleConnDoubleClick}
+                onUpdateConn={handleUpdateConn}
+                onLabelChange={handleConnLabelChange}
+                onFinishEditing={handleFinishEditingConn}
+              />
+            ))}
 
             {/* Temp line */}
             {tempLine && (
               <path
                 d={getConnectionPath(tempLine.x1, tempLine.y1, tempLine.x2, tempLine.y2) || ''}
                 stroke={connectionColor} strokeWidth={2} strokeDasharray="6 4" opacity={0.7} fill="none"
-                markerStart={`url(#dot-${connectFrom})`}
+                markerStart="url(#temp-dot)"
                 markerEnd="url(#temp-arrow)"
                 style={{ pointerEvents: 'none' }}
                 className="animate-[dash_1s_linear_infinite]"
@@ -808,9 +817,33 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 editingShapeId={editingShapeId}
               />
             ))}
+
+            {/* Alignment Guides */}
+            {alignmentLines.map((line, i) => (
+              <line
+                key={i}
+                x1={line.x !== undefined ? line.x : -10000}
+                y1={line.y !== undefined ? line.y : -10000}
+                x2={line.x !== undefined ? line.x : 10000}
+                y2={line.y !== undefined ? line.y : 10000}
+                stroke="#3b82f6"
+                strokeWidth={1}
+                strokeDasharray="4 4"
+                opacity={0.5}
+              />
+            ))}
           </g>
         </svg>
       </div>
+
+      {/* Minimap */}
+      <CanvasMinimap 
+        shapes={shapes} 
+        viewport={viewport} 
+        containerWidth={containerDimensions.width} 
+        containerHeight={containerDimensions.height} 
+        onNavigate={(x, y) => setViewport(v => ({ ...v, x, y }))}
+      />
 
       {selectedShapeId && shapes.find(s => s.id === selectedShapeId) && activeTool === 'select' && !editingShapeId && (
         <ShapeProperties
@@ -830,8 +863,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           onPushToTasks={handlePushToTasks} projects={projects} isPushing={isPushing} />
       )}
       {showCanvasList && (
-        <CanvasList canvases={loadCanvases()} onSelect={handleLoadCanvas}
-          onDelete={id => { deleteCanvasStorage(id); setShowCanvasList(false); setTimeout(() => setShowCanvasList(true), 10); }}
+        <CanvasList key={canvasListKey} canvases={loadCanvases()} onSelect={handleLoadCanvas}
+          onDelete={id => { deleteCanvasStorage(id); setCanvasListKey(k => k + 1); }}
           onClose={() => setShowCanvasList(false)} />
       )}
     </div>

@@ -24,6 +24,9 @@ interface ToolbarProps {
   onClear: () => void;
   onNewCanvas: () => void;
   onLoadCanvas: () => void;
+  onExport: () => void;
+  snapToGrid: boolean;
+  onSnapToGridChange: (snap: boolean) => void;
   canvasName: string;
   onCanvasNameChange: (name: string) => void;
   shapeCount: number;
@@ -77,7 +80,8 @@ const toolGroups = [
 export function NexusToolbar({
   activeTool, onToolChange, activeColor, onColorChange,
   connectionColor, onConnectionColorChange,
-  onConvert, onSave, onClear, onNewCanvas, onLoadCanvas,
+  onConvert, onSave, onClear, onNewCanvas, onLoadCanvas, onExport,
+  snapToGrid, onSnapToGridChange,
   canvasName, onCanvasNameChange, shapeCount, connectionCount,
   isConverting, connectFrom,
   onUndo, onRedo, canUndo, canRedo,
@@ -269,6 +273,25 @@ export function NexusToolbar({
                   className="w-full h-1.5 bg-gray-100 rounded-full appearance-none cursor-pointer accent-emerald-500" />
               </div>
             </div>
+
+            <div className="w-px bg-black/[0.05]" />
+
+            {/* Editor Config */}
+            <div className="space-y-4">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block text-center">Editor Settings</span>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => onSnapToGridChange(!snapToGrid)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-xs font-bold",
+                    snapToGrid ? "bg-blue-50 border-blue-200 text-blue-600" : "border-gray-100 text-gray-400 hover:bg-gray-50"
+                  )}
+                >
+                  <div className={cn("w-2 h-2 rounded-full", snapToGrid ? "bg-blue-500" : "bg-gray-300")} />
+                  Snap to Grid
+                </button>
+              </div>
+            </div>
           </motion.div>
         )}
 
@@ -280,6 +303,7 @@ export function NexusToolbar({
               { onClick: onSave, icon: Save, label: 'Save', color: 'hover:text-emerald-600 hover:bg-emerald-50' },
               { onClick: onLoadCanvas, icon: FolderOpen, label: 'Open', color: 'hover:text-blue-600 hover:bg-blue-50' },
               { onClick: onNewCanvas, icon: Plus, label: 'New', color: 'hover:text-violet-600 hover:bg-violet-50' },
+              { onClick: onExport, icon: Paintbrush, label: 'PNG', color: 'hover:text-amber-600 hover:bg-amber-50' },
               { onClick: onClear, icon: Trash2, label: 'Clear', color: 'hover:text-red-600 hover:bg-red-50' },
             ].map(a => (
               <button key={a.label} onClick={() => { a.onClick(); setShowConfig(null); }} className={cn("flex flex-col items-center gap-1 p-3.5 rounded-2xl transition-all group", a.color)}>
