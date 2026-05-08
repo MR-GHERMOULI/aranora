@@ -871,7 +871,6 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onTextChange={handleTextChange}
                 onContextMenu={handleShapeContextMenu}
                 onResizeStart={handleResizeStart}
-                onDuplicate={() => handleDuplicateShape(shape.id)}
                 editingShapeId={editingShapeId}
                 canvasTheme={canvasTheme}
               />
