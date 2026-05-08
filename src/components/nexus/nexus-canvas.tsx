@@ -162,6 +162,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       else if (key === 'c') setActiveTool('circle');
       else if (key === 'd') setActiveTool('diamond');
       else if (key === 'x') setActiveTool('hexagon');
+      else if (key === 'z') setActiveTool('parallelogram');
       else if (key === 'l') setActiveTool('connect');
       else if (key === 'delete' || key === 'backspace') {
         if (selectedConnId) {
@@ -359,20 +360,29 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
       // Smart Alignment logic
       const guides: { x?: number, y?: number }[] = [];
-      shapes.forEach(other => {
-        if (other.id === dragging.shapeId) return;
-        const thresh = 5;
-        if (Math.abs(newX - other.x) < thresh) { newX = other.x; guides.push({ x: other.x }); }
-        if (Math.abs(newX + shapes.find(s => s.id === dragging.shapeId)!.width - (other.x + other.width)) < thresh) { 
-          newX = other.x + other.width - shapes.find(s => s.id === dragging.shapeId)!.width; 
-          guides.push({ x: other.x + other.width }); 
-        }
-        if (Math.abs(newY - other.y) < thresh) { newY = other.y; guides.push({ y: other.y }); }
-        if (Math.abs(newY + shapes.find(s => s.id === dragging.shapeId)!.height - (other.y + other.height)) < thresh) { 
-          newY = other.y + other.height - shapes.find(s => s.id === dragging.shapeId)!.height; 
-          guides.push({ y: other.y + other.height }); 
-        }
-      });
+      const currentShape = shapes.find(s => s.id === dragging.shapeId);
+      if (currentShape) {
+        shapes.forEach(other => {
+          if (other.id === dragging.shapeId) return;
+          const thresh = 5;
+          if (Math.abs(newX - other.x) < thresh) { 
+            newX = other.x; 
+            guides.push({ x: other.x }); 
+          }
+          if (Math.abs(newX + currentShape.width - (other.x + other.width)) < thresh) { 
+            newX = other.x + other.width - currentShape.width; 
+            guides.push({ x: other.x + other.width }); 
+          }
+          if (Math.abs(newY - other.y) < thresh) { 
+            newY = other.y; 
+            guides.push({ y: other.y }); 
+          }
+          if (Math.abs(newY + currentShape.height - (other.y + other.height)) < thresh) { 
+            newY = other.y + other.height - currentShape.height; 
+            guides.push({ y: other.y + other.height }); 
+          }
+        });
+      }
       setAlignmentLines(guides);
 
       setShapes(prev => prev.map(s =>

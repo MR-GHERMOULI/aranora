@@ -60,6 +60,7 @@ const toolGroups = [
       { mode: 'circle', icon: Circle, label: 'Circle (C)' },
       { mode: 'diamond', icon: Diamond, label: 'Diamond (D)' },
       { mode: 'hexagon', icon: Hexagon, label: 'Hexagon (X)' },
+      { mode: 'parallelogram', icon: Square, label: 'Parallelogram (Z)' },
     ]
   },
   {

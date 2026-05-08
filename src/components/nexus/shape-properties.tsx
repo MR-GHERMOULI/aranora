@@ -27,6 +27,7 @@ const shapeTypes: { type: ShapeType; icon: any; label: string }[] = [
   { type: 'circle', icon: Circle, label: 'Circle' },
   { type: 'diamond', icon: Diamond, label: 'Diamond' },
   { type: 'hexagon', icon: Hexagon, label: 'Hex' },
+  { type: 'parallelogram', icon: Square, label: 'Para' },
 ];
 
 const symbols = ['[ ]', '{ }', '( )', '→', '•', '★', '✔', '✖', '●', '■', '▲'];
