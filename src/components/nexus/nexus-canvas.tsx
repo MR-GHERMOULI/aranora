@@ -245,25 +245,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     const { x, y } = screenToCanvas(e.clientX, e.clientY);
-    const shapeTypes: ToolMode[] = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram', 'text'];
+    const shapeTypes: ToolMode[] = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram', 'text', 'mindmap'];
     if (shapeTypes.includes(activeTool as any)) {
       const newShape: NexusShape = {
         id: uuidv4(),
-        type: activeTool as any,
+        type: activeTool === 'mindmap' ? 'rectangle' : (activeTool as any),
         x, y,
-        width: activeTool === 'text' ? 160 : 120,
-        height: activeTool === 'text' ? 60 : 80,
-        text: activeTool === 'text' ? 'Start typing...' : '',
-        color: activeTool === 'text' ? 'transparent' : activeColor.fill,
-        borderColor: activeTool === 'text' ? 'transparent' : activeColor.border,
-        textColor: activeTool === 'text' ? '#0f172a' : activeColor.text,
-        fontSize: (activeTool === 'text' || activeTool === 'mindmap') ? 16 : 14,
-        zIndex: Date.now(),
-        // Mind map specific defaults
-        fontWeight: activeTool === 'mindmap' ? 'bold' : 'normal',
         width: activeTool === 'mindmap' ? 200 : (activeTool === 'text' ? 160 : 120),
         height: activeTool === 'mindmap' ? 100 : (activeTool === 'text' ? 60 : 80),
         text: activeTool === 'mindmap' ? 'Central Topic' : (activeTool === 'text' ? 'Start typing...' : ''),
+        color: (activeTool === 'text' || activeTool === 'mindmap') ? 'transparent' : activeColor.fill,
+        borderColor: (activeTool === 'text' || activeTool === 'mindmap') ? 'transparent' : activeColor.border,
+        textColor: (activeTool === 'text' || activeTool === 'mindmap') ? '#0f172a' : activeColor.text,
+        fontSize: (activeTool === 'text' || activeTool === 'mindmap') ? 16 : 14,
+        zIndex: Date.now(),
+        fontWeight: activeTool === 'mindmap' ? 'bold' : 'normal',
       };
       setShapes(prev => {
         const next = [...prev, newShape];

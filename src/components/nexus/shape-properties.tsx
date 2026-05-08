@@ -5,6 +5,7 @@ import type { NexusShape, ShapeType } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import {
   Square, Circle, Diamond, Hexagon,
+  Trash2, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
   Languages, Hash, ArrowRightLeft, Type, Copy,
   GitBranch, Plus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Network
 } from 'lucide-react';
