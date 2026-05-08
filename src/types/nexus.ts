@@ -1,6 +1,6 @@
 // ── Nexus Canvas Types ─────────────────────────────────
 
-export type ShapeType = 'rectangle' | 'circle' | 'diamond' | 'hexagon' | 'parallelogram';
+export type ShapeType = 'rectangle' | 'circle' | 'diamond' | 'hexagon' | 'parallelogram' | 'text';
 
 export interface NexusShape {
   id: string;

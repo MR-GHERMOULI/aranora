@@ -7,7 +7,7 @@ import {
   MousePointer2, Hand, Square, Circle, Diamond, Hexagon,
   Link2, Sparkles, Save, Trash2, FolderOpen, Plus, ChevronUp,
   Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser,
-  GripHorizontal, Palette, Settings2, Scissors
+  GripHorizontal, Palette, Settings2, Scissors, Type
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -76,6 +76,7 @@ const toolGroups = [
     tools: [
       { mode: 'pen', icon: PenLine, label: 'Pen (P)' },
       { mode: 'eraser', icon: Eraser, label: 'Eraser (E)' },
+      { mode: 'text', icon: Type, label: 'Text (T)' },
     ]
   }
 ];

@@ -180,6 +180,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       else if (key === 'd') setActiveTool('diamond');
       else if (key === 'x') setActiveTool('hexagon');
       else if (key === 'z') setActiveTool('parallelogram');
+      else if (key === 't') setActiveTool('text');
       else if (key === 'l') setActiveTool('connect');
       else if (key === 'delete' || key === 'backspace') {
         if (selectedConnId) {
@@ -252,10 +253,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     const { x, y } = screenToCanvas(e.clientX, e.clientY);
-    const shapeTools = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram'] as const;
-
-    if (shapeTools.includes(activeTool as any)) {
-      const newShape = createShape(activeTool as NexusShape['type'], x, y, activeColor.fill, activeColor.border, activeColor.text);
+    const shapeTypes: ToolMode[] = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram', 'text'];
+    if (shapeTypes.includes(activeTool as any)) {
+      const newShape: NexusShape = {
+        id: uuidv4(),
+        type: activeTool as any,
+        x, y,
+        width: activeTool === 'text' ? 160 : 120,
+        height: activeTool === 'text' ? 60 : 80,
+        text: activeTool === 'text' ? 'Start typing...' : '',
+        color: activeTool === 'text' ? 'transparent' : activeColor.fill,
+        borderColor: activeTool === 'text' ? 'transparent' : activeColor.border,
+        textColor: activeColor.text,
+        fontSize: 14,
+        zIndex: Date.now(),
+      };
       setShapes(prev => {
         const next = [...prev, newShape];
         saveToHistory(next, connections, paths);

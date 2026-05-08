@@ -142,6 +142,9 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
                 const sk = w * 0.16;
                 return <path d={`M ${sk} 4 L ${w - 4} 4 L ${w - sk} ${h - 4} L 4 ${h - 4} Z`} {...commonProps} />;
               }
+              case 'text':
+                // For text, we don't render a background box in flat mode unless it's for a hover/hit area
+                return <rect x={0} y={0} width={w} height={h} fill="transparent" stroke="none" />;
               default:
                 return null;
             }
@@ -173,6 +176,9 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
           } else if (shape.type === 'parallelogram') {
             const sk = w * 0.16;
             drawable = generator.polygon([[sk, 4], [w - 4, 4], [w - sk, h - 4], [4, h - 4]], options);
+          } else if (shape.type === 'text') {
+            // No rough shape for text type, just return null so we only see the text
+            return <rect x={0} y={0} width={w} height={h} fill="transparent" stroke="none" />;
           }
 
           if (!drawable) return null;
