@@ -257,8 +257,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         color: activeTool === 'text' ? 'transparent' : activeColor.fill,
         borderColor: activeTool === 'text' ? 'transparent' : activeColor.border,
         textColor: activeTool === 'text' ? '#0f172a' : activeColor.text,
-        fontSize: activeTool === 'text' ? 16 : 14,
+        fontSize: (activeTool === 'text' || activeTool === 'mindmap') ? 16 : 14,
         zIndex: Date.now(),
+        // Mind map specific defaults
+        fontWeight: activeTool === 'mindmap' ? 'bold' : 'normal',
+        width: activeTool === 'mindmap' ? 200 : (activeTool === 'text' ? 160 : 120),
+        height: activeTool === 'mindmap' ? 100 : (activeTool === 'text' ? 60 : 80),
+        text: activeTool === 'mindmap' ? 'Central Topic' : (activeTool === 'text' ? 'Start typing...' : ''),
       };
       setShapes(prev => {
         const next = [...prev, newShape];
@@ -326,6 +331,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         setConnectFrom(null);
         setTempLine(null);
       }
+      return;
+    }
+
+    if (activeTool === 'mindmap') {
+      handleAddChild(shapeId, 'right');
       return;
     }
 
@@ -561,6 +571,47 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       return next;
     });
     setSelectedShapeId(newShape.id);
+  };
+
+  const handleAddChild = (parentId: string, direction: 'left' | 'right' | 'top' | 'bottom') => {
+    const parent = shapes.find(s => s.id === parentId);
+    if (!parent) return;
+
+    const offset = 120;
+    const newWidth = Math.max(80, parent.width * 0.9);
+    const newHeight = Math.max(40, parent.height * 0.9);
+    
+    let newX = parent.x;
+    let newY = parent.y;
+
+    if (direction === 'left') newX -= (parent.width + offset);
+    if (direction === 'right') newX += (parent.width + offset);
+    if (direction === 'top') newY -= (parent.height + offset);
+    if (direction === 'bottom') newY += (parent.height + offset);
+
+    const childId = uuidv4();
+    const newChild: NexusShape = {
+      ...parent,
+      id: childId,
+      x: newX,
+      y: newY,
+      width: newWidth,
+      height: newHeight,
+      text: 'New Branch',
+      zIndex: Date.now(),
+      // Slightly lighter color for branches
+      color: parent.color,
+      borderColor: parent.borderColor,
+      fontSize: Math.max(10, parent.fontSize - 1),
+    };
+
+    const newConn = createConnection(parentId, childId, parent.borderColor, 'curved');
+
+    setShapes(prev => [...prev, newChild]);
+    setConnections(prev => [...prev, newConn]);
+    saveToHistory([...shapes, newChild], [...connections, newConn], paths);
+    setSelectedShapeId(childId);
+    setEditingShapeId(childId);
   };
 
   const deleteSelectedShape = () => {
@@ -943,6 +994,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           onTypeChange={(t) => updateShapeType(selectedShapeId, t)}
           onDelete={deleteSelectedShape}
           onDuplicate={() => handleDuplicateShape(selectedShapeId)}
+          onAddChild={(dir) => handleAddChild(selectedShapeId, dir)}
           onFontSizeChange={(size) => updateShapeFontSize(selectedShapeId, size)}
           onPropertyChange={(updates) => handleUpdateShapeProperty(selectedShapeId, updates)}
           zoom={viewport.zoom}

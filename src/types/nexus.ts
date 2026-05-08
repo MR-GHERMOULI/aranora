@@ -77,7 +77,8 @@ export type ToolMode =
   | 'connect'
   | 'pen'
   | 'eraser'
-  | 'text';
+  | 'text'
+  | 'mindmap';
 
 export interface GeneratedTask {
   title: string;

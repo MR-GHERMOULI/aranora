@@ -5,8 +5,8 @@ import type { NexusShape, ShapeType } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
 import {
   Square, Circle, Diamond, Hexagon,
-  Trash2, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
-  Languages, Hash, ArrowRightLeft, Type, Copy
+  Languages, Hash, ArrowRightLeft, Type, Copy,
+  GitBranch, Plus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Network
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -17,6 +17,7 @@ interface ShapePropertiesProps {
   onTypeChange: (type: ShapeType) => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onAddChild: (direction: 'left' | 'right' | 'top' | 'bottom') => void;
   onFontSizeChange: (size: number) => void;
   onPropertyChange: (updates: Partial<NexusShape>) => void;
   zoom: number;
@@ -35,7 +36,7 @@ const shapeTypes: { type: ShapeType; icon: any; label: string }[] = [
 const symbols = ['[ ]', '{ }', '( )', '→', '•', '★', '✔', '✖', '●', '■', '▲'];
 
 export function ShapeProperties({
-  shape, onColorChange, onTypeChange, onDelete, onDuplicate, onFontSizeChange,
+  shape, onColorChange, onTypeChange, onDelete, onDuplicate, onAddChild, onFontSizeChange,
   onPropertyChange, zoom, viewport
 }: ShapePropertiesProps) {
   const [showSymbols, setShowSymbols] = useState(false);
@@ -80,6 +81,30 @@ export function ShapeProperties({
         >
           <Bold className="h-4 w-4" />
         </button>
+        
+        <div className="w-px h-5 bg-black/[0.04] mx-1" />
+
+        {/* Mind Map Expansion */}
+        <div className="flex items-center bg-blue-50/50 p-1 rounded-2xl gap-0.5">
+          <div className="p-1.5 text-blue-400">
+            <GitBranch className="h-3 w-3" />
+          </div>
+          {[
+            { dir: 'top', icon: ArrowUp },
+            { dir: 'bottom', icon: ArrowDown },
+            { dir: 'left', icon: ArrowLeft },
+            { dir: 'right', icon: ArrowRight },
+          ].map(d => (
+            <button
+              key={d.dir}
+              onClick={() => onAddChild(d.dir as any)}
+              className="p-2 rounded-xl text-blue-600 hover:bg-white hover:shadow-sm transition-all active:scale-90"
+              title={`Add ${d.dir} branch`}
+            >
+              <d.icon className="h-3.5 w-3.5" />
+            </button>
+          ))}
+        </div>
         
         <button
           onClick={() => onPropertyChange({ direction: shape.direction === 'rtl' ? 'ltr' : 'rtl', textAlign: shape.direction === 'rtl' ? 'center' : 'right' })}
