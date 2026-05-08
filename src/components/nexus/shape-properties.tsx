@@ -136,6 +136,16 @@ export function ShapeProperties({
           <option value="mono">Mono</option>
         </select>
 
+        <select
+          value={shape.fontSize || 14}
+          onChange={e => onFontSizeChange(Number(e.target.value))}
+          className="bg-black/[0.04] text-[10px] font-bold text-gray-700 outline-none cursor-pointer hover:bg-black/[0.06] py-1.5 px-2.5 rounded-xl transition-all"
+        >
+          {[12, 14, 16, 18, 20, 24, 28, 32].map(size => (
+            <option key={size} value={size}>{size}px</option>
+          ))}
+        </select>
+
         {/* Color Grid Flyout */}
         <AnimatePresence>
           {showColorGrid && (
@@ -145,7 +155,9 @@ export function ShapeProperties({
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               className="absolute bottom-full mb-4 left-0 p-4 rounded-[2rem] bg-white border border-black/[0.06] shadow-2xl z-[100] w-64"
             >
-              <div className="px-2 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Shape Color Card</div>
+              <div className="px-2 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                {shape.type === 'text' ? 'Text Color' : 'Shape Color Card'}
+              </div>
               <div className="grid grid-cols-6 gap-2">
                 {SHAPE_COLOR_PRESETS.slice(0, 18).map(p => (
                   <button

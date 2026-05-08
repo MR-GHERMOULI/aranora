@@ -264,8 +264,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         text: activeTool === 'text' ? 'Start typing...' : '',
         color: activeTool === 'text' ? 'transparent' : activeColor.fill,
         borderColor: activeTool === 'text' ? 'transparent' : activeColor.border,
-        textColor: activeColor.text,
-        fontSize: 14,
+        textColor: activeTool === 'text' ? '#0f172a' : activeColor.text,
+        fontSize: activeTool === 'text' ? 16 : 14,
         zIndex: Date.now(),
       };
       setShapes(prev => {

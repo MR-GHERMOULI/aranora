@@ -84,6 +84,7 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
     if (shape.type === 'diamond') { px = shape.width * 0.25; py = shape.height * 0.25; }
     if (shape.type === 'circle') { px = shape.width * 0.15; py = shape.height * 0.15; }
     if (shape.type === 'hexagon') { px = shape.width * 0.25; }
+    if (shape.type === 'text') { px = 4; py = 4; }
     
     return {
       x: px,
@@ -228,8 +229,9 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
               ...textStyles,
               display: 'flex',
               alignItems: 'center',
+              paddingTop: shape.type === 'text' ? '0px' : '4px',
             }}
-            placeholder="Type..."
+            placeholder="Write something..."
           />
         ) : (
           <div
