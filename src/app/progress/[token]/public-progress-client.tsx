@@ -154,12 +154,27 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
     }
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
-            {/* Ambient Background Elements */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full animate-mesh" />
-                <div className="absolute top-[20%] -right-[5%] w-[30%] h-[30%] bg-emerald-500/5 blur-[100px] rounded-full animate-mesh [animation-delay:2s]" />
-                <div className="absolute bottom-[-10%] left-[20%] w-[35%] h-[35%] bg-blue-500/5 blur-[110px] rounded-full animate-mesh [animation-delay:4s]" />
+        <div className="min-h-screen bg-[#0f172a] text-foreground font-sans selection:bg-primary/20 selection:text-primary relative">
+            {/* Direct Image-Inspired Background */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                {/* Main Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#10b981] via-[#1e3a5f] to-[#0f172a] opacity-90" />
+                
+                {/* Grid Pattern Overlay */}
+                <div 
+                    className="absolute inset-0 opacity-[0.15]" 
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '40px 40px'
+                    }}
+                />
+
+                {/* Subtle Radial Highlights */}
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.15),transparent_50%)]" />
+                <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_80%,rgba(30,58,95,0.2),transparent_50%)]" />
             </div>
 
             {/* Header Navigation */}
