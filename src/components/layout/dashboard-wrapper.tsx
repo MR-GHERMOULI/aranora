@@ -10,6 +10,7 @@ import { TimerBar } from "@/components/time-tracking/timer-bar";
 import { AccessLogger } from "@/components/security/access-logger";
 import { Menu, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
 
 interface DashboardWrapperProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ interface DashboardWrapperProps {
 }
 
 export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrapperProps) {
+  const pathname = usePathname();
   const { isCollapsed, toggleSidebar } = useSidebar();
   const [mounted, setMounted] = React.useState(false);
 
@@ -39,16 +41,19 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
       {/* Main Content */}
       <main className="flex-1 h-full overflow-hidden relative flex flex-col">
         {/* Toggle Button */}
-        <div className="absolute top-6 left-6 z-[100]">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleSidebar}
-            className="bg-white/90 backdrop-blur-md shadow-xl border-gray-200 hover:bg-white hover:scale-110 transition-all rounded-2xl"
-          >
-            {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
-        </div>
+        {/* Toggle Button - Hidden on Nexus page as it is integrated into the workspace toolbar */}
+        {!pathname.includes('/nexus') && (
+          <div className="absolute top-6 left-6 z-[100]">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleSidebar}
+              className="bg-white/90 backdrop-blur-md shadow-xl border-gray-200 hover:bg-white hover:scale-110 transition-all rounded-2xl"
+            >
+              {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+          </div>
+        )}
 
         <div className="flex-1 overflow-auto">
           <ReadOnlyBanner />

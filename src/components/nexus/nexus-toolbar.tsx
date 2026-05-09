@@ -8,7 +8,7 @@ import {
   Link2, Sparkles, Save, Trash2, FolderOpen, Plus, ChevronUp,
   Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser,
   GripHorizontal, Palette, Settings2, Scissors, Type, Network, GitBranch, ArrowRight,
-  Minus, RotateCcw, Layout
+  Minus, RotateCcw, Layout, Menu, ChevronLeft
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -50,6 +50,7 @@ interface ToolbarProps {
   onZoomChange: (zoom: number) => void;
   onResetZoom: () => void;
   isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
 }
 
 const toolGroups = [
@@ -111,7 +112,7 @@ export function NexusToolbar({
   showMinimap, onShowMinimapChange,
   orientation, onOrientationChange,
   zoom, onZoomChange, onResetZoom,
-  isSidebarCollapsed,
+  isSidebarCollapsed, onToggleSidebar,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState<'style' | 'actions' | null>(null);
@@ -138,7 +139,7 @@ export function NexusToolbar({
       "fixed pointer-events-none flex items-center justify-center z-50 transition-all duration-700",
       orientation === 'horizontal' 
         ? "bottom-8 left-0 right-0" 
-        : cn("top-0 bottom-0", isSidebarCollapsed ? "left-8" : "left-[312px]")
+        : cn("top-6 bottom-auto", isSidebarCollapsed ? "left-6" : "left-[312px]")
     )}>
       
       {/* Non-Draggable Dock */}
@@ -148,6 +149,21 @@ export function NexusToolbar({
           orientation === 'vertical' ? 'flex-col py-2 px-1 gap-0.5 min-w-[48px]' : 'flex-row px-2.5 py-1 gap-0.5 min-h-[48px]'
         )}
       >
+        {/* Sidebar Toggle Integration */}
+        <div className={cn("flex items-center", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-1')}>
+          <button 
+            onClick={onToggleSidebar}
+            className={cn(
+              "p-2 rounded-xl transition-all shadow-md active:scale-95",
+              isSidebarCollapsed ? "bg-gray-100 text-gray-500" : "bg-gray-900 text-white"
+            )}
+            title={isSidebarCollapsed ? "Open Sidebar" : "Close Sidebar"}
+          >
+            {isSidebarCollapsed ? <Menu className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+          </button>
+          <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px mt-1' : 'w-px h-6 ml-1')} />
+        </div>
+
         {/* Zoom Controls Integration */}
         <div className={cn("flex items-center gap-0.5 bg-black/[0.02] p-0.5 rounded-lg", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-0.5')}>
           <button onClick={() => onZoomChange(Math.min(3, zoom * 1.2))} className="p-1 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition-all active:scale-90">

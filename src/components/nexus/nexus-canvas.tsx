@@ -36,7 +36,7 @@ interface NexusCanvasProps {
 }
 
 export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [shapes, setShapes] = useState<NexusShape[]>([]);
   const [connections, setConnections] = useState<NexusConnection[]>([]);
   const [paths, setPaths] = useState<NexusPath[]>([]);
@@ -1215,6 +1215,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         onZoomChange={(z) => setViewport(v => ({ ...v, zoom: z }))}
         onResetZoom={() => setViewport({ x: 0, y: 0, zoom: 1 })}
         isSidebarCollapsed={isCollapsed}
+        onToggleSidebar={toggleSidebar}
       />
 
 
