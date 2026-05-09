@@ -142,7 +142,7 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                 const article = await res.json()
                 toast.success(
                     publishStatus === "published"
-                        ? (new Date(saveData.published_at) > new Date() ? "Article scheduled!" : "Article published!")
+                        ? (saveData.published_at && new Date(saveData.published_at) > new Date() ? "Article scheduled!" : "Article published!")
                         : "Article saved as draft"
                 )
                 router.push(`/admin/articles/${article.id}`)
@@ -155,7 +155,7 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                 if (!res.ok) throw new Error("Failed to update")
                 toast.success(
                     publishStatus === "published"
-                        ? (new Date(saveData.published_at) > new Date() ? "Article scheduled!" : "Article published!")
+                        ? (saveData.published_at && new Date(saveData.published_at) > new Date() ? "Article scheduled!" : "Article published!")
                         : "Article updated successfully"
                 )
                 router.refresh()
