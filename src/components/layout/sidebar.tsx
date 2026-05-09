@@ -24,7 +24,8 @@ import {
     Wallet,
     TrendingUp,
     ClipboardList,
-    Workflow
+    Workflow,
+    MessageSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -36,6 +37,7 @@ import { useEffect } from "react"
 import { getUnreadBroadcastsCount } from "./notifications/actions"
 import { SubscriptionDisclaimer } from "./subscription-disclaimer"
 import { useSidebar } from "@/components/providers/sidebar-context"
+import { FeedbackModal } from "@/components/clients/feedback-modal"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
@@ -43,6 +45,7 @@ export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const { isCollapsed } = useSidebar();
     const [isOpen, setIsOpen] = useState(false)
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
     const [broadcastsCount, setBroadcastsCount] = useState(0)
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
     const [siteName, setSiteName] = useState("Aranora")
@@ -420,9 +423,25 @@ export function Sidebar({ className }: SidebarProps) {
                             Settings
                         </div>
                     </Link>
+                    <button
+                        onClick={() => setIsFeedbackModalOpen(true)}
+                        className={cn(
+                            "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition text-zinc-400 text-left"
+                        )}
+                    >
+                        <div className="flex items-center flex-1">
+                            <MessageSquare className="h-5 w-5 mr-3 text-[#10b981]" />
+                            Send Feedback
+                        </div>
+                    </button>
                     <LogoutButton />
                 </div>
             </div>
+
+            <FeedbackModal 
+                isOpen={isFeedbackModalOpen} 
+                onClose={() => setIsFeedbackModalOpen(false)} 
+            />
         </>
     )
 }
