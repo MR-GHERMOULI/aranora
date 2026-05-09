@@ -8,7 +8,7 @@ import {
   Link2, Sparkles, Save, Trash2, FolderOpen, Plus, ChevronUp,
   Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser,
   GripHorizontal, Palette, Settings2, Scissors, Type, Network, GitBranch, ArrowRight,
-  Minus, RotateCcw
+  Minus, RotateCcw, Layout
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -272,6 +272,15 @@ export function NexusToolbar({
             )}
           >
             <Settings2 className="h-5 w-5" />
+          </button>
+
+          {/* Orientation Toggle */}
+          <button 
+            onClick={() => onOrientationChange(orientation === 'horizontal' ? 'vertical' : 'horizontal')}
+            className="p-2.5 rounded-xl transition-all text-gray-500 hover:bg-black/[0.04] hover:text-gray-900"
+            title={orientation === 'horizontal' ? "Dock to Left" : "Dock to Bottom"}
+          >
+            <Layout className={cn("h-5 w-5", orientation === 'vertical' ? 'rotate-90' : '')} />
           </button>
         </div>
 
