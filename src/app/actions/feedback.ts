@@ -15,6 +15,10 @@ export async function submitFeedback(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
     const email = user?.email || null
 
+    if (photos.length > 10) {
+        return { error: "You can only upload a maximum of 10 photos." }
+    }
+
     // 1. Upload photos if any
     const photoUrls: string[] = []
     

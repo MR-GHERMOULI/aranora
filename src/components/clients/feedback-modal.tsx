@@ -23,7 +23,15 @@ export function FeedbackModal({ isOpen, onClose, projectId }: FeedbackModalProps
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            setPhotos(Array.from(e.target.files))
+            const newFiles = Array.from(e.target.files)
+            setPhotos(prev => {
+                const combined = [...prev, ...newFiles]
+                if (combined.length > 10) {
+                    toast.error("You can only upload a maximum of 10 photos.")
+                    return combined.slice(0, 10)
+                }
+                return combined
+            })
         }
     }
 
