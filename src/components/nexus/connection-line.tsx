@@ -124,6 +124,8 @@ export function ConnectionLine({
           x={midX - 60} y={midY - 15}
           width={120} height={30}
           style={{ pointerEvents: isEditing ? 'all' : 'none' }}
+          onMouseDown={e => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           <div className="flex items-center justify-center h-full">
             {isEditing ? (
@@ -154,6 +156,8 @@ export function ConnectionLine({
           x={midX - 160} y={midY + 20}
           width={320} height={40}
           style={{ pointerEvents: 'all' }}
+          onMouseDown={e => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           <div className="flex items-center justify-center h-full">
             <div className="flex items-center gap-1 p-1 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-black/5 divide-x divide-gray-100">
