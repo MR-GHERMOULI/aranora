@@ -144,22 +144,22 @@ export function NexusToolbar({
       {/* Non-Draggable Dock */}
       <div 
         className={cn(
-          "pointer-events-auto flex items-center p-1.5 rounded-[2.2rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/[0.03] transition-all duration-500",
-          orientation === 'vertical' ? 'flex-col py-2.5 px-1.5 gap-0.5 min-w-[56px]' : 'flex-row px-3 py-1.5 gap-0.5 min-h-[56px]'
+          "pointer-events-auto flex items-center p-1 rounded-[1.8rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.02] transition-all duration-500",
+          orientation === 'vertical' ? 'flex-col py-2 px-1 gap-0.5 min-w-[48px]' : 'flex-row px-2.5 py-1 gap-0.5 min-h-[48px]'
         )}
       >
         {/* Zoom Controls Integration */}
-        <div className={cn("flex items-center gap-0.5 bg-black/[0.03] p-0.5 rounded-xl", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-0.5')}>
-          <button onClick={() => onZoomChange(Math.min(3, zoom * 1.2))} className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all active:scale-90">
-            <Plus className="h-3.5 w-3.5" />
+        <div className={cn("flex items-center gap-0.5 bg-black/[0.02] p-0.5 rounded-lg", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-0.5')}>
+          <button onClick={() => onZoomChange(Math.min(3, zoom * 1.2))} className="p-1 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition-all active:scale-90">
+            <Plus className="h-3 w-3" />
           </button>
-          <div className={cn("flex items-center justify-center", orientation === 'vertical' ? 'py-1' : 'px-1 min-w-[42px]')}>
-            <span className="text-[9px] font-bold font-mono text-gray-900 tracking-tighter">
+          <div className={cn("flex items-center justify-center", orientation === 'vertical' ? 'py-0.5' : 'px-0.5 min-w-[36px]')}>
+            <span className="text-[8px] font-bold font-mono text-gray-900 tracking-tighter">
               {Math.round(zoom * 100)}%
             </span>
           </div>
-          <button onClick={() => onZoomChange(Math.max(0.15, zoom / 1.2))} className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all active:scale-90">
-            <Minus className="h-3.5 w-3.5" />
+          <button onClick={() => onZoomChange(Math.max(0.15, zoom / 1.2))} className="p-1 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition-all active:scale-90">
+            <Minus className="h-3 w-3" />
           </button>
         </div>
 
@@ -168,12 +168,12 @@ export function NexusToolbar({
         {/* History Group */}
         <div className={cn("flex items-center gap-0.5", orientation === 'vertical' ? 'flex-col py-0.5' : 'flex-row px-0.5')}>
           <button onClick={onUndo} disabled={!canUndo} 
-            className={cn("p-2 rounded-xl transition-all", canUndo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
-            <Undo className="h-4 w-4" />
+            className={cn("p-1.5 rounded-lg transition-all", canUndo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
+            <Undo className="h-3.5 w-3.5" />
           </button>
           <button onClick={onRedo} disabled={!canRedo} 
-            className={cn("p-2 rounded-xl transition-all", canRedo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
-            <Redo className="h-4 w-4" />
+            className={cn("p-1.5 rounded-lg transition-all", canRedo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
+            <Redo className="h-3.5 w-3.5" />
           </button>
         </div>
 
@@ -194,13 +194,13 @@ export function NexusToolbar({
                   }}
                   onDoubleClick={() => onToolChange(currentTool.mode as ToolMode)}
                   className={cn(
-                    "relative p-2.5 rounded-xl transition-all duration-300 group",
+                    "relative p-2 rounded-lg transition-all duration-300 group",
                     isActive 
-                      ? "bg-gray-900 text-white shadow-lg shadow-gray-900/20" 
-                      : "text-gray-500 hover:bg-black/[0.04] hover:text-gray-900"
+                      ? "bg-gray-900 text-white shadow-md shadow-gray-900/10" 
+                      : "text-gray-500 hover:bg-black/[0.03] hover:text-gray-900"
                   )}
                 >
-                  <currentTool.icon className="h-5 w-5 relative z-10" />
+                  <currentTool.icon className="h-4 w-4 relative z-10" />
                   {group.tools.length > 1 && (
                     <div className={cn(
                       "absolute bottom-1 right-1 w-1 h-1 rounded-full bg-current opacity-40",
@@ -260,50 +260,50 @@ export function NexusToolbar({
           <button 
             onClick={() => toggleConfig('style')}
             className={cn(
-              "p-2.5 rounded-xl transition-all",
-              showConfig === 'style' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
+              "p-2 rounded-lg transition-all",
+              showConfig === 'style' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.03]"
             )}
           >
-            <Palette className="h-5 w-5" />
+            <Palette className="h-4 w-4" />
           </button>
 
           {/* Quick Actions (Save, Load, etc) */}
           <button 
             onClick={() => toggleConfig('actions')}
             className={cn(
-              "p-2.5 rounded-xl transition-all",
-              showConfig === 'actions' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
+              "p-2 rounded-lg transition-all",
+              showConfig === 'actions' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.03]"
             )}
           >
-            <Settings2 className="h-5 w-5" />
+            <Settings2 className="h-4 w-4" />
           </button>
 
           {/* Orientation Toggle */}
           <button 
             onClick={() => onOrientationChange(orientation === 'horizontal' ? 'vertical' : 'horizontal')}
-            className="p-2.5 rounded-xl transition-all text-gray-500 hover:bg-black/[0.04] hover:text-gray-900"
+            className="p-2 rounded-lg transition-all text-gray-500 hover:bg-black/[0.03] hover:text-gray-900"
             title={orientation === 'horizontal' ? "Dock to Left" : "Dock to Bottom"}
           >
-            <Layout className={cn("h-5 w-5", orientation === 'vertical' ? 'rotate-90' : '')} />
+            <Layout className={cn("h-4 w-4", orientation === 'vertical' ? 'rotate-90' : '')} />
           </button>
         </div>
 
         <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* AI Magic Button */}
-        <div className={cn("px-1", orientation === 'vertical' ? 'pt-1' : 'pl-1')}>
+        <div className={cn("px-0.5", orientation === 'vertical' ? 'pt-0.5' : 'pl-0.5')}>
           <button 
             onClick={() => { onConvert(); setActiveGroup(null); setShowConfig(null); }}
             disabled={shapeCount === 0 || isConverting}
             className={cn(
-              'flex items-center justify-center rounded-xl font-bold text-sm transition-all relative overflow-hidden group shadow-md shadow-gray-900/10',
-              orientation === 'vertical' ? 'w-10 h-10' : 'px-4 py-2.5',
-              shapeCount > 0 && !isConverting ? 'bg-gray-900 text-white hover:shadow-lg hover:-translate-y-0.5' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              'flex items-center justify-center rounded-lg font-bold text-xs transition-all relative overflow-hidden group shadow-sm shadow-gray-900/5',
+              orientation === 'vertical' ? 'w-8 h-8' : 'px-3 py-2',
+              shapeCount > 0 && !isConverting ? 'bg-gray-900 text-white hover:shadow-md hover:-translate-y-0.5' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             )}
           >
-            <Sparkles className={cn('h-4 w-4 relative z-10', isConverting && 'animate-spin')} />
+            <Sparkles className={cn('h-3.5 w-3.5 relative z-10', isConverting && 'animate-spin')} />
             {orientation === 'horizontal' && (
-              <span className="ml-1.5 relative z-10 uppercase tracking-wider text-[10px]">{isConverting ? '...' : 'Gen Tasks'}</span>
+              <span className="ml-1 relative z-10 uppercase tracking-tighter text-[9px]">{isConverting ? '...' : 'Gen Tasks'}</span>
             )}
           </button>
         </div>
