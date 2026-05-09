@@ -38,19 +38,22 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
   const sidebarHidden = mounted && isNexus && isCollapsed;
 
   return (
-    <div className="h-full relative flex overflow-hidden bg-gray-50 w-full">
-      {/* Sidebar Container — sticky so it never scrolls away with the page */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Sidebar — always pinned to the left, full viewport height */}
       <div 
         className={cn(
-          "hidden md:flex md:flex-col flex-shrink-0 sticky top-0 h-screen transition-all duration-300 ease-in-out z-40",
+          "hidden md:flex md:flex-col fixed inset-y-0 left-0 transition-all duration-300 ease-in-out z-40",
           sidebarHidden ? "w-0 overflow-hidden opacity-0" : "w-72 opacity-100"
         )}
       >
-        <Sidebar className="w-72 shrink-0 h-full" />
+        <Sidebar className="w-72 h-full" />
       </div>
 
-      {/* Main Content — scrolls independently of the sidebar */}
-      <main className="flex-1 min-h-screen overflow-y-auto relative flex flex-col">
+      {/* Main Content — offset by sidebar width, scrolls independently */}
+      <main className={cn(
+        "flex flex-col min-h-screen transition-all duration-300 ease-in-out",
+        sidebarHidden ? "md:ml-0" : "md:ml-72"
+      )}>
         <div className="flex-1">
           <ReadOnlyBanner />
           {children}
