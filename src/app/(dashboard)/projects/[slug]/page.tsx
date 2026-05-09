@@ -204,7 +204,7 @@ export default async function ProjectPage({
                     <Tabs defaultValue="tasks" className="w-full">
                         <TabsList className="w-full justify-start">
                             <TabsTrigger value="tasks">Tasks</TabsTrigger>
-                            <TabsTrigger value="files">Files & Documents</TabsTrigger>
+                            <TabsTrigger value="files">Files</TabsTrigger>
                             <TabsTrigger value="invoices">Invoices</TabsTrigger>
                             <TabsTrigger value="time-tracking">Time Tracking</TabsTrigger>
                             <TabsTrigger value="contracts" className="gap-1.5">
