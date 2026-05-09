@@ -134,8 +134,8 @@ export function EditProjectDialog({ project }: EditProjectDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">
-                    <Pencil className="mr-2 h-4 w-4" /> Edit Project
+                <Button variant="outline" className="px-3">
+                    <Pencil className="mr-1.5 h-4 w-4" /> Edit Project
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[550px]">

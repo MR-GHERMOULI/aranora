@@ -68,7 +68,7 @@ export function ShareProgressDialog({ projectId, projectTitle }: ShareProgressDi
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" className="gap-1.5 px-3">
                     <Share2 className="h-4 w-4" />
                     Share Progress
                 </Button>

@@ -22,7 +22,7 @@ export function ProjectTimerButton({ projectId, projectTitle }: ProjectTimerButt
                 variant="destructive"
                 onClick={stopTimer}
                 disabled={isLoading}
-                className="gap-2"
+                className="gap-1.5 px-3"
             >
                 <StopCircle className="h-4 w-4" />
                 Stop Timer
@@ -38,7 +38,7 @@ export function ProjectTimerButton({ projectId, projectTitle }: ProjectTimerButt
                 description: `Working on ${projectTitle}`
             })}
             disabled={isLoading}
-            className={cn("gap-2 border-amber-500 text-amber-600 hover:bg-amber-50", isRunningSomewhereElse && "opacity-50")}
+            className={cn("gap-1.5 px-3 border-amber-500 text-amber-600 hover:bg-amber-50", isRunningSomewhereElse && "opacity-50")}
         >
             <Play className="h-4 w-4 fill-current" />
             {isRunningSomewhereElse ? "Switch Timer" : "Start Timer"}

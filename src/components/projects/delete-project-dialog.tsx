@@ -44,8 +44,8 @@ export function DeleteProjectDialog({ projectId, projectTitle }: DeleteProjectDi
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
+                <Button variant="destructive" className="px-3">
+                    <Trash2 className="mr-1.5 h-4 w-4" />
                     Delete
                 </Button>
             </DialogTrigger>

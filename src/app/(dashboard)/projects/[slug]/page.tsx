@@ -88,8 +88,8 @@ export default async function ProjectPage({
                         <p className="text-muted-foreground mt-1 max-w-2xl">{project.description}</p>
                     )}
                 </div>
-                <div className="flex gap-2">
-                    <Button asChild variant="outline" className="gap-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-700 font-semibold shadow-sm transition-all active:scale-95">
+                <div className="flex gap-1">
+                    <Button asChild variant="outline" className="gap-1.5 px-3 border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-700 font-semibold shadow-sm transition-all active:scale-95">
                         <Link href={`/nexus?project=${project.id}&name=${encodeURIComponent(project.title)}`}>
                             <Sparkles className="h-4 w-4 text-blue-500" />
                             Nexus
