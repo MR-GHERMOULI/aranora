@@ -237,8 +237,36 @@ export function NexusToolbar({
                         orientation === 'vertical' ? 'left-full ml-4 top-1/2 -translate-y-1/2' : 'bottom-full mb-4 left-1/2 -translate-x-1/2'
                       )}
                     >
-                      <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-black/[0.03] mb-1">
-                        {group.label}
+                      <div className="px-3 py-2 border-b border-black/[0.03] mb-1 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          {group.label}
+                        </span>
+                        {group.id === 'art' && (
+                          <div className="flex gap-0.5 bg-gray-50 p-0.5 rounded-lg border border-black/[0.03]">
+                            {[
+                              { id: 'pen', icon: PenLine, label: 'Pen' },
+                              { id: 'illustration', icon: Pencil, label: 'Brush' },
+                              { id: 'highlighter', icon: Highlighter, label: 'Glow' }
+                            ].map(t => (
+                              <button
+                                key={t.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onPenConfigChange({ ...penConfig, type: t.id as any });
+                                }}
+                                className={cn(
+                                  "p-1 rounded-md transition-all",
+                                  penConfig.type === t.id 
+                                    ? "bg-white text-emerald-600 shadow-sm shadow-emerald-500/10 ring-1 ring-black/[0.05]" 
+                                    : "text-gray-400 hover:text-gray-600 hover:bg-black/[0.02]"
+                                )}
+                                title={t.label}
+                              >
+                                <t.icon className="h-3 w-3" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="grid gap-1">
                         {group.tools.map(tool => (
