@@ -19,12 +19,23 @@ interface DashboardWrapperProps {
 
 export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrapperProps) {
   const pathname = usePathname();
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed, setIsCollapsed, toggleSidebar } = useSidebar();
   const [mounted, setMounted] = React.useState(false);
+  const isNexus = pathname.includes('/nexus');
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  // When leaving Nexus, always re-expand the sidebar
+  React.useEffect(() => {
+    if (!isNexus) {
+      setIsCollapsed(false);
+    }
+  }, [isNexus, setIsCollapsed]);
+
+  // Sidebar is collapsible ONLY on Nexus; elsewhere it is always expanded
+  const sidebarHidden = mounted && isNexus && isCollapsed;
 
   return (
     <div className="h-full relative flex overflow-hidden bg-gray-50 w-full">
@@ -32,7 +43,7 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
       <div 
         className={cn(
           "hidden h-full md:flex md:flex-col transition-all duration-300 ease-in-out z-40",
-          (mounted && isCollapsed) ? "w-0 overflow-hidden opacity-0" : "w-72 opacity-100"
+          sidebarHidden ? "w-0 overflow-hidden opacity-0" : "w-72 opacity-100"
         )}
       >
         <Sidebar className="w-72 shrink-0" />
@@ -40,9 +51,8 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
 
       {/* Main Content */}
       <main className="flex-1 h-full overflow-hidden relative flex flex-col">
-        {/* Toggle Button */}
-        {/* Toggle Button - Hidden on Nexus page as it is integrated into the workspace toolbar */}
-        {!pathname.includes('/nexus') && (
+        {/* Toggle Button - only on non-Nexus pages (Nexus has it integrated in its toolbar) */}
+        {!isNexus && (
           <div className="absolute top-6 left-6 z-[100]">
             <Button
               variant="outline"
