@@ -22,7 +22,7 @@ import { ConnectionLine } from './connection-line';
 import { CanvasMinimap } from './canvas-minimap';
 import { CollaborativeCursors } from './collaborative-cursors';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
-import { Sparkles, MousePointer2, Pencil, Lock, Unlock } from 'lucide-react';
+import { Sparkles, MousePointer2, Pencil, Lock, Unlock, Plus, Minus } from 'lucide-react';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
 import { recognizeShape } from '@/lib/shape-recognition';
@@ -120,6 +120,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [canvasTheme, setCanvasTheme] = useState<CanvasTheme>('hand-drawn');
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const [showMinimap, setShowMinimap] = useState(true);
+  const [toolbarOrientation, setToolbarOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
 
   useEffect(() => {
     if (containerRef.current) {
@@ -139,6 +140,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     if (savedMinimap) {
       setShowMinimap(savedMinimap === 'true');
     }
+    const savedOrientation = localStorage.getItem('nexus-toolbar-orientation');
+    if (savedOrientation === 'horizontal' || savedOrientation === 'vertical') {
+      setToolbarOrientation(savedOrientation);
+    }
   }, []);
 
   useEffect(() => {
@@ -152,6 +157,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   useEffect(() => {
     localStorage.setItem('nexus-minimap', showMinimap.toString());
   }, [showMinimap]);
+
+  useEffect(() => {
+    localStorage.setItem('nexus-toolbar-orientation', toolbarOrientation);
+  }, [toolbarOrientation]);
 
   const screenToCanvas = useCallback((clientX: number, clientY: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -1198,15 +1207,37 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         onThemeChange={setCanvasTheme}
         showMinimap={showMinimap}
         onShowMinimapChange={setShowMinimap}
+        orientation={toolbarOrientation}
+        onOrientationChange={setToolbarOrientation}
       />
 
-      {/* Zoom controls - Moved to top left since dock is at bottom */}
-      <div className="absolute top-6 left-6 z-40 flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-white/90 backdrop-blur-xl border border-gray-200 shadow-sm text-gray-600 text-xs font-bold tracking-tight">
-        <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(3, v.zoom * 1.2) }))} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition text-sm leading-none">+</button>
-        <span className="w-10 text-center font-mono">{Math.round(viewport.zoom * 100)}%</span>
-        <button onClick={() => setViewport(v => ({ ...v, zoom: Math.max(0.15, v.zoom / 1.2) }))} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition text-sm leading-none">−</button>
-        <div className="w-px h-4 bg-gray-200 mx-1" />
-        <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition uppercase text-[9px] tracking-widest">Reset</button>
+      {/* Zoom controls - Premium Glassmorphism */}
+      <div className="absolute top-8 left-8 z-40 flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/95 backdrop-blur-2xl border border-black/[0.08] shadow-[0_12px_40px_rgb(0,0,0,0.12)] ring-1 ring-black/[0.02]">
+        <div className="flex bg-black/[0.03] p-1 rounded-xl">
+           <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(3, v.zoom * 1.2) }))} 
+             className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition active:scale-90"
+             title="Zoom In"
+           >
+             <Plus className="h-4 w-4" />
+           </button>
+           <div className="px-3 flex items-center min-w-[60px] justify-center">
+             <span className="text-[11px] font-black font-mono text-gray-900 tracking-tighter">
+               {Math.round(viewport.zoom * 100)}%
+             </span>
+           </div>
+           <button onClick={() => setViewport(v => ({ ...v, zoom: Math.max(0.15, v.zoom / 1.2) }))} 
+             className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition active:scale-90"
+             title="Zoom Out"
+           >
+             <Minus className="h-4 w-4" />
+           </button>
+        </div>
+        <div className="w-px h-6 bg-black/[0.06] mx-0.5" />
+        <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} 
+          className="px-4 py-2 hover:bg-black/[0.04] rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition active:scale-95"
+        >
+          Reset
+        </button>
       </div>
 
 

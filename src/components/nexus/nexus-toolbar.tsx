@@ -43,6 +43,8 @@ interface ToolbarProps {
   onThemeChange: (theme: CanvasTheme) => void;
   showMinimap: boolean;
   onShowMinimapChange: (show: boolean) => void;
+  orientation: 'horizontal' | 'vertical';
+  onOrientationChange: (orientation: 'horizontal' | 'vertical') => void;
 }
 
 const toolGroups = [
@@ -102,6 +104,7 @@ export function NexusToolbar({
   penConfig, onPenConfigChange,
   canvasTheme, onThemeChange,
   showMinimap, onShowMinimapChange,
+  orientation, onOrientationChange,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState<'style' | 'actions' | null>(null);
@@ -132,17 +135,20 @@ export function NexusToolbar({
         dragConstraints={constraintsRef}
         dragElastic={0.1}
         dragMomentum={false}
-        className="pointer-events-auto flex items-center p-2.5 rounded-[2rem] bg-white/90 backdrop-blur-3xl border border-white/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.02)] ring-1 ring-black/[0.03]"
+        className={cn(
+          "pointer-events-auto flex items-center p-2.5 rounded-[2.2rem] bg-white/90 backdrop-blur-3xl border border-white/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.02)] ring-1 ring-black/[0.03] transition-all duration-500",
+          orientation === 'vertical' ? 'flex-col py-4' : 'flex-row px-4'
+        )}
       >
         {/* Drag Handle */}
-        <div className="px-2 py-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors">
-          <GripHorizontal className="h-5 w-5" />
+        <div className={cn("flex items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors", orientation === 'vertical' ? 'pb-2 w-full' : 'pr-2 h-full')}>
+          <GripHorizontal className={cn("h-5 w-5", orientation === 'vertical' ? 'rotate-90' : '')} />
         </div>
 
-        <div className="w-px h-8 bg-black/[0.06] mx-1" />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* History Group */}
-        <div className="flex items-center gap-1 px-2">
+        <div className={cn("flex items-center gap-1", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
           <button onClick={onUndo} disabled={!canUndo} 
             className={cn("p-2.5 rounded-2xl transition-all", canUndo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
             <Undo className="h-4 w-4" />
@@ -153,10 +159,10 @@ export function NexusToolbar({
           </button>
         </div>
 
-        <div className="w-px h-8 bg-black/[0.06] mx-1" />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* Dynamic Tool Groups */}
-        <div className="flex items-center gap-1.5 px-2">
+        <div className={cn("flex items-center gap-1.5", orientation === 'vertical' ? 'flex-col py-2' : 'flex-row px-2')}>
           {toolGroups.map((group) => {
             const isActive = group.tools.some(t => t.mode === activeTool);
             const currentTool = group.tools.find(t => t.mode === activeTool) || group.tools[0];
@@ -189,10 +195,13 @@ export function NexusToolbar({
                 <AnimatePresence>
                   {activeGroup === group.id && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 p-2 rounded-3xl bg-white border border-black/[0.06] shadow-2xl min-w-[160px] z-[100]"
+                      initial={{ opacity: 0, x: orientation === 'vertical' ? 20 : 0, y: orientation === 'vertical' ? 0 : 10, scale: 0.95 }}
+                      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: orientation === 'vertical' ? 20 : 0, y: orientation === 'vertical' ? 0 : 10, scale: 0.95 }}
+                      className={cn(
+                        "absolute p-2 rounded-3xl bg-white border border-black/[0.06] shadow-2xl min-w-[160px] z-[100]",
+                        orientation === 'vertical' ? 'left-full ml-4 top-1/2 -translate-y-1/2' : 'bottom-full mb-4 left-1/2 -translate-x-1/2'
+                      )}
                     >
                       <div className="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-black/[0.03] mb-1">
                         {group.label}
@@ -213,7 +222,10 @@ export function NexusToolbar({
                         ))}
                       </div>
                       {/* Arrow */}
-                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-black/[0.06] rotate-45" />
+                      <div className={cn(
+                        "absolute w-3 h-3 bg-white border border-black/[0.06] rotate-45",
+                        orientation === 'vertical' ? '-left-1.5 top-1/2 -translate-y-1/2 border-t-0 border-r-0' : '-bottom-1.5 left-1/2 -translate-x-1/2 border-l-0 border-t-0'
+                      )} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -222,10 +234,10 @@ export function NexusToolbar({
           })}
         </div>
 
-        <div className="w-px h-8 bg-black/[0.06] mx-1" />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* Styling & Config */}
-        <div className="flex items-center gap-1.5 px-2">
+        <div className={cn("flex items-center gap-1.5", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
           {/* Palette (Color & Pen) */}
           <button 
             onClick={() => toggleConfig('style')}
@@ -249,20 +261,23 @@ export function NexusToolbar({
           </button>
         </div>
 
-        <div className="w-px h-8 bg-black/[0.06] mx-1" />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* AI Magic Button */}
-        <div className="px-2">
+        <div className={cn("px-1", orientation === 'vertical' ? 'pt-1' : 'pl-1')}>
           <button 
             onClick={() => { onConvert(); setActiveGroup(null); setShowConfig(null); }}
             disabled={shapeCount === 0 || isConverting}
             className={cn(
-              'flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all relative overflow-hidden group shadow-lg shadow-gray-900/10',
+              'flex items-center justify-center rounded-2xl font-bold text-sm transition-all relative overflow-hidden group shadow-lg shadow-gray-900/10',
+              orientation === 'vertical' ? 'w-12 h-12' : 'px-6 py-3',
               shapeCount > 0 && !isConverting ? 'bg-gray-900 text-white hover:shadow-2xl hover:-translate-y-0.5' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             )}
           >
             <Sparkles className={cn('h-4 w-4 relative z-10', isConverting && 'animate-spin')} />
-            <span className="relative z-10 uppercase tracking-wider text-[11px]">{isConverting ? 'Processing' : 'Gen Tasks'}</span>
+            {orientation === 'horizontal' && (
+              <span className="ml-2 relative z-10 uppercase tracking-wider text-[11px]">{isConverting ? 'Processing' : 'Gen Tasks'}</span>
+            )}
           </button>
         </div>
       </motion.div>
@@ -352,6 +367,27 @@ export function NexusToolbar({
                     )}
                   >
                     Sketch
+                  </button>
+                </div>
+
+                <div className="p-1.5 bg-gray-50 rounded-2xl flex gap-1">
+                  <button
+                    onClick={() => { onOrientationChange('horizontal'); setShowConfig(null); }}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all",
+                      orientation === 'horizontal' ? "bg-white shadow-sm text-blue-600" : "text-gray-400 hover:text-gray-600"
+                    )}
+                  >
+                    Horizontal
+                  </button>
+                  <button
+                    onClick={() => { onOrientationChange('vertical'); setShowConfig(null); }}
+                    className={cn(
+                      "flex-1 px-3 py-2 rounded-xl text-[10px] font-bold transition-all",
+                      orientation === 'vertical' ? "bg-white shadow-sm text-blue-600" : "text-gray-400 hover:text-gray-600"
+                    )}
+                  >
+                    Vertical
                   </button>
                 </div>
               </div>
