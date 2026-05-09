@@ -265,7 +265,7 @@ export function ShapeProperties({
       {/* 4. Core Actions */}
       <div className="flex items-center gap-0.5 px-1.5">
         <button
-          onClick={onToggleLock}
+          onClick={() => onToggleLock()}
           className={cn(
             "p-2.5 rounded-2xl transition-all active:scale-95 flex items-center justify-center",
             shape.isLocked 
@@ -274,7 +274,7 @@ export function ShapeProperties({
           )}
           title={shape.isLocked ? "Unlock Item" : "Lock Item"}
         >
-          {shape.isLocked ? <Lock className="h-4.5 w-4.5" /> : <Unlock className="h-4 w-4" />}
+          {shape.isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
         </button>
         
         {!shape.isLocked && (

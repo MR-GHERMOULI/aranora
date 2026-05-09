@@ -1058,8 +1058,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setEditingConnId(null);
   }, []);
 
-  const handleToggleLock = (targetId?: string) => {
-    const targets = targetId ? [targetId] : selectedShapeIds;
+  const handleToggleLock = (targetId?: string | any) => {
+    const targets = typeof targetId === 'string' ? [targetId] : selectedShapeIds;
     if (targets.length === 0) return;
 
     setShapes(prev => {
