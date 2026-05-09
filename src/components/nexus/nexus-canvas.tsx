@@ -1156,6 +1156,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           </div>
         </div>
       )}
+      {/* Connect mode banner - Moved to top center */}
+      {connectFrom && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-6 py-3 rounded-full bg-gray-900/95 backdrop-blur-md shadow-2xl text-white text-sm font-medium animate-in slide-in-from-top-4 duration-300">
           <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse ring-4 ring-blue-500/20" />
           Click a second shape to connect
