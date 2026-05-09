@@ -5,6 +5,7 @@ import type { NexusConnection, NexusShape, CanvasTheme } from '@/types/nexus';
 import { cn } from '@/lib/utils';
 import { getConnectionPoints, getConnectionPath } from '@/lib/nexus/canvas-helpers';
 import rough from 'roughjs';
+import { Type, ArrowRight, Circle, Diamond, Minus, Navigation } from 'lucide-react';
 
 const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
 
@@ -18,6 +19,7 @@ interface ConnectionLineProps {
   onUpdateConn: (connId: string, updates: Partial<NexusConnection>) => void;
   onLabelChange: (connId: string, label: string) => void;
   onFinishEditing: () => void;
+  onSplitConn: (connId: string) => void;
   canvasTheme: CanvasTheme;
 }
 
@@ -30,7 +32,7 @@ interface ConnectionLineProps {
  */
 export function ConnectionLine({
   conn, shapes, isSelected, isEditing,
-  onSelect, onDoubleClick, onUpdateConn, onLabelChange, onFinishEditing,
+  onSelect, onDoubleClick, onUpdateConn, onLabelChange, onFinishEditing, onSplitConn,
   canvasTheme,
 }: ConnectionLineProps) {
   const from = shapes.find(s => s.id === conn.fromShapeId);
@@ -98,8 +100,8 @@ export function ConnectionLine({
             fill="none"
             strokeWidth={isSelected ? conn.strokeWidth + 0.5 : conn.strokeWidth}
             strokeLinecap="round"
-            markerStart={p.isFirst ? `url(#dot-${conn.id})` : 'none'}
-            markerEnd={p.isFirst ? `url(#arrow-${conn.id})` : 'none'}
+            markerStart={conn.startMarker !== 'none' && p.isFirst ? `url(#${conn.startMarker || 'dot'}-${conn.id})` : 'none'}
+            markerEnd={conn.endMarker !== 'none' && p.isFirst ? `url(#${conn.endMarker || 'arrow'}-${conn.id})` : 'none'}
             style={{ pointerEvents: 'none' }}
           />
         ))
@@ -109,8 +111,8 @@ export function ConnectionLine({
           stroke={isSelected ? '#3b82f6' : conn.color}
           fill="none"
           strokeWidth={isSelected ? conn.strokeWidth + 1 : conn.strokeWidth}
-          markerStart={`url(#dot-${conn.id})`}
-          markerEnd={`url(#arrow-${conn.id})`}
+          markerStart={conn.startMarker !== 'none' ? `url(#${conn.startMarker || 'dot'}-${conn.id})` : 'none'}
+          markerEnd={conn.endMarker !== 'none' ? `url(#${conn.endMarker || 'arrow'}-${conn.id})` : 'none'}
           style={{ pointerEvents: 'none' }}
           className={canvasTheme === 'flat' ? "transition-all duration-200" : ""}
         />
@@ -146,29 +148,74 @@ export function ConnectionLine({
         </foreignObject>
       )}
 
-      {/* Routing controls */}
+      {/* Routing & Endpoint controls */}
       {isSelected && !isEditing && (
         <foreignObject
-          x={midX - 75} y={midY + 20}
-          width={150} height={40}
+          x={midX - 130} y={midY + 20}
+          width={260} height={40}
           style={{ pointerEvents: 'all' }}
         >
           <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-1 p-1 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-black/5">
-              <button
-                onClick={() => onUpdateConn(conn.id, { routing: 'curved' })}
-                className={cn("px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-                  (!conn.routing || conn.routing === 'curved') ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50")}
-              >
-                Free
-              </button>
-              <button
-                onClick={() => onUpdateConn(conn.id, { routing: 'orthogonal' })}
-                className={cn("px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-                  conn.routing === 'orthogonal' ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-50")}
-              >
-                Regulated
-              </button>
+            <div className="flex items-center gap-1 p-1 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-black/5 divide-x divide-gray-100">
+              
+              {/* Text Label */}
+              <div className="px-1 flex gap-0.5">
+                <button
+                  onClick={() => { onDoubleClick(conn.id); }}
+                  className="p-1.5 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-blue-600 transition-all"
+                  title="Add Phrase"
+                >
+                  <Type className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => { onSplitConn(conn.id); }}
+                  className="p-1.5 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-green-600 transition-all"
+                  title="Branch from connection"
+                >
+                  <Navigation className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {/* Start Marker */}
+              <div className="px-1 flex gap-0.5">
+                {[
+                  { m: 'none', icon: Minus },
+                  { m: 'dot', icon: Circle },
+                  { m: 'diamond', icon: Diamond }
+                ].map(opt => (
+                  <button key={`start-${opt.m}`} onClick={() => onUpdateConn(conn.id, { startMarker: opt.m as any })}
+                    className={cn("p-1.5 rounded-lg transition-all", (conn.startMarker === opt.m || (opt.m==='none' && !conn.startMarker)) ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50")}>
+                    <opt.icon className="h-3 w-3" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Routing */}
+              <div className="px-1 flex gap-0.5">
+                {[
+                  { r: 'curved', label: 'C' },
+                  { r: 'straight', label: 'S' },
+                  { r: 'orthogonal', label: 'O' }
+                ].map(opt => (
+                  <button key={`rout-${opt.r}`} onClick={() => onUpdateConn(conn.id, { routing: opt.r as any })}
+                    className={cn("px-2 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all", (conn.routing === opt.r || (opt.r==='curved' && !conn.routing)) ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50")}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* End Marker */}
+              <div className="px-1 flex gap-0.5">
+                {[
+                  { m: 'none', icon: Minus },
+                  { m: 'arrow', icon: ArrowRight }
+                ].map(opt => (
+                  <button key={`end-${opt.m}`} onClick={() => onUpdateConn(conn.id, { endMarker: opt.m as any })}
+                    className={cn("p-1.5 rounded-lg transition-all", (conn.endMarker === opt.m || (opt.m==='arrow' && !conn.endMarker)) ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50")}>
+                    <opt.icon className="h-3 w-3" />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </foreignObject>

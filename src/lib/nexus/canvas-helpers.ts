@@ -97,7 +97,7 @@ export function createConnection(
   fromShapeId: string,
   toShapeId: string,
   color: string = '#3b82f6',
-  routing: 'curved' | 'orthogonal' | 'mindmap' = 'curved'
+  routing: 'curved' | 'orthogonal' | 'mindmap' | 'straight' = 'curved'
 ): NexusConnection {
   return {
     id: uuidv4(),
@@ -108,6 +108,8 @@ export function createConnection(
     style: 'solid',
     animated: false,
     routing,
+    startMarker: 'none',
+    endMarker: 'arrow',
   };
 }
 
@@ -170,7 +172,7 @@ function getSnapEdgePoint(shape: NexusShape, center: {x:number, y:number}, targe
 }
 
 export function getConnectionPath(
-  x1: number, y1: number, x2: number, y2: number, routing: 'curved' | 'orthogonal' | 'mindmap' = 'curved'
+  x1: number, y1: number, x2: number, y2: number, routing: 'curved' | 'orthogonal' | 'mindmap' | 'straight' = 'curved'
 ): string {
   // Prevent NaN path data
   if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return '';
@@ -187,6 +189,10 @@ export function getConnectionPath(
       const cy = (y1 + y2) / 2;
       return `M ${x1} ${y1} L ${x1} ${cy} L ${x2} ${cy} L ${x2} ${y2}`;
     }
+  }
+
+  if (routing === 'straight') {
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
   if (routing === 'mindmap') {

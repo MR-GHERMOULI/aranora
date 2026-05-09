@@ -783,6 +783,51 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setEditingConnId(null);
   }, []);
 
+  const handleSplitConn = useCallback((connId: string) => {
+    const conn = connections.find(c => c.id === connId);
+    if (!conn) return;
+
+    const fromShape = shapes.find(s => s.id === conn.fromShapeId);
+    const toShape = shapes.find(s => s.id === conn.toShapeId);
+    if (!fromShape || !toShape) return;
+
+    // Midpoint
+    const midX = (fromShape.x + fromShape.width/2 + toShape.x + toShape.width/2) / 2;
+    const midY = (fromShape.y + fromShape.height/2 + toShape.y + toShape.height/2) / 2;
+
+    const waypointId = uuidv4();
+    const waypoint: NexusShape = {
+      id: waypointId,
+      type: 'circle',
+      x: midX - 10,
+      y: midY - 10,
+      width: 20,
+      height: 20,
+      text: '',
+      color: '#ffffff',
+      borderColor: conn.color,
+      textColor: '#000000',
+      fontSize: 10,
+      zIndex: Date.now(),
+    };
+
+    const newConn1 = createConnection(conn.fromShapeId, waypointId, conn.color, conn.routing);
+    newConn1.startMarker = conn.startMarker;
+    newConn1.endMarker = 'none';
+
+    const newConn2 = createConnection(waypointId, conn.toShapeId, conn.color, conn.routing);
+    newConn2.startMarker = 'none';
+    newConn2.endMarker = conn.endMarker;
+
+    setShapes(prev => [...prev, waypoint]);
+    setConnections(prev => [...prev.filter(c => c.id !== connId), newConn1, newConn2]);
+    setSelectedConnId(null);
+    setSelectedShapeId(waypointId);
+    setConnectFrom(waypointId); // Ready to drag a new connection from this waypoint
+    
+    saveToHistory([...shapes, waypoint], [...connections.filter(c => c.id !== connId), newConn1, newConn2], paths);
+  }, [connections, shapes, saveToHistory]);
+
   const handleExportPNG = async () => {
     if (!svgRef.current) return;
     const svg = svgRef.current;
@@ -937,6 +982,9 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 <marker id={`arrow-${conn.id}`} markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
                   <path d="M 0 0 L 10 4 L 0 8 z" fill={selectedConnId === conn.id ? '#f59e0b' : conn.color} />
                 </marker>
+                <marker id={`diamond-${conn.id}`} markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+                  <path d="M 0 6 L 6 0 L 12 6 L 6 12 z" fill={conn.color} />
+                </marker>
               </g>
             ))}
             {/* Temp line arrow */}
@@ -1002,6 +1050,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onUpdateConn={handleUpdateConn}
                 onLabelChange={handleConnLabelChange}
                 onFinishEditing={handleFinishEditingConn}
+                onSplitConn={handleSplitConn}
                 canvasTheme={canvasTheme}
               />
             ))}
