@@ -27,8 +27,13 @@ const statusConfig: Record<string, { color: string; icon: any }> = {
     Draft: { color: "bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400", icon: FileText },
 };
 
-const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount);
+const formatCurrency = (amount: number, currency: string = "USD") =>
+    new Intl.NumberFormat('en-US', { 
+        style: 'currency', 
+        currency: currency, 
+        minimumFractionDigits: 0, 
+        maximumFractionDigits: 2 
+    }).format(amount);
 
 export function InvoicesClient({ invoices }: InvoicesClientProps) {
     const [search, setSearch] = useState("");
@@ -253,7 +258,7 @@ export function InvoicesClient({ invoices }: InvoicesClientProps) {
 
                                     <div className="mt-auto pt-4 border-t flex items-center justify-between">
                                         <div className="text-lg font-bold">
-                                            {formatCurrency(invoice.total)}
+                                            {formatCurrency(invoice.total, invoice.currency)}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
@@ -312,7 +317,7 @@ export function InvoicesClient({ invoices }: InvoicesClientProps) {
                                                 </span>
                                             </td>
                                             <td className="p-4 align-middle text-right font-bold text-base">
-                                                {formatCurrency(invoice.total)}
+                                                {formatCurrency(invoice.total, invoice.currency)}
                                             </td>
                                             <td className="p-4 align-middle text-center">
                                                 <Badge className={`text-[10px] uppercase tracking-wider ${isOverdue ? statusConfig.Overdue.color : config.color}`} variant="secondary">

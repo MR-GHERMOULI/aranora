@@ -49,6 +49,14 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         const total = typeof invoice.total === 'number' ? invoice.total : 0;
         const subtotal = typeof invoice.subtotal === 'number' ? invoice.subtotal : 0;
 
+        const getCurrencySymbol = (code?: string) => {
+            const symbols: Record<string, string> = {
+                USD: "$", EUR: "€", GBP: "£", JPY: "¥", CAD: "C$", AUD: "A$", AED: "د.إ", SAR: "ر.س", DZD: "د.ج"
+            };
+            return symbols[code || "USD"] || (code || "$");
+        };
+        const currencySymbol = getCurrencySymbol(invoice.currency);
+
         return (
             <div className="px-4 lg:px-8 space-y-6 pt-8 pb-10">
                 {/* Header */}
@@ -122,11 +130,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                                 <div className="pt-4 border-t">
                                     <div className="flex justify-between items-center mb-2">
                                         <p className="text-sm text-muted-foreground">Subtotal</p>
-                                        <p className="text-sm font-medium">${subtotal.toLocaleString()}</p>
+                                        <p className="text-sm font-medium">{currencySymbol}{subtotal.toLocaleString()}</p>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <p className="text-base font-bold text-brand-primary">Total</p>
-                                        <p className="text-xl font-bold text-brand-primary">${total.toLocaleString()}</p>
+                                        <p className="text-xl font-bold text-brand-primary">{currencySymbol}{total.toLocaleString()}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -160,8 +168,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                                                     <tr key={i} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                                                         <td className="p-4 align-middle">{item.description}</td>
                                                         <td className="p-4 align-middle text-right">{item.quantity}</td>
-                                                        <td className="p-4 align-middle text-right">${(item.unit_price || 0).toFixed(2)}</td>
-                                                        <td className="p-4 align-middle text-right font-medium">${((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
+                                                        <td className="p-4 align-middle text-right">{currencySymbol}{(item.unit_price || 0).toFixed(2)}</td>
+                                                        <td className="p-4 align-middle text-right font-medium">{currencySymbol}{((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>

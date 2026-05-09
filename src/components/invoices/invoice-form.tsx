@@ -27,6 +27,18 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
+const CURRENCIES = [
+    { code: "USD", symbol: "$", name: "US Dollar" },
+    { code: "EUR", symbol: "€", name: "Euro" },
+    { code: "GBP", symbol: "£", name: "British Pound" },
+    { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+    { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+    { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+    { code: "SAR", symbol: "ر.س", name: "Saudi Riyal" },
+    { code: "DZD", symbol: "د.ج", name: "Algerian Dinar" },
+];
+
 interface InvoiceFormProps {
     clients: Client[];
     projects: Project[];
@@ -60,6 +72,7 @@ export function InvoiceForm({ clients, projects, invoice, profile }: InvoiceForm
     const [status, setStatus] = useState(invoice?.status || "Draft")
     const [paperSize, setPaperSize] = useState<'A4' | 'LETTER'>(invoice?.paper_size || profile?.default_paper_size || 'A4')
     const [taxRate, setTaxRate] = useState(invoice?.tax_rate || profile?.default_tax_rate || 0)
+    const [selectedCurrency, setSelectedCurrency] = useState(invoice?.currency || profile?.default_currency || "USD")
     const [importedTimeEntryIds, setImportedTimeEntryIds] = useState<string[]>([])
 
     const handleImportTime = (entries: TimeEntry[]) => {
@@ -120,6 +133,7 @@ export function InvoiceForm({ clients, projects, invoice, profile }: InvoiceForm
             formData.append("status", status);
             formData.append("paperSize", paperSize);
             formData.append("taxRate", String(taxRate));
+            formData.append("currency", selectedCurrency);
             formData.append("items", JSON.stringify(items));
 
             if (invoice) {
@@ -259,6 +273,21 @@ export function InvoiceForm({ clients, projects, invoice, profile }: InvoiceForm
                         onChange={(e) => setTaxRate(Number(e.target.value))}
                     />
                 </div>
+                <div className="space-y-2">
+                    <Label>Currency</Label>
+                    <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {CURRENCIES.map(c => (
+                                <SelectItem key={c.code} value={c.code}>
+                                    {c.code} - {c.name} ({c.symbol})
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -298,7 +327,7 @@ export function InvoiceForm({ clients, projects, invoice, profile }: InvoiceForm
                                 />
                             </div>
                             <div className="md:col-span-3 space-y-2">
-                                <Label>Unit Price ($)</Label>
+                                <Label>Unit Price ({CURRENCIES.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency})</Label>
                                 <Input
                                     type="number"
                                     min="0"
@@ -321,17 +350,17 @@ export function InvoiceForm({ clients, projects, invoice, profile }: InvoiceForm
             <div className="flex flex-col items-end space-y-2 pt-6 border-t font-medium">
                 <div className="flex justify-between w-64 text-sm text-muted-foreground">
                     <span>Subtotal:</span>
-                    <span>${items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0).toLocaleString()}</span>
+                    <span>{CURRENCIES.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency} {items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0).toLocaleString()}</span>
                 </div>
                 {taxRate > 0 && (
                     <div className="flex justify-between w-64 text-sm text-muted-foreground">
                         <span>Tax ({taxRate}%):</span>
-                        <span>${(items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * taxRate / 100).toLocaleString()}</span>
+                        <span>{CURRENCIES.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency} {(items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * taxRate / 100).toLocaleString()}</span>
                     </div>
                 )}
                 <div className="flex justify-between w-64 text-lg font-bold border-t pt-2">
                     <span>Total:</span>
-                    <span>${(items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * (1 + taxRate / 100)).toLocaleString()}</span>
+                    <span>{CURRENCIES.find(c => c.code === selectedCurrency)?.symbol || selectedCurrency} {(items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0) * (1 + taxRate / 100)).toLocaleString()}</span>
                 </div>
             </div>
 

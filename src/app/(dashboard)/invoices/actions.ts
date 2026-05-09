@@ -101,6 +101,7 @@ export async function createInvoice(formData: FormData) {
   const status = 'Draft';
   const paperSize = formData.get('paperSize') as string || 'A4';
   const taxRate = Number(formData.get('taxRate')) || 0;
+  const currency = formData.get('currency') as string || 'USD';
 
   // Parse items from hidden JSON field (simplified for FormData)
   // In a real app, we might use a more robust data structure, 
@@ -153,6 +154,7 @@ export async function createInvoice(formData: FormData) {
       tax_rate: taxRate,
       tax_amount: taxAmount,
       total,
+      currency,
       paper_size: paperSize
     })
     .select()
@@ -202,6 +204,7 @@ export async function updateInvoice(formData: FormData) {
   const issueDate = formData.get('issueDate') as string;
   const dueDate = formData.get('dueDate') as string;
   const status = formData.get('status') as string;
+  const currency = formData.get('currency') as string || 'USD';
 
   const itemsJson = formData.get('items') as string;
   const items = JSON.parse(itemsJson);
@@ -226,6 +229,7 @@ export async function updateInvoice(formData: FormData) {
       tax_rate: taxRate,
       tax_amount: taxAmount,
       total,
+      currency,
       paper_size: paperSize
     })
     .eq('id', id)
