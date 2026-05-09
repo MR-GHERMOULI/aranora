@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, Variants } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import {
     Calendar, CheckCircle2, Circle, Clock, AlertCircle,
@@ -89,7 +89,7 @@ const priorityConfig: Record<string, { color: string; label: string }> = {
     Low: { color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50", label: "Standard" },
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
@@ -97,7 +97,7 @@ const containerVariants = {
     }
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
         y: 0,
