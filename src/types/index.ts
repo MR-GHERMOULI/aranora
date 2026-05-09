@@ -10,6 +10,17 @@ export interface ContactMessage {
     created_at: string
 }
 
+export interface CustomerFeedback {
+    id: string
+    project_id: string | null
+    name: string
+    comment: string
+    photos: string[]
+    is_read: boolean
+    created_at: string
+    project?: { title: string }
+}
+
 export interface Client {
     id: string
     user_id: string

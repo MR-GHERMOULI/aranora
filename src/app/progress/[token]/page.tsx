@@ -43,6 +43,7 @@ async function getProjectData(token: string) {
 
     return {
         project: {
+            id: project.id,
             title: project.title,
             status: project.status,
             start_date: project.start_date,
@@ -106,5 +107,10 @@ export default async function PublicProgressPage({ params }: { params: Promise<{
     const platformLogoUrl = brandingSetting?.value?.logo_url || null;
     const platformSiteName = brandingSetting?.value?.site_name || "Aranora";
 
-    return <PublicProgressClient data={data} platformLogoUrl={platformLogoUrl} platformSiteName={platformSiteName} />
+    return <PublicProgressClient 
+        data={data} 
+        platformLogoUrl={platformLogoUrl} 
+        platformSiteName={platformSiteName} 
+        projectId={data?.project?.id} 
+    />
 }

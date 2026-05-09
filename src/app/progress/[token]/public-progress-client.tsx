@@ -9,6 +9,8 @@ import {
     TrendingUp, Zap, Share2
 } from "lucide-react"
 import { useState, useMemo } from "react"
+import { FeedbackModal } from "@/components/clients/feedback-modal"
+import { MessageSquare } from "lucide-react"
 
 interface Task {
     id: string
@@ -106,8 +108,9 @@ const itemVariants: Variants = {
     }
 }
 
-export default function PublicProgressClient({ data, platformLogoUrl, platformSiteName = "Aranora" }: { data: ProjectData | null, platformLogoUrl?: string | null, platformSiteName?: string }) {
+export default function PublicProgressClient({ data, platformLogoUrl, platformSiteName = "Aranora", projectId }: { data: ProjectData | null, platformLogoUrl?: string | null, platformSiteName?: string, projectId?: string }) {
     const [searchQuery, setSearchQuery] = useState("")
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false)
 
     if (!data) {
         return (
@@ -189,18 +192,28 @@ export default function PublicProgressClient({ data, platformLogoUrl, platformSi
                         </div>
                     </a>
                     
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-4 sm:gap-8">
                         <div className="hidden lg:flex items-center gap-4 px-6 py-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-black text-emerald-400 tracking-widest uppercase">
                             <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
                             Synchronized Live
                         </div>
                         <div className="h-10 w-px bg-white/10 hidden sm:block" />
-                        <button className="h-12 w-12 rounded-2xl glass flex items-center justify-center text-white hover:bg-white/10 transition-all border border-white/10 shadow-lg">
-                            <Share2 className="h-5 w-5" />
+                        <button 
+                            onClick={() => setIsFeedbackOpen(true)}
+                            className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-[#10b981] text-white font-black hover:scale-105 transition-all shadow-xl shadow-emerald-500/20"
+                        >
+                            <MessageSquare className="h-5 w-5" />
+                            <span className="hidden sm:inline">Add Feedback</span>
                         </button>
                     </div>
                 </div>
             </nav>
+
+            <FeedbackModal 
+                isOpen={isFeedbackOpen} 
+                onClose={() => setIsFeedbackOpen(false)} 
+                projectId={projectId}
+            />
 
             {/* Main Content Area */}
             <main className="max-w-7xl mx-auto px-8 py-16 relative z-10">

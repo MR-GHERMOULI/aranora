@@ -21,7 +21,8 @@ import {
     Link2,
     UserPlus,
     ShieldAlert,
-    HeartPulse
+    HeartPulse,
+    Inbox
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
@@ -43,6 +44,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
     const { setTheme } = useTheme()
 
     const [unreadCount, setUnreadCount] = useState(0)
+    const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0)
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
     const [siteName, setSiteName] = useState("Aranora")
 
@@ -50,9 +52,13 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
         // Simple fetch for unread count and branding
         const fetchData = async () => {
             const supabase = createClient()
-            const [unreadRes, brandingRes] = await Promise.all([
+            const [unreadRes, feedbackRes, brandingRes] = await Promise.all([
                 supabase
                     .from("contact_messages")
+                    .select("*", { count: "exact", head: true })
+                    .eq("is_read", false),
+                supabase
+                    .from("customer_feedback")
                     .select("*", { count: "exact", head: true })
                     .eq("is_read", false),
                 supabase
@@ -63,6 +69,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             ])
             
             setUnreadCount(unreadRes.count || 0)
+            setUnreadFeedbackCount(feedbackRes.count || 0)
             if (brandingRes.data?.value?.logo_url) {
                 setLogoUrl(brandingRes.data.value.logo_url)
             }
@@ -132,6 +139,14 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             href: "/admin/messages",
             color: "text-blue-500",
             badge: unreadCount > 0 ? unreadCount : null,
+        },
+        {
+            label: "Feedback",
+            labelAr: "الملاحظات",
+            icon: Inbox,
+            href: "/admin/feedback",
+            color: "text-blue-500",
+            badge: unreadFeedbackCount > 0 ? unreadFeedbackCount : null,
         },
         {
             label: "Subscriptions",
