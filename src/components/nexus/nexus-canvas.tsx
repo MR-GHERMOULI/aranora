@@ -7,6 +7,7 @@ import type {
 } from '@/types/nexus';
 import { SHAPE_COLOR_PRESETS, CONNECTION_COLORS } from '@/types/nexus';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import {
   createShape, createConnection, getConnectionPath,
   saveCanvas, loadCanvases, deleteCanvas as deleteCanvasStorage,

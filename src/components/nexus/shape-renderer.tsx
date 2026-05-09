@@ -297,14 +297,17 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
         </g>
       )}
 
-      {/* Lock Indicator */}
-      {shape.isLocked && isSelected && (
+      {/* Lock Indicator - Always show if locked */}
+      {shape.isLocked && (
         <g 
           transform={`translate(${shape.width - 24}, ${-24})`} 
-          className="cursor-pointer hover:scale-110 transition-transform"
-          onClick={(e) => { e.stopPropagation(); onToggleLock(shape.id); }}
+          className="cursor-pointer transition-all hover:scale-110 active:scale-95"
+          onClick={(e) => { 
+            e.stopPropagation(); 
+            onToggleLock(shape.id); 
+          }}
         >
-          <circle cx={12} cy={12} r={10} fill="#ef4444" />
+          <circle cx={12} cy={12} r={10} fill="#ef4444" className="shadow-lg shadow-red-500/20" />
           <path d="M8 11v-2a4 4 0 0 1 8 0v2" fill="none" stroke="white" strokeWidth="1.5" />
           <rect x={6} y={11} width={12} height={8} rx={1} fill="white" />
         </g>
