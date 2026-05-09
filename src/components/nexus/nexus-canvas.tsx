@@ -22,7 +22,6 @@ import { ConnectionLine } from './connection-line';
 import { CanvasMinimap } from './canvas-minimap';
 import { CollaborativeCursors } from './collaborative-cursors';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
-import { toast } from 'sonner';
 import { Sparkles, MousePointer2, Pencil, Lock, Unlock } from 'lucide-react';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
