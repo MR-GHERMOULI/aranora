@@ -22,7 +22,7 @@ import { CanvasMinimap } from './canvas-minimap';
 import { CollaborativeCursors } from './collaborative-cursors';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { toast } from 'sonner';
-import { Sparkles, MousePointer2, Pencil } from 'lucide-react';
+import { Sparkles, MousePointer2, Pencil, Lock, Unlock } from 'lucide-react';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
 import { recognizeShape } from '@/lib/shape-recognition';
@@ -97,12 +97,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
+  const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
   const [selectedConnId, setSelectedConnId] = useState<string | null>(null);
   const [editingShapeId, setEditingShapeId] = useState<string | null>(null);
   const [editingConnId, setEditingConnId] = useState<string | null>(null);
   const [dragging, setDragging] = useState<{ shapeId: string; offsetX: number; offsetY: number } | null>(null);
   const [resizing, setResizing] = useState<{ shapeId: string; handle: string; startX: number; startY: number; startWidth: number; startHeight: number; startShapeX: number; startShapeY: number } | null>(null);
+  const [rotating, setRotating] = useState<{ shapeId: string; startAngle: number; initialRotation: number; initialRotations?: Record<string, number> } | null>(null);
   const [panning, setPanning] = useState<{ startX: number; startY: number; startVpX: number; startVpY: number } | null>(null);
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [tempLine, setTempLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
@@ -151,6 +152,32 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     };
   }, [viewport]);
 
+  const handleRotateStart = (e: React.MouseEvent, shapeId: string) => {
+    e.stopPropagation();
+    const { x, y } = screenToCanvas(e.clientX, e.clientY);
+    const shape = shapes.find(s => s.id === shapeId);
+    if (!shape) return;
+    
+    const cx = shape.x + shape.width / 2;
+    const cy = shape.y + shape.height / 2;
+    const angle = Math.atan2(y - cy, x - cx) * (180 / Math.PI);
+    
+    // Capture initial rotations for all selected shapes if the target is selected
+    const targets = selectedShapeIds.includes(shapeId) ? selectedShapeIds : [shapeId];
+    const initialRotations: Record<string, number> = {};
+    targets.forEach(id => {
+      const s = shapes.find(sh => sh.id === id);
+      if (s) initialRotations[id] = s.rotation || 0;
+    });
+
+    setRotating({
+      shapeId,
+      startAngle: angle,
+      initialRotation: shape.rotation || 0,
+      initialRotations // Added this to the state (need to update type)
+    } as any);
+  };
+
   // ── Escape / keyboard shortcuts ──────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -162,7 +189,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         setConnectFrom(null);
         setTempLine(null);
         setActivePath(null);
-        setSelectedShapeId(null);
+        setSelectedShapeIds([]);
         setSelectedConnId(null);
         setEditingShapeId(null);
         setEditingConnId(null);
@@ -190,17 +217,22 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           setConnections(newConns);
           saveToHistory(shapes, newConns, paths);
           setSelectedConnId(null);
-        } else if (selectedShapeId) {
-          const newShapes = shapes.filter(s => s.id !== selectedShapeId);
-          const newConns = connections.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId);
+        } else if (selectedShapeIds.length > 0) {
+          const locked = shapes.filter(s => selectedShapeIds.includes(s.id) && s.isLocked);
+          if (locked.length > 0) {
+            toast.error("Locked items cannot be deleted");
+            return;
+          }
+          const newShapes = shapes.filter(s => !selectedShapeIds.includes(s.id));
+          const newConns = connections.filter(c => !selectedShapeIds.includes(c.fromShapeId) && !selectedShapeIds.includes(c.toShapeId));
           setShapes(newShapes);
           setConnections(newConns);
           saveToHistory(newShapes, newConns, paths);
-          setSelectedShapeId(null);
+          setSelectedShapeIds([]);
         }
       }
-      else if ((e.ctrlKey || e.metaKey) && key === 'c' && selectedShapeId) {
-        const shape = shapes.find(s => s.id === selectedShapeId);
+      else if ((e.ctrlKey || e.metaKey) && key === 'c' && selectedShapeIds.length === 1) {
+        const shape = shapes.find(s => s.id === selectedShapeIds[0]);
         if (shape) setClipboard(shape);
       }
       else if ((e.ctrlKey || e.metaKey) && key === 'v' && clipboard) {
@@ -210,24 +242,24 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           saveToHistory(next, connections, paths);
           return next;
         });
-        setSelectedShapeId(newShape.id);
+        setSelectedShapeIds([newShape.id]);
       }
-      else if ((e.ctrlKey || e.metaKey) && key === 'd' && selectedShapeId) {
+      else if ((e.ctrlKey || e.metaKey) && key === 'd' && selectedShapeIds.length === 1) {
         e.preventDefault();
-        handleDuplicateShape(selectedShapeId);
+        handleDuplicateShape(selectedShapeIds[0]);
       }
-      else if (key === 'tab' && selectedShapeId) {
+      else if (key === 'tab' && selectedShapeIds.length === 1) {
         e.preventDefault();
-        handleAddChild(selectedShapeId);
+        handleAddChild(selectedShapeIds[0]);
       }
-      else if (key === 'enter' && selectedShapeId && !editingShapeId) {
+      else if (key === 'enter' && selectedShapeIds.length === 1 && !editingShapeId) {
         e.preventDefault();
-        handleAddSibling(selectedShapeId);
+        handleAddSibling(selectedShapeIds[0]);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [editingShapeId, selectedShapeId, selectedConnId, undo, redo, shapes, connections, paths, saveToHistory]);
+  }, [editingShapeId, selectedShapeIds, selectedConnId, undo, redo, shapes, connections, paths, saveToHistory, clipboard]);
 
   // ── Wheel zoom ───────────────────────────────────────
   useEffect(() => {
@@ -275,7 +307,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           saveToHistory(next, connections, paths);
           return next;
         });
-        setSelectedShapeId(newShape.id);
+        setSelectedShapeIds([newShape.id]);
         setEditingShapeId(newShape.id);
         setActiveTool('select');
         return;
@@ -303,7 +335,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           saveToHistory(next, connections, paths);
           return next;
         });
-        setSelectedShapeId(newShape.id);
+        setSelectedShapeIds([newShape.id]);
         setActiveTool('select');
         if (activeTool === 'text') setEditingShapeId(newShape.id);
         return;
@@ -366,7 +398,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       setTempLine(null);
       return;
     }
-    setSelectedShapeId(null);
+    setSelectedShapeIds([]);
     setSelectedConnId(null);
     setEditingShapeId(null);
     setEditingConnId(null);
@@ -413,12 +445,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       return;
     }
 
-    setSelectedShapeId(shapeId);
-    setSelectedConnId(null);
-    setEditingShapeId(null);
-    setEditingConnId(null);
-    setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, zIndex: Date.now() } : s));
-    setDragging({ shapeId, offsetX: x - shape.x, offsetY: y - shape.y });
+    if (activeTool === 'select') {
+      if (e.shiftKey) {
+        setSelectedShapeIds(prev => prev.includes(shapeId) ? prev.filter(id => id !== shapeId) : [...prev, shapeId]);
+      } else {
+        setSelectedShapeIds([shapeId]);
+      }
+      setSelectedConnId(null);
+      setEditingShapeId(null);
+      setEditingConnId(null);
+      
+      if (!shape.isLocked) {
+        setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, zIndex: Date.now() } : s));
+        setDragging({ shapeId, offsetX: x - shape.x, offsetY: y - shape.y });
+      }
+    }
   };
 
   const handleResizeStart = (e: React.MouseEvent, shapeId: string, handle: string) => {
@@ -440,7 +481,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleConnClick = (e: React.MouseEvent, connId: string) => {
     e.stopPropagation();
     setSelectedConnId(connId);
-    setSelectedShapeId(null);
+    setSelectedShapeIds([]);
     setEditingConnId(null);
   };
 
@@ -493,6 +534,29 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       setShapes(prev => prev.map(s =>
         s.id === dragging.shapeId ? { ...s, x: newX, y: newY } : s
       ));
+      return;
+    }
+    if (rotating) {
+      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      const shape = shapes.find(s => s.id === (rotating as any).shapeId);
+      if (shape) {
+        const cx = shape.x + shape.width / 2;
+        const cy = shape.y + shape.height / 2;
+        const currentAngle = Math.atan2(y - cy, x - cx) * (180 / Math.PI);
+        const rotationDiff = currentAngle - (rotating as any).startAngle;
+        
+        const targets = (rotating as any).initialRotations ? Object.keys((rotating as any).initialRotations) : [(rotating as any).shapeId];
+        
+        setShapes(prev => prev.map(s => {
+          if (targets.includes(s.id)) {
+            const initial = (rotating as any).initialRotations ? (rotating as any).initialRotations[s.id] : (rotating as any).initialRotation;
+            let newRotation = (initial + rotationDiff) % 360;
+            if (e.shiftKey) newRotation = Math.round(newRotation / 15) * 15;
+            return { ...s, rotation: newRotation };
+          }
+          return s;
+        }));
+      }
       return;
     }
     if (resizing) {
@@ -641,6 +705,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         setActivePath(null);
       }
     }
+    if (rotating) {
+      saveToHistory(shapes, connections, paths);
+      setRotating(null);
+    }
     if (resizing) {
       saveToHistory(shapes, connections, paths);
       setResizing(null);
@@ -679,7 +747,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleDoubleClick = (shapeId: string) => { 
     setEditingShapeId(shapeId); 
     setEditingConnId(null);
-    setSelectedShapeId(shapeId); 
+    setSelectedShapeIds([shapeId]); 
   };
   
   const handleConnDoubleClick = (connId: string) => {
@@ -690,7 +758,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
 
   const handleShapeContextMenu = (e: React.MouseEvent, shapeId: string) => {
     // Right click triggers selection to show property ribbon
-    setSelectedShapeId(shapeId);
+    setSelectedShapeIds([shapeId]);
     setSelectedConnId(null);
     setEditingShapeId(null);
     setEditingConnId(null);
@@ -723,7 +791,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       saveToHistory(next, connections, paths);
       return next;
     });
-    setSelectedShapeId(newShape.id);
+    setSelectedShapeIds([newShape.id]);
   };
 
   const handleAddChild = (parentId: string, requestedDirection?: 'left' | 'right' | 'top' | 'bottom') => {
@@ -805,7 +873,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setShapes(prev => [...prev, newChild]);
     setConnections(prev => [...prev, newConn]);
     saveToHistory([...shapes, newChild], [...connections, newConn], paths);
-    setSelectedShapeId(childId);
+    setSelectedShapeIds([childId]);
     setEditingShapeId(childId);
   };
 
@@ -833,18 +901,18 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setShapes(prev => [...prev, newSibling]);
     setConnections(prev => [...prev, newConn]);
     saveToHistory([...shapes, newSibling], [...connections, newConn], paths);
-    setSelectedShapeId(siblingId);
+    setSelectedShapeIds([siblingId]);
     setEditingShapeId(siblingId);
   };
 
   const deleteSelectedShape = () => {
-    if (!selectedShapeId) return;
-    const newShapes = shapes.filter(s => s.id !== selectedShapeId);
-    const newConns = connections.filter(c => c.fromShapeId !== selectedShapeId && c.toShapeId !== selectedShapeId);
+    if (selectedShapeIds.length === 0) return;
+    const newShapes = shapes.filter(s => !selectedShapeIds.includes(s.id));
+    const newConns = connections.filter(c => !selectedShapeIds.includes(c.fromShapeId) && !selectedShapeIds.includes(c.toShapeId));
     setShapes(newShapes);
     setConnections(newConns);
     saveToHistory(newShapes, newConns, paths);
-    setSelectedShapeId(null);
+    setSelectedShapeIds([]);
   };
 
   const handleErasePath = (pathId: string) => {
@@ -899,13 +967,13 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleLoadCanvas = (canvas: NexusCanvasData) => {
     setShapes(canvas.shapes); setConnections(canvas.connections); setPaths(canvas.paths || []);
     setCanvasName(canvas.name); setCanvasId(canvas.id);
-    setShowCanvasList(false); setSelectedShapeId(null); setEditingShapeId(null);
+    setShowCanvasList(false); setSelectedShapeIds([]); setEditingShapeId(null);
     toast.success(`Loaded "${canvas.name}"`);
   };
 
   const handleNewCanvas = () => {
     setShapes([]); setConnections([]); setPaths([]); setCanvasName('Untitled Canvas');
-    setCanvasId(''); setSelectedShapeId(null); setEditingShapeId(null);
+    setCanvasId(''); setSelectedShapeIds([]); setEditingShapeId(null);
     setGeneratedTasks(null); setViewport({ x: 0, y: 0, zoom: 1 });
   };
 
@@ -913,7 +981,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     if (shapes.length === 0 && paths.length === 0) return;
     saveToHistory(shapes, connections, paths);
     setShapes([]); setConnections([]); setPaths([]);
-    setSelectedShapeId(null); setEditingShapeId(null);
+    setSelectedShapeIds([]); setEditingShapeId(null);
     toast.info('Canvas cleared');
   };
 
@@ -929,6 +997,16 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleFinishEditingConn = useCallback(() => {
     setEditingConnId(null);
   }, []);
+
+  const handleToggleLock = () => {
+    if (selectedShapeIds.length === 0) return;
+    const allLocked = shapes.filter(s => selectedShapeIds.includes(s.id)).every(s => s.isLocked);
+    const nextShapes = shapes.map(s => selectedShapeIds.includes(s.id) ? { ...s, isLocked: !allLocked } : s);
+    setShapes(nextShapes);
+    saveToHistory(nextShapes, connections, paths);
+    if (!allLocked) toast.success("Items locked");
+    else toast.info("Items unlocked");
+  };
 
   const handleSplitConn = useCallback((connId: string) => {
     const conn = connections.find(c => c.id === connId);
@@ -969,7 +1047,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setShapes(prev => [...prev, waypoint]);
     setConnections(prev => [...prev.filter(c => c.id !== connId), newConn1, newConn2]);
     setSelectedConnId(null);
-    setSelectedShapeId(waypointId);
+    setSelectedShapeIds([waypointId]);
     setConnectFrom(waypointId); // Ready to drag a new connection from this waypoint
     setActiveTool('arrow'); // Ensure they are in arrow mode to finish the branch
     
@@ -1053,8 +1131,31 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition uppercase text-[9px] tracking-widest">Reset</button>
       </div>
 
-      {/* Connect mode banner - Moved to top center */}
-      {connectFrom && (
+      {/* Floating Shape Properties Toolbar */}
+      {selectedShapeIds.length > 0 && !editingShapeId && (
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 p-1 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-black/5 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center gap-1 px-1 border-r border-gray-100">
+            <button
+              onClick={handleToggleLock}
+              className={cn(
+                "p-2 rounded-xl transition-all",
+                shapes.filter(s => selectedShapeIds.includes(s.id)).every(s => s.isLocked)
+                  ? "bg-red-50 text-red-600 shadow-inner"
+                  : "text-gray-500 hover:bg-gray-100"
+              )}
+              title="Lock/Unlock Items"
+            >
+              {shapes.filter(s => selectedShapeIds.includes(s.id)).every(s => s.isLocked) ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+            </button>
+          </div>
+          {/* Other tool groups could go here, but for now we focus on lock */}
+          <div className="flex items-center gap-1 px-1">
+             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2">
+               {selectedShapeIds.length} Selected
+             </span>
+          </div>
+        </div>
+      )}
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-6 py-3 rounded-full bg-gray-900/95 backdrop-blur-md shadow-2xl text-white text-sm font-medium animate-in slide-in-from-top-4 duration-300">
           <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse ring-4 ring-blue-500/20" />
           Click a second shape to connect
@@ -1220,7 +1321,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
               <ShapeRenderer
                 key={shape.id}
                 shape={shape}
-                isSelected={selectedShapeId === shape.id}
+                isSelected={selectedShapeIds.includes(shape.id)}
                 isConnectSource={connectFrom === shape.id}
                 zoom={viewport.zoom}
                 onMouseDown={handleShapeMouseDown}
@@ -1228,6 +1329,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onTextChange={handleTextChange}
                 onContextMenu={handleShapeContextMenu}
                 onResizeStart={handleResizeStart}
+                onRotateStart={handleRotateStart}
                 editingShapeId={editingShapeId}
                 canvasTheme={canvasTheme}
                 activeTool={activeTool}
@@ -1265,16 +1367,16 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         onNavigate={(x, y) => setViewport(v => ({ ...v, x, y }))}
       />
 
-      {selectedShapeId && shapes.find(s => s.id === selectedShapeId) && activeTool === 'select' && !editingShapeId && (
+      {selectedShapeIds.length === 1 && shapes.find(s => s.id === selectedShapeIds[0]) && activeTool === 'select' && !editingShapeId && (
         <ShapeProperties
-          shape={shapes.find(s => s.id === selectedShapeId)!}
-          onColorChange={(f, b, t) => updateShapeColor(selectedShapeId, f, b, t)}
-          onTypeChange={(t) => updateShapeType(selectedShapeId, t)}
+          shape={shapes.find(s => s.id === selectedShapeIds[0])!}
+          onColorChange={(f, b, t) => updateShapeColor(selectedShapeIds[0], f, b, t)}
+          onTypeChange={(t) => updateShapeType(selectedShapeIds[0], t)}
           onDelete={deleteSelectedShape}
-          onDuplicate={() => handleDuplicateShape(selectedShapeId)}
-          onAddChild={(dir) => handleAddChild(selectedShapeId, dir)}
-          onFontSizeChange={(size) => updateShapeFontSize(selectedShapeId, size)}
-          onPropertyChange={(updates) => handleUpdateShapeProperty(selectedShapeId, updates)}
+          onDuplicate={() => handleDuplicateShape(selectedShapeIds[0])}
+          onAddChild={(dir) => handleAddChild(selectedShapeIds[0], dir)}
+          onFontSizeChange={(size) => updateShapeFontSize(selectedShapeIds[0], size)}
+          onPropertyChange={(updates) => handleUpdateShapeProperty(selectedShapeIds[0], updates)}
           zoom={viewport.zoom}
           viewport={viewport}
         />

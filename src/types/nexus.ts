@@ -25,6 +25,8 @@ export interface NexusShape {
   textAlign?: 'left' | 'center' | 'right';
   fontFamily?: 'sans' | 'serif' | 'mono';
   direction?: 'ltr' | 'rtl';
+  rotation?: number; // degrees
+  isLocked?: boolean;
 }
 
 export interface NexusConnection {

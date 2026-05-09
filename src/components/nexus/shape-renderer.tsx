@@ -19,12 +19,13 @@ interface ShapeRendererProps {
   editingShapeId: string | null;
   canvasTheme: CanvasTheme;
   activeTool: string;
+  onRotateStart: (e: React.MouseEvent, shapeId: string) => void;
 }
 
 export const ShapeRenderer = React.memo(function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
   onMouseDown, onDoubleClick, onTextChange, onContextMenu, onResizeStart, editingShapeId,
-  canvasTheme, activeTool,
+  canvasTheme, activeTool, onRotateStart,
 }: ShapeRendererProps) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const isEditing = editingShapeId === shape.id;
@@ -97,14 +98,14 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
 
   return (
     <g
-      transform={`translate(${shape.x}, ${shape.y})`}
+      transform={`translate(${shape.x}, ${shape.y}) rotate(${shape.rotation || 0}, ${shape.width / 2}, ${shape.height / 2})`}
       style={{ 
-        cursor: isEditing ? 'text' : 
+        cursor: shape.isLocked ? 'not-allowed' : isEditing ? 'text' : 
                 (activeTool === 'connect' || activeTool === 'arrow') ? 'crosshair' : 
                 activeTool === 'pan' ? 'grab' : 'grab' 
       }}
-      onMouseDown={e => { if (!isEditing) onMouseDown(e, shape.id); }}
-      onDoubleClick={() => onDoubleClick(shape.id)}
+      onMouseDown={e => { if (!isEditing && !shape.isLocked) onMouseDown(e, shape.id); }}
+      onDoubleClick={() => { if (!shape.isLocked) onDoubleClick(shape.id); }}
       onContextMenu={e => { e.preventDefault(); onContextMenu(e, shape.id); }}
     >
       <defs>
@@ -271,8 +272,16 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
       </foreignObject>
 
       {/* Resizing Handles */}
-      {isSelected && !isEditing && (
+      {isSelected && !isEditing && !shape.isLocked && (
         <g>
+          {/* Rotation Handle */}
+          <line x1={shape.width / 2} y1={-6} x2={shape.width / 2} y2={-24} stroke="#3b82f6" strokeWidth={1.5} />
+          <circle 
+            cx={shape.width / 2} cy={-24} r={5} 
+            className="fill-white stroke-blue-600 cursor-alias" 
+            onMouseDown={e => { e.stopPropagation(); onRotateStart(e, shape.id); }} 
+          />
+
           {/* Corners */}
           <rect x={-4} y={-4} width={8} height={8} className="fill-white stroke-blue-600 cursor-nwse-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'nw'); }} />
           <rect x={shape.width - 4} y={-4} width={8} height={8} className="fill-white stroke-blue-600 cursor-nesw-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'ne'); }} />
@@ -286,6 +295,15 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
           <rect x={shape.width - 4} y={shape.height / 2 - 4} width={8} height={8} className="fill-white stroke-blue-600 cursor-ew-resize" onMouseDown={e => { e.stopPropagation(); onResizeStart(e, shape.id, 'e'); }} />
         </g>
       )}
+
+      {/* Lock Indicator */}
+      {shape.isLocked && isSelected && (
+        <g transform={`translate(${shape.width - 24}, ${-24})`}>
+          <circle cx={12} cy={12} r={10} fill="#ef4444" />
+          <path d="M8 11v-2a4 4 0 0 1 8 0v2" fill="none" stroke="white" strokeWidth="1.5" />
+          <rect x={6} y={11} width={12} height={8} rx={1} fill="white" />
+        </g>
+      )}
     </g>
   );
 }, (prevProps, nextProps) => {
@@ -294,7 +312,15 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
     prevProps.isConnectSource === nextProps.isConnectSource &&
     prevProps.zoom === nextProps.zoom &&
     prevProps.editingShapeId === nextProps.editingShapeId &&
-    prevProps.canvasTheme === nextProps.canvasTheme &&
-    prevProps.shape === nextProps.shape
+    prevProps.activeTool === nextProps.activeTool &&
+    prevProps.shape.rotation === nextProps.shape.rotation &&
+    prevProps.shape.isLocked === nextProps.shape.isLocked &&
+    prevProps.shape.x === nextProps.shape.x &&
+    prevProps.shape.y === nextProps.shape.y &&
+    prevProps.shape.width === nextProps.shape.width &&
+    prevProps.shape.height === nextProps.shape.height &&
+    prevProps.shape.text === nextProps.shape.text &&
+    prevProps.shape.color === nextProps.shape.color &&
+    prevProps.shape.borderColor === nextProps.shape.borderColor
   );
 });
