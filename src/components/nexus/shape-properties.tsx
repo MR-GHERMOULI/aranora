@@ -7,7 +7,8 @@ import {
   Square, Circle, Diamond, Hexagon,
   Trash2, Bold, Italic, AlignLeft, AlignCenter, AlignRight,
   Languages, Hash, ArrowRightLeft, Type, Copy,
-  GitBranch, Plus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Network
+  GitBranch, Plus, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Network,
+  Lock, Unlock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -21,6 +22,7 @@ interface ShapePropertiesProps {
   onAddChild: (direction: 'left' | 'right' | 'top' | 'bottom') => void;
   onFontSizeChange: (size: number) => void;
   onPropertyChange: (updates: Partial<NexusShape>) => void;
+  onToggleLock: () => void;
   zoom: number;
   viewport: { x: number; y: number };
 }
@@ -38,13 +40,13 @@ const symbols = ['[ ]', '{ }', '( )', '→', '•', '★', '✔', '✖', '●', 
 
 export function ShapeProperties({
   shape, onColorChange, onTypeChange, onDelete, onDuplicate, onAddChild, onFontSizeChange,
-  onPropertyChange, zoom, viewport
+  onPropertyChange, onToggleLock, zoom, viewport
 }: ShapePropertiesProps) {
   const [showSymbols, setShowSymbols] = useState(false);
   const [showColorGrid, setShowColorGrid] = useState(false);
   
   const x = (shape.x * zoom) + viewport.x + (shape.width * zoom / 2);
-  const y = (shape.y * zoom) + viewport.y - 72;
+  const y = (shape.y * zoom) + viewport.y - 100; // Raised to avoid rotation handle overlap
 
   const insertSymbol = (s: string) => {
     onPropertyChange({ text: (shape.text || '') + s });
@@ -228,6 +230,16 @@ export function ShapeProperties({
 
       {/* Group 4: Actions */}
       <div className="flex items-center gap-0.5 px-1.5">
+        <button
+          onClick={onToggleLock}
+          className={cn(
+            "p-2.5 rounded-2xl transition-all active:scale-90",
+            shape.isLocked ? "bg-red-50 text-red-600" : "text-gray-400 hover:bg-gray-100 hover:text-gray-900"
+          )}
+          title="Lock/Unlock"
+        >
+          {shape.isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+        </button>
         <button
           onClick={onDuplicate}
           className="p-2.5 rounded-2xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-all active:scale-90"

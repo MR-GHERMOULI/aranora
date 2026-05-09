@@ -1379,6 +1379,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           onAddChild={(dir) => handleAddChild(selectedShapeIds[0], dir)}
           onFontSizeChange={(size) => updateShapeFontSize(selectedShapeIds[0], size)}
           onPropertyChange={(updates) => handleUpdateShapeProperty(selectedShapeIds[0], updates)}
+          onToggleLock={handleToggleLock}
           zoom={viewport.zoom}
           viewport={viewport}
         />
