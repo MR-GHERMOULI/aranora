@@ -136,33 +136,33 @@ export function NexusToolbar({
         dragElastic={0.1}
         dragMomentum={false}
         className={cn(
-          "pointer-events-auto flex items-center p-2.5 rounded-[2.2rem] bg-white/90 backdrop-blur-3xl border border-white/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2),0_0_0_1px_rgba(0,0,0,0.02)] ring-1 ring-black/[0.03] transition-all duration-500",
-          orientation === 'vertical' ? 'flex-col py-4' : 'flex-row px-4'
+          "pointer-events-auto flex items-center p-2 rounded-[2.2rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] ring-1 ring-black/[0.03] transition-all duration-500",
+          orientation === 'vertical' ? 'flex-col py-3 px-2 gap-1 min-w-[64px]' : 'flex-row px-4 py-2 gap-1 min-h-[64px]'
         )}
       >
         {/* Drag Handle */}
-        <div className={cn("flex items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors", orientation === 'vertical' ? 'pb-2 w-full' : 'pr-2 h-full')}>
+        <div className={cn("flex items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors", orientation === 'vertical' ? 'pb-2 w-full h-6' : 'pr-2 h-full w-6')}>
           <GripHorizontal className={cn("h-5 w-5", orientation === 'vertical' ? 'rotate-90' : '')} />
         </div>
 
-        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* History Group */}
-        <div className={cn("flex items-center gap-1", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
+        <div className={cn("flex items-center gap-0.5", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
           <button onClick={onUndo} disabled={!canUndo} 
-            className={cn("p-2.5 rounded-2xl transition-all", canUndo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
+            className={cn("p-2 rounded-xl transition-all", canUndo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
             <Undo className="h-4 w-4" />
           </button>
           <button onClick={onRedo} disabled={!canRedo} 
-            className={cn("p-2.5 rounded-2xl transition-all", canRedo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
+            className={cn("p-2 rounded-xl transition-all", canRedo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
             <Redo className="h-4 w-4" />
           </button>
         </div>
 
-        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* Dynamic Tool Groups */}
-        <div className={cn("flex items-center gap-1.5", orientation === 'vertical' ? 'flex-col py-2' : 'flex-row px-2')}>
+        <div className={cn("flex items-center gap-1", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
           {toolGroups.map((group) => {
             const isActive = group.tools.some(t => t.mode === activeTool);
             const currentTool = group.tools.find(t => t.mode === activeTool) || group.tools[0];
@@ -176,7 +176,7 @@ export function NexusToolbar({
                   }}
                   onDoubleClick={() => onToolChange(currentTool.mode as ToolMode)}
                   className={cn(
-                    "relative p-3.5 rounded-2xl transition-all duration-300 group",
+                    "relative p-3 rounded-2xl transition-all duration-300 group",
                     isActive 
                       ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20" 
                       : "text-gray-500 hover:bg-black/[0.04] hover:text-gray-900"
@@ -234,15 +234,15 @@ export function NexusToolbar({
           })}
         </div>
 
-        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* Styling & Config */}
-        <div className={cn("flex items-center gap-1.5", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
+        <div className={cn("flex items-center gap-1", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
           {/* Palette (Color & Pen) */}
           <button 
             onClick={() => toggleConfig('style')}
             className={cn(
-              "p-3.5 rounded-2xl transition-all",
+              "p-3 rounded-2xl transition-all",
               showConfig === 'style' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
             )}
           >
@@ -253,7 +253,7 @@ export function NexusToolbar({
           <button 
             onClick={() => toggleConfig('actions')}
             className={cn(
-              "p-3.5 rounded-2xl transition-all",
+              "p-3 rounded-2xl transition-all",
               showConfig === 'actions' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
             )}
           >
@@ -261,7 +261,7 @@ export function NexusToolbar({
           </button>
         </div>
 
-        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-10 h-px my-1' : 'w-px h-8 mx-1')} />
+        <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* AI Magic Button */}
         <div className={cn("px-1", orientation === 'vertical' ? 'pt-1' : 'pl-1')}>
