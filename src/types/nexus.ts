@@ -80,7 +80,8 @@ export type ToolMode =
   | 'pen'
   | 'eraser'
   | 'text'
-  | 'mindmap';
+  | 'mindmap'
+  | 'arrow';
 
 export interface GeneratedTask {
   title: string;

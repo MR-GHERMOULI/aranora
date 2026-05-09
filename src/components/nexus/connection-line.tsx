@@ -151,8 +151,8 @@ export function ConnectionLine({
       {/* Routing & Endpoint controls */}
       {isSelected && !isEditing && (
         <foreignObject
-          x={midX - 130} y={midY + 20}
-          width={260} height={40}
+          x={midX - 160} y={midY + 20}
+          width={320} height={40}
           style={{ pointerEvents: 'all' }}
         >
           <div className="flex items-center justify-center h-full">
@@ -193,9 +193,9 @@ export function ConnectionLine({
               {/* Routing */}
               <div className="px-1 flex gap-0.5">
                 {[
-                  { r: 'curved', label: 'C' },
-                  { r: 'straight', label: 'S' },
-                  { r: 'orthogonal', label: 'O' }
+                  { r: 'curved', label: 'Curved' },
+                  { r: 'straight', label: 'Straight' },
+                  { r: 'orthogonal', label: 'Ortho' }
                 ].map(opt => (
                   <button key={`rout-${opt.r}`} onClick={() => onUpdateConn(conn.id, { routing: opt.r as any })}
                     className={cn("px-2 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all", (conn.routing === opt.r || (opt.r==='curved' && !conn.routing)) ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50")}>

@@ -309,6 +309,22 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         return;
       }
       
+      if (activeTool === 'arrow') {
+        const waypointId = uuidv4();
+        const waypoint: NexusShape = {
+          id: waypointId,
+          type: 'circle',
+          x: x - 10, y: y - 10,
+          width: 20, height: 20,
+          text: '', color: '#ffffff', borderColor: connectionColor,
+          textColor: '#000000', fontSize: 10, zIndex: Date.now(),
+        };
+        setShapes(prev => [...prev, waypoint]);
+        setConnectFrom(waypointId);
+        setTempLine({ x1: x, y1: y, x2: x, y2: y });
+        return;
+      }
+      
     if (activeTool === 'pen') {
       const newPath: NexusPath = {
         id: uuidv4(),
@@ -344,7 +360,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     const shape = shapes.find(s => s.id === shapeId);
     if (!shape) return;
 
-    if (activeTool === 'connect') {
+    if (activeTool === 'connect' || activeTool === 'arrow') {
       if (!connectFrom) {
         setConnectFrom(shapeId);
         // Start tempLine from shape center
@@ -356,7 +372,12 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           c => (c.fromShapeId === connectFrom && c.toShapeId === shapeId)
         );
         if (!exists) {
-          setConnections(prev => [...prev, createConnection(connectFrom, shapeId, connectionColor)]);
+          const newConn = createConnection(connectFrom, shapeId, connectionColor);
+          if (activeTool === 'arrow') {
+             // For Arrow tool, we default to straight line since it's a "free arrow"
+             newConn.routing = 'straight';
+          }
+          setConnections(prev => [...prev, newConn]);
         }
         setConnectFrom(null);
         setTempLine(null);
@@ -505,7 +526,55 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     }
   };
 
-  const handleMouseUp = () => { 
+  const handleMouseUp = (e: React.MouseEvent) => { 
+    if (activeTool === 'arrow' && connectFrom && tempLine) {
+      // Check if we dropped on a shape
+      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      // Give precedence to non-waypoint shapes, then fall back to waypoints
+      const hitShape = [...shapes].sort((a,b) => b.zIndex - a.zIndex).find(s => 
+        s.id !== connectFrom && 
+        x >= s.x && x <= s.x + s.width && 
+        y >= s.y && y <= s.y + s.height
+      );
+
+      if (hitShape) {
+        const newConn = createConnection(connectFrom, hitShape.id, connectionColor, 'straight');
+        setConnections(prev => [...prev, newConn]);
+        saveToHistory(shapes, [...connections, newConn], paths);
+      } else {
+        // Did we actually drag, or just click?
+        const dx = Math.abs(tempLine.x2 - tempLine.x1);
+        const dy = Math.abs(tempLine.y2 - tempLine.y1);
+        if (dx > 5 || dy > 5) {
+          const waypointId = uuidv4();
+          const waypoint: NexusShape = {
+            id: waypointId,
+            type: 'circle',
+            x: x - 10, y: y - 10,
+            width: 20, height: 20,
+            text: '', color: '#ffffff', borderColor: connectionColor,
+            textColor: '#000000', fontSize: 10, zIndex: Date.now(),
+          };
+          const newConn = createConnection(connectFrom, waypointId, connectionColor, 'straight');
+          setShapes(prev => [...prev, waypoint]);
+          setConnections(prev => [...prev, newConn]);
+          saveToHistory([...shapes, waypoint], [...connections, newConn], paths);
+          setActiveTool('select');
+          setSelectedConnId(newConn.id);
+        } else {
+          // It was a click, not a drag. If the fromShape is a waypoint, delete it (cleanup).
+          const fromShape = shapes.find(s => s.id === connectFrom);
+          if (fromShape && fromShape.type === 'circle' && fromShape.width === 20) {
+            setShapes(prev => prev.filter(s => s.id !== connectFrom));
+          }
+        }
+      }
+      
+      setConnectFrom(null);
+      setTempLine(null);
+      return;
+    }
+
     if (activePath) {
       // SMART DRAWING: Analyze if the path looks like a geometric shape
       const recognized = recognizeShape(activePath.points);

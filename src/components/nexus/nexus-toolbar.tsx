@@ -7,7 +7,7 @@ import {
   MousePointer2, Hand, Square, Circle, Diamond, Hexagon,
   Link2, Sparkles, Save, Trash2, FolderOpen, Plus, ChevronUp,
   Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser,
-  GripHorizontal, Palette, Settings2, Scissors, Type, Network, GitBranch
+  GripHorizontal, Palette, Settings2, Scissors, Type, Network, GitBranch, ArrowRight
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -67,7 +67,8 @@ const toolGroups = [
     id: 'connect',
     label: 'Relationships',
     tools: [
-      { mode: 'connect', icon: Link2, label: 'Connect (L)' },
+      { mode: 'arrow', icon: ArrowRight, label: 'Free Arrow (A)' },
+      { mode: 'connect', icon: Link2, label: 'Connect Shapes (L)' },
     ]
   },
   {
