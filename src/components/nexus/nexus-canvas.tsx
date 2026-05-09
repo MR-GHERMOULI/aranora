@@ -108,6 +108,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [tempLine, setTempLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const [activePath, setActivePath] = useState<NexusPath | null>(null);
+  const [selectionBox, setSelectionBox] = useState<{ startX: number; startY: number; currentX: number; currentY: number } | null>(null);
 
   const [generatedTasks, setGeneratedTasks] = useState<GeneratedTask[] | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -398,6 +399,15 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       setTempLine(null);
       return;
     }
+
+    if (activeTool === 'select') {
+      setSelectionBox({ startX: x, startY: y, currentX: x, currentY: y });
+      setSelectedConnId(null);
+      setEditingShapeId(null);
+      setEditingConnId(null);
+      return;
+    }
+    
     setSelectedShapeIds([]);
     setSelectedConnId(null);
     setEditingShapeId(null);
@@ -486,6 +496,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (selectionBox) {
+      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      setSelectionBox(prev => prev ? { ...prev, currentX: x, currentY: y } : null);
+      return;
+    }
     if (panning) {
       setViewport(prev => ({
         ...prev,
@@ -610,6 +625,28 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   const handleMouseUp = (e: React.MouseEvent) => { 
+    if (selectionBox) {
+      const x1 = Math.min(selectionBox.startX, selectionBox.currentX);
+      const y1 = Math.min(selectionBox.startY, selectionBox.currentY);
+      const x2 = Math.max(selectionBox.startX, selectionBox.currentX);
+      const y2 = Math.max(selectionBox.startY, selectionBox.currentY);
+
+      const inBox = shapes.filter(s => {
+        const sx1 = s.x;
+        const sy1 = s.y;
+        const sx2 = s.x + s.width;
+        const sy2 = s.y + s.height;
+        return sx1 >= x1 && sx2 <= x2 && sy1 >= y1 && sy2 <= y2;
+      }).map(s => s.id);
+
+      if (e.shiftKey) {
+        setSelectedShapeIds(prev => Array.from(new Set([...prev, ...inBox])));
+      } else {
+        setSelectedShapeIds(inBox);
+      }
+      setSelectionBox(null);
+      return;
+    }
     if (activeTool === 'arrow' && connectFrom && tempLine) {
       // Check if we dropped on a shape
       const { x, y } = screenToCanvas(e.clientX, e.clientY);
@@ -1315,6 +1352,22 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 markerEnd="url(#temp-arrow)"
                 style={{ pointerEvents: 'none' }}
                 className="animate-[dash_1s_linear_infinite]"
+              />
+            )}
+
+            {/* Selection Box */}
+            {selectionBox && (
+              <rect
+                x={Math.min(selectionBox.startX, selectionBox.currentX)}
+                y={Math.min(selectionBox.startY, selectionBox.currentY)}
+                width={Math.abs(selectionBox.currentX - selectionBox.startX)}
+                height={Math.abs(selectionBox.currentY - selectionBox.startY)}
+                fill="rgba(59, 130, 246, 0.1)"
+                stroke="#3b82f6"
+                strokeWidth={1}
+                strokeDasharray="4 4"
+                rx={2}
+                ry={2}
               />
             )}
 
