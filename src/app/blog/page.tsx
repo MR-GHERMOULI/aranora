@@ -35,6 +35,7 @@ export default async function BlogPage() {
         .from("articles")
         .select("id, title, slug, excerpt, cover_image, author_name, tags, published_at")
         .eq("status", "published")
+        .lte("published_at", new Date().toISOString())
         .order("published_at", { ascending: false })
 
     return (

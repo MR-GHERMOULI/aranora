@@ -63,7 +63,8 @@ export function ArticlesClient({ initialArticles }: ArticlesClientProps) {
             a.slug.toLowerCase().includes(search.toLowerCase())
     )
 
-    const published = initialArticles.filter((a) => a.status === "published")
+    const published = initialArticles.filter((a) => a.status === "published" && a.published_at && new Date(a.published_at) <= new Date())
+    const scheduled = initialArticles.filter((a) => a.status === "published" && a.published_at && new Date(a.published_at) > new Date())
     const drafts = initialArticles.filter((a) => a.status === "draft")
 
     async function handleDelete() {
@@ -130,8 +131,19 @@ export function ArticlesClient({ initialArticles }: ArticlesClientProps) {
                 </div>
                 <div className="rounded-2xl border bg-card p-5">
                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div>
+                            <p className="text-2xl font-bold">{scheduled.length}</p>
+                            <p className="text-sm text-muted-foreground">Scheduled</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                            <Clock className="h-5 w-5 text-amber-500" />
+                            <FileText className="h-5 w-5 text-amber-500" />
                         </div>
                         <div>
                             <p className="text-2xl font-bold">{drafts.length}</p>
@@ -189,9 +201,15 @@ export function ArticlesClient({ initialArticles }: ArticlesClientProps) {
                                 </div>
                                 <div className="col-span-2">
                                     {article.status === "published" ? (
-                                        <Badge className="bg-green-500/10 text-green-600">
-                                            Published
-                                        </Badge>
+                                        article.published_at && new Date(article.published_at) > new Date() ? (
+                                            <Badge className="bg-blue-500/10 text-blue-600">
+                                                Scheduled
+                                            </Badge>
+                                        ) : (
+                                            <Badge className="bg-green-500/10 text-green-600">
+                                                Published
+                                            </Badge>
+                                        )
                                     ) : (
                                         <Badge variant="secondary">Draft</Badge>
                                     )}

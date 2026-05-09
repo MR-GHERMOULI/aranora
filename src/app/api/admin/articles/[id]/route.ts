@@ -59,9 +59,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             updated_at: new Date().toISOString(),
         }
 
-        // Set published_at when transitioning to published
-        if (body.status === 'published') {
-            // Only set published_at if not already set
+        // Handle published_at logic
+        if (body.published_at) {
+            updateData.published_at = body.published_at
+        } else if (body.status === 'published') {
+            // Only set published_at if not already set and not provided in body
             const { data: existing } = await supabase
                 .from("articles")
                 .select("published_at")
@@ -71,6 +73,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             if (!existing?.published_at) {
                 updateData.published_at = new Date().toISOString()
             }
+        } else if (body.status === 'draft') {
+            // If explicitly moving back to draft, we might want to clear published_at
+            // or keep it for history. Usually, clearing it is better for "scheduling" logic.
+            // However, if it was already published, maybe keep it? 
+            // User requested "schedule for publication at a later time after completing additions".
+            // So if it's draft, it's not scheduled yet.
+            updateData.published_at = null
         }
 
         const { data: article, error } = await supabase

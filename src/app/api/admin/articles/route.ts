@@ -69,7 +69,7 @@ export async function POST(request: Request) {
             tags: tags || [],
             meta_description: meta_description || '',
             created_by: user.id,
-            published_at: status === 'published' ? new Date().toISOString() : null,
+            published_at: status === 'published' ? (body.published_at || new Date().toISOString()) : null,
         }
 
         const { data: article, error } = await supabase

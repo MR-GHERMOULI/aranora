@@ -19,6 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         .select("title, meta_description, excerpt")
         .eq("slug", slug)
         .eq("status", "published")
+        .lte("published_at", new Date().toISOString())
         .single()
 
     const { data: brandingSetting } = await supabase
@@ -48,6 +49,7 @@ export default async function ArticlePage({ params }: PageProps) {
         .select("*")
         .eq("slug", slug)
         .eq("status", "published")
+        .lte("published_at", new Date().toISOString())
         .single()
 
     const { data: brandingSetting } = await supabase
@@ -63,6 +65,7 @@ export default async function ArticlePage({ params }: PageProps) {
         .from("articles")
         .select("id, title, slug, excerpt, published_at")
         .eq("status", "published")
+        .lte("published_at", new Date().toISOString())
         .neq("id", article.id)
         .order("published_at", { ascending: false })
         .limit(3)

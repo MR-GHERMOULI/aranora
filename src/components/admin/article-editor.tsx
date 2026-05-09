@@ -21,6 +21,7 @@ interface ArticleData {
     status: string
     tags: string[]
     meta_description: string
+    published_at?: string
 }
 
 interface ArticleEditorProps {
@@ -34,6 +35,7 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
     const [isSaving, setIsSaving] = useState(false)
     const [tagsInput, setTagsInput] = useState(initialData.tags.join(", "))
     const [isUploading, setIsUploading] = useState(false)
+    const [scheduledDate, setScheduledDate] = useState(initialData.published_at ? new Date(initialData.published_at).toISOString().slice(0, 16) : "")
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
@@ -88,10 +90,29 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
         }
     }
 
+    function validateFields() {
+        const missingFields = []
+        if (!data.title.trim()) missingFields.push("Title")
+        if (!data.content.trim()) missingFields.push("Content")
+        if (!data.cover_image) missingFields.push("Cover Image")
+        if (!data.excerpt.trim()) missingFields.push("Excerpt")
+        if (!data.meta_description.trim()) missingFields.push("Meta Description")
+        
+        return missingFields
+    }
+
     async function handleSave(publishStatus?: string) {
         if (!data.title.trim()) {
             toast.error("Title is required")
             return
+        }
+
+        const missing = validateFields()
+        if (publishStatus === "published" && missing.length > 0) {
+            const confirmPublish = window.confirm(
+                `The following fields are missing: ${missing.join(", ")}. Are you sure you want to proceed?`
+            )
+            if (!confirmPublish) return
         }
 
         setIsSaving(true)
@@ -103,6 +124,9 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                     .map((t) => t.trim())
                     .filter(Boolean),
                 status: publishStatus || data.status,
+                published_at: publishStatus === "published" 
+                    ? (scheduledDate ? new Date(scheduledDate).toISOString() : new Date().toISOString())
+                    : data.published_at
             }
 
             if (isNew) {
@@ -118,7 +142,7 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                 const article = await res.json()
                 toast.success(
                     publishStatus === "published"
-                        ? "Article published!"
+                        ? (new Date(saveData.published_at) > new Date() ? "Article scheduled!" : "Article published!")
                         : "Article saved as draft"
                 )
                 router.push(`/admin/articles/${article.id}`)
@@ -129,7 +153,11 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                     body: JSON.stringify(saveData),
                 })
                 if (!res.ok) throw new Error("Failed to update")
-                toast.success("Article updated successfully")
+                toast.success(
+                    publishStatus === "published"
+                        ? (new Date(saveData.published_at) > new Date() ? "Article scheduled!" : "Article published!")
+                        : "Article updated successfully"
+                )
                 router.refresh()
             }
         } catch (error) {
@@ -159,16 +187,27 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                         )}
                     </div>
                     {!isNew && (
-                        <Badge
-                            className={
-                                data.status === "published"
-                                    ? "bg-green-500/10 text-green-600"
-                                    : ""
-                            }
-                            variant={data.status === "published" ? "default" : "secondary"}
-                        >
-                            {data.status === "published" ? "Published" : "Draft"}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                            <Badge
+                                className={
+                                    data.status === "published"
+                                        ? (data.published_at && new Date(data.published_at) > new Date() 
+                                            ? "bg-blue-500/10 text-blue-600" 
+                                            : "bg-green-500/10 text-green-600")
+                                        : ""
+                                }
+                                variant={data.status === "published" ? "default" : "secondary"}
+                            >
+                                {data.status === "published" 
+                                    ? (data.published_at && new Date(data.published_at) > new Date() ? "Scheduled" : "Published") 
+                                    : "Draft"}
+                            </Badge>
+                            {data.status === "published" && data.published_at && (
+                                <p className="text-[10px] text-muted-foreground">
+                                    {new Date(data.published_at).toLocaleString()}
+                                </p>
+                            )}
+                        </div>
                     )}
                 </div>
                 <div className="flex items-center gap-2">
@@ -195,7 +234,7 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                         className="gap-2"
                     >
                         <Globe className="h-4 w-4" />
-                        {isSaving ? "Saving..." : "Publish"}
+                        {isSaving ? "Saving..." : (scheduledDate && new Date(scheduledDate) > new Date() ? "Schedule" : "Publish")}
                     </Button>
                 </div>
             </div>
@@ -319,26 +358,52 @@ export function ArticleEditor({ initialData, isNew }: ArticleEditorProps) {
                         </div>
                     </div>
 
-                    {/* SEO */}
-                    <div className="rounded-xl border bg-card p-6 space-y-4">
-                        <h3 className="font-semibold">SEO & Tags</h3>
-                        <div className="space-y-2">
-                            <Label>Meta Description</Label>
-                            <Input
-                                value={data.meta_description}
-                                onChange={(e) =>
-                                    updateField("meta_description", e.target.value)
-                                }
-                                placeholder="Brief description for search engines (150-160 characters)..."
-                            />
+                    {/* SEO & Publishing */}
+                    <div className="grid gap-6 md:grid-cols-2">
+                        <div className="rounded-xl border bg-card p-6 space-y-4">
+                            <h3 className="font-semibold">SEO & Tags</h3>
+                            <div className="space-y-2">
+                                <Label>Meta Description</Label>
+                                <Input
+                                    value={data.meta_description}
+                                    onChange={(e) =>
+                                        updateField("meta_description", e.target.value)
+                                    }
+                                    placeholder="Brief description for search engines (150-160 characters)..."
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Tags (comma separated)</Label>
+                                <Input
+                                    value={tagsInput}
+                                    onChange={(e) => setTagsInput(e.target.value)}
+                                    placeholder="freelancing, invoicing, tips"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Tags (comma separated)</Label>
-                            <Input
-                                value={tagsInput}
-                                onChange={(e) => setTagsInput(e.target.value)}
-                                placeholder="freelancing, invoicing, tips"
-                            />
+
+                        <div className="rounded-xl border bg-card p-6 space-y-4">
+                            <h3 className="font-semibold">Publishing Settings</h3>
+                            <div className="space-y-2">
+                                <Label>Publication Date & Time</Label>
+                                <Input
+                                    type="datetime-local"
+                                    value={scheduledDate}
+                                    onChange={(e) => setScheduledDate(e.target.value)}
+                                    className="w-full"
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Leave empty to publish immediately, or select a future date to schedule.
+                                </p>
+                            </div>
+                            {validateFields().length > 0 && (
+                                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                    <p className="text-xs font-medium text-amber-600 mb-1">Missing fields for best results:</p>
+                                    <ul className="text-[10px] text-amber-600/80 list-disc list-inside">
+                                        {validateFields().map(f => <li key={f}>{f}</li>)}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                     </div>
 
