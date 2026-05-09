@@ -15,9 +15,14 @@ interface AdminDashboardClientProps {
         mau: number
         activeProjects: number
         totalProjects: number
+        completedProjects: number
         totalInvoices: number
         paidInvoices: number
         growthRate: number
+        totalClients: number
+        totalTimeHours: number
+        completedContracts: number
+        intakeFormsCount: number
     }
     charts: {
         userGrowth: { month: string; users: number; newUsers: number }[]
@@ -38,7 +43,7 @@ export function AdminDashboardClient({ stats, charts }: AdminDashboardClientProp
                 </p>
             </div>
 
-            {/* Stats Grid */}
+            {/* Platform Stats Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <StatsCard
                     title="Total Users"
@@ -46,35 +51,7 @@ export function AdminDashboardClient({ stats, charts }: AdminDashboardClientProp
                     iconName="Users"
                     trend={{ value: stats.growthRate, isPositive: stats.growthRate > 0 }}
                     description="all time"
-                    delay={0.1}
-                />
-                <StatsCard
-                    title="Active Users (MAU)"
-                    value={stats.mau}
-                    iconName="Activity"
-                    description="last 30 days"
-                    delay={0.2}
-                />
-                <StatsCard
-                    title="Active Projects"
-                    value={stats.activeProjects}
-                    iconName="Briefcase"
-                    description={`of ${stats.totalProjects} total`}
-                    delay={0.3}
-                />
-                <StatsCard
-                    title="Total Invoices"
-                    value={stats.totalInvoices}
-                    iconName="FileText"
-                    description="generated"
-                    delay={0.4}
-                />
-                <StatsCard
-                    title="Paid Invoices"
-                    value={stats.paidInvoices}
-                    iconName="DollarSign"
-                    description={`${stats.totalInvoices > 0 ? Math.round((stats.paidInvoices / stats.totalInvoices) * 100) : 0}% rate`}
-                    delay={0.5}
+                    delay={0.05}
                 />
                 <StatsCard
                     title="Growth Rate"
@@ -82,7 +59,79 @@ export function AdminDashboardClient({ stats, charts }: AdminDashboardClientProp
                     iconName="TrendingUp"
                     trend={{ value: stats.growthRate, isPositive: stats.growthRate > 0 }}
                     description="monthly"
-                    delay={0.6}
+                    delay={0.1}
+                />
+                <StatsCard
+                    title="Active Users"
+                    value={stats.mau}
+                    iconName="Activity"
+                    description="last 30 days"
+                    delay={0.15}
+                />
+                <StatsCard
+                    title="Total Invoices"
+                    value={stats.totalInvoices}
+                    iconName="FileText"
+                    description="all time"
+                    delay={0.2}
+                />
+                <StatsCard
+                    title="Paid Invoices"
+                    value={stats.paidInvoices}
+                    iconName="DollarSign"
+                    description={`${stats.totalInvoices > 0 ? Math.round((stats.paidInvoices / stats.totalInvoices) * 100) : 0}% rate`}
+                    delay={0.25}
+                />
+                <StatsCard
+                    title="Total Revenue"
+                    value={`$${Math.round(charts.invoicesByMonth.reduce((acc, curr) => acc + curr.amount, 0)).toLocaleString()}`}
+                    iconName="BarChart"
+                    description="last 6 months"
+                    delay={0.3}
+                />
+            </div>
+
+            {/* Operational Stats Grid */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                <StatsCard
+                    title="Total Clients"
+                    value={stats.totalClients}
+                    iconName="Contact"
+                    description="registered clients"
+                    className="bg-primary/5"
+                    delay={0.35}
+                />
+                <StatsCard
+                    title="Completed Projects"
+                    value={stats.completedProjects}
+                    iconName="ClipboardCheck"
+                    description="by freelancers"
+                    className="bg-primary/5"
+                    delay={0.4}
+                />
+                <StatsCard
+                    title="Total Time"
+                    value={`${stats.totalTimeHours}h`}
+                    iconName="Clock"
+                    description="tracked by users"
+                    className="bg-primary/5"
+                    delay={0.45}
+                />
+                <StatsCard
+                    title="Completed Contracts"
+                    value={stats.completedContracts}
+                    iconName="FileCheck"
+                    description="signed by clients"
+                    className="bg-primary/5"
+                    delay={0.5}
+                />
+                <StatsCard
+                    title="Intake Forms"
+                    value={stats.intakeFormsCount}
+                    iconName="Briefcase"
+                    description="prepared & sent"
+                    className="bg-primary/5"
+                    delay={0.55}
                 />
             </div>
 

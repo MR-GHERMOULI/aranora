@@ -11,7 +11,11 @@ import {
     Radio,
     TrendingUp,
     Activity,
-    BarChart
+    BarChart,
+    Clock,
+    ClipboardCheck,
+    FileCheck,
+    Contact
 } from "lucide-react"
 import { motion } from "framer-motion"
 
@@ -27,6 +31,10 @@ const iconMap = {
     TrendingUp,
     Activity,
     BarChart,
+    Clock,
+    ClipboardCheck,
+    FileCheck,
+    Contact
 } as const
 
 type IconName = keyof typeof iconMap

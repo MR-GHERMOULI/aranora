@@ -9,8 +9,13 @@ export default async function AdminDashboardPage() {
         { count: totalUsers },
         { count: totalProjects },
         { count: activeProjects },
+        { count: completedProjects },
         { count: totalInvoices },
         { count: paidInvoices },
+        { count: totalClients },
+        { count: completedContracts },
+        { count: intakeFormsCount },
+        { data: timeEntries },
         { data: recentUsers },
         { data: projectsByStatus },
         { data: invoicesByMonth },
@@ -19,13 +24,26 @@ export default async function AdminDashboardPage() {
         supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }),
         supabaseAdmin.from("projects").select("*", { count: "exact", head: true }),
         supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).eq("status", "In Progress"),
+        supabaseAdmin.from("projects").select("*", { count: "exact", head: true }).eq("status", "Completed"),
         supabaseAdmin.from("invoices").select("*", { count: "exact", head: true }),
         supabaseAdmin.from("invoices").select("*", { count: "exact", head: true }).eq("status", "Paid"),
+        supabaseAdmin.from("clients").select("*", { count: "exact", head: true }),
+        supabaseAdmin.from("contracts").select("*", { count: "exact", head: true }).eq("status", "Signed"),
+        supabaseAdmin.from("intake_forms").select("*", { count: "exact", head: true }),
+        supabaseAdmin.from("time_entries").select("start_time, end_time").not("end_time", "is", null),
         supabaseAdmin.from("profiles").select("id, created_at").order("created_at", { ascending: false }).limit(100),
         supabaseAdmin.from("projects").select("status"),
         supabaseAdmin.from("invoices").select("total, created_at"),
         supabaseAdmin.from("profiles").select("country"),
     ])
+
+    // Calculate total time recorded in hours
+    const totalTimeSeconds = (timeEntries || []).reduce((acc, entry) => {
+        const start = new Date(entry.start_time).getTime()
+        const end = new Date(entry.end_time).getTime()
+        return acc + (end - start) / 1000
+    }, 0)
+    const totalTimeHours = Math.round(totalTimeSeconds / 3600)
 
     // Calculate monthly active users (users created in last 30 days as proxy)
     const thirtyDaysAgo = new Date()
@@ -87,9 +105,14 @@ export default async function AdminDashboardPage() {
                 mau,
                 activeProjects: activeProjects || 0,
                 totalProjects: totalProjects || 0,
+                completedProjects: completedProjects || 0,
                 totalInvoices: totalInvoices || 0,
                 paidInvoices: paidInvoices || 0,
                 growthRate: parseFloat(growthRate as string),
+                totalClients: totalClients || 0,
+                totalTimeHours,
+                completedContracts: completedContracts || 0,
+                intakeFormsCount: intakeFormsCount || 0,
             }}
             charts={{
                 userGrowth: userGrowthData,
