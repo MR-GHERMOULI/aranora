@@ -911,20 +911,15 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       : (connections.find(c => c.toShapeId === parentId)?.color || '#3b82f6');
 
     const newChild: NexusShape = {
+      ...parent,
       id: childId,
-      type: 'mindmap-node',
       x: newX,
       y: newY,
-      width: 140,
-      height: 40,
-      text: 'New Topic',
+      text: parent.type === 'text' ? parent.text : (parent.text ? `Sub: ${parent.text}` : 'New Node'),
       zIndex: Date.now(),
-      color: 'transparent',
-      borderColor: branchColor, // Store the branch color here
-      textColor: '#1e293b',
-      fontSize: isFirstLevel ? 15 : 13,
-      fontWeight: isFirstLevel ? 'bold' : 'normal',
-      textAlign: direction === 'right' ? 'left' : 'right',
+      isLocked: false,
+      // Only override textAlign if it's a mindmap-node specifically, otherwise keep parent's alignment
+      textAlign: parent.type === 'mindmap-node' ? (direction === 'right' ? 'left' : 'right') : (parent.textAlign || 'center'),
     };
 
     const newConn = createConnection(parentId, childId, branchColor, 'mindmap');
