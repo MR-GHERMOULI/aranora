@@ -310,19 +310,38 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       }
       
       if (activeTool === 'arrow') {
-        const waypointId = uuidv4();
-        const waypoint: NexusShape = {
-          id: waypointId,
-          type: 'circle',
-          x: x - 10, y: y - 10,
-          width: 20, height: 20,
-          text: '', color: '#ffffff', borderColor: connectionColor,
-          textColor: '#000000', fontSize: 10, zIndex: Date.now(),
-        };
-        setShapes(prev => [...prev, waypoint]);
-        setConnectFrom(waypointId);
-        setTempLine({ x1: x, y1: y, x2: x, y2: y });
-        return;
+        if (connectFrom) {
+          // Second click of a click-to-click connection
+          const waypointId = uuidv4();
+          const waypoint: NexusShape = {
+            id: waypointId, type: 'circle',
+            x: x - 10, y: y - 10, width: 20, height: 20,
+            text: '', color: '#ffffff', borderColor: connectionColor,
+            textColor: '#000000', fontSize: 10, zIndex: Date.now(),
+          };
+          const newConn = createConnection(connectFrom, waypointId, connectionColor, 'straight');
+          setShapes(prev => [...prev, waypoint]);
+          setConnections(prev => [...prev, newConn]);
+          saveToHistory([...shapes, waypoint], [...connections, newConn], paths);
+          setActiveTool('select');
+          setSelectedConnId(newConn.id);
+          setConnectFrom(null);
+          setTempLine(null);
+          return;
+        } else {
+          // Starting a new arrow
+          const waypointId = uuidv4();
+          const waypoint: NexusShape = {
+            id: waypointId, type: 'circle',
+            x: x - 10, y: y - 10, width: 20, height: 20,
+            text: '', color: '#ffffff', borderColor: connectionColor,
+            textColor: '#000000', fontSize: 10, zIndex: Date.now(),
+          };
+          setShapes(prev => [...prev, waypoint]);
+          setConnectFrom(waypointId);
+          setTempLine({ x1: x, y1: y, x2: x, y2: y });
+          return;
+        }
       }
       
     if (activeTool === 'pen') {
@@ -562,10 +581,17 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
           setActiveTool('select');
           setSelectedConnId(newConn.id);
         } else {
-          // It was a click, not a drag. If the fromShape is a waypoint, delete it (cleanup).
+          // It was a click, not a drag. 
           const fromShape = shapes.find(s => s.id === connectFrom);
           if (fromShape && fromShape.type === 'circle' && fromShape.width === 20) {
+            // Clicked empty space to start, but didn't drag. Cancel.
             setShapes(prev => prev.filter(s => s.id !== connectFrom));
+            setConnectFrom(null);
+            setTempLine(null);
+          } else {
+            // Clicked a real shape! Keep connectFrom active so they can click the target.
+            // We just return and do NOT clear connectFrom.
+            return;
           }
         }
       }
@@ -620,6 +646,30 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       setResizing(null);
     }
     if (dragging) {
+      const draggedShape = shapes.find(s => s.id === dragging.shapeId);
+      // If we are dragging a waypoint
+      if (draggedShape && draggedShape.type === 'circle' && draggedShape.width === 20) {
+        const { x, y } = screenToCanvas(e.clientX, e.clientY);
+        // Find a real shape under the drop location
+        const targetShape = [...shapes].sort((a,b) => b.zIndex - a.zIndex).find(s => 
+          s.id !== draggedShape.id && 
+          s.type !== 'circle' && // Assuming we only snap to non-waypoints
+          x >= s.x && x <= s.x + s.width && 
+          y >= s.y && y <= s.y + s.height
+        );
+
+        if (targetShape) {
+          // Re-route all connections attached to the waypoint to the new target shape
+          setConnections(prev => prev.map(c => {
+            if (c.fromShapeId === draggedShape.id) return { ...c, fromShapeId: targetShape.id };
+            if (c.toShapeId === draggedShape.id) return { ...c, toShapeId: targetShape.id };
+            return c;
+          }));
+          // Delete the waypoint
+          setShapes(prev => prev.filter(s => s.id !== draggedShape.id));
+        }
+      }
+      
       saveToHistory(shapes, connections, paths);
       setDragging(null);
     }
