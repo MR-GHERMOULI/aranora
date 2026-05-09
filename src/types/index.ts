@@ -14,6 +14,7 @@ export interface CustomerFeedback {
     id: string
     project_id: string | null
     name: string
+    email: string | null
     comment: string
     photos: string[]
     is_read: boolean

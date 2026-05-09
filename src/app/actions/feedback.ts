@@ -11,6 +11,10 @@ export async function submitFeedback(formData: FormData) {
     const comment = formData.get("comment") as string
     const photos = formData.getAll("photos") as File[]
 
+    // Fetch the user to automatically grab the email if they are logged in
+    const { data: { user } } = await supabase.auth.getUser()
+    const email = user?.email || null
+
     // 1. Upload photos if any
     const photoUrls: string[] = []
     
@@ -40,6 +44,7 @@ export async function submitFeedback(formData: FormData) {
         .insert({
             project_id: projectId || null,
             name,
+            email,
             comment,
             photos: photoUrls,
             is_read: false

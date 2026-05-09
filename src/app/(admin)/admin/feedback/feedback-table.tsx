@@ -138,6 +138,11 @@ export function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
                                             {item.project.title}
                                         </span>
                                     )}
+                                    {item.email && (
+                                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                            ({item.email})
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
                                     {item.comment}
@@ -187,7 +192,9 @@ export function FeedbackTable({ initialFeedback }: FeedbackTableProps) {
                             </span>
                         </div>
                         <DialogDescription className="flex flex-col gap-1">
-                            <span className="text-lg font-bold text-slate-900 dark:text-white">From: {selectedItem?.name}</span>
+                            <span className="text-lg font-bold text-slate-900 dark:text-white">
+                                From: {selectedItem?.name} {selectedItem?.email ? `(${selectedItem.email})` : ""}
+                            </span>
                             {selectedItem?.project && (
                                 <span className="text-sm font-medium text-slate-500">Project: {selectedItem.project.title}</span>
                             )}

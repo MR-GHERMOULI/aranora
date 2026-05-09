@@ -14,6 +14,7 @@ export default async function FeedbackPage() {
             id,
             project_id,
             name,
+            email,
             comment,
             photos,
             is_read,
