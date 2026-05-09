@@ -23,6 +23,7 @@ import { CanvasMinimap } from './canvas-minimap';
 import { CollaborativeCursors } from './collaborative-cursors';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { Sparkles, MousePointer2, Pencil, Lock, Unlock, Plus, Minus } from 'lucide-react';
+import { useSidebar } from '@/components/providers/sidebar-context';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
 import { recognizeShape } from '@/lib/shape-recognition';
@@ -35,6 +36,7 @@ interface NexusCanvasProps {
 }
 
 export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
+  const { isCollapsed } = useSidebar();
   const [shapes, setShapes] = useState<NexusShape[]>([]);
   const [connections, setConnections] = useState<NexusConnection[]>([]);
   const [paths, setPaths] = useState<NexusPath[]>([]);
@@ -1212,6 +1214,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         zoom={viewport.zoom}
         onZoomChange={(z) => setViewport(v => ({ ...v, zoom: z }))}
         onResetZoom={() => setViewport({ x: 0, y: 0, zoom: 1 })}
+        isSidebarCollapsed={isCollapsed}
       />
 
 

@@ -49,6 +49,7 @@ interface ToolbarProps {
   zoom: number;
   onZoomChange: (zoom: number) => void;
   onResetZoom: () => void;
+  isSidebarCollapsed: boolean;
 }
 
 const toolGroups = [
@@ -110,6 +111,7 @@ export function NexusToolbar({
   showMinimap, onShowMinimapChange,
   orientation, onOrientationChange,
   zoom, onZoomChange, onResetZoom,
+  isSidebarCollapsed,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState<'style' | 'actions' | null>(null);
@@ -134,7 +136,9 @@ export function NexusToolbar({
   return (
     <div className={cn(
       "fixed pointer-events-none flex items-center justify-center z-50 transition-all duration-700",
-      orientation === 'horizontal' ? "bottom-8 left-0 right-0" : "left-8 top-0 bottom-0"
+      orientation === 'horizontal' 
+        ? "bottom-8 left-0 right-0" 
+        : cn("top-0 bottom-0", isSidebarCollapsed ? "left-8" : "left-[312px]")
     )}>
       
       {/* Non-Draggable Dock */}
