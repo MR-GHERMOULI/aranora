@@ -143,6 +143,15 @@ const getCurrencySymbol = (currencyCode?: string) => {
     return symbols[currencyCode || "USD"] || (currencyCode || "$");
 };
 
+const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    try {
+        return format(new Date(dateString), 'MMM d, yyyy');
+    } catch (e) {
+        return 'Invalid Date';
+    }
+};
+
 export const InvoicePDF = ({ invoice, profile, paperSize = 'A4', platformName = 'Aranora' }: InvoicePDFProps) => {
     const currencySymbol = getCurrencySymbol(invoice.currency);
     
