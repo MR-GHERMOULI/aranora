@@ -97,7 +97,7 @@ export function createConnection(
   fromShapeId: string,
   toShapeId: string,
   color: string = '#3b82f6',
-  routing: 'curved' | 'orthogonal' = 'curved'
+  routing: 'curved' | 'orthogonal' | 'mindmap' = 'curved'
 ): NexusConnection {
   return {
     id: uuidv4(),
