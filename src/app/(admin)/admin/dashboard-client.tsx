@@ -46,30 +46,35 @@ export function AdminDashboardClient({ stats, charts }: AdminDashboardClientProp
                     iconName="Users"
                     trend={{ value: stats.growthRate, isPositive: stats.growthRate > 0 }}
                     description="all time"
+                    delay={0.1}
                 />
                 <StatsCard
                     title="Active Users (MAU)"
                     value={stats.mau}
                     iconName="Activity"
                     description="last 30 days"
+                    delay={0.2}
                 />
                 <StatsCard
                     title="Active Projects"
                     value={stats.activeProjects}
                     iconName="Briefcase"
                     description={`of ${stats.totalProjects} total`}
+                    delay={0.3}
                 />
                 <StatsCard
                     title="Total Invoices"
                     value={stats.totalInvoices}
                     iconName="FileText"
                     description="generated"
+                    delay={0.4}
                 />
                 <StatsCard
                     title="Paid Invoices"
                     value={stats.paidInvoices}
                     iconName="DollarSign"
                     description={`${stats.totalInvoices > 0 ? Math.round((stats.paidInvoices / stats.totalInvoices) * 100) : 0}% rate`}
+                    delay={0.5}
                 />
                 <StatsCard
                     title="Growth Rate"
@@ -77,6 +82,7 @@ export function AdminDashboardClient({ stats, charts }: AdminDashboardClientProp
                     iconName="TrendingUp"
                     trend={{ value: stats.growthRate, isPositive: stats.growthRate > 0 }}
                     description="monthly"
+                    delay={0.6}
                 />
             </div>
 
