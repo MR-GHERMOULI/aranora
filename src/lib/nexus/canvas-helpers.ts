@@ -131,9 +131,9 @@ export function getConnectionPoints(
     tc = { x: tc.x + 1, y: tc.y + 1 };
   }
 
-  // Calculate intersection with shape boundary
-  const fromPoint = getEdgePoint(from, fc, tc);
-  const toPoint = getEdgePoint(to, tc, fc);
+  // Snap to edge centers for clean, Miro-like organized splitting
+  const fromPoint = getSnapEdgePoint(from, fc, tc);
+  const toPoint = getSnapEdgePoint(to, tc, fc);
 
   return {
     x1: fromPoint.x,
@@ -141,6 +141,26 @@ export function getConnectionPoints(
     x2: toPoint.x,
     y2: toPoint.y,
   };
+}
+
+function getSnapEdgePoint(shape: NexusShape, center: {x:number, y:number}, target: {x:number, y:number}) {
+  const dx = target.x - center.x;
+  const dy = target.y - center.y;
+
+  if (dx === 0 && dy === 0) return center;
+
+  const w = shape.width;
+  const h = shape.height;
+  
+  if (Math.abs(dx) * h > Math.abs(dy) * w) {
+    // Left or right edge
+    if (dx > 0) return { x: shape.x + shape.width, y: center.y };
+    else return { x: shape.x, y: center.y };
+  } else {
+    // Top or bottom edge
+    if (dy > 0) return { x: center.x, y: shape.y + shape.height };
+    else return { x: center.x, y: shape.y };
+  }
 }
 
 export function getConnectionPath(
@@ -163,12 +183,17 @@ export function getConnectionPath(
     }
   }
 
+  // Miro-style organic cubic bezier paths for distinct splitting
   if (isHorizontal) {
-    const cx = (x1 + x2) / 2;
-    return `M ${x1} ${y1} C ${cx} ${y1} ${cx} ${y2} ${x2} ${y2}`;
+    const offset = Math.max(dx / 2, 40);
+    const c1x = x1 + (x2 > x1 ? offset : -offset);
+    const c2x = x2 - (x2 > x1 ? offset : -offset);
+    return `M ${x1} ${y1} C ${c1x} ${y1} ${c2x} ${y2} ${x2} ${y2}`;
   } else {
-    const cy = (y1 + y2) / 2;
-    return `M ${x1} ${y1} C ${x1} ${cy} ${x2} ${cy} ${x2} ${y2}`;
+    const offset = Math.max(dy / 2, 40);
+    const c1y = y1 + (y2 > y1 ? offset : -offset);
+    const c2y = y2 - (y2 > y1 ? offset : -offset);
+    return `M ${x1} ${y1} C ${x1} ${c1y} ${x2} ${c2y} ${x2} ${y2}`;
   }
 }
 
