@@ -51,19 +51,8 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
 
       {/* Main Content */}
       <main className="flex-1 h-full overflow-hidden relative flex flex-col">
-        {/* Toggle Button - only on non-Nexus pages (Nexus has it integrated in its toolbar) */}
-        {!isNexus && (
-          <div className="absolute top-6 left-6 z-[100]">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleSidebar}
-              className="bg-white/90 backdrop-blur-md shadow-xl border-gray-200 hover:bg-white hover:scale-110 transition-all rounded-2xl"
-            >
-              {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </Button>
-          </div>
-        )}
+        {/* No toggle button here — sidebar is always open on non-Nexus pages.
+            On the Nexus page the toggle is embedded in the workspace toolbar. */}
 
         <div className="flex-1 overflow-auto">
           <ReadOnlyBanner />
