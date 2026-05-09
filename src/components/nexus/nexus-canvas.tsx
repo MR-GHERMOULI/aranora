@@ -33,9 +33,10 @@ const roughGenerator = typeof window !== 'undefined' ? rough.generator() : null;
 interface NexusCanvasProps {
   projects: { id: string; title: string }[];
   userId: string;
+  className?: string;
 }
 
-export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
+export function NexusCanvas({ projects, userId, className }: NexusCanvasProps) {
   const { isCollapsed, toggleSidebar } = useSidebar();
   const [shapes, setShapes] = useState<NexusShape[]>([]);
   const [connections, setConnections] = useState<NexusConnection[]>([]);
@@ -1258,7 +1259,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   return (
-    <div className="h-screen w-full overflow-hidden relative bg-white" style={{ marginLeft: '0' }}>
+    <div className={cn("w-full overflow-hidden relative bg-white", className || "h-screen")} style={{ marginLeft: '0' }}>
       {/* Toolbar */}
       <NexusToolbar
         activeTool={activeTool}

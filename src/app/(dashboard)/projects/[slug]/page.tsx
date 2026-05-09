@@ -8,6 +8,7 @@ import { ProjectTaskList } from "@/components/projects/project-task-list";
 import { ProjectFileList } from "@/components/projects/project-file-list";
 import { ProjectTimeTrackingTab } from "@/components/projects/project-time-tracking-tab";
 import { ProjectContractsTab } from "@/components/projects/project-contracts-tab";
+import { NexusCanvas } from "@/components/nexus/nexus-canvas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +27,7 @@ import { getProjectCollaborators } from "../collaborator-actions";
 import { getProfile } from "../../settings/actions";
 import { getIntakeForms, getSubmissions } from "../../intake-forms/actions";
 import { ProjectIntakeTab } from "@/components/projects/project-intake-tab";
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Shapes } from "lucide-react";
 
 export default async function ProjectPage({
     params
@@ -219,6 +220,10 @@ export default async function ProjectPage({
                                     </span>
                                 )}
                             </TabsTrigger>
+                            <TabsTrigger value="nexus" className="gap-1.5">
+                                <Shapes className="h-3.5 w-3.5 text-blue-500" />
+                                Workspace
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
@@ -245,6 +250,15 @@ export default async function ProjectPage({
                                 projectId={project.id}
                                 projectTitle={project.title}
                             />
+                        </TabsContent>
+                        <TabsContent value="nexus" className="mt-4">
+                            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm relative">
+                                <NexusCanvas 
+                                    projects={[{ id: project.id, title: project.title }]} 
+                                    userId={profile?.id || ''} 
+                                    className="h-[800px]" 
+                                />
+                            </div>
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (
