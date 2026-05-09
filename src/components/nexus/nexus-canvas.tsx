@@ -22,7 +22,7 @@ import { ConnectionLine } from './connection-line';
 import { CanvasMinimap } from './canvas-minimap';
 import { CollaborativeCursors } from './collaborative-cursors';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
-import { Sparkles, MousePointer2, Pencil, Lock, Unlock, Plus, Minus } from 'lucide-react';
+import { Sparkles, MousePointer2, Pencil, Lock, Unlock, Plus, Minus, Check } from 'lucide-react';
 import { useSidebar } from '@/components/providers/sidebar-context';
 import rough from 'roughjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -42,6 +42,17 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [paths, setPaths] = useState<NexusPath[]>([]);
   const [canvasName, setCanvasName] = useState('Untitled Canvas');
   const [canvasId, setCanvasId] = useState<string>('');
+  const [isEditingCanvasName, setIsEditingCanvasName] = useState(false);
+  const [pendingCanvasName, setPendingCanvasName] = useState('');
+  const canvasNameInputRef = useRef<HTMLInputElement>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isRestoringRef = useRef(false);
+  // Refs so the debounced auto-save always writes the latest state
+  const latestShapesRef = useRef(shapes);
+  const latestConnectionsRef = useRef(connections);
+  const latestPathsRef = useRef(paths);
+  const latestCanvasNameRef = useRef(canvasName);
+  const latestCanvasIdRef = useRef(canvasId);
 
   // ── History (Undo/Redo) ──────────────────────────────
   // Refs are the source of truth — prevents stale-closure bugs
@@ -146,6 +157,21 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     if (savedOrientation === 'horizontal' || savedOrientation === 'vertical') {
       setToolbarOrientation(savedOrientation);
     }
+
+    // ── Restore last active canvas session ────────────────
+    const activeId = localStorage.getItem('nexus-active-canvas-id');
+    if (activeId) {
+      const canvases = loadCanvases();
+      const found = canvases.find(c => c.id === activeId);
+      if (found) {
+        isRestoringRef.current = true;
+        setShapes(found.shapes);
+        setConnections(found.connections);
+        setPaths(found.paths || []);
+        setCanvasName(found.name);
+        setCanvasId(found.id);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -163,6 +189,51 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   useEffect(() => {
     localStorage.setItem('nexus-toolbar-orientation', toolbarOrientation);
   }, [toolbarOrientation]);
+
+  // ── Keep latest-value refs in sync ───────────────────
+  useEffect(() => { latestShapesRef.current = shapes; }, [shapes]);
+  useEffect(() => { latestConnectionsRef.current = connections; }, [connections]);
+  useEffect(() => { latestPathsRef.current = paths; }, [paths]);
+  useEffect(() => { latestCanvasNameRef.current = canvasName; }, [canvasName]);
+  useEffect(() => { latestCanvasIdRef.current = canvasId; }, [canvasId]);
+
+  // ── Debounced Auto-Save ───────────────────────────────
+  // Triggered by any content change; uses refs to avoid stale closures.
+  useEffect(() => {
+    if (isRestoringRef.current) {
+      isRestoringRef.current = false;
+      return;
+    }
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(() => {
+      const id = latestCanvasIdRef.current || uuidv4();
+      if (!latestCanvasIdRef.current) {
+        latestCanvasIdRef.current = id;
+        setCanvasId(id);
+      }
+      const canvas: NexusCanvasData = {
+        id,
+        name: latestCanvasNameRef.current,
+        shapes: latestShapesRef.current,
+        connections: latestConnectionsRef.current,
+        paths: latestPathsRef.current,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      saveCanvas(canvas);
+      localStorage.setItem('nexus-active-canvas-id', id);
+    }, 800);
+    return () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shapes, connections, paths, canvasName]);
+
+  // Focus name input when it opens
+  useEffect(() => {
+    if (isEditingCanvasName && canvasNameInputRef.current) {
+      canvasNameInputRef.current.focus();
+      canvasNameInputRef.current.select();
+    }
+  }, [isEditingCanvasName]);
 
   const screenToCanvas = useCallback((clientX: number, clientY: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -1033,20 +1104,25 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   };
 
   const handleSave = () => {
-    const canvas: NexusCanvasData = { id: canvasId || uuidv4(), name: canvasName, shapes, connections, paths, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-    if (!canvasId) setCanvasId(canvas.id);
+    const id = canvasId || uuidv4();
+    const canvas: NexusCanvasData = { id, name: canvasName, shapes, connections, paths, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    if (!canvasId) setCanvasId(id);
     saveCanvas(canvas);
+    localStorage.setItem('nexus-active-canvas-id', id);
     toast.success('Canvas saved!');
   };
 
   const handleLoadCanvas = (canvas: NexusCanvasData) => {
+    isRestoringRef.current = true;
     setShapes(canvas.shapes); setConnections(canvas.connections); setPaths(canvas.paths || []);
     setCanvasName(canvas.name); setCanvasId(canvas.id);
+    localStorage.setItem('nexus-active-canvas-id', canvas.id);
     setShowCanvasList(false); setSelectedShapeIds([]); setEditingShapeId(null);
     toast.success(`Loaded "${canvas.name}"`);
   };
 
   const handleNewCanvas = () => {
+    localStorage.removeItem('nexus-active-canvas-id');
     setShapes([]); setConnections([]); setPaths([]); setCanvasName('Untitled Canvas');
     setCanvasId(''); setSelectedShapeIds([]); setEditingShapeId(null);
     setGeneratedTasks(null); setViewport({ x: 0, y: 0, zoom: 1 });
@@ -1174,6 +1250,12 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [canvasListKey, setCanvasListKey] = useState(0);
 
   const gridSize = 28;
+
+  const commitCanvasName = () => {
+    const trimmed = pendingCanvasName.trim();
+    if (trimmed) setCanvasName(trimmed);
+    setIsEditingCanvasName(false);
+  };
 
   return (
     <div className="h-screen w-full overflow-hidden relative bg-white" style={{ marginLeft: '0' }}>
@@ -1398,6 +1480,53 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             </foreignObject>
           </g>
         </svg>
+      </div>
+
+      {/* ── Canvas Name Badge ────────────────────────────────────────── */}
+      <div
+        className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2"
+        style={{ pointerEvents: 'auto' }}
+      >
+        {isEditingCanvasName ? (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 border border-blue-300 shadow-lg backdrop-blur-md ring-2 ring-blue-500/20 animate-in zoom-in-95 duration-150">
+            <input
+              ref={canvasNameInputRef}
+              value={pendingCanvasName}
+              onChange={e => setPendingCanvasName(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') commitCanvasName();
+                if (e.key === 'Escape') setIsEditingCanvasName(false);
+              }}
+              onBlur={commitCanvasName}
+              className="text-sm font-semibold text-gray-800 bg-transparent outline-none w-44 placeholder:text-gray-400"
+              placeholder="Canvas name…"
+              maxLength={60}
+            />
+            <button
+              onMouseDown={e => { e.preventDefault(); commitCanvasName(); }}
+              className="p-1 rounded-lg text-blue-500 hover:bg-blue-50 transition-all"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => { setPendingCanvasName(canvasName); setIsEditingCanvasName(true); }}
+            className="group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 border border-black/[0.06] shadow-sm backdrop-blur-md hover:bg-white hover:border-black/10 hover:shadow-md transition-all duration-200"
+            title="Rename canvas"
+          >
+            <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900 transition-colors max-w-[200px] truncate">
+              {canvasName}
+            </span>
+            <Pencil className="h-3 w-3 text-gray-400 group-hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100" />
+          </button>
+        )}
+
+        {/* Auto-save indicator */}
+        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/70 border border-black/[0.04] backdrop-blur-md">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Auto-saved</span>
+        </div>
       </div>
 
       {/* Minimap */}
