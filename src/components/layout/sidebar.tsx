@@ -327,7 +327,7 @@ export function Sidebar({ className }: SidebarProps) {
 
             <div
                 className={cn(
-                    "space-y-4 py-4 flex flex-col h-full bg-slate-900 text-white fixed inset-y-0 left-0 z-50 w-72 transition-all duration-300 transform md:relative",
+                    "space-y-4 py-4 flex flex-col h-full bg-slate-900 text-white fixed inset-y-0 left-0 z-50 w-72 transition-all duration-300 transform md:static md:inset-auto",
                     isOpen ? "translate-x-0" : "-translate-x-full",
                     isCollapsed ? "md:w-0 md:-translate-x-full md:opacity-0" : "md:w-72 md:translate-x-0 md:opacity-100",
                     className

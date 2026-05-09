@@ -39,22 +39,19 @@ export function DashboardWrapper({ children, upcomingRenewals }: DashboardWrappe
 
   return (
     <div className="h-full relative flex overflow-hidden bg-gray-50 w-full">
-      {/* Sidebar Container */}
+      {/* Sidebar Container — sticky so it never scrolls away with the page */}
       <div 
         className={cn(
-          "hidden h-full md:flex md:flex-col transition-all duration-300 ease-in-out z-40",
+          "hidden md:flex md:flex-col flex-shrink-0 sticky top-0 h-screen transition-all duration-300 ease-in-out z-40",
           sidebarHidden ? "w-0 overflow-hidden opacity-0" : "w-72 opacity-100"
         )}
       >
-        <Sidebar className="w-72 shrink-0" />
+        <Sidebar className="w-72 shrink-0 h-full" />
       </div>
 
-      {/* Main Content */}
-      <main className="flex-1 h-full overflow-hidden relative flex flex-col">
-        {/* No toggle button here — sidebar is always open on non-Nexus pages.
-            On the Nexus page the toggle is embedded in the workspace toolbar. */}
-
-        <div className="flex-1 overflow-auto">
+      {/* Main Content — scrolls independently of the sidebar */}
+      <main className="flex-1 min-h-screen overflow-y-auto relative flex flex-col">
+        <div className="flex-1">
           <ReadOnlyBanner />
           {children}
         </div>
