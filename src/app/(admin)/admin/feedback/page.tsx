@@ -8,10 +8,11 @@ export default async function FeedbackPage() {
     const supabase = await createClient()
 
     // Fetch feedback with project titles
-    const { data: feedback, error } = await supabase
+    const { data: rawFeedback, error } = await supabase
         .from("customer_feedback")
         .select(`
             id,
+            project_id,
             name,
             comment,
             photos,
@@ -20,6 +21,8 @@ export default async function FeedbackPage() {
             project:projects(title)
         `)
         .order("created_at", { ascending: false })
+
+    const feedback = rawFeedback as any[]
 
     if (error) {
         console.error("Error fetching feedback:", error)
