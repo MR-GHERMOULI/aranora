@@ -155,8 +155,9 @@ export function AddCollaboratorDialog({ projectId }: AddCollaboratorDialogProps)
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-xs px-3">
-                    <UserPlus className="mr-2 h-3.5 w-3.5" /> Add Collaborator
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-1">
+                    <UserPlus className="h-3 w-3" />
+                    Add
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
