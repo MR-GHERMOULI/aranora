@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { format, isPast, parseISO } from "date-fns";
+import { DeleteInvoiceDialog } from "./delete-invoice-dialog";
 
 interface InvoicesClientProps {
     invoices: any[];
@@ -263,6 +264,7 @@ export function InvoicesClient({ invoices }: InvoicesClientProps) {
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
                                                 <Download className="h-4 w-4" />
                                             </Button>
+                                            <DeleteInvoiceDialog invoiceId={invoice.id} invoiceNumber={invoice.invoice_number} />
                                         </div>
                                     </div>
                                 </CardContent>
@@ -327,6 +329,7 @@ export function InvoicesClient({ invoices }: InvoicesClientProps) {
                                                     <Button variant="ghost" size="icon" className="h-8 w-8">
                                                         <Download className="h-4 w-4" />
                                                     </Button>
+                                                    <DeleteInvoiceDialog invoiceId={invoice.id} invoiceNumber={invoice.invoice_number} />
                                                 </div>
                                             </td>
                                         </tr>

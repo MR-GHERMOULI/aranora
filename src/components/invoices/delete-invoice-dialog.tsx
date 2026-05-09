@@ -15,6 +15,8 @@ import {
 import { Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+import { toast } from "sonner"
+
 interface DeleteInvoiceDialogProps {
     invoiceId: string
     invoiceNumber: string
@@ -29,10 +31,12 @@ export function DeleteInvoiceDialog({ invoiceId, invoiceNumber }: DeleteInvoiceD
         try {
             setIsDeleting(true)
             await deleteInvoice(invoiceId)
+            toast.success("Invoice deleted successfully")
             setOpen(false)
-            router.push('/invoices')
+            router.refresh()
         } catch (error) {
             console.error("Failed to delete invoice", error)
+            toast.error("Failed to delete invoice")
             setIsDeleting(false)
         }
     }
@@ -40,9 +44,8 @@ export function DeleteInvoiceDialog({ invoiceId, invoiceNumber }: DeleteInvoiceD
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="destructive">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors">
+                    <Trash2 className="h-4 w-4" />
                 </Button>
             </DialogTrigger>
             <DialogContent>
