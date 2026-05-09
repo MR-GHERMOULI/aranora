@@ -520,7 +520,7 @@ function TaskGroup({ title, tasks, type }: { title: string, tasks: Task[], type:
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.98 }}
                                 key={task.id}
-                                className={`flex items-center gap-6 p-8 rounded-[2.5rem] glass border-white/5 hover:border-white/10 transition-all group ${isDone ? 'opacity-50 hover:opacity-80 transition-opacity' : 'shadow-2xl shadow-black/20 hover:bg-white/10'}`}
+                                className={`flex items-center gap-6 p-8 rounded-[2.5rem] glass border-white/5 hover:border-white/10 transition-all group ${isDone ? 'opacity-80 hover:opacity-100 transition-opacity' : 'shadow-2xl shadow-black/20 hover:bg-white/10'}`}
                             >
                                 <div className={`h-16 w-16 rounded-[1.5rem] flex items-center justify-center shrink-0 transition-all duration-500 group-hover:rotate-6 ${isDone ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-400 group-hover:text-[#10b981] group-hover:bg-[#10b981]/10 border border-white/5'}`}>
                                     <TaskIcon className={`h-7 w-7 ${statusCfg.glow}`} />
@@ -528,7 +528,7 @@ function TaskGroup({ title, tasks, type }: { title: string, tasks: Task[], type:
                                 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-5 mb-2">
-                                        <p className={`text-xl font-black truncate transition-all ${isDone ? 'line-through text-slate-600' : 'text-white group-hover:text-[#10b981]'}`}>
+                                        <p className={`text-xl font-black truncate transition-all ${isDone ? 'line-through text-slate-400/90' : 'text-white group-hover:text-[#10b981]'}`}>
                                             {task.title}
                                         </p>
                                         {task.priority && pCfg && !isDone && (
@@ -537,13 +537,13 @@ function TaskGroup({ title, tasks, type }: { title: string, tasks: Task[], type:
                                             </Badge>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                                    <div className="flex items-center gap-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
                                         <span className={`${statusCfg.color} flex items-center gap-2`}>
                                             <div className={`h-1.5 w-1.5 rounded-full ${isDone ? 'bg-emerald-400' : 'bg-blue-400'}`} />
                                             {task.status}
                                         </span>
                                         {task.priority && <span className="opacity-30">•</span>}
-                                        {task.priority && <span>{task.priority} Priority</span>}
+                                        {task.priority && <span className={isDone ? 'text-slate-500' : ''}>{task.priority} Priority</span>}
                                     </div>
                                 </div>
 
