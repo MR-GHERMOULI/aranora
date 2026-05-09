@@ -101,7 +101,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [selectedConnId, setSelectedConnId] = useState<string | null>(null);
   const [editingShapeId, setEditingShapeId] = useState<string | null>(null);
   const [editingConnId, setEditingConnId] = useState<string | null>(null);
-  const [dragging, setDragging] = useState<{ shapeId: string; offsetX: number; offsetY: number } | null>(null);
+  const [dragging, setDragging] = useState<{ shapeId: string; offsetX: number; offsetY: number; initialPositions?: Record<string, { x: number; y: number }> } | null>(null);
   const [resizing, setResizing] = useState<{ shapeId: string; handle: string; startX: number; startY: number; startWidth: number; startHeight: number; startShapeX: number; startShapeY: number } | null>(null);
   const [rotating, setRotating] = useState<{ shapeId: string; startAngle: number; initialRotation: number; initialRotations?: Record<string, number> } | null>(null);
   const [panning, setPanning] = useState<{ startX: number; startY: number; startVpX: number; startVpY: number } | null>(null);
@@ -157,14 +157,19 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     e.stopPropagation();
     const { x, y } = screenToCanvas(e.clientX, e.clientY);
     const shape = shapes.find(s => s.id === shapeId);
-    if (!shape) return;
+    if (!shape || shape.isLocked) return;
     
     const cx = shape.x + shape.width / 2;
     const cy = shape.y + shape.height / 2;
     const angle = Math.atan2(y - cy, x - cx) * (180 / Math.PI);
     
     // Capture initial rotations for all selected shapes if the target is selected
-    const targets = selectedShapeIds.includes(shapeId) ? selectedShapeIds : [shapeId];
+    // Only include non-locked shapes in the rotation group
+    const targets = selectedShapeIds.includes(shapeId) ? selectedShapeIds.filter(id => {
+      const s = shapes.find(sh => sh.id === id);
+      return s && !s.isLocked;
+    }) : [shapeId];
+    
     const initialRotations: Record<string, number> = {};
     targets.forEach(id => {
       const s = shapes.find(sh => sh.id === id);
@@ -175,7 +180,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       shapeId,
       startAngle: angle,
       initialRotation: shape.rotation || 0,
-      initialRotations // Added this to the state (need to update type)
+      initialRotations
     } as any);
   };
 
@@ -467,7 +472,16 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       
       if (!shape.isLocked) {
         setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, zIndex: Date.now() } : s));
-        setDragging({ shapeId, offsetX: x - shape.x, offsetY: y - shape.y });
+        
+        // Capture initial positions for all selected items (if they aren't locked)
+        const targets = selectedShapeIds.includes(shapeId) ? selectedShapeIds : [shapeId];
+        const initialPositions: Record<string, { x: number, y: number }> = {};
+        targets.forEach(id => {
+          const s = shapes.find(sh => sh.id === id);
+          if (s && !s.isLocked) initialPositions[id] = { x: s.x, y: s.y };
+        });
+
+        setDragging({ shapeId, offsetX: x - shape.x, offsetY: y - shape.y, initialPositions });
       }
     }
   };
@@ -475,7 +489,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleResizeStart = (e: React.MouseEvent, shapeId: string, handle: string) => {
     e.stopPropagation();
     const shape = shapes.find(s => s.id === shapeId);
-    if (!shape) return;
+    if (!shape || shape.isLocked) return;
     setResizing({
       shapeId,
       handle,
@@ -511,6 +525,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     }
     if (dragging) {
       const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      const dx = x - (dragging.offsetX + (shapes.find(s => s.id === dragging.shapeId)?.x || 0)); // This is tricky, let's use a simpler diff
+      // Let's use mouse delta
+      const currentShape = shapes.find(s => s.id === dragging.shapeId);
+      if (!currentShape) return;
+      
       let newX = x - dragging.offsetX;
       let newY = y - dragging.offsetY;
 
@@ -519,36 +538,36 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         newY = Math.round(newY / gridSize) * gridSize;
       }
 
-      // Smart Alignment logic
+      const moveDx = newX - currentShape.x;
+      const moveDy = newY - currentShape.y;
+
+      // Smart Alignment logic (only for the main dragged shape)
       const guides: { x?: number, y?: number }[] = [];
-      const currentShape = shapes.find(s => s.id === dragging.shapeId);
-      if (currentShape) {
-        shapes.forEach(other => {
-          if (other.id === dragging.shapeId) return;
-          const thresh = 5;
-          if (Math.abs(newX - other.x) < thresh) { 
-            newX = other.x; 
-            guides.push({ x: other.x }); 
-          }
-          if (Math.abs(newX + currentShape.width - (other.x + other.width)) < thresh) { 
-            newX = other.x + other.width - currentShape.width; 
-            guides.push({ x: other.x + other.width }); 
-          }
-          if (Math.abs(newY - other.y) < thresh) { 
-            newY = other.y; 
-            guides.push({ y: other.y }); 
-          }
-          if (Math.abs(newY + currentShape.height - (other.y + other.height)) < thresh) { 
-            newY = other.y + other.height - currentShape.height; 
-            guides.push({ y: other.y + other.height }); 
-          }
-        });
-      }
+      shapes.forEach(other => {
+        if (other.id === dragging.shapeId || (dragging.initialPositions && dragging.initialPositions[other.id])) return;
+        const thresh = 5;
+        if (Math.abs(newX - other.x) < thresh) { 
+          newX = other.x; 
+          guides.push({ x: other.x }); 
+        }
+        if (Math.abs(newY - other.y) < thresh) { 
+          newY = other.y; 
+          guides.push({ y: other.y }); 
+        }
+      });
       setAlignmentLines(guides);
 
-      setShapes(prev => prev.map(s =>
-        s.id === dragging.shapeId ? { ...s, x: newX, y: newY } : s
-      ));
+      const targets = dragging.initialPositions ? Object.keys(dragging.initialPositions) : [dragging.shapeId];
+      
+      setShapes(prev => prev.map(s => {
+        if (targets.includes(s.id)) {
+          // If it's the main shape, use the calculated newX/newY (with snapping/guides)
+          if (s.id === dragging.shapeId) return { ...s, x: newX, y: newY };
+          // For others, apply the same delta
+          return { ...s, x: s.x + moveDx, y: s.y + moveDy };
+        }
+        return s;
+      }));
       return;
     }
     if (rotating) {
