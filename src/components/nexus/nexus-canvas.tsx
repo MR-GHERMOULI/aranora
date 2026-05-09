@@ -34,14 +34,16 @@ interface NexusCanvasProps {
   projects: { id: string; title: string }[];
   userId: string;
   className?: string;
+  initialProjectId?: string | null;
+  initialCanvasName?: string | null;
 }
 
-export function NexusCanvas({ projects, userId, className }: NexusCanvasProps) {
+export function NexusCanvas({ projects, userId, className, initialProjectId, initialCanvasName }: NexusCanvasProps) {
   const { isCollapsed, toggleSidebar } = useSidebar();
   const [shapes, setShapes] = useState<NexusShape[]>([]);
   const [connections, setConnections] = useState<NexusConnection[]>([]);
   const [paths, setPaths] = useState<NexusPath[]>([]);
-  const [canvasName, setCanvasName] = useState('Untitled Canvas');
+  const [canvasName, setCanvasName] = useState(initialCanvasName || 'Untitled Canvas');
   const [canvasId, setCanvasId] = useState<string>('');
   const [isEditingCanvasName, setIsEditingCanvasName] = useState(false);
   const [pendingCanvasName, setPendingCanvasName] = useState('');
@@ -1559,7 +1561,8 @@ export function NexusCanvas({ projects, userId, className }: NexusCanvasProps) {
 
       {generatedTasks && (
         <TaskPanel tasks={generatedTasks} onClose={() => setGeneratedTasks(null)}
-          onPushToTasks={handlePushToTasks} projects={projects} isPushing={isPushing} />
+          onPushToTasks={handlePushToTasks} projects={projects} isPushing={isPushing}
+          initialProjectId={initialProjectId} />
       )}
       {showCanvasList && (
         <CanvasList key={canvasListKey} canvases={loadCanvases()} onSelect={handleLoadCanvas}

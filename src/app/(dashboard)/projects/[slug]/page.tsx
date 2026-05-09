@@ -8,14 +8,13 @@ import { ProjectTaskList } from "@/components/projects/project-task-list";
 import { ProjectFileList } from "@/components/projects/project-file-list";
 import { ProjectTimeTrackingTab } from "@/components/projects/project-time-tracking-tab";
 import { ProjectContractsTab } from "@/components/projects/project-contracts-tab";
-import { NexusCanvas } from "@/components/nexus/nexus-canvas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddCollaboratorDialog } from "@/components/projects/add-collaborator-dialog";
 import { RemoveCollaboratorButton } from "@/components/projects/remove-collaborator-button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer, FileSignature } from "lucide-react";
+import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer, FileSignature, Sparkles, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
@@ -27,7 +26,7 @@ import { getProjectCollaborators } from "../collaborator-actions";
 import { getProfile } from "../../settings/actions";
 import { getIntakeForms, getSubmissions } from "../../intake-forms/actions";
 import { ProjectIntakeTab } from "@/components/projects/project-intake-tab";
-import { ClipboardList, Shapes } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 
 export default async function ProjectPage({
     params
@@ -221,8 +220,8 @@ export default async function ProjectPage({
                                 )}
                             </TabsTrigger>
                             <TabsTrigger value="nexus" className="gap-1.5">
-                                <Shapes className="h-3.5 w-3.5 text-blue-500" />
-                                Workspace
+                                <Sparkles className="h-3.5 w-3.5" />
+                                Nexus
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
@@ -252,13 +251,51 @@ export default async function ProjectPage({
                             />
                         </TabsContent>
                         <TabsContent value="nexus" className="mt-4">
-                            <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm relative">
-                                <NexusCanvas 
-                                    projects={[{ id: project.id, title: project.title }]} 
-                                    userId={profile?.id || ''} 
-                                    className="h-[800px]" 
-                                />
-                            </div>
+                            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                                <CardContent className="p-0">
+                                    <div className="relative flex flex-col items-center justify-center py-16 px-8 text-center">
+                                        {/* Decorative background grid */}
+                                        <div className="absolute inset-0 opacity-[0.04]" style={{
+                                            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+                                            backgroundSize: '24px 24px',
+                                        }} />
+
+                                        {/* Glow effect */}
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-blue-500/10 blur-[100px]" />
+
+                                        {/* Icon */}
+                                        <div className="relative mb-6">
+                                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-xl shadow-blue-500/25 ring-1 ring-white/10">
+                                                <Sparkles className="h-8 w-8 text-white" />
+                                            </div>
+                                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse" />
+                                        </div>
+
+                                        {/* Content */}
+                                        <h3 className="relative text-xl font-bold text-white mb-2 tracking-tight">
+                                            Open Nexus Workspace
+                                        </h3>
+                                        <p className="relative text-sm text-slate-400 max-w-sm mb-8 leading-relaxed">
+                                            Launch the full visual workspace for <span className="text-blue-400 font-semibold">{project.title}</span>. 
+                                            Draw diagrams, map ideas, and convert them into actionable tasks.
+                                        </p>
+
+                                        {/* CTA Button */}
+                                        <Button asChild size="lg" className="relative bg-white text-slate-900 hover:bg-blue-50 font-bold rounded-xl px-8 shadow-xl shadow-black/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-0.5 group">
+                                            <Link href={`/nexus?project=${project.id}&name=${encodeURIComponent(project.title)}`}>
+                                                <Sparkles className="h-4 w-4 mr-2 text-blue-600" />
+                                                Open Workspace — {project.title}
+                                                <ExternalLink className="h-3.5 w-3.5 ml-2 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                            </Link>
+                                        </Button>
+
+                                        {/* Keyboard hint */}
+                                        <p className="relative text-[11px] text-slate-500 mt-4 font-medium">
+                                            Your work is auto-saved and linked to this project
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (

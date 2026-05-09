@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 
 const NexusCanvas = dynamic(() => import("@/components/nexus/nexus-canvas").then(mod => mod.NexusCanvas), { 
   ssr: false,
@@ -15,5 +16,16 @@ const NexusCanvas = dynamic(() => import("@/components/nexus/nexus-canvas").then
 });
 
 export function NexusWrapper({ projects, userId }: { projects: any[]; userId: string }) {
-  return <NexusCanvas projects={projects} userId={userId} />;
+  const searchParams = useSearchParams();
+  const initialProjectId = searchParams.get('project');
+  const initialCanvasName = searchParams.get('name');
+
+  return (
+    <NexusCanvas 
+      projects={projects} 
+      userId={userId} 
+      initialProjectId={initialProjectId}
+      initialCanvasName={initialCanvasName}
+    />
+  );
 }

@@ -14,6 +14,7 @@ interface TaskPanelProps {
   onPushToTasks: (tasks: GeneratedTask[], projectId: string | null) => void;
   projects: { id: string; title: string }[];
   isPushing: boolean;
+  initialProjectId?: string | null;
 }
 
 const priorityConfig = {
@@ -40,8 +41,8 @@ const priorityConfig = {
   },
 };
 
-export function TaskPanel({ tasks, onClose, onPushToTasks, projects, isPushing }: TaskPanelProps) {
-  const [selectedProject, setSelectedProject] = useState<string>('');
+export function TaskPanel({ tasks, onClose, onPushToTasks, projects, isPushing, initialProjectId }: TaskPanelProps) {
+  const [selectedProject, setSelectedProject] = useState<string>(initialProjectId || '');
   const [expandedTask, setExpandedTask] = useState<number | null>(null);
   const [checkedTasks, setCheckedTasks] = useState<Set<number>>(new Set(tasks.map((_, i) => i)));
 
