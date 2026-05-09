@@ -18,12 +18,13 @@ interface ShapeRendererProps {
   onResizeStart: (e: React.MouseEvent, shapeId: string, handle: string) => void;
   editingShapeId: string | null;
   canvasTheme: CanvasTheme;
+  activeTool: string;
 }
 
 export const ShapeRenderer = React.memo(function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
   onMouseDown, onDoubleClick, onTextChange, onContextMenu, onResizeStart, editingShapeId,
-  canvasTheme,
+  canvasTheme, activeTool,
 }: ShapeRendererProps) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const isEditing = editingShapeId === shape.id;
@@ -97,7 +98,11 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
   return (
     <g
       transform={`translate(${shape.x}, ${shape.y})`}
-      style={{ cursor: isEditing ? 'text' : 'grab' }}
+      style={{ 
+        cursor: isEditing ? 'text' : 
+                (activeTool === 'connect' || activeTool === 'arrow') ? 'crosshair' : 
+                activeTool === 'pan' ? 'grab' : 'grab' 
+      }}
       onMouseDown={e => { if (!isEditing) onMouseDown(e, shape.id); }}
       onDoubleClick={() => onDoubleClick(shape.id)}
       onContextMenu={e => { e.preventDefault(); onContextMenu(e, shape.id); }}

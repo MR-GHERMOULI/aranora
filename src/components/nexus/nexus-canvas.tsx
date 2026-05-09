@@ -1107,7 +1107,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       <div
         ref={containerRef}
         className="w-full h-full"
-        style={{ cursor: activeTool === 'pan' ? 'grab' : activeTool === 'connect' ? 'crosshair' : activeTool === 'select' ? 'default' : 'crosshair' }}
+        style={{ cursor: activeTool === 'pan' ? 'grab' : (activeTool === 'connect' || activeTool === 'arrow') ? 'crosshair' : activeTool === 'select' ? 'default' : 'crosshair' }}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -1229,6 +1229,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onResizeStart={handleResizeStart}
                 editingShapeId={editingShapeId}
                 canvasTheme={canvasTheme}
+                activeTool={activeTool}
               />
             ))}
 
