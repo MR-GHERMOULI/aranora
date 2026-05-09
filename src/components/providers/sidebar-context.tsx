@@ -13,10 +13,14 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Sync with localStorage if needed
+  // Sync with localStorage if needed - Default to false (open) unless explicitly saved
   useEffect(() => {
     const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved === 'true') setIsCollapsed(true);
+    if (saved === 'true') {
+      setIsCollapsed(true);
+    } else {
+      setIsCollapsed(false);
+    }
   }, []);
 
   const toggleSidebar = () => {
