@@ -302,7 +302,7 @@ export function NexusToolbar({
             )}
           </button>
         </div>
-      </motion.div>
+      </div>
 
       {/* Config Popovers */}
       <AnimatePresence>
