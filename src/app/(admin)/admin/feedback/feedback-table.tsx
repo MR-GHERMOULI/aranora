@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Trash2, CheckCircle, Clock, Eye, ExternalLink, MessageSquare } from "lucide-react"
+import { Search, Filter, Trash2, CheckCircle, Clock, Eye, ExternalLink, MessageSquare, Camera } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
