@@ -89,6 +89,12 @@ export default async function ProjectPage({
                     )}
                 </div>
                 <div className="flex gap-2">
+                    <Button asChild variant="outline" className="gap-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-700 font-semibold shadow-sm transition-all active:scale-95">
+                        <Link href={`/nexus?project=${project.id}&name=${encodeURIComponent(project.title)}`}>
+                            <Sparkles className="h-4 w-4 text-blue-500" />
+                            Nexus
+                        </Link>
+                    </Button>
                     <ProjectTimerButton projectId={project.id} projectTitle={project.title} />
                     <ShareProgressDialog projectId={project.id} projectTitle={project.title} />
                     <EditProjectDialog project={project} />
@@ -219,10 +225,6 @@ export default async function ProjectPage({
                                     </span>
                                 )}
                             </TabsTrigger>
-                            <TabsTrigger value="nexus" className="gap-1.5">
-                                <Sparkles className="h-3.5 w-3.5" />
-                                Nexus
-                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="tasks" className="mt-4">
                             <ProjectTaskList tasks={tasks} projectId={project.id} />
@@ -250,53 +252,7 @@ export default async function ProjectPage({
                                 projectTitle={project.title}
                             />
                         </TabsContent>
-                        <TabsContent value="nexus" className="mt-4">
-                            <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-                                <CardContent className="p-0">
-                                    <div className="relative flex flex-col items-center justify-center py-16 px-8 text-center">
-                                        {/* Decorative background grid */}
-                                        <div className="absolute inset-0 opacity-[0.04]" style={{
-                                            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-                                            backgroundSize: '24px 24px',
-                                        }} />
 
-                                        {/* Glow effect */}
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-blue-500/10 blur-[100px]" />
-
-                                        {/* Icon */}
-                                        <div className="relative mb-6">
-                                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-xl shadow-blue-500/25 ring-1 ring-white/10">
-                                                <Sparkles className="h-8 w-8 text-white" />
-                                            </div>
-                                            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse" />
-                                        </div>
-
-                                        {/* Content */}
-                                        <h3 className="relative text-xl font-bold text-white mb-2 tracking-tight">
-                                            Open Nexus Workspace
-                                        </h3>
-                                        <p className="relative text-sm text-slate-400 max-w-sm mb-8 leading-relaxed">
-                                            Launch the full visual workspace for <span className="text-blue-400 font-semibold">{project.title}</span>. 
-                                            Draw diagrams, map ideas, and convert them into actionable tasks.
-                                        </p>
-
-                                        {/* CTA Button */}
-                                        <Button asChild size="lg" className="relative bg-white text-slate-900 hover:bg-blue-50 font-bold rounded-xl px-8 shadow-xl shadow-black/20 transition-all hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-0.5 group">
-                                            <Link href={`/nexus?project=${project.id}&name=${encodeURIComponent(project.title)}`}>
-                                                <Sparkles className="h-4 w-4 mr-2 text-blue-600" />
-                                                Open Workspace — {project.title}
-                                                <ExternalLink className="h-3.5 w-3.5 ml-2 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                            </Link>
-                                        </Button>
-
-                                        {/* Keyboard hint */}
-                                        <p className="relative text-[11px] text-slate-500 mt-4 font-medium">
-                                            Your work is auto-saved and linked to this project
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
                         <TabsContent value="invoices" className="mt-4 space-y-4">
                             {invoices.length === 0 ? (
                                 <Card>
