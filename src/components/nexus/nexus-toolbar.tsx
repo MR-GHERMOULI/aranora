@@ -7,7 +7,8 @@ import {
   MousePointer2, Hand, Square, Circle, Diamond, Hexagon,
   Link2, Sparkles, Save, Trash2, FolderOpen, Plus, ChevronUp,
   Undo, Redo, PenLine, Pencil, Highlighter, Paintbrush, Eraser,
-  GripHorizontal, Palette, Settings2, Scissors, Type, Network, GitBranch, ArrowRight
+  GripHorizontal, Palette, Settings2, Scissors, Type, Network, GitBranch, ArrowRight,
+  Minus, RotateCcw
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +46,9 @@ interface ToolbarProps {
   onShowMinimapChange: (show: boolean) => void;
   orientation: 'horizontal' | 'vertical';
   onOrientationChange: (orientation: 'horizontal' | 'vertical') => void;
+  zoom: number;
+  onZoomChange: (zoom: number) => void;
+  onResetZoom: () => void;
 }
 
 const toolGroups = [
@@ -105,6 +109,7 @@ export function NexusToolbar({
   canvasTheme, onThemeChange,
   showMinimap, onShowMinimapChange,
   orientation, onOrientationChange,
+  zoom, onZoomChange, onResetZoom,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState<'style' | 'actions' | null>(null);
@@ -127,28 +132,45 @@ export function NexusToolbar({
   const constraintsRef = useRef(null);
 
   return (
-    <div className="fixed bottom-8 left-0 right-0 pointer-events-none flex flex-col items-center gap-6 z-50" ref={constraintsRef}>
+    <div className={cn(
+      "fixed pointer-events-none flex items-center justify-center z-50 transition-all duration-700",
+      orientation === 'horizontal' ? "bottom-8 left-0 right-0" : "left-8 top-0 bottom-0"
+    )}>
       
-      {/* Draggable Dock */}
-      <motion.div 
-        drag
-        dragConstraints={constraintsRef}
-        dragElastic={0.1}
-        dragMomentum={false}
+      {/* Non-Draggable Dock */}
+      <div 
         className={cn(
           "pointer-events-auto flex items-center p-2 rounded-[2.2rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] ring-1 ring-black/[0.03] transition-all duration-500",
           orientation === 'vertical' ? 'flex-col py-3 px-2 gap-1 min-w-[64px]' : 'flex-row px-4 py-2 gap-1 min-h-[64px]'
         )}
       >
-        {/* Drag Handle */}
-        <div className={cn("flex items-center justify-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors", orientation === 'vertical' ? 'pb-2 w-full h-6' : 'pr-2 h-full w-6')}>
-          <GripHorizontal className={cn("h-5 w-5", orientation === 'vertical' ? 'rotate-90' : '')} />
+        {/* Zoom Controls Integration */}
+        <div className={cn("flex items-center gap-0.5 bg-black/[0.03] p-1 rounded-2xl", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-1')}>
+          <button onClick={() => onZoomChange(Math.min(3, zoom * 1.2))} className="p-2 hover:bg-white hover:shadow-sm rounded-xl text-gray-600 transition-all active:scale-90">
+            <Plus className="h-4 w-4" />
+          </button>
+          <div className={cn("flex items-center justify-center", orientation === 'vertical' ? 'py-1' : 'px-2 min-w-[50px]')}>
+            <span className="text-[10px] font-black font-mono text-gray-900 tracking-tighter">
+              {Math.round(zoom * 100)}%
+            </span>
+          </div>
+          <button onClick={() => onZoomChange(Math.max(0.15, zoom / 1.2))} className="p-2 hover:bg-white hover:shadow-sm rounded-xl text-gray-600 transition-all active:scale-90">
+            <Minus className="h-4 w-4" />
+          </button>
+          {orientation === 'horizontal' && (
+            <>
+              <div className="w-px h-4 bg-black/[0.06] mx-0.5" />
+              <button onClick={onResetZoom} className="p-2 hover:bg-white hover:shadow-sm rounded-xl text-gray-400 hover:text-gray-900 transition-all active:scale-90">
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
         </div>
 
         <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
 
         {/* History Group */}
-        <div className={cn("flex items-center gap-0.5", orientation === 'vertical' ? 'flex-col py-1' : 'flex-row px-1')}>
+        <div className={cn("flex items-center gap-0.5", orientation === 'vertical' ? 'flex-col py-0.5' : 'flex-row px-0.5')}>
           <button onClick={onUndo} disabled={!canUndo} 
             className={cn("p-2 rounded-xl transition-all", canUndo ? "text-gray-600 hover:bg-black/[0.04] active:scale-95" : "text-gray-300 cursor-not-allowed")}>
             <Undo className="h-4 w-4" />

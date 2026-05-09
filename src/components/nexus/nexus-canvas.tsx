@@ -1209,36 +1209,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         onShowMinimapChange={setShowMinimap}
         orientation={toolbarOrientation}
         onOrientationChange={setToolbarOrientation}
+        zoom={viewport.zoom}
+        onZoomChange={(z) => setViewport(v => ({ ...v, zoom: z }))}
+        onResetZoom={() => setViewport({ x: 0, y: 0, zoom: 1 })}
       />
-
-      {/* Zoom controls - Premium Glassmorphism */}
-      <div className="absolute top-10 left-10 z-40 flex items-center gap-2 p-2 rounded-[2rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/[0.03]">
-        <div className="flex bg-black/[0.03] p-1 rounded-[1.5rem] items-center">
-           <button onClick={() => setViewport(v => ({ ...v, zoom: Math.min(3, v.zoom * 1.2) }))} 
-             className="p-3 hover:bg-white hover:shadow-sm rounded-2xl text-gray-700 transition-all active:scale-90"
-             title="Zoom In"
-           >
-             <Plus className="h-4 w-4" />
-           </button>
-           <div className="px-4 flex items-center min-w-[70px] justify-center">
-             <span className="text-[13px] font-black font-mono text-gray-900 tracking-tighter">
-               {Math.round(viewport.zoom * 100)}%
-             </span>
-           </div>
-           <button onClick={() => setViewport(v => ({ ...v, zoom: Math.max(0.15, v.zoom / 1.2) }))} 
-             className="p-3 hover:bg-white hover:shadow-sm rounded-2xl text-gray-700 transition-all active:scale-90"
-             title="Zoom Out"
-           >
-             <Minus className="h-4 w-4" />
-           </button>
-        </div>
-        <div className="w-px h-8 bg-black/[0.06] mx-1" />
-        <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} 
-          className="px-6 py-3 hover:bg-black/[0.04] rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all active:scale-95"
-        >
-          Reset
-        </button>
-      </div>
 
 
       {/* Connect mode banner - Moved to top center */}
