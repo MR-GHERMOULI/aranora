@@ -20,12 +20,13 @@ interface ShapeRendererProps {
   canvasTheme: CanvasTheme;
   activeTool: string;
   onRotateStart: (e: React.MouseEvent, shapeId: string) => void;
+  onToggleLock: (shapeId: string) => void;
 }
 
 export const ShapeRenderer = React.memo(function ShapeRenderer({
   shape, isSelected, isConnectSource, zoom,
   onMouseDown, onDoubleClick, onTextChange, onContextMenu, onResizeStart, editingShapeId,
-  canvasTheme, activeTool, onRotateStart,
+  canvasTheme, activeTool, onRotateStart, onToggleLock,
 }: ShapeRendererProps) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const isEditing = editingShapeId === shape.id;
@@ -298,7 +299,11 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
 
       {/* Lock Indicator */}
       {shape.isLocked && isSelected && (
-        <g transform={`translate(${shape.width - 24}, ${-24})`}>
+        <g 
+          transform={`translate(${shape.width - 24}, ${-24})`} 
+          className="cursor-pointer hover:scale-110 transition-transform"
+          onClick={(e) => { e.stopPropagation(); onToggleLock(shape.id); }}
+        >
           <circle cx={12} cy={12} r={10} fill="#ef4444" />
           <path d="M8 11v-2a4 4 0 0 1 8 0v2" fill="none" stroke="white" strokeWidth="1.5" />
           <rect x={6} y={11} width={12} height={8} rx={1} fill="white" />

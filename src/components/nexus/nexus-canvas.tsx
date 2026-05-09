@@ -1035,10 +1035,11 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setEditingConnId(null);
   }, []);
 
-  const handleToggleLock = () => {
-    if (selectedShapeIds.length === 0) return;
-    const allLocked = shapes.filter(s => selectedShapeIds.includes(s.id)).every(s => s.isLocked);
-    const nextShapes = shapes.map(s => selectedShapeIds.includes(s.id) ? { ...s, isLocked: !allLocked } : s);
+  const handleToggleLock = (targetId?: string) => {
+    const targets = targetId ? [targetId] : selectedShapeIds;
+    if (targets.length === 0) return;
+    const allLocked = shapes.filter(s => targets.includes(s.id)).every(s => s.isLocked);
+    const nextShapes = shapes.map(s => targets.includes(s.id) ? { ...s, isLocked: !allLocked } : s);
     setShapes(nextShapes);
     saveToHistory(nextShapes, connections, paths);
     if (!allLocked) toast.success("Items locked");
@@ -1168,31 +1169,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         <button onClick={() => setViewport({ x: 0, y: 0, zoom: 1 })} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-gray-900 transition uppercase text-[9px] tracking-widest">Reset</button>
       </div>
 
-      {/* Floating Shape Properties Toolbar */}
-      {selectedShapeIds.length > 0 && !editingShapeId && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 p-1 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-black/5 animate-in fade-in slide-in-from-top-4">
-          <div className="flex items-center gap-1 px-1 border-r border-gray-100">
-            <button
-              onClick={handleToggleLock}
-              className={cn(
-                "p-2 rounded-xl transition-all",
-                shapes.filter(s => selectedShapeIds.includes(s.id)).every(s => s.isLocked)
-                  ? "bg-red-50 text-red-600 shadow-inner"
-                  : "text-gray-500 hover:bg-gray-100"
-              )}
-              title="Lock/Unlock Items"
-            >
-              {shapes.filter(s => selectedShapeIds.includes(s.id)).every(s => s.isLocked) ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-            </button>
-          </div>
-          {/* Other tool groups could go here, but for now we focus on lock */}
-          <div className="flex items-center gap-1 px-1">
-             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2">
-               {selectedShapeIds.length} Selected
-             </span>
-          </div>
-        </div>
-      )}
+
       {/* Connect mode banner - Moved to top center */}
       {connectFrom && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-6 py-3 rounded-full bg-gray-900/95 backdrop-blur-md shadow-2xl text-white text-sm font-medium animate-in slide-in-from-top-4 duration-300">
@@ -1385,6 +1362,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 onContextMenu={handleShapeContextMenu}
                 onResizeStart={handleResizeStart}
                 onRotateStart={handleRotateStart}
+                onToggleLock={handleToggleLock}
                 editingShapeId={editingShapeId}
                 canvasTheme={canvasTheme}
                 activeTool={activeTool}
