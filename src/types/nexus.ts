@@ -1,6 +1,6 @@
 // ── Nexus Canvas Types ─────────────────────────────────
 
-export type ShapeType = 'rectangle' | 'circle' | 'diamond' | 'hexagon' | 'parallelogram' | 'text';
+export type ShapeType = 'rectangle' | 'circle' | 'diamond' | 'hexagon' | 'parallelogram' | 'text' | 'mindmap-node';
 
 export interface NexusShape {
   id: string;
@@ -36,7 +36,7 @@ export interface NexusConnection {
   label?: string;
   style: 'solid' | 'dashed' | 'dotted';
   animated?: boolean;
-  routing?: 'curved' | 'orthogonal';
+  routing?: 'curved' | 'orthogonal' | 'mindmap';
 }
 
 export interface NexusPath {

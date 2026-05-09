@@ -19,6 +19,7 @@ import { TaskPanel } from './task-panel';
 import { CanvasList } from './canvas-list';
 import { ConnectionLine } from './connection-line';
 import { CanvasMinimap } from './canvas-minimap';
+import { CollaborativeCursors } from './collaborative-cursors';
 import { createTask as pushTask } from '@/app/(dashboard)/tasks/actions';
 import { toast } from 'sonner';
 import { Sparkles, MousePointer2, Pencil } from 'lucide-react';
@@ -215,6 +216,14 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         e.preventDefault();
         handleDuplicateShape(selectedShapeId);
       }
+      else if (key === 'tab' && selectedShapeId) {
+        e.preventDefault();
+        handleAddChild(selectedShapeId);
+      }
+      else if (key === 'enter' && selectedShapeId && !editingShapeId) {
+        e.preventDefault();
+        handleAddSibling(selectedShapeId);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -245,32 +254,33 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     const { x, y } = screenToCanvas(e.clientX, e.clientY);
-    const shapeTypes: ToolMode[] = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram', 'text', 'mindmap'];
-    if (shapeTypes.includes(activeTool as any)) {
-      const newShape: NexusShape = {
-        id: uuidv4(),
-        type: activeTool === 'mindmap' ? 'rectangle' : (activeTool as any),
-        x, y,
-        width: activeTool === 'mindmap' ? 200 : (activeTool === 'text' ? 160 : 120),
-        height: activeTool === 'mindmap' ? 100 : (activeTool === 'text' ? 60 : 80),
-        text: activeTool === 'mindmap' ? 'Central Topic' : (activeTool === 'text' ? 'Start typing...' : ''),
-        color: (activeTool === 'text' || activeTool === 'mindmap') ? 'transparent' : activeColor.fill,
-        borderColor: (activeTool === 'text' || activeTool === 'mindmap') ? 'transparent' : activeColor.border,
-        textColor: (activeTool === 'text' || activeTool === 'mindmap') ? '#0f172a' : activeColor.text,
-        fontSize: (activeTool === 'text' || activeTool === 'mindmap') ? 16 : 14,
-        zIndex: Date.now(),
-        fontWeight: activeTool === 'mindmap' ? 'bold' : 'normal',
-      };
-      setShapes(prev => {
-        const next = [...prev, newShape];
-        saveToHistory(next, connections, paths);
-        return next;
-      });
-      setSelectedShapeId(newShape.id);
-      setEditingShapeId(newShape.id);
-      setActiveTool('select');
-      return;
-    }
+      if (activeTool === 'mindmap') {
+        const newShape: NexusShape = {
+          id: uuidv4(),
+          type: 'rectangle', // Root node is a rectangle
+          x, y,
+          width: 200,
+          height: 80,
+          text: 'Central Topic',
+          color: '#ede9fe', // Soft purple root
+          borderColor: '#8b5cf6',
+          textColor: '#4c1d95',
+          fontSize: 18,
+          zIndex: Date.now(),
+          fontWeight: 'bold',
+          textAlign: 'center',
+        };
+        setShapes(prev => {
+          const next = [...prev, newShape];
+          saveToHistory(next, connections, paths);
+          return next;
+        });
+        setSelectedShapeId(newShape.id);
+        setEditingShapeId(newShape.id);
+        setActiveTool('select');
+        return;
+      }
+      const shapeTypes: ToolMode[] = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram', 'text'];
     if (activeTool === 'pen') {
       const newPath: NexusPath = {
         id: uuidv4(),
@@ -331,7 +341,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     }
 
     if (activeTool === 'mindmap') {
-      handleAddChild(shapeId, 'right');
+      handleAddChild(shapeId);
       return;
     }
 
@@ -569,45 +579,115 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setSelectedShapeId(newShape.id);
   };
 
-  const handleAddChild = (parentId: string, direction: 'left' | 'right' | 'top' | 'bottom') => {
+  const handleAddChild = (parentId: string, requestedDirection?: 'left' | 'right' | 'top' | 'bottom') => {
     const parent = shapes.find(s => s.id === parentId);
     if (!parent) return;
 
-    const offset = 120;
-    const newWidth = Math.max(80, parent.width * 0.9);
-    const newHeight = Math.max(40, parent.height * 0.9);
+    // Determine direction: if root, try to balance; if not, follow parent's lead
+    const incoming = connections.find(c => c.toShapeId === parentId);
+    let direction: 'left' | 'right' | 'top' | 'bottom' = requestedDirection || 'right';
+    
+    if (!requestedDirection) {
+      if (incoming) {
+        const grandParent = shapes.find(s => s.id === incoming.fromShapeId);
+        if (grandParent) direction = parent.x > grandParent.x ? 'right' : 'left';
+      } else {
+        // It's a root. Count existing children to balance.
+        const children = connections.filter(c => c.fromShapeId === parentId);
+        const rightCount = children.filter(c => {
+          const child = shapes.find(s => s.id === c.toShapeId);
+          return child && child.x > parent.x;
+        }).length;
+        const leftCount = children.length - rightCount;
+        direction = rightCount <= leftCount ? 'right' : 'left';
+      }
+    }
+
+    const siblings = connections
+      .filter(c => c.fromShapeId === parentId)
+      .map(c => shapes.find(s => s.id === c.toShapeId))
+      .filter((s): s is NexusShape => !!s && (direction === 'right' ? s.x > parent.x : s.x < parent.x));
+
+    const offsetHorizontal = 160;
+    const offsetVertical = 60;
     
     let newX = parent.x;
     let newY = parent.y;
 
-    if (direction === 'left') newX -= (parent.width + offset);
-    if (direction === 'right') newX += (parent.width + offset);
-    if (direction === 'top') newY -= (parent.height + offset);
-    if (direction === 'bottom') newY += (parent.height + offset);
+    if (direction === 'right') newX = parent.x + parent.width + offsetHorizontal;
+    else if (direction === 'left') newX = parent.x - offsetHorizontal - 120;
+    else if (direction === 'top') newY = parent.y - offsetVertical - 40;
+    else if (direction === 'bottom') newY = parent.y + parent.height + offsetVertical;
+
+    if (siblings.length > 0) {
+      // Position below the last sibling
+      const lastSibling = siblings.sort((a, b) => b.y - a.y)[0];
+      newY = lastSibling.y + lastSibling.height + 20;
+      // Re-center all siblings for logical flow
+      const totalHeight = (siblings.length + 1) * offsetVertical;
+      const startY = parent.y + parent.height / 2 - totalHeight / 2;
+      // We'll skip complex auto-layout for now and just stack
+    }
 
     const childId = uuidv4();
+    const isFirstLevel = !incoming;
+    const branchColor = isFirstLevel 
+      ? CONNECTION_COLORS[connections.filter(c => !connections.find(pc => pc.toShapeId === c.fromShapeId)).length % CONNECTION_COLORS.length]
+      : (connections.find(c => c.toShapeId === parentId)?.color || '#3b82f6');
+
     const newChild: NexusShape = {
-      ...parent,
       id: childId,
+      type: 'mindmap-node',
       x: newX,
       y: newY,
-      width: newWidth,
-      height: newHeight,
-      text: 'New Branch',
+      width: 140,
+      height: 40,
+      text: 'New Topic',
       zIndex: Date.now(),
-      // Slightly lighter color for branches
-      color: parent.color,
-      borderColor: parent.borderColor,
-      fontSize: Math.max(10, parent.fontSize - 1),
+      color: 'transparent',
+      borderColor: branchColor, // Store the branch color here
+      textColor: '#1e293b',
+      fontSize: isFirstLevel ? 15 : 13,
+      fontWeight: isFirstLevel ? 'bold' : 'normal',
+      textAlign: direction === 'right' ? 'left' : 'right',
     };
 
-    const newConn = createConnection(parentId, childId, parent.borderColor, 'curved');
+    const newConn = createConnection(parentId, childId, branchColor, 'mindmap');
+    newConn.strokeWidth = isFirstLevel ? 2.5 : 1.5;
 
     setShapes(prev => [...prev, newChild]);
     setConnections(prev => [...prev, newConn]);
     saveToHistory([...shapes, newChild], [...connections, newConn], paths);
     setSelectedShapeId(childId);
     setEditingShapeId(childId);
+  };
+
+  const handleAddSibling = (targetId: string) => {
+    const target = shapes.find(s => s.id === targetId);
+    const parentConn = connections.find(c => c.toShapeId === targetId);
+    if (!target || !parentConn) return;
+
+    const parentId = parentConn.fromShapeId;
+    const parent = shapes.find(s => s.id === parentId);
+    if (!parent) return;
+
+    const siblingId = uuidv4();
+    const newSibling: NexusShape = {
+      ...target,
+      id: siblingId,
+      y: target.y + target.height + 20,
+      text: 'New Sibling',
+      zIndex: Date.now(),
+    };
+
+    const newConn = createConnection(parentId, siblingId, parentConn.color, 'mindmap');
+    newConn.strokeWidth = parentConn.strokeWidth;
+
+    setShapes(prev => [...prev, newSibling]);
+    setConnections(prev => [...prev, newConn]);
+    saveToHistory([...shapes, newSibling], [...connections, newConn], paths);
+    setSelectedShapeId(siblingId);
+    setEditingShapeId(siblingId);
   };
 
   const deleteSelectedShape = () => {
@@ -970,6 +1050,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
                 opacity={0.5}
               />
             ))}
+            {/* Collaborative cursors in canvas space */}
+            <foreignObject x={-5000} y={-5000} width={10000} height={10000} style={{ pointerEvents: 'none' }}>
+              <CollaborativeCursors />
+            </foreignObject>
           </g>
         </svg>
       </div>

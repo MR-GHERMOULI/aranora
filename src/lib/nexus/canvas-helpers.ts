@@ -152,6 +152,12 @@ function getSnapEdgePoint(shape: NexusShape, center: {x:number, y:number}, targe
   const w = shape.width;
   const h = shape.height;
   
+  // For mindmap nodes, we often want to connect to the left/right edges for a tree-like flow
+  if (shape.type === 'mindmap-node') {
+    if (dx > 0) return { x: shape.x + shape.width, y: center.y };
+    else return { x: shape.x, y: center.y };
+  }
+
   if (Math.abs(dx) * h > Math.abs(dy) * w) {
     // Left or right edge
     if (dx > 0) return { x: shape.x + shape.width, y: center.y };
@@ -164,7 +170,7 @@ function getSnapEdgePoint(shape: NexusShape, center: {x:number, y:number}, targe
 }
 
 export function getConnectionPath(
-  x1: number, y1: number, x2: number, y2: number, routing: 'curved' | 'orthogonal' = 'curved'
+  x1: number, y1: number, x2: number, y2: number, routing: 'curved' | 'orthogonal' | 'mindmap' = 'curved'
 ): string {
   // Prevent NaN path data
   if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return '';
@@ -181,6 +187,14 @@ export function getConnectionPath(
       const cy = (y1 + y2) / 2;
       return `M ${x1} ${y1} L ${x1} ${cy} L ${x2} ${cy} L ${x2} ${y2}`;
     }
+  }
+
+  if (routing === 'mindmap') {
+    // Elegant forking curves
+    const horizontalOffset = Math.min(dx * 0.45, 100);
+    const c1x = x1 + (x2 > x1 ? horizontalOffset : -horizontalOffset);
+    const c2x = x2 - (x2 > x1 ? horizontalOffset : -horizontalOffset);
+    return `M ${x1} ${y1} C ${c1x} ${y1} ${c2x} ${y2} ${x2} ${y2}`;
   }
 
   // Miro-style organic cubic bezier paths for distinct splitting

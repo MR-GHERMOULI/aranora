@@ -84,7 +84,7 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
     if (shape.type === 'diamond') { px = shape.width * 0.25; py = shape.height * 0.25; }
     if (shape.type === 'circle') { px = shape.width * 0.15; py = shape.height * 0.15; }
     if (shape.type === 'hexagon') { px = shape.width * 0.25; }
-    if (shape.type === 'text') { px = 4; py = 4; }
+    if (shape.type === 'text' || shape.type === 'mindmap-node') { px = 4; py = 4; }
     
     return {
       x: px,
@@ -144,8 +144,23 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
                 return <path d={`M ${sk} 4 L ${w - 4} 4 L ${w - sk} ${h - 4} L 4 ${h - 4} Z`} {...commonProps} />;
               }
               case 'text':
-                // For text, we don't render a background box in flat mode unless it's for a hover/hit area
-                return <rect x={0} y={0} width={w} height={h} fill="transparent" stroke="none" />;
+              case 'mindmap-node':
+                // For mindmap nodes, we render a small underline or dot to indicate the branch start
+                return (
+                  <g>
+                    <rect x={0} y={0} width={w} height={h} fill="transparent" stroke="none" />
+                    <line 
+                      x1={shape.textAlign === 'right' ? w - 4 : 4} 
+                      y1={h - 6} 
+                      x2={shape.textAlign === 'right' ? 4 : w - 4} 
+                      y2={h - 6} 
+                      stroke={shape.borderColor} 
+                      strokeWidth={2} 
+                      strokeLinecap="round"
+                      className="opacity-40"
+                    />
+                  </g>
+                );
               default:
                 return null;
             }
@@ -177,7 +192,7 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
           } else if (shape.type === 'parallelogram') {
             const sk = w * 0.16;
             drawable = generator.polygon([[sk, 4], [w - 4, 4], [w - sk, h - 4], [4, h - 4]], options);
-          } else if (shape.type === 'text') {
+          } else if (shape.type === 'text' || shape.type === 'mindmap-node') {
             // No rough shape for text type, just return null so we only see the text
             return <rect x={0} y={0} width={w} height={h} fill="transparent" stroke="none" />;
           }
