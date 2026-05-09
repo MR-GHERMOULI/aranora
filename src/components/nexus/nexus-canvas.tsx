@@ -161,21 +161,45 @@ export function NexusCanvas({ projects, userId, className, initialProjectId, ini
       setToolbarOrientation(savedOrientation);
     }
 
-    // ── Restore last active canvas session ────────────────
-    const activeId = localStorage.getItem('nexus-active-canvas-id');
-    if (activeId) {
-      const canvases = loadCanvases();
-      const found = canvases.find(c => c.id === activeId);
-      if (found) {
+    // ── Restore or Initialize Canvas Session ──────────────
+    const canvases = loadCanvases();
+    
+    if (initialCanvasName) {
+      // Prioritize project-specific canvas if launched from a project
+      const projectCanvas = canvases.find(c => c.name.toLowerCase() === initialCanvasName.toLowerCase());
+      
+      if (projectCanvas) {
         isRestoringRef.current = true;
-        setShapes(found.shapes);
-        setConnections(found.connections);
-        setPaths(found.paths || []);
-        setCanvasName(found.name);
-        setCanvasId(found.id);
+        setShapes(projectCanvas.shapes);
+        setConnections(projectCanvas.connections);
+        setPaths(projectCanvas.paths || []);
+        setCanvasName(projectCanvas.name);
+        setCanvasId(projectCanvas.id);
+        localStorage.setItem('nexus-active-canvas-id', projectCanvas.id);
+      } else {
+        // No existing canvas for this project, prepare a new one with this name
+        setCanvasName(initialCanvasName);
+        setCanvasId(''); // Will be generated on first save
+        setShapes([]);
+        setConnections([]);
+        setPaths([]);
+      }
+    } else {
+      // Fallback to last active session
+      const activeId = localStorage.getItem('nexus-active-canvas-id');
+      if (activeId) {
+        const found = canvases.find(c => c.id === activeId);
+        if (found) {
+          isRestoringRef.current = true;
+          setShapes(found.shapes);
+          setConnections(found.connections);
+          setPaths(found.paths || []);
+          setCanvasName(found.name);
+          setCanvasId(found.id);
+        }
       }
     }
-  }, []);
+  }, [initialCanvasName]);
 
   useEffect(() => {
     localStorage.setItem('nexus-theme', canvasTheme);
