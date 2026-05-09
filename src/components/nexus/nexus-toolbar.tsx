@@ -41,6 +41,8 @@ interface ToolbarProps {
   onPenConfigChange: (config: { type: 'pen' | 'illustration' | 'highlighter', color: string, width: number }) => void;
   canvasTheme: CanvasTheme;
   onThemeChange: (theme: CanvasTheme) => void;
+  showMinimap: boolean;
+  onShowMinimapChange: (show: boolean) => void;
 }
 
 const toolGroups = [
@@ -99,6 +101,7 @@ export function NexusToolbar({
   onUndo, onRedo, canUndo, canRedo,
   penConfig, onPenConfigChange,
   canvasTheme, onThemeChange,
+  showMinimap, onShowMinimapChange,
 }: ToolbarProps) {
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState<'style' | 'actions' | null>(null);
@@ -318,6 +321,17 @@ export function NexusToolbar({
                 >
                   <div className={cn("w-2 h-2 rounded-full", snapToGrid ? "bg-blue-500" : "bg-gray-300")} />
                   Snap to Grid
+                </button>
+
+                <button
+                  onClick={() => { onShowMinimapChange(!showMinimap); setShowConfig(null); }}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-2xl border transition-all text-xs font-bold",
+                    showMinimap ? "bg-emerald-50 border-emerald-200 text-emerald-600" : "border-gray-100 text-gray-400 hover:bg-gray-50"
+                  )}
+                >
+                  <div className={cn("w-2 h-2 rounded-full", showMinimap ? "bg-emerald-500" : "bg-gray-300")} />
+                  Show Navigator
                 </button>
 
                 <div className="p-1.5 bg-gray-50 rounded-2xl flex gap-1">

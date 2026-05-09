@@ -119,6 +119,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const [alignmentLines, setAlignmentLines] = useState<{ x?: number, y?: number }[]>([]);
   const [canvasTheme, setCanvasTheme] = useState<CanvasTheme>('hand-drawn');
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [showMinimap, setShowMinimap] = useState(true);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -134,6 +135,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     if (savedGrid) {
       setSnapToGrid(savedGrid === 'true');
     }
+    const savedMinimap = localStorage.getItem('nexus-minimap');
+    if (savedMinimap) {
+      setShowMinimap(savedMinimap === 'true');
+    }
   }, []);
 
   useEffect(() => {
@@ -143,6 +148,10 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   useEffect(() => {
     localStorage.setItem('nexus-snap', snapToGrid.toString());
   }, [snapToGrid]);
+
+  useEffect(() => {
+    localStorage.setItem('nexus-minimap', showMinimap.toString());
+  }, [showMinimap]);
 
   const screenToCanvas = useCallback((clientX: number, clientY: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -1187,6 +1196,8 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         onPenConfigChange={setPenConfig}
         canvasTheme={canvasTheme}
         onThemeChange={setCanvasTheme}
+        showMinimap={showMinimap}
+        onShowMinimapChange={setShowMinimap}
       />
 
       {/* Zoom controls - Moved to top left since dock is at bottom */}
@@ -1421,13 +1432,15 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       </div>
 
       {/* Minimap */}
-      <CanvasMinimap 
-        shapes={shapes} 
-        viewport={viewport} 
-        containerWidth={containerDimensions.width} 
-        containerHeight={containerDimensions.height} 
-        onNavigate={(x, y) => setViewport(v => ({ ...v, x, y }))}
-      />
+      {showMinimap && (
+        <CanvasMinimap 
+          shapes={shapes} 
+          viewport={viewport} 
+          containerWidth={containerDimensions.width} 
+          containerHeight={containerDimensions.height} 
+          onNavigate={(x, y) => setViewport(v => ({ ...v, x, y }))}
+        />
+      )}
 
       {selectedShapeIds.length === 1 && shapes.find(s => s.id === selectedShapeIds[0]) && activeTool === 'select' && !editingShapeId && (
         <ShapeProperties
