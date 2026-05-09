@@ -5,7 +5,7 @@ import type {
   NexusShape, NexusConnection, NexusPath, ToolMode, GeneratedTask,
   CanvasViewport, NexusCanvas as NexusCanvasData, CanvasTheme,
 } from '@/types/nexus';
-import { SHAPE_COLOR_PRESETS } from '@/types/nexus';
+import { SHAPE_COLOR_PRESETS, CONNECTION_COLORS } from '@/types/nexus';
 import { cn } from '@/lib/utils';
 import {
   createShape, createConnection, getConnectionPath,
