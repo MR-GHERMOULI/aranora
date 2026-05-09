@@ -140,31 +140,23 @@ export function NexusToolbar({
       {/* Non-Draggable Dock */}
       <div 
         className={cn(
-          "pointer-events-auto flex items-center p-2 rounded-[2.2rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] ring-1 ring-black/[0.03] transition-all duration-500",
-          orientation === 'vertical' ? 'flex-col py-3 px-2 gap-1 min-w-[64px]' : 'flex-row px-4 py-2 gap-1 min-h-[64px]'
+          "pointer-events-auto flex items-center p-1.5 rounded-[2.2rem] bg-white/95 backdrop-blur-3xl border border-white/60 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/[0.03] transition-all duration-500",
+          orientation === 'vertical' ? 'flex-col py-2.5 px-1.5 gap-0.5 min-w-[56px]' : 'flex-row px-3 py-1.5 gap-0.5 min-h-[56px]'
         )}
       >
         {/* Zoom Controls Integration */}
-        <div className={cn("flex items-center gap-0.5 bg-black/[0.03] p-1 rounded-2xl", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-1')}>
-          <button onClick={() => onZoomChange(Math.min(3, zoom * 1.2))} className="p-2 hover:bg-white hover:shadow-sm rounded-xl text-gray-600 transition-all active:scale-90">
-            <Plus className="h-4 w-4" />
+        <div className={cn("flex items-center gap-0.5 bg-black/[0.03] p-0.5 rounded-xl", orientation === 'vertical' ? 'flex-col mb-1' : 'flex-row mr-0.5')}>
+          <button onClick={() => onZoomChange(Math.min(3, zoom * 1.2))} className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all active:scale-90">
+            <Plus className="h-3.5 w-3.5" />
           </button>
-          <div className={cn("flex items-center justify-center", orientation === 'vertical' ? 'py-1' : 'px-2 min-w-[50px]')}>
-            <span className="text-[10px] font-black font-mono text-gray-900 tracking-tighter">
+          <div className={cn("flex items-center justify-center", orientation === 'vertical' ? 'py-1' : 'px-1 min-w-[42px]')}>
+            <span className="text-[9px] font-bold font-mono text-gray-900 tracking-tighter">
               {Math.round(zoom * 100)}%
             </span>
           </div>
-          <button onClick={() => onZoomChange(Math.max(0.15, zoom / 1.2))} className="p-2 hover:bg-white hover:shadow-sm rounded-xl text-gray-600 transition-all active:scale-90">
-            <Minus className="h-4 w-4" />
+          <button onClick={() => onZoomChange(Math.max(0.15, zoom / 1.2))} className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all active:scale-90">
+            <Minus className="h-3.5 w-3.5" />
           </button>
-          {orientation === 'horizontal' && (
-            <>
-              <div className="w-px h-4 bg-black/[0.06] mx-0.5" />
-              <button onClick={onResetZoom} className="p-2 hover:bg-white hover:shadow-sm rounded-xl text-gray-400 hover:text-gray-900 transition-all active:scale-90">
-                <RotateCcw className="h-3.5 w-3.5" />
-              </button>
-            </>
-          )}
         </div>
 
         <div className={cn("bg-black/[0.06]", orientation === 'vertical' ? 'w-8 h-px my-1' : 'w-px h-8 mx-1')} />
@@ -198,9 +190,9 @@ export function NexusToolbar({
                   }}
                   onDoubleClick={() => onToolChange(currentTool.mode as ToolMode)}
                   className={cn(
-                    "relative p-3 rounded-2xl transition-all duration-300 group",
+                    "relative p-2.5 rounded-xl transition-all duration-300 group",
                     isActive 
-                      ? "bg-gray-900 text-white shadow-xl shadow-gray-900/20" 
+                      ? "bg-gray-900 text-white shadow-lg shadow-gray-900/20" 
                       : "text-gray-500 hover:bg-black/[0.04] hover:text-gray-900"
                   )}
                 >
@@ -264,7 +256,7 @@ export function NexusToolbar({
           <button 
             onClick={() => toggleConfig('style')}
             className={cn(
-              "p-3 rounded-2xl transition-all",
+              "p-2.5 rounded-xl transition-all",
               showConfig === 'style' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
             )}
           >
@@ -275,7 +267,7 @@ export function NexusToolbar({
           <button 
             onClick={() => toggleConfig('actions')}
             className={cn(
-              "p-3 rounded-2xl transition-all",
+              "p-2.5 rounded-xl transition-all",
               showConfig === 'actions' ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:bg-black/[0.04]"
             )}
           >
@@ -291,14 +283,14 @@ export function NexusToolbar({
             onClick={() => { onConvert(); setActiveGroup(null); setShowConfig(null); }}
             disabled={shapeCount === 0 || isConverting}
             className={cn(
-              'flex items-center justify-center rounded-2xl font-bold text-sm transition-all relative overflow-hidden group shadow-lg shadow-gray-900/10',
-              orientation === 'vertical' ? 'w-12 h-12' : 'px-6 py-3',
-              shapeCount > 0 && !isConverting ? 'bg-gray-900 text-white hover:shadow-2xl hover:-translate-y-0.5' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              'flex items-center justify-center rounded-xl font-bold text-sm transition-all relative overflow-hidden group shadow-md shadow-gray-900/10',
+              orientation === 'vertical' ? 'w-10 h-10' : 'px-4 py-2.5',
+              shapeCount > 0 && !isConverting ? 'bg-gray-900 text-white hover:shadow-lg hover:-translate-y-0.5' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             )}
           >
             <Sparkles className={cn('h-4 w-4 relative z-10', isConverting && 'animate-spin')} />
             {orientation === 'horizontal' && (
-              <span className="ml-2 relative z-10 uppercase tracking-wider text-[11px]">{isConverting ? 'Processing' : 'Gen Tasks'}</span>
+              <span className="ml-1.5 relative z-10 uppercase tracking-wider text-[10px]">{isConverting ? '...' : 'Gen Tasks'}</span>
             )}
           </button>
         </div>
