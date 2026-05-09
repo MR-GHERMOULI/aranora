@@ -281,6 +281,34 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
         return;
       }
       const shapeTypes: ToolMode[] = ['rectangle', 'circle', 'diamond', 'hexagon', 'parallelogram', 'text'];
+      if (shapeTypes.includes(activeTool)) {
+        const newShape = createShape(
+          activeTool as any,
+          x,
+          y,
+          activeColor.fill,
+          activeColor.border,
+          activeColor.text
+        );
+        // For text tool, override some defaults
+        if (activeTool === 'text') {
+          newShape.color = 'transparent';
+          newShape.borderColor = 'transparent';
+          newShape.textColor = '#1e293b';
+          newShape.text = 'Double click to edit';
+        }
+        
+        setShapes(prev => {
+          const next = [...prev, newShape];
+          saveToHistory(next, connections, paths);
+          return next;
+        });
+        setSelectedShapeId(newShape.id);
+        setActiveTool('select');
+        if (activeTool === 'text') setEditingShapeId(newShape.id);
+        return;
+      }
+      
     if (activeTool === 'pen') {
       const newPath: NexusPath = {
         id: uuidv4(),
