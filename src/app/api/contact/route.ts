@@ -1,10 +1,38 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
+function normalizeEmail(email: string) {
+    if (!email) return ""
+    let normalized = email.toLowerCase().trim()
+    if (normalized.endsWith('@gmail.com') || normalized.endsWith('@googlemail.com')) {
+        const [localPart] = normalized.split('@')
+        let cleanedLocal = localPart.replace(/\./g, '')
+        const plusIndex = cleanedLocal.indexOf('+')
+        if (plusIndex !== -1) {
+            cleanedLocal = cleanedLocal.substring(0, plusIndex)
+        }
+        normalized = `${cleanedLocal}@gmail.com`
+    }
+    return normalized
+}
+
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { name, email, subject, message } = body
+        const { name, email, subject, message, website_url } = body
+
+        // 1. Honeypot check (hidden field filled by bots)
+        if (website_url) {
+            console.log("Spam bot detected via honeypot field. Dropping message.")
+            return NextResponse.json({ success: true }) // Fake success
+        }
+
+        // 2. Link spam check (more than 2 URLs)
+        const urlCount = (message?.match(/http:|https:|www\./gi) || []).length;
+        if (urlCount > 2) {
+             console.log("Spam bot detected via excessive links. Dropping message.")
+             return NextResponse.json({ success: true }) // Fake success
+        }
 
         // Basic validation
         if (!name || !email || !message) {
@@ -41,12 +69,15 @@ export async function POST(request: Request) {
             },
         })
 
+        // Normalize email to prevent dot-trick variations cluttering the DB
+        const normalizedEmail = normalizeEmail(email)
+
         // Insert message
         const { error } = await supabase
             .from("contact_messages")
             .insert({
                 name,
-                email,
+                email: normalizedEmail,
                 subject: subject || null,
                 message,
             })

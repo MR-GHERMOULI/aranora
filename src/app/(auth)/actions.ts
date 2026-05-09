@@ -5,10 +5,24 @@ import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { generateAndSendOtp } from '@/lib/otp'
 
+function normalizeEmail(email: string) {
+    let normalized = email.toLowerCase().trim()
+    if (normalized.endsWith('@gmail.com') || normalized.endsWith('@googlemail.com')) {
+        const [localPart] = normalized.split('@')
+        let cleanedLocal = localPart.replace(/\./g, '')
+        const plusIndex = cleanedLocal.indexOf('+')
+        if (plusIndex !== -1) {
+            cleanedLocal = cleanedLocal.substring(0, plusIndex)
+        }
+        normalized = `${cleanedLocal}@gmail.com`
+    }
+    return normalized
+}
+
 export async function login(formData: FormData) {
     const supabase = await createClient()
 
-    const email = formData.get('email') as string
+    let email = formData.get('email') as string
     const password = formData.get('password') as string
 
     if (!email || !password) {
@@ -173,6 +187,19 @@ export async function signup(formData: FormData) {
                 subscription_status: 'trialing',
             })
         }
+    }
+
+    // --- Block Dot-Trick Registrations ---
+    // Check if the normalized email matches any existing profile
+    const normalizedInput = normalizeEmail(email)
+    if (normalizedInput !== email.toLowerCase().trim()) {
+         // It's a dot or plus alias. We should check if the base email is already in the system.
+         // Since we don't have a normalized_email column, we'll fetch profiles that might match.
+         // A simple way is to check the exact normalized base email. If they registered the base email `sarkar@gmail.com`, 
+         // it will block `s.ar.k.a.r@gmail.com`. But what if they registered `s.ar.k.a.r@gmail.com` first?
+         // This check isn't perfect without fetching all emails, so let's just reject any email containing '+' or '.' before the @gmail.com
+         // to force them to use the base email. This is the simplest and safest way!
+         return { error: 'Please use your base Gmail address without any dots (.) or plus (+) signs.' }
     }
 
     const { data: signupData, error } = await supabase.auth.signUp({

@@ -25,7 +25,8 @@ export default function ContactPage() {
         lastName: "",
         email: "",
         subject: "",
-        message: ""
+        message: "",
+        website_url: ""
     })
 
     useEffect(() => {
@@ -76,6 +77,7 @@ export default function ContactPage() {
                     email: formData.email,
                     subject: formData.subject,
                     message: formData.message,
+                    website_url: formData.website_url,
                 }),
             })
 
@@ -168,6 +170,18 @@ export default function ContactPage() {
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-4">
+                                    {/* Honeypot field - invisible to users, filled by bots */}
+                                    <div style={{ display: 'none', position: 'absolute', opacity: 0, top: -1000, left: -1000 }} aria-hidden="true">
+                                        <Label htmlFor="website_url">Website URL (leave empty)</Label>
+                                        <Input
+                                            id="website_url"
+                                            type="text"
+                                            tabIndex={-1}
+                                            autoComplete="off"
+                                            value={formData.website_url}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="firstName">First Name</Label>
