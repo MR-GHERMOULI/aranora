@@ -1057,12 +1057,23 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
   const handleToggleLock = (targetId?: string) => {
     const targets = targetId ? [targetId] : selectedShapeIds;
     if (targets.length === 0) return;
-    const allLocked = shapes.filter(s => targets.includes(s.id)).every(s => s.isLocked);
-    const nextShapes = shapes.map(s => targets.includes(s.id) ? { ...s, isLocked: !allLocked } : s);
-    setShapes(nextShapes);
-    saveToHistory(nextShapes, connections, paths);
-    if (!allLocked) toast.success("Items locked");
-    else toast.info("Items unlocked");
+
+    setShapes(prev => {
+      const allLocked = prev.filter(s => targets.includes(s.id)).every(s => !!s.isLocked);
+      const nextLockedState = !allLocked;
+      const nextShapes = prev.map(s => 
+        targets.includes(s.id) ? { ...s, isLocked: nextLockedState } : s
+      );
+      
+      // Save to history with the next state
+      saveToHistory(nextShapes, connections, paths);
+      
+      // Feedback
+      if (nextLockedState) toast.success("Items locked");
+      else toast.info("Items unlocked");
+      
+      return nextShapes;
+    });
   };
 
   const handleSplitConn = useCallback((connId: string) => {
