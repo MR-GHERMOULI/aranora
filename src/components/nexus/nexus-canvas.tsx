@@ -470,13 +470,17 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
       setEditingShapeId(null);
       setEditingConnId(null);
       
+      // Physical Locking: only allow dragging if NOT locked
       if (!shape.isLocked) {
         setShapes(prev => prev.map(s => s.id === shapeId ? { ...s, zIndex: Date.now() } : s));
         
-        // Capture initial positions for all selected items (if they aren't locked)
-        const targets = selectedShapeIds.includes(shapeId) ? selectedShapeIds : [shapeId];
+        // Capture initial positions for all selected items (filtering out locked ones)
+        const currentSelection = e.shiftKey 
+          ? (selectedShapeIds.includes(shapeId) ? selectedShapeIds : [...selectedShapeIds, shapeId])
+          : [shapeId];
+          
         const initialPositions: Record<string, { x: number, y: number }> = {};
-        targets.forEach(id => {
+        currentSelection.forEach(id => {
           const s = shapes.find(sh => sh.id === id);
           if (s && !s.isLocked) initialPositions[id] = { x: s.x, y: s.y };
         });

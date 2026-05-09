@@ -101,11 +101,12 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
     <g
       transform={`translate(${shape.x}, ${shape.y}) rotate(${shape.rotation || 0}, ${shape.width / 2}, ${shape.height / 2})`}
       style={{ 
-        cursor: shape.isLocked ? 'not-allowed' : isEditing ? 'text' : 
+        cursor: isEditing ? 'text' : 
+                shape.isLocked ? 'default' :
                 (activeTool === 'connect' || activeTool === 'arrow') ? 'crosshair' : 
                 activeTool === 'pan' ? 'grab' : 'grab' 
       }}
-      onMouseDown={e => { if (!isEditing && !shape.isLocked) onMouseDown(e, shape.id); }}
+      onMouseDown={e => { if (!isEditing) onMouseDown(e, shape.id); }}
       onDoubleClick={() => { if (!shape.isLocked) onDoubleClick(shape.id); }}
       onContextMenu={e => { e.preventDefault(); onContextMenu(e, shape.id); }}
     >
@@ -228,13 +229,13 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
           width={shape.width + 12} height={shape.height + 12}
           rx={16} ry={16}
           fill="none"
-          stroke={isConnectSource ? '#f59e0b' : '#3b82f6'}
-          strokeWidth={1.5}
-          strokeDasharray="6 4"
-          opacity={0.7}
+          stroke={shape.isLocked ? '#94a3b8' : (isConnectSource ? '#f59e0b' : '#3b82f6')}
+          strokeWidth={shape.isLocked ? 1 : 1.5}
+          strokeDasharray={shape.isLocked ? "4 4" : "6 4"}
+          opacity={shape.isLocked ? 0.4 : 0.7}
           style={{ pointerEvents: 'none' }}
         >
-          <animate attributeName="stroke-dashoffset" from="0" to="20" dur="1.2s" repeatCount="indefinite" />
+          {!shape.isLocked && <animate attributeName="stroke-dashoffset" from="0" to="20" dur="1.2s" repeatCount="indefinite" />}
         </rect>
       )}
 
@@ -300,7 +301,7 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
       {/* Lock Indicator - Always show if locked */}
       {!!shape.isLocked && (
         <g 
-          transform={`translate(${shape.width - 24}, ${-24})`} 
+          transform={`translate(${shape.width - 28}, ${-12})`} 
           className="cursor-pointer transition-all hover:scale-110 active:scale-95"
           style={{ pointerEvents: 'all' }}
           onClick={(e) => { 
@@ -308,9 +309,13 @@ export const ShapeRenderer = React.memo(function ShapeRenderer({
             onToggleLock(shape.id); 
           }}
         >
-          <circle cx={12} cy={12} r={10} fill="#ef4444" className="shadow-lg" style={{ filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))' }} />
-          <path d="M8 11v-2a4 4 0 0 1 8 0v2" fill="none" stroke="white" strokeWidth="1.5" />
-          <rect x={6} y={11} width={12} height={8} rx={1} fill="white" />
+          {/* A more premium "floating" glass lock button */}
+          <rect x={0} y={0} width={24} height={24} rx={12} fill="#ef4444" className="shadow-lg" />
+          <g transform="translate(6, 6) scale(0.5)">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x={7} y={11} width={10} height={7} rx={1} fill="white" />
+            <path d="M9 11V8a3 3 0 0 1 6 0v3" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
         </g>
       )}
     </g>
