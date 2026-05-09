@@ -153,8 +153,8 @@ export function ConnectionLine({
       {/* Routing & Endpoint controls */}
       {isSelected && !isEditing && (
         <foreignObject
-          x={midX - 160} y={midY + 20}
-          width={320} height={40}
+          x={midX - 200} y={midY + 20}
+          width={400} height={40}
           style={{ pointerEvents: 'all' }}
           onMouseDown={e => e.stopPropagation()}
           onClick={e => e.stopPropagation()}
@@ -184,6 +184,7 @@ export function ConnectionLine({
               <div className="px-1 flex gap-0.5">
                 {[
                   { m: 'none', icon: Minus },
+                  { m: 'arrow', icon: ArrowRight },
                   { m: 'dot', icon: Circle },
                   { m: 'diamond', icon: Diamond }
                 ].map(opt => (
@@ -212,7 +213,9 @@ export function ConnectionLine({
               <div className="px-1 flex gap-0.5">
                 {[
                   { m: 'none', icon: Minus },
-                  { m: 'arrow', icon: ArrowRight }
+                  { m: 'arrow', icon: ArrowRight },
+                  { m: 'dot', icon: Circle },
+                  { m: 'diamond', icon: Diamond }
                 ].map(opt => (
                   <button key={`end-${opt.m}`} onClick={() => onUpdateConn(conn.id, { endMarker: opt.m as any })}
                     className={cn("p-1.5 rounded-lg transition-all", (conn.endMarker === opt.m || (opt.m==='arrow' && !conn.endMarker)) ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:bg-gray-50")}>

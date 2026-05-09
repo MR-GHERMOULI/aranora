@@ -971,6 +971,7 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
     setSelectedConnId(null);
     setSelectedShapeId(waypointId);
     setConnectFrom(waypointId); // Ready to drag a new connection from this waypoint
+    setActiveTool('arrow'); // Ensure they are in arrow mode to finish the branch
     
     saveToHistory([...shapes, waypoint], [...connections.filter(c => c.id !== connId), newConn1, newConn2], paths);
   }, [connections, shapes, saveToHistory]);
@@ -1123,22 +1124,22 @@ export function NexusCanvas({ projects, userId }: NexusCanvasProps) {
             {/* Per-connection markers */}
             {connections.map(conn => (
               <g key={`defs-${conn.id}`}>
-                <marker id={`dot-${conn.id}`} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <marker id={`dot-${conn.id}`} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
                   <circle cx="3" cy="3" r="2.5" fill={conn.color} />
                 </marker>
-                <marker id={`arrow-${conn.id}`} markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                <marker id={`arrow-${conn.id}`} markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
                   <path d="M 0 0 L 10 4 L 0 8 z" fill={selectedConnId === conn.id ? '#f59e0b' : conn.color} />
                 </marker>
-                <marker id={`diamond-${conn.id}`} markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+                <marker id={`diamond-${conn.id}`} markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto-start-reverse">
                   <path d="M 0 6 L 6 0 L 12 6 L 6 12 z" fill={conn.color} />
                 </marker>
               </g>
             ))}
             {/* Temp line arrow */}
-            <marker id="temp-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+            <marker id="temp-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto-start-reverse">
               <path d="M 0 0 L 10 4 L 0 8 z" fill={connectionColor} opacity="0.6" />
             </marker>
-            <marker id="temp-dot" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <marker id="temp-dot" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse">
               <circle cx="3" cy="3" r="2.5" fill={connectionColor} opacity="0.6" />
             </marker>
 
