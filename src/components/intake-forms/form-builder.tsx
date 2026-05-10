@@ -188,23 +188,31 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
             <DialogContent className="sm:max-w-[900px] w-full p-0 overflow-hidden border-none shadow-2xl gap-0 max-h-[95dvh] flex flex-col">
                 <div className="flex flex-col min-h-0 flex-1 bg-white dark:bg-slate-950">
                     {/* Dark Header */}
-                    <div className="bg-slate-900 text-white px-8 pt-7 pb-5 shrink-0 relative overflow-hidden">
-                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-rose-500/15 rounded-full blur-[80px]" />
-                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-[60px]" />
+                    <div className="bg-gradient-to-br from-brand-primary via-brand-primary-light to-brand-secondary text-white px-8 pt-7 pb-5 shrink-0 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10 pointer-events-none">
+                            <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <defs>
+                                    <pattern id="grid-intake" width="8" height="8" patternUnits="userSpaceOnUse">
+                                        <path d="M 8 0 L 0 0 0 8" fill="none" stroke="white" strokeWidth="0.5" />
+                                    </pattern>
+                                </defs>
+                                <rect width="100" height="100" fill="url(#grid-intake)" />
+                            </svg>
+                        </div>
 
                         <div className="relative z-10 flex items-center justify-between mb-7">
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-2xl bg-rose-500/20 flex items-center justify-center ring-1 ring-white/10">
-                                    <FileText className="h-7 w-7 text-rose-400" />
+                                <div className="h-12 w-12 rounded-2xl bg-brand-secondary/20 flex items-center justify-center ring-1 ring-white/10">
+                                    <FileText className="h-7 w-7 text-brand-secondary" />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold tracking-tight">Intake Form Builder</h2>
-                                    <p className="text-slate-400 text-sm mt-0.5">Create a professional client questionnaire</p>
+                                    <p className="text-white/70 text-sm mt-0.5">Create a professional client questionnaire</p>
                                 </div>
                             </div>
                             <div className="text-right hidden sm:block">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Step {currentStep} of 4</span>
-                                <div className="text-sm font-semibold text-rose-400 mt-1">{STEPS[currentStep - 1].title}</div>
+                                <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Step {currentStep} of 4</span>
+                                <div className="text-sm font-semibold text-brand-secondary mt-1">{STEPS[currentStep - 1].title}</div>
                             </div>
                         </div>
 
@@ -216,16 +224,16 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                 return (
                                     <div key={step.id} className="flex-1 group">
                                         <div className="relative">
-                                            <div className={`h-1.5 rounded-full transition-all duration-700 ${isCompleted ? 'bg-rose-500' : isActive ? 'bg-rose-500/40' : 'bg-slate-800'}`} />
+                                            <div className={`h-1.5 rounded-full transition-all duration-700 ${isCompleted ? 'bg-brand-secondary' : isActive ? 'bg-brand-secondary/40' : 'bg-white/10'}`} />
                                             {isActive && (
-                                                <motion.div layoutId="intake-step-glow" className="absolute inset-0 bg-rose-500 rounded-full blur-md opacity-40" />
+                                                <motion.div layoutId="intake-step-glow" className="absolute inset-0 bg-brand-secondary rounded-full blur-md opacity-40" />
                                             )}
                                         </div>
                                         <div className="mt-3 flex items-center gap-2">
-                                            <div className={`h-4 w-4 rounded-full text-[10px] flex items-center justify-center font-bold transition-colors ${isCompleted ? 'bg-rose-500 text-white' : isActive ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-slate-500'}`}>
+                                            <div className={`h-4 w-4 rounded-full text-[10px] flex items-center justify-center font-bold transition-colors ${isCompleted ? 'bg-brand-secondary text-white' : isActive ? 'bg-brand-secondary/20 text-brand-secondary border border-brand-secondary/30' : 'bg-white/10 text-white/40'}`}>
                                                 {isCompleted ? <Check className="h-2.5 w-2.5" /> : step.id}
                                             </div>
-                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-rose-400' : isCompleted ? 'text-slate-200' : 'text-slate-500'}`}>
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-brand-secondary' : isCompleted ? 'text-white' : 'text-white/40'}`}>
                                                 {step.title}
                                             </span>
                                         </div>
@@ -251,18 +259,18 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                     <div className="space-y-8 max-w-2xl mx-auto">
                                         <section className="space-y-4">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <div className="h-6 w-1 bg-rose-500 rounded-full" />
+                                                <div className="h-6 w-1 bg-brand-secondary rounded-full" />
                                                 <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Form Details</h3>
                                             </div>
                                             <div className="space-y-3">
                                                 <Label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Form Title *</Label>
                                                 <div className="relative group">
-                                                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-rose-500 transition-colors" />
+                                                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-brand-secondary transition-colors" />
                                                     <Input
                                                         placeholder="e.g. Web Design Project Request"
                                                         value={title}
                                                         onChange={(e) => setTitle(e.target.value)}
-                                                        className="h-13 pl-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-rose-500/20 focus-visible:border-rose-500 rounded-xl font-medium"
+                                                        className="h-13 pl-12 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-brand-secondary/20 focus-visible:border-brand-secondary rounded-xl font-medium"
                                                     />
                                                 </div>
                                             </div>
@@ -272,7 +280,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                     placeholder="Describe what information you need from the client..."
                                                     value={description}
                                                     onChange={(e) => setDescription(e.target.value)}
-                                                    className="min-h-[80px] bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-rose-500/20 focus-visible:border-rose-500 rounded-xl"
+                                                    className="min-h-[80px] bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white border-slate-200 focus-visible:ring-brand-secondary/20 focus-visible:border-brand-secondary rounded-xl"
                                                 />
                                             </div>
                                         </section>
@@ -280,10 +288,10 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                         <section className="space-y-4 pt-2">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="h-6 w-1 bg-indigo-500 rounded-full" />
+                                                    <div className="h-6 w-1 bg-brand-primary rounded-full" />
                                                     <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Start from Template</h3>
                                                 </div>
-                                                <Badge variant="secondary" className="bg-indigo-50 text-indigo-600 border-indigo-100 text-[10px]">
+                                                <Badge variant="secondary" className="bg-brand-primary/10 text-brand-primary border-brand-primary/10 text-[10px]">
                                                     {templates.length} AVAILABLE
                                                 </Badge>
                                             </div>
@@ -292,7 +300,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                     <div
                                                         key={i}
                                                         onClick={() => handleTemplateSelect(t)}
-                                                        className="group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-rose-200 hover:shadow-md hover:bg-rose-50/30 dark:hover:bg-rose-900/20"
+                                                        className="group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-brand-secondary/20 hover:shadow-md hover:bg-brand-secondary/5 dark:hover:bg-brand-secondary/10"
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div className="text-xl shrink-0">{t.name.split(' ')[0]}</div>
@@ -300,7 +308,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                                 <span className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{t.name.replace(/^[^\w]*\s*/, '')}</span>
                                                                 <span className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{t.fields.length} fields</span>
                                                             </div>
-                                                            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-rose-500 transition-colors ml-auto shrink-0" />
+                                                            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-brand-secondary transition-colors ml-auto shrink-0" />
                                                         </div>
                                                     </div>
                                                 ))}
@@ -320,13 +328,13 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                     <div className="space-y-6 max-w-2xl mx-auto">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <div className="h-6 w-1 bg-rose-500 rounded-full" />
+                                                <div className="h-6 w-1 bg-brand-secondary rounded-full" />
                                                 <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Form Fields</h3>
                                                 <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-[10px]">{fields.length}</Badge>
                                             </div>
                                             <Button
                                                 onClick={() => setShowFieldPicker(!showFieldPicker)}
-                                                className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold h-9 px-4 rounded-lg border border-rose-200 gap-2 shrink-0"
+                                                className="bg-brand-secondary/10 hover:bg-brand-secondary/20 text-brand-secondary font-bold h-9 px-4 rounded-lg border border-brand-secondary/20 gap-2 shrink-0"
                                             >
                                                 <Plus className="h-4 w-4" /> Add Field
                                             </Button>
@@ -348,9 +356,9 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                                 <button
                                                                     key={ft.type}
                                                                     onClick={() => addField(ft.type)}
-                                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-50 hover:bg-rose-50 hover:text-rose-700 border border-transparent hover:border-rose-200 transition-all text-center group"
+                                                                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-slate-50 hover:bg-brand-secondary/10 hover:text-brand-secondary border border-transparent hover:border-brand-secondary/20 transition-all text-center group"
                                                                 >
-                                                                    <ft.icon className="h-5 w-5 text-slate-400 group-hover:text-rose-500 transition-colors" />
+                                                                    <ft.icon className="h-5 w-5 text-slate-400 group-hover:text-brand-secondary transition-colors" />
                                                                     <span className="text-[10px] font-bold">{ft.label}</span>
                                                                 </button>
                                                             ))}
@@ -371,7 +379,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                         layout
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0 }}
-                                                        className={`bg-white dark:bg-slate-800 border rounded-xl transition-all ${isEditing ? 'border-rose-300 shadow-md ring-1 ring-rose-100' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`}
+                                                        className={`bg-white dark:bg-slate-800 border rounded-xl transition-all ${isEditing ? 'border-brand-secondary/30 shadow-md ring-1 ring-brand-secondary/10' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'}`}
                                                     >
                                                         {/* Field Header */}
                                                         <div
@@ -508,7 +516,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                     <div className="space-y-8 max-w-2xl mx-auto">
                                         <section className="space-y-5">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <div className="h-6 w-1 bg-rose-500 rounded-full" />
+                                                <div className="h-6 w-1 bg-brand-secondary rounded-full" />
                                                 <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Messages</h3>
                                             </div>
                                             <div className="space-y-3">
@@ -533,7 +541,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
 
                                         <section className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-5">
                                             <div className="flex items-center gap-2">
-                                                <Settings2 className="h-5 w-5 text-indigo-500" />
+                                                <Settings2 className="h-5 w-5 text-brand-primary" />
                                                 <h4 className="text-sm font-bold text-slate-800 dark:text-white">Client Information</h4>
                                             </div>
                                             <div className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -612,7 +620,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                                                 <div key={field.id} className="flex items-center gap-2 text-sm">
                                                                     <Icon className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                                                                     <span className="text-slate-700 dark:text-slate-300 font-medium truncate">{field.label || 'Untitled'}</span>
-                                                                    {field.required && <span className="text-[9px] font-bold text-rose-500 shrink-0">REQ</span>}
+                                                                    {field.required && <span className="text-[9px] font-bold text-brand-secondary shrink-0">REQ</span>}
                                                                 </div>
                                                             )
                                                         })}
@@ -641,7 +649,7 @@ export function FormBuilder({ onCreated }: FormBuilderProps) {
                                 <Button
                                     onClick={() => setCurrentStep(currentStep + 1)}
                                     disabled={isNextDisabled()}
-                                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold h-11 px-8 rounded-xl shadow-lg shadow-rose-500/20 gap-2 transition-all"
+                                    className="bg-brand-secondary hover:bg-brand-secondary-dark text-white font-bold h-11 px-8 rounded-xl shadow-lg shadow-brand-secondary/20 gap-2 transition-all"
                                 >
                                     Next
                                     <ArrowRight className="h-4 w-4" />
