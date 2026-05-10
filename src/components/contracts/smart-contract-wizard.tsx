@@ -291,10 +291,17 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
             <DialogContent className="sm:max-w-[850px] w-full p-0 overflow-hidden border-none shadow-2xl gap-0 max-h-[95dvh] flex flex-col">
                 <div className="flex flex-col min-h-0 flex-1 bg-white dark:bg-slate-950">
                     {/* ── Dark Header ── */}
-                    <div className="bg-slate-900 text-white px-8 pt-8 pb-6 shrink-0 relative overflow-hidden">
-                        {/* Decorative glow */}
-                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-primary/20 rounded-full blur-[80px]" />
-                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/10 rounded-full blur-[60px]" />
+                    <div className="bg-gradient-to-br from-brand-primary via-brand-primary-light to-brand-secondary text-white px-8 pt-8 pb-6 shrink-0 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10 pointer-events-none">
+                            <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <defs>
+                                    <pattern id="grid-contract" width="8" height="8" patternUnits="userSpaceOnUse">
+                                        <path d="M 8 0 L 0 0 0 8" fill="none" stroke="white" strokeWidth="0.5" />
+                                    </pattern>
+                                </defs>
+                                <rect width="100" height="100" fill="url(#grid-contract)" />
+                            </svg>
+                        </div>
 
                         <div className="relative z-10 flex items-center justify-between mb-8">
                             <div className="flex items-center gap-4">
@@ -303,11 +310,11 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold tracking-tight">Smart Contract Assistant</h2>
-                                    <p className="text-slate-400 text-sm mt-0.5">Generate professional, secure agreements in minutes.</p>
+                                    <p className="text-white/70 text-sm mt-0.5">Generate professional, secure agreements in minutes.</p>
                                 </div>
                             </div>
                             <div className="text-right hidden sm:block">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Step {currentStep} of 4</span>
+                                <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Step {currentStep} of 4</span>
                                 <div className="text-sm font-semibold text-brand-primary mt-1">{STEPS[currentStep - 1].title}</div>
                             </div>
                         </div>
@@ -320,7 +327,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                 return (
                                     <div key={step.id} className="flex-1 group">
                                         <div className="relative">
-                                            <div className={`h-1.5 rounded-full transition-all duration-700 ${isCompleted ? 'bg-brand-primary' : isActive ? 'bg-brand-primary/40' : 'bg-slate-800'}`} />
+                                            <div className={`h-1.5 rounded-full transition-all duration-700 ${isCompleted ? 'bg-brand-primary' : isActive ? 'bg-brand-primary/40' : 'bg-white/10'}`} />
                                             {isActive && (
                                                 <motion.div
                                                     layoutId="step-glow"
@@ -329,11 +336,11 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             )}
                                         </div>
                                         <div className="mt-3 flex items-center gap-2">
-                                            <div className={`h-4 w-4 rounded-full text-[10px] flex items-center justify-center font-bold transition-colors ${isCompleted ? 'bg-brand-primary text-white' : isActive ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30' : 'bg-slate-800 text-slate-500'}`}>
+                                            <div className={`h-4 w-4 rounded-full text-[10px] flex items-center justify-center font-bold transition-colors ${isCompleted ? 'bg-brand-primary text-white' : isActive ? 'bg-brand-primary/20 text-brand-primary border border-brand-primary/30' : 'bg-white/10 text-white/40'}`}>
                                                 {isCompleted ? <Check className="h-2.5 w-2.5" /> : step.id}
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-brand-primary' : isCompleted ? 'text-slate-200' : 'text-slate-500'}`}>
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${isActive ? 'text-brand-primary' : isCompleted ? 'text-white' : 'text-white/40'}`}>
                                                     {step.title}
                                                 </span>
                                             </div>
@@ -409,10 +416,10 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                         <section className="space-y-4 pt-2">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="h-6 w-1 bg-violet-500 rounded-full" />
+                                                    <div className="h-6 w-1 bg-brand-primary rounded-full" />
                                                     <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Select Template Base</h3>
                                                 </div>
-                                                <Badge variant="secondary" className="bg-violet-50 text-violet-600 border-violet-100 text-[10px]">
+                                                <Badge variant="secondary" className="bg-brand-secondary/10 text-brand-secondary border-brand-secondary/10 text-[10px]">
                                                     {templates.length} AVAILABLE
                                                 </Badge>
                                             </div>
@@ -424,7 +431,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                         className={`group relative p-4 rounded-2xl border transition-all cursor-pointer overflow-hidden ${templateId === t.id ? 'bg-brand-primary/5 border-brand-primary ring-1 ring-brand-primary/20' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 hover:shadow-md'}`}
                                                     >
                                                         <div className="flex items-center gap-4 relative z-10">
-                                                            <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${templateId === t.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-violet-50 group-hover:text-violet-500'}`}>
+                                                            <div className={`h-11 w-11 rounded-xl flex items-center justify-center transition-colors ${templateId === t.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-brand-secondary/10 group-hover:text-brand-secondary'}`}>
                                                                 <Layers className="h-5 w-5" />
                                                             </div>
                                                             <div className="flex flex-col min-w-0 pr-4">
@@ -672,7 +679,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             {/* Legal Checks Card */}
                                             <section className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-5">
                                                 <div className="flex items-center gap-2">
-                                                    <ShieldCheck className="h-5 w-5 text-indigo-500" />
+                                                    <ShieldCheck className="h-5 w-5 text-brand-primary" />
                                                     <h4 className="text-sm font-bold text-slate-800 dark:text-white">Legal Provisions</h4>
                                                 </div>
 
@@ -736,14 +743,14 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                                             <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="h-6 w-1 bg-violet-600 rounded-full" />
+                                                    <div className="h-6 w-1 bg-brand-secondary rounded-full" />
                                                     <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Project Deliverables</h3>
                                                 </div>
                                                 <p className="text-sm text-slate-500">Specify exactly what the client will receive.</p>
                                             </div>
                                             <Button
                                                 onClick={addDeliverable}
-                                                className="bg-violet-50 hover:bg-violet-100 text-violet-700 font-bold h-9 px-4 rounded-lg border border-violet-200 gap-2 shrink-0 transition-all hover:scale-[1.03]"
+                                                className="bg-brand-secondary/10 hover:bg-brand-secondary/20 text-brand-secondary font-bold h-9 px-4 rounded-lg border border-brand-secondary/20 gap-2 shrink-0 transition-all hover:scale-[1.03]"
                                             >
                                                 <Plus className="h-4 w-4" /> Add Item
                                             </Button>
@@ -757,14 +764,14 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                                     animate={{ opacity: 1, x: 0 }}
                                                     className="flex gap-3 group"
                                                 >
-                                                    <div className={`h-12 w-12 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${deliverable ? 'bg-violet-50 text-violet-600 border border-violet-100' : 'bg-slate-50 text-slate-400'}`}>
+                                                    <div className={`h-12 w-12 shrink-0 rounded-xl flex items-center justify-center font-bold text-xs transition-colors ${deliverable ? 'bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/10' : 'bg-slate-50 text-slate-400'}`}>
                                                         {index + 1}
                                                     </div>
                                                     <Input
                                                         placeholder="e.g. Interactive Prototype in Figma / High-fidelity mockup"
                                                         value={deliverable}
                                                         onChange={(e) => updateDeliverable(index, e.target.value)}
-                                                        className="h-12 flex-1 rounded-xl bg-slate-50 focus:bg-white border-transparent focus:border-violet-200 focus-visible:ring-violet-100/30 transition-all font-medium"
+                                                        className="h-12 flex-1 rounded-xl bg-slate-50 focus:bg-white border-transparent focus:border-brand-secondary/30 focus-visible:ring-brand-secondary/10 transition-all font-medium"
                                                     />
                                                     <Button
                                                         variant="ghost"
@@ -839,7 +846,7 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
                                             <div className="flex-1 overflow-y-auto p-4 md:p-12 scrollbar-none flex justify-center bg-slate-950/20">
                                                 <div className="w-full max-w-[650px] bg-white dark:bg-slate-900 shadow-2xl min-h-[500px] p-10 md:p-20 relative rounded-sm transition-colors">
                                                     {/* Top Binder Edge */}
-                                                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-primary/40 to-indigo-500/40" />
+                                                    <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-primary/40 to-brand-secondary/40" />
 
                                                     {/* Decorative Header */}
                                                     <div className="border-b border-slate-100 dark:border-slate-800 pb-8 mb-10 flex flex-col gap-2">
@@ -877,22 +884,22 @@ export function SmartContractWizard({ clients, projects, templates = [], freelan
 
                                                         {structuredData.milestones && structuredData.milestones.length > 0 && (
                                                             <div className="flex items-center gap-3">
-                                                                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                                                                    <Layers className="h-4 w-4 text-indigo-400" />
+                                                                <div className="h-8 w-8 rounded-lg bg-brand-primary/10 flex items-center justify-center border border-brand-primary/20">
+                                                                    <Layers className="h-4 w-4 text-brand-primary" />
                                                                 </div>
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-tight">Milestones</span>
+                                                                    <span className="text-[10px] font-bold text-brand-primary uppercase tracking-tight">Milestones</span>
                                                                     <span className="text-xs text-slate-300">{structuredData.milestones.length} Injected</span>
                                                                 </div>
                                                             </div>
                                                         )}
 
                                                         <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 rounded-lg bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-                                                                <ShieldCheck className="h-4 w-4 text-violet-400" />
+                                                            <div className="h-8 w-8 rounded-lg bg-brand-secondary/10 flex items-center justify-center border border-brand-secondary/20">
+                                                                <ShieldCheck className="h-4 w-4 text-brand-secondary" />
                                                             </div>
                                                             <div className="flex flex-col">
-                                                                <span className="text-[10px] font-bold text-violet-400 uppercase tracking-tight">Legal Protection</span>
+                                                                <span className="text-[10px] font-bold text-brand-secondary uppercase tracking-tight">Legal Protection</span>
                                                                 <span className="text-xs text-slate-300">
                                                                     {structuredData.nda_included ? 'NDA' : ''}
                                                                     {structuredData.nda_included && structuredData.non_compete_included ? ' + ' : ''}
