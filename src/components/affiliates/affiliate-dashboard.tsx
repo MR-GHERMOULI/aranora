@@ -7,8 +7,9 @@ import {
     Twitter, Linkedin, Mail, Clock, AlertCircle, UserPlus,
     Award, Medal, Star, ShieldCheck, Download, Image as ImageIcon,
     MessageSquare, MousePointerClick, CreditCard, BarChart3,
-    ArrowDownRight, Eye, Percent, Zap
+    ArrowDownRight, Eye, Percent, Zap, Sparkles
 } from 'lucide-react';
+
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
