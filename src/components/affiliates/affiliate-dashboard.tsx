@@ -131,6 +131,7 @@ export function AffiliateDashboard() {
     const [payoutLoading, setPayoutLoading] = useState(false);
 
     const [siteName, setSiteName] = useState("Aranora");
+    const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchBranding = async () => {
@@ -141,12 +142,14 @@ export function AffiliateDashboard() {
                 .select('value')
                 .eq('key', 'branding')
                 .single();
-            if (data?.value?.site_name) {
-                setSiteName(data.value.site_name);
+            if (data?.value) {
+                if (data.value.site_name) setSiteName(data.value.site_name);
+                if (data.value.logo_url) setLogoUrl(data.value.logo_url);
             }
         };
         fetchBranding();
     }, []);
+
 
     const fetchData = useCallback(async () => {
         try {
@@ -172,9 +175,11 @@ export function AffiliateDashboard() {
                 .select("value")
                 .eq("key", "branding")
                 .single()
-            if (branding?.value?.site_name) {
-                setSiteName(branding.value.site_name)
+            if (branding?.value) {
+                if (branding.value.site_name) setSiteName(branding.value.site_name)
+                if (branding.value.logo_url) setLogoUrl(branding.value.logo_url)
             }
+
         } catch {
             console.error('Failed to fetch affiliate data');
         } finally {
@@ -1157,7 +1162,9 @@ export function AffiliateDashboard() {
                                         affiliateCode={affiliate?.affiliate_code || ''} 
                                         referralLink={referralLink}
                                         siteName={siteName}
+                                        logoUrl={logoUrl}
                                     />
+
                                 </div>
                             </div>
                         </div>

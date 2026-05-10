@@ -50,9 +50,11 @@ interface AffiliateMarketingCardProps {
     affiliateCode: string;
     referralLink: string;
     siteName: string;
+    logoUrl: string | null;
 }
 
-export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName }: AffiliateMarketingCardProps) {
+export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName, logoUrl }: AffiliateMarketingCardProps) {
+
     const cardRef = useRef<HTMLDivElement>(null);
     const [selectedAngle, setSelectedAngle] = React.useState<MarketingAngle>(MARKETING_ANGLES[0]);
     const [customTitle, setCustomTitle] = React.useState(MARKETING_ANGLES[0].title);
@@ -212,11 +214,16 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName }
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-12">
                                     <div className="flex flex-col">
-                                        <span className="text-white text-3xl font-black tracking-tighter leading-none mb-1">
-                                            {siteName}
-                                        </span>
+                                        {logoUrl ? (
+                                            <img src={logoUrl} alt={siteName} className="h-10 w-auto object-contain mb-2 self-start" />
+                                        ) : (
+                                            <span className="text-white text-3xl font-black tracking-tighter leading-none mb-1">
+                                                {siteName}
+                                            </span>
+                                        )}
                                         <span className="text-brand-secondary text-[10px] font-bold uppercase tracking-[0.3em]">Partner Program</span>
                                     </div>
+
                                     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10">
                                         <QRCodeSVG 
                                             value={referralLink} 
