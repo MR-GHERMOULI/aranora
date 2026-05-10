@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { AffiliateMarketingCard } from "./marketing-card";
+
 
 interface AffiliateStats {
     totalClicks: number;
@@ -1135,7 +1137,32 @@ export function AffiliateDashboard() {
                             </p>
                         </div>
 
+                        {/* NEW: Personalized Marketing Card Generator */}
+                        <div className="mb-16">
+                            <div className="bg-muted/30 rounded-[32px] p-8 lg:p-12 border border-border/50 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                                    <Sparkles className="h-32 w-32 text-brand-primary" />
+                                </div>
+                                <div className="relative z-10">
+                                    <div className="mb-10">
+                                        <Badge className="mb-4 bg-brand-primary/10 text-brand-primary border-brand-primary/20 hover:bg-brand-primary/20 px-3 py-1 font-bold">New Tool</Badge>
+                                        <h3 className="text-3xl font-bold text-foreground mb-4">Personalized Marketing Card</h3>
+                                        <p className="text-muted-foreground text-lg max-w-2xl leading-relaxed">
+                                            Generate a custom marketing card with your unique QR code and professional marketing text. Perfect for sharing on social media or in direct messages.
+                                        </p>
+                                    </div>
+
+                                    <AffiliateMarketingCard 
+                                        affiliateCode={affiliate?.affiliate_code || ''} 
+                                        referralLink={referralLink}
+                                        siteName={siteName}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                             {/* Graphic Asset 1 */}
                             <Card className="flex flex-col rounded-2xl overflow-hidden group hover:border-brand-primary/20 transition-all border-none bg-muted/30">
                                 <div className="h-40 bg-zinc-100 dark:bg-zinc-900 border-b border-border flex flex-col items-center justify-center p-4 relative">
