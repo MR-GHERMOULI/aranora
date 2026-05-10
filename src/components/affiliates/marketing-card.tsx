@@ -304,9 +304,12 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName, 
                                             </span>
                                         )}
                                         <span className={cn(
-                                            "text-[10px] font-bold uppercase tracking-[0.3em]",
-                                            theme === 'dark' ? 'text-white/40' : 'text-slate-400'
-                                        )}>Partner Program</span>
+                                            "text-[11px] font-black uppercase tracking-[0.4em]",
+                                            theme === 'dark' ? 'text-brand-secondary' : 'text-brand-primary'
+                                        )}>
+                                            {siteName.toUpperCase()}.COM
+                                        </span>
+
                                     </div>
 
                                     {size !== 'landscape' && (
