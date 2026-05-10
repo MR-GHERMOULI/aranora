@@ -7,7 +7,10 @@ import { toPng } from 'html-to-image';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { motion } from 'framer-motion';
+
 
 interface MarketingAngle {
     id: string;
@@ -52,8 +55,17 @@ interface AffiliateMarketingCardProps {
 export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName }: AffiliateMarketingCardProps) {
     const cardRef = useRef<HTMLDivElement>(null);
     const [selectedAngle, setSelectedAngle] = React.useState<MarketingAngle>(MARKETING_ANGLES[0]);
+    const [customTitle, setCustomTitle] = React.useState(MARKETING_ANGLES[0].title);
+    const [customText, setCustomText] = React.useState(MARKETING_ANGLES[0].text);
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [copied, setCopied] = React.useState(false);
+
+    const handleAngleSelect = (angle: MarketingAngle) => {
+        setSelectedAngle(angle);
+        setCustomTitle(angle.title);
+        setCustomText(angle.text);
+    };
+
 
     const handleDownload = async () => {
         if (!cardRef.current) return;
@@ -102,12 +114,12 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName }
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Select Marketing Angle</label>
+                        <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Select a Template</label>
                         <div className="grid grid-cols-1 gap-3">
                             {MARKETING_ANGLES.map((angle) => (
                                 <button
                                     key={angle.id}
-                                    onClick={() => setSelectedAngle(angle)}
+                                    onClick={() => handleAngleSelect(angle)}
                                     className={`text-left p-4 rounded-2xl border transition-all relative overflow-hidden group ${
                                         selectedAngle.id === angle.id
                                             ? 'border-brand-primary bg-brand-primary/[0.03] shadow-md ring-1 ring-brand-primary'
@@ -130,6 +142,29 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName }
                             ))}
                         </div>
                     </div>
+
+                    {/* Customization Fields */}
+                    <div className="space-y-4 p-6 bg-muted/20 rounded-2xl border border-border/50">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Custom Title</label>
+                            <Input 
+                                value={customTitle} 
+                                onChange={(e) => setCustomTitle(e.target.value)}
+                                className="h-10 bg-background border-border"
+                                placeholder="Enter a catchy title..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Custom Marketing Text</label>
+                            <Textarea 
+                                value={customText} 
+                                onChange={(e) => setCustomText(e.target.value)}
+                                className="min-h-[100px] bg-background border-border resize-none"
+                                placeholder="Write your marketing message here..."
+                            />
+                        </div>
+                    </div>
+
 
                     <div className="pt-4 flex flex-col sm:flex-row gap-3">
                         <Button 
@@ -200,12 +235,13 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName }
                                         {selectedAngle.badge}
                                     </Badge>
                                     <h2 className="text-white text-4xl font-bold leading-[1.1] tracking-tight mb-6">
-                                        {selectedAngle.title}
+                                        {customTitle}
                                     </h2>
                                     <p className="text-slate-300 text-lg leading-relaxed font-medium">
-                                        "{selectedAngle.text}"
+                                        "{customText}"
                                     </p>
                                 </div>
+
 
                                 {/* Footer / Social Identity */}
                                 <div className="mt-12 pt-8 border-t border-white/10 flex items-center justify-between">
