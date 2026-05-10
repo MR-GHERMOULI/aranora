@@ -1169,83 +1169,8 @@ export function AffiliateDashboard() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                            {/* Graphic Asset 1 */}
-                            <Card className="flex flex-col rounded-2xl overflow-hidden group hover:border-brand-primary/20 transition-all border-none bg-muted/30">
-                                <div className="h-40 bg-zinc-100 dark:bg-zinc-900 border-b border-border flex flex-col items-center justify-center p-4 relative">
-                                    <div className="text-3xl font-black text-brand-primary tracking-tighter drop-shadow-sm">{siteName}</div>
-                                    <div className="text-[10px] text-brand-secondary font-bold uppercase tracking-[0.2em] mt-2">Identity Pack</div>
-                                    <div className="absolute top-2 right-2">
-                                        <Badge className="bg-brand-primary text-[9px] uppercase">SVG/PNG</Badge>
-                                    </div>
-                                </div>
-                                <div className="p-6 flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <h4 className="font-bold text-foreground mb-1.5 flex items-center gap-2">
-                                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                                            Official Logos
-                                        </h4>
-                                        <p className="text-xs text-muted-foreground mb-6 leading-relaxed">Verified brand marks in all color formats for professional integration.</p>
-                                    </div>
-                                    <Button variant="outline" size="sm" className="w-full gap-2 font-bold group-hover:bg-brand-primary group-hover:text-white transition-all">
-                                        <Download className="h-3.5 w-3.5" /> Download Identity
-                                    </Button>
-                                </div>
-                            </Card>
-
-                            {/* Graphic Asset 2 */}
-                            <Card className="flex flex-col rounded-2xl overflow-hidden group hover:border-brand-primary/20 transition-all border-none bg-muted/30">
-                                <div className="h-40 bg-gradient-to-br from-brand-primary to-brand-primary-light border-b border-border flex items-center justify-center p-4 relative overflow-hidden">
-                                     <div className="absolute inset-0 opacity-20 pointer-events-none">
-                                        <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                            <path d="M0 100 Q 50 0 100 100" fill="white" />
-                                        </svg>
-                                    </div>
-                                    <ImageIcon className="h-12 w-12 text-white/50 relative z-10" />
-                                    <div className="absolute top-2 right-2">
-                                        <Badge className="bg-white text-brand-primary text-[9px] uppercase">Banners</Badge>
-                                    </div>
-                                </div>
-                                <div className="p-6 flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <h4 className="font-bold text-foreground mb-1.5 flex items-center gap-2">
-                                            <Share2 className="h-4 w-4 text-muted-foreground" />
-                                            Social Graphics
-                                        </h4>
-                                        <p className="text-xs text-muted-foreground mb-6 leading-relaxed">Optimized banners for LinkedIn, X (Twitter), and Instagram ads.</p>
-                                    </div>
-                                    <Button variant="outline" size="sm" className="w-full gap-2 font-bold group-hover:bg-brand-primary group-hover:text-white transition-all">
-                                        <Download className="h-3.5 w-3.5" /> Download Pack
-                                    </Button>
-                                </div>
-                            </Card>
-
-                            {/* Copy Asset */}
-                            <Card className="flex flex-col rounded-2xl overflow-hidden group hover:border-brand-primary/20 transition-all border-none bg-muted/30">
-                                <div className="h-40 bg-zinc-100 dark:bg-zinc-900 border-b border-border flex flex-col items-center justify-center p-4 relative">
-                                    <MessageSquare className="h-10 w-10 text-blue-500 mb-3 opacity-50" />
-                                    <div className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Email Templates</div>
-                                    <div className="absolute top-2 right-2">
-                                        <Badge className="bg-blue-500 text-white text-[9px] uppercase">Text</Badge>
-                                    </div>
-                                </div>
-                                <div className="p-6 flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <h4 className="font-bold text-foreground mb-1.5 flex items-center gap-2">
-                                            <Mail className="h-4 w-4 text-muted-foreground" />
-                                            Campaign Scripts
-                                        </h4>
-                                        <p className="text-xs text-muted-foreground mb-6 leading-relaxed">Ready-to-use email series designed to drive interest and conversions.</p>
-                                    </div>
-                                    <Button variant="outline" size="sm" className="w-full gap-2 font-bold group-hover:bg-brand-primary group-hover:text-white transition-all">
-                                        <Copy className="h-3.5 w-3.5" /> View Templates
-                                    </Button>
-                                </div>
-                            </Card>
-                        </div>
-
                         <Card className="mt-12 border-none bg-brand-primary/[0.03] dark:bg-brand-primary/10 overflow-hidden relative">
+
                             <div className="absolute left-0 top-0 h-full w-1 bg-brand-primary" />
                             <CardContent className="p-8 flex flex-col md:flex-row gap-8 items-start">
                                 <div className="w-14 h-14 bg-brand-primary/10 rounded-2xl flex items-center justify-center shrink-0 border border-brand-primary/20">
