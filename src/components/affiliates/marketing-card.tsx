@@ -9,8 +9,9 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { motion } from 'framer-motion';
-
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sun, Moon, Maximize, Smartphone, Square as SquareIcon, Layout } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MarketingAngle {
     id: string;
@@ -19,7 +20,26 @@ interface MarketingAngle {
     badge: string;
 }
 
+type ThemeType = 'dark' | 'light';
+type SizeType = 'story' | 'square' | 'landscape';
+
+interface SizeConfig {
+    id: SizeType;
+    name: string;
+    icon: any;
+    width: string;
+    height: string;
+    aspectRatio: string;
+}
+
+const MARKETING_SIZES: SizeConfig[] = [
+    { id: 'story', name: 'Story', icon: Smartphone, width: '360px', height: '640px', aspectRatio: '9/16' },
+    { id: 'square', name: 'Square', icon: SquareIcon, width: '400px', height: '400px', aspectRatio: '1/1' },
+    { id: 'landscape', name: 'Landscape', icon: Layout, width: '500px', height: '262px', aspectRatio: '1.91/1' },
+];
+
 const MARKETING_ANGLES: MarketingAngle[] = [
+
     {
         id: 'professional',
         title: 'Professional Growth',
@@ -59,8 +79,12 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName, 
     const [selectedAngle, setSelectedAngle] = React.useState<MarketingAngle>(MARKETING_ANGLES[0]);
     const [customTitle, setCustomTitle] = React.useState(MARKETING_ANGLES[0].title);
     const [customText, setCustomText] = React.useState(MARKETING_ANGLES[0].text);
+    const [theme, setTheme] = React.useState<ThemeType>('dark');
+    const [size, setSize] = React.useState<SizeType>('story');
     const [isDownloading, setIsDownloading] = React.useState(false);
     const [copied, setCopied] = React.useState(false);
+
+    const activeSize = MARKETING_SIZES.find(s => s.id === size) || MARKETING_SIZES[0];
 
     const handleAngleSelect = (angle: MarketingAngle) => {
         setSelectedAngle(angle);
@@ -117,55 +141,88 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName, 
 
                     <div className="space-y-3">
                         <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Select a Template</label>
-                        <div className="grid grid-cols-1 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
                             {MARKETING_ANGLES.map((angle) => (
                                 <button
                                     key={angle.id}
                                     onClick={() => handleAngleSelect(angle)}
-                                    className={`text-left p-4 rounded-2xl border transition-all relative overflow-hidden group ${
+                                    className={`text-left p-3 rounded-xl border transition-all relative overflow-hidden group ${
                                         selectedAngle.id === angle.id
-                                            ? 'border-brand-primary bg-brand-primary/[0.03] shadow-md ring-1 ring-brand-primary'
+                                            ? 'border-brand-primary bg-brand-primary/[0.03] shadow-sm ring-1 ring-brand-primary'
                                             : 'border-border bg-card hover:border-brand-primary/30'
                                     }`}
                                 >
-                                    {selectedAngle.id === angle.id && (
-                                        <div className="absolute top-0 right-0 p-1">
-                                            <Check className="h-4 w-4 text-brand-primary" />
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="font-bold text-sm text-foreground">{angle.title}</span>
-                                        <Badge variant="secondary" className="text-[9px] uppercase h-4 px-1.5 font-bold bg-muted text-muted-foreground group-hover:bg-brand-primary/10 group-hover:text-brand-primary transition-colors">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="font-bold text-xs text-foreground truncate">{angle.title}</span>
+                                        <Badge variant="secondary" className="text-[8px] w-fit uppercase h-3.5 px-1 font-bold bg-muted text-muted-foreground">
                                             {angle.badge}
                                         </Badge>
                                     </div>
-                                    <p className="text-xs text-muted-foreground line-clamp-1">{angle.text}</p>
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     {/* Customization Fields */}
-                    <div className="space-y-4 p-6 bg-muted/20 rounded-2xl border border-border/50">
+                    <div className="space-y-4 p-5 bg-muted/20 rounded-2xl border border-border/50">
+                        <div className="flex items-center justify-between gap-4 mb-2">
+                             <div className="flex flex-col">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Theme</label>
+                                <div className="flex bg-background border border-border p-1 rounded-lg mt-1">
+                                    <button 
+                                        onClick={() => setTheme('dark')}
+                                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${theme === 'dark' ? 'bg-brand-primary text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        <Moon className="h-3 w-3" /> Dark
+                                    </button>
+                                    <button 
+                                        onClick={() => setTheme('light')}
+                                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${theme === 'light' ? 'bg-white text-brand-primary shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        <Sun className="h-3 w-3" /> Light
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex flex-col flex-1">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Size / Format</label>
+                                <div className="flex bg-background border border-border p-1 rounded-lg mt-1 justify-end">
+                                    {MARKETING_SIZES.map(s => {
+                                        const Icon = s.icon;
+                                        return (
+                                            <button 
+                                                key={s.id}
+                                                onClick={() => setSize(s.id)}
+                                                className={`p-1.5 rounded-md transition-all ${size === s.id ? 'bg-brand-primary text-white' : 'text-muted-foreground hover:text-foreground'}`}
+                                                title={s.name}
+                                            >
+                                                <Icon className="h-4 w-4" />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Custom Title</label>
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Custom Title</label>
                             <Input 
                                 value={customTitle} 
                                 onChange={(e) => setCustomTitle(e.target.value)}
-                                className="h-10 bg-background border-border"
+                                className="h-9 bg-background border-border text-sm"
                                 placeholder="Enter a catchy title..."
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Custom Marketing Text</label>
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Custom Marketing Text</label>
                             <Textarea 
                                 value={customText} 
                                 onChange={(e) => setCustomText(e.target.value)}
-                                className="min-h-[100px] bg-background border-border resize-none"
+                                className="min-h-[80px] bg-background border-border resize-none text-sm"
                                 placeholder="Write your marketing message here..."
                             />
                         </div>
                     </div>
+
 
 
                     <div className="pt-4 flex flex-col sm:flex-row gap-3">
@@ -193,88 +250,173 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName, 
 
                 {/* Right: Preview */}
                 <div className="flex flex-col items-center">
-                    <div className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4">Live Preview</div>
+                    <div className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-4">Preview: {activeSize.name}</div>
                     
                     {/* The Actual Card to be captured */}
-                    <div className="relative group perspective-1000">
+                    <div className="relative group perspective-1000 shadow-2xl rounded-[32px] overflow-hidden">
                         <div 
                             ref={cardRef}
-                            className="w-[400px] h-[560px] bg-[#0F172A] rounded-[32px] overflow-hidden flex flex-col relative shadow-2xl"
+                            className={cn(
+                                "overflow-hidden flex flex-col relative transition-all duration-300",
+                                theme === 'dark' ? 'bg-[#0F172A]' : 'bg-[#F8FAFC]'
+                            )}
                             style={{ 
-                                background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+                                width: activeSize.width,
+                                height: activeSize.height,
+                                background: theme === 'dark' 
+                                    ? 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)' 
+                                    : 'linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)',
                                 fontFamily: 'Inter, system-ui, sans-serif'
                             }}
                         >
                             {/* Decorative Background Elements */}
-                            <div className="absolute top-[-100px] right-[-100px] w-64 h-64 bg-brand-primary/20 rounded-full blur-[80px]" />
-                            <div className="absolute bottom-[-50px] left-[-50px] w-64 h-64 bg-brand-secondary/20 rounded-full blur-[80px]" />
-                            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                            <div className={cn(
+                                "absolute top-[-100px] right-[-100px] w-64 h-64 rounded-full blur-[80px]",
+                                theme === 'dark' ? 'bg-brand-primary/20' : 'bg-brand-primary/10'
+                            )} />
+                            <div className={cn(
+                                "absolute bottom-[-50px] left-[-50px] w-64 h-64 rounded-full blur-[80px]",
+                                theme === 'dark' ? 'bg-brand-secondary/20' : 'bg-brand-secondary/10'
+                            )} />
+                            <div className={cn(
+                                "absolute inset-0 opacity-[0.03] pointer-events-none",
+                                theme === 'dark' ? 'opacity-[0.03]' : 'opacity-[0.08]'
+                            )} style={{ backgroundImage: theme === 'dark' ? 'radial-gradient(#fff 1px, transparent 1px)' : 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-                            <div className="p-10 flex flex-col h-full relative z-10">
+                            <div className={cn(
+                                "p-10 flex flex-col h-full relative z-10",
+                                size === 'landscape' ? 'flex-row gap-8 items-center p-8' : 'p-10'
+                            )}>
                                 {/* Header */}
-                                <div className="flex justify-between items-start mb-12">
-                                    <div className="flex flex-col">
+                                <div className={cn(
+                                    "flex justify-between items-start",
+                                    size === 'landscape' ? 'flex-col justify-center items-center mb-0 border-r border-border/20 pr-8 h-full w-1/3 shrink-0' : 'mb-12'
+                                )}>
+                                    <div className={cn("flex flex-col", size === 'landscape' && 'items-center text-center')}>
                                         {logoUrl ? (
-                                            <img src={logoUrl} alt={siteName} className="h-10 w-auto object-contain mb-2 self-start" />
+                                            <img src={logoUrl} alt={siteName} className={cn("h-10 w-auto object-contain mb-3", size === 'landscape' ? 'self-center' : 'self-start')} />
                                         ) : (
-                                            <span className="text-white text-3xl font-black tracking-tighter leading-none mb-1">
+                                            <span className={cn(
+                                                "text-3xl font-black tracking-tighter leading-none mb-1",
+                                                theme === 'dark' ? 'text-white' : 'text-brand-primary'
+                                            )}>
                                                 {siteName}
                                             </span>
                                         )}
-                                        <span className="text-brand-secondary text-[10px] font-bold uppercase tracking-[0.3em]">Partner Program</span>
+                                        <span className={cn(
+                                            "text-[10px] font-bold uppercase tracking-[0.3em]",
+                                            theme === 'dark' ? 'text-white/40' : 'text-slate-400'
+                                        )}>Partner Program</span>
                                     </div>
 
-                                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/10">
-                                        <QRCodeSVG 
-                                            value={referralLink} 
-                                            size={70} 
-                                            bgColor="transparent" 
-                                            fgColor="#FFFFFF" 
-                                            level="H"
-                                            includeMargin={false}
-                                        />
-                                    </div>
+                                    {size !== 'landscape' && (
+                                        <div className={cn(
+                                            "rounded-2xl p-2.5 border",
+                                            theme === 'dark' ? 'bg-white/10 border-white/10 backdrop-blur-md' : 'bg-white border-slate-200 shadow-sm'
+                                        )}>
+                                            <QRCodeSVG 
+                                                value={referralLink} 
+                                                size={60} 
+                                                bgColor="transparent" 
+                                                fgColor={theme === 'dark' ? '#FFFFFF' : '#0F172A'} 
+                                                level="H"
+                                                includeMargin={false}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Main Text Area */}
-                                <div className="flex-1 flex flex-col justify-center">
-                                    <Badge className="w-fit mb-4 bg-brand-primary text-white border-none text-[10px] uppercase font-black px-3 py-1">
+                                <div className="flex-1 flex flex-col justify-center overflow-hidden">
+                                    <Badge className={cn(
+                                        "w-fit mb-4 border-none text-[9px] uppercase font-black px-2.5 py-0.5",
+                                        theme === 'dark' ? 'bg-brand-primary text-white' : 'bg-brand-primary/10 text-brand-primary'
+                                    )}>
                                         {selectedAngle.badge}
                                     </Badge>
-                                    <h2 className="text-white text-4xl font-bold leading-[1.1] tracking-tight mb-6">
+                                    <h2 className={cn(
+                                        "font-bold leading-[1.1] tracking-tight mb-4 transition-all",
+                                        theme === 'dark' ? 'text-white' : 'text-slate-900',
+                                        size === 'story' ? 'text-4xl' : size === 'square' ? 'text-3xl' : 'text-2xl'
+                                    )}>
                                         {customTitle}
                                     </h2>
-                                    <p className="text-slate-300 text-lg leading-relaxed font-medium">
+                                    <p className={cn(
+                                        "leading-relaxed font-medium transition-all",
+                                        theme === 'dark' ? 'text-slate-300' : 'text-slate-600',
+                                        size === 'story' ? 'text-lg' : size === 'square' ? 'text-base' : 'text-sm line-clamp-4'
+                                    )}>
                                         "{customText}"
                                     </p>
                                 </div>
 
-
-                                {/* Footer / Social Identity */}
-                                <div className="mt-12 pt-8 border-t border-white/10 flex items-center justify-between">
+                                {/* Footer / Landscape Specific Items */}
+                                <div className={cn(
+                                    "pt-6 flex items-center justify-between transition-all",
+                                    size === 'landscape' ? 'hidden' : 'mt-8 border-t border-border/10',
+                                    theme === 'dark' ? 'border-white/10' : 'border-slate-200'
+                                )}>
                                     <div className="flex flex-col">
-                                        <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mb-1">Visit directly at</span>
-                                        <span className="text-white font-mono text-sm font-semibold opacity-80 truncate max-w-[200px]">
-                                            {referralLink.replace('https://', '').replace('http://', '')}
+                                        <span className={cn(
+                                            "text-[9px] uppercase font-bold tracking-widest mb-1",
+                                            theme === 'dark' ? 'text-white/30' : 'text-slate-400'
+                                        )}>Visit at</span>
+                                        <span className={cn(
+                                            "font-mono text-[11px] font-semibold opacity-80 truncate max-w-[180px]",
+                                            theme === 'dark' ? 'text-white' : 'text-slate-700'
+                                        )}>
+                                            {referralLink.replace('https://', '').replace('http://', '').split('?')[0]}
                                         </span>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-brand-primary/20 flex items-center justify-center border border-brand-primary/30">
+                                    <div className={cn(
+                                        "w-9 h-9 rounded-full flex items-center justify-center border",
+                                        theme === 'dark' ? 'bg-brand-primary/20 border-brand-primary/30' : 'bg-brand-primary/5 border-brand-primary/10'
+                                    )}>
                                         <Share2 className="h-4 w-4 text-brand-primary" />
                                     </div>
                                 </div>
+
+                                {size === 'landscape' && (
+                                    <div className="absolute right-6 bottom-6 flex flex-col items-end gap-2">
+                                        <div className={cn(
+                                            "rounded-xl p-2 border",
+                                            theme === 'dark' ? 'bg-white/10 border-white/10 backdrop-blur-md' : 'bg-white border-slate-200 shadow-sm'
+                                        )}>
+                                            <QRCodeSVG 
+                                                value={referralLink} 
+                                                size={40} 
+                                                bgColor="transparent" 
+                                                fgColor={theme === 'dark' ? '#FFFFFF' : '#0F172A'} 
+                                                level="H"
+                                                includeMargin={false}
+                                            />
+                                        </div>
+                                        <span className={cn(
+                                            "text-[8px] font-mono opacity-60",
+                                            theme === 'dark' ? 'text-white' : 'text-slate-900'
+                                        )}>Scan to join</span>
+                                    </div>
+                                )}
                             </div>
                             
                             {/* Brand watermark */}
-                            <div className="absolute bottom-6 right-10 rotate-[-90deg] origin-bottom-right opacity-10">
-                                <span className="text-white text-5xl font-black tracking-tighter uppercase whitespace-nowrap">ARANORA</span>
+                            <div className={cn(
+                                "absolute bottom-6 rotate-[-90deg] origin-bottom-right opacity-[0.03] select-none",
+                                size === 'landscape' ? 'right-4 bottom-4' : 'right-10 bottom-6'
+                            )}>
+                                <span className={cn(
+                                    "text-5xl font-black tracking-tighter uppercase whitespace-nowrap",
+                                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                                )}>{siteName}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <p className="mt-6 text-xs text-muted-foreground italic text-center max-w-[300px]">
-                        The card is optimized for Instagram Stories, LinkedIn posts, and X threads. 
+                    <p className="mt-4 text-[10px] text-muted-foreground italic text-center max-w-[300px]">
+                        Optimized for {activeSize.name} format. Preview may be scaled.
                     </p>
                 </div>
+
             </div>
         </div>
     );
