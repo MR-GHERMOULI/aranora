@@ -305,10 +305,11 @@ export function AffiliateMarketingCard({ affiliateCode, referralLink, siteName, 
                                         )}
                                         <span className={cn(
                                             "text-[11px] font-black uppercase tracking-[0.4em]",
-                                            theme === 'dark' ? 'text-brand-secondary' : 'text-brand-primary'
+                                            theme === 'dark' ? 'text-teal-400' : 'text-brand-primary'
                                         )}>
                                             {siteName.toUpperCase()}.COM
                                         </span>
+
 
                                     </div>
 
