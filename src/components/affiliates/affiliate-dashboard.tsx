@@ -1185,10 +1185,8 @@ export function AffiliateDashboard() {
                                         We value transparency and integrity. Please ensure you always disclose your affiliate status (like using <span className="text-brand-primary font-mono font-bold">#ad</span> or <span className="text-brand-primary font-mono font-bold">#partner</span>). 
                                         Note that bidding on branded keywords ("{siteName}") in PPC campaigns is strictly prohibited and may lead to account suspension.
                                     </p>
-                                    <Button variant="link" className="p-0 h-auto text-brand-primary font-bold">
-                                        Review full program terms &amp; conditions →
-                                    </Button>
                                 </div>
+
                             </CardContent>
                         </Card>
                     </div>
