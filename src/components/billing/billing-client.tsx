@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import type { UserBillingInfo } from '@/lib/billing';
 import { createClient } from '@/lib/supabase/client';
+import { getLemonSqueezyManagementUrl } from '@/app/(dashboard)/billing/ls-actions';
 
 interface BillingSubscriptionRecord {
     id: string;
@@ -124,6 +125,16 @@ export function BillingClient({ billing, history }: BillingClientProps) {
         setPortalLoading(true);
         setPortalError(null);
         try {
+            // Check if it's a Lemon Squeezy customer first
+            if (billing.lemonSqueezyCustomerId) {
+                const url = await getLemonSqueezyManagementUrl();
+                if (url) {
+                    window.location.href = url;
+                    return;
+                }
+            }
+
+            // Fallback to Stripe portal if LS fails or user is Stripe customer
             const res = await fetch('/api/stripe/portal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -187,7 +198,7 @@ export function BillingClient({ billing, history }: BillingClientProps) {
     const config = statusConfig[billing.status];
     const StatusIcon = config.icon;
     const showUpgradeCTA = billing.status === 'trialing' || billing.status === 'expired';
-    const showManagePortal = !!billing.stripeCustomerId;
+    const showManagePortal = !!billing.stripeCustomerId || !!billing.lemonSqueezyCustomerId;
     const showPlanDetails = billing.status === 'active';
     const showFeatureList = showUpgradeCTA;
 
@@ -515,7 +526,7 @@ export function BillingClient({ billing, history }: BillingClientProps) {
                                 </div>
                             ))}
                         </div>
-                        {billing.stripeCustomerId && (
+                        {showManagePortal && (
                             <div
                                 className="px-6 py-3"
                                 style={{ borderTop: '1px solid var(--border)' }}
@@ -529,7 +540,10 @@ export function BillingClient({ billing, history }: BillingClientProps) {
                                     onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
                                 >
                                     <ExternalLink className="h-3 w-3" />
-                                    View full invoices in Stripe portal
+                                    {billing.lemonSqueezyCustomerId 
+                                        ? 'View and manage orders in Lemon Squeezy portal'
+                                        : 'View full invoices in Stripe portal'
+                                    }
                                 </button>
                             </div>
                         )}

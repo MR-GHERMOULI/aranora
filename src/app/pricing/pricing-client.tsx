@@ -49,7 +49,7 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
     const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
         setLoading(planType);
         try {
-            const res = await fetch('/api/stripe/checkout', {
+            const res = await fetch('/api/payments/lemon-squeezy/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ planType }),

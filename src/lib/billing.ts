@@ -12,6 +12,7 @@ export interface UserBillingInfo {
     currentPeriodEnd: string | null;
     cancelAtPeriodEnd: boolean;
     stripeCustomerId: string | null;
+    lemonSqueezyCustomerId: string | null;
 }
 
 function createServiceClient() {
@@ -41,7 +42,7 @@ export async function getUserBillingInfo(userId: string): Promise<UserBillingInf
     // Get profile billing info (including is_admin to identify Owner accounts)
     const { data: profile } = await supabase
         .from('profiles')
-        .select('trial_ends_at, subscription_status, stripe_customer_id, is_admin')
+        .select('trial_ends_at, subscription_status, stripe_customer_id, lemon_squeezy_customer_id, is_admin')
         .eq('id', userId)
         .single();
 
@@ -57,6 +58,7 @@ export async function getUserBillingInfo(userId: string): Promise<UserBillingInf
             currentPeriodEnd: null,
             cancelAtPeriodEnd: false,
             stripeCustomerId: profile.stripe_customer_id || null,
+            lemonSqueezyCustomerId: profile.lemon_squeezy_customer_id || null,
         };
     }
 
@@ -106,6 +108,7 @@ export async function getUserBillingInfo(userId: string): Promise<UserBillingInf
         currentPeriodEnd: subscription?.current_period_end || null,
         cancelAtPeriodEnd: subscription?.cancel_at_period_end || false,
         stripeCustomerId: profile?.stripe_customer_id || null,
+        lemonSqueezyCustomerId: profile?.lemon_squeezy_customer_id || null,
     };
 }
 
