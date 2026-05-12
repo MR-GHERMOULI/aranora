@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
         }
 
         const variantId = LEMONSQUEEZY_VARIANTS[planType as keyof typeof LEMONSQUEEZY_VARIANTS];
+
         if (!variantId) {
             return NextResponse.json({ error: 'Variant not configured' }, { status: 500 });
         }
