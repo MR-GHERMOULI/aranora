@@ -13,6 +13,7 @@ import { Crown, Shield, User, MoreVertical, Briefcase, Clock, CheckCircle2, Doll
 import { TeamMember } from "@/types";
 import { updateTeamMemberRole, updateTeamMemberSalary, removeTeamMember } from "@/app/(dashboard)/team/actions";
 import { useRouter } from "next/navigation";
+import { usePresence } from "@/components/providers/presence-provider";
 
 interface TeamMemberCardProps {
     member: TeamMember;
@@ -46,6 +47,7 @@ export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+    const { isOnline } = usePresence();
 
     const RoleIcon = roleIcons[member.role] || User;
     const displayName = member.profile?.full_name || member.profile?.username || member.profile?.email || 'Invited User';
@@ -55,6 +57,8 @@ export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
         .join('')
         .substring(0, 2)
         .toUpperCase();
+    
+    const online = member.user_id ? isOnline(member.user_id) : false;
 
     function handleRoleChange(newRole: string) {
         startTransition(async () => {
@@ -89,17 +93,20 @@ export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
                 <CardContent className="pt-6 pb-4">
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            {member.profile?.avatar_url ? (
-                                <img
-                                    src={member.profile.avatar_url}
-                                    alt={displayName}
-                                    className="h-12 w-12 rounded-full object-cover ring-2 ring-white dark:ring-slate-800"
-                                />
-                            ) : (
-                                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-slate-800">
-                                    {initials}
-                                </div>
-                            )}
+                            <div className="relative">
+                                {member.profile?.avatar_url ? (
+                                    <img
+                                        src={member.profile.avatar_url}
+                                        alt={displayName}
+                                        className="h-12 w-12 rounded-full object-cover ring-2 ring-white dark:ring-slate-800"
+                                    />
+                                ) : (
+                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white font-semibold text-sm ring-2 ring-white dark:ring-slate-800">
+                                        {initials}
+                                    </div>
+                                )}
+                                <div className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-800 ${online ? 'bg-green-500' : 'bg-slate-400'}`} />
+                            </div>
                             <div>
                                 <h3 className="font-semibold text-sm truncate max-w-[160px]">{displayName}</h3>
                                 <p className="text-xs text-muted-foreground truncate max-w-[160px]">

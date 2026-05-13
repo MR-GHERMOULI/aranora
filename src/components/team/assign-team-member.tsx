@@ -8,6 +8,7 @@ import { UsersRound, Plus, Check, Loader2, UserMinus, Shield, User } from "lucid
 import { getTeamMembers, assignMemberToProject, unassignMemberFromProject, getProjectTeamMembers } from "@/app/(dashboard)/team/actions";
 import { useRouter } from "next/navigation";
 import { TeamMember } from "@/types";
+import { usePresence } from "@/components/providers/presence-provider";
 
 interface AssignTeamMemberProps {
     projectId: string;
@@ -20,6 +21,7 @@ export function AssignTeamMember({ projectId }: AssignTeamMemberProps) {
     const [assignedIds, setAssignedIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { isOnline } = usePresence();
 
     useEffect(() => {
         if (open) {
@@ -91,6 +93,7 @@ export function AssignTeamMember({ projectId }: AssignTeamMemberProps) {
                                 .join('')
                                 .substring(0, 2)
                                 .toUpperCase();
+                            const online = member.user_id ? isOnline(member.user_id) : false;
 
                             return (
                                 <button
@@ -103,17 +106,20 @@ export function AssignTeamMember({ projectId }: AssignTeamMemberProps) {
                                             : 'border-transparent hover:bg-muted/50'
                                     }`}
                                 >
-                                    {member.profile?.avatar_url ? (
-                                        <img
-                                            src={member.profile.avatar_url}
-                                            alt={displayName}
-                                            className="h-10 w-10 rounded-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white font-semibold text-xs">
-                                            {initials}
-                                        </div>
-                                    )}
+                                    <div className="relative">
+                                        {member.profile?.avatar_url ? (
+                                            <img
+                                                src={member.profile.avatar_url}
+                                                alt={displayName}
+                                                className="h-10 w-10 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center text-white font-semibold text-xs">
+                                                {initials}
+                                            </div>
+                                        )}
+                                        <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-slate-950 ${online ? 'bg-green-500' : 'bg-slate-400'}`} />
+                                    </div>
 
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{displayName}</p>

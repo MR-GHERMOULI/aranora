@@ -93,7 +93,8 @@ export async function getDashboardStats() {
         { data: prevMonthPaidInvoices },
         { data: recentSignedContracts },
         timeEntriesResponse,
-        activeTimerResponse
+        activeTimerResponse,
+        teamMembersResponse
     ] = await Promise.all([
         supabase.from('clients').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('projects').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'In Progress'),
@@ -133,7 +134,12 @@ export async function getDashboardStats() {
         supabase.from('time_entries').select('id')
             .eq('user_id', user.id)
             .is('end_time', null)
-            .maybeSingle()
+            .maybeSingle(),
+        supabase.from('team_members').select('base_salary, status')
+            .in('team_id', (
+                await supabase.from('teams').select('id').eq('owner_id', user.id)
+            ).data?.map(t => t.id) || [])
+            .eq('status', 'active')
     ]);
 
     const timeEntriesThisWeek = (timeEntriesResponse?.data as any[]) || [];
@@ -182,6 +188,9 @@ export async function getDashboardStats() {
         ...(recentSignedContracts || []).map(c => ({ type: 'contract', id: c.id, title: `Contract signed: ${c.title}`, date: c.signed_at, link: `/contracts/${c.id}` }))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
+    const teamMonthlyCosts = (teamMembersResponse?.data || []).reduce((sum, member) => sum + (Number(member.base_salary) || 0), 0);
+    const netProfit = monthlyRevenue - teamMonthlyCosts;
+
     return {
         isTeamMember: false,
         profile: { full_name: profile?.full_name || user.email, username: profile?.username },
@@ -191,6 +200,8 @@ export async function getDashboardStats() {
         monthlyRevenue,
         prevMonthRevenue,
         totalRevenue,
+        teamMonthlyCosts,
+        netProfit,
         revenueChartData,
         projectStatusCounts,
         activities,

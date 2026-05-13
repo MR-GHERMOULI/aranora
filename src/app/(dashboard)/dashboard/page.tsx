@@ -13,6 +13,7 @@ import { ClientGreeting } from "@/components/dashboard/client-greeting";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { TimeSummaryWidget } from "@/components/dashboard/time-summary";
 import { MemberDashboard } from "@/components/dashboard/member-dashboard";
+import { NetProfitReport } from "@/components/dashboard/net-profit-report";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -158,6 +159,15 @@ export default async function DashboardPage() {
                         hasActiveTimer={stats.hasActiveTimer || false}
                     />
                 </div>
+
+                {/* Net Profit Report */}
+                {stats.teamMonthlyCosts !== undefined && stats.teamMonthlyCosts > 0 && (
+                    <NetProfitReport 
+                        revenue={stats.monthlyRevenue || 0} 
+                        teamCosts={stats.teamMonthlyCosts || 0} 
+                        netProfit={stats.netProfit || 0} 
+                    />
+                )}
 
                 {/* Main Content Grid */}
                 <div className="grid gap-6 lg:grid-cols-3">

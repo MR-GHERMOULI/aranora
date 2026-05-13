@@ -3,6 +3,7 @@ import { TimeTrackerProvider } from "@/components/time-tracking/time-tracker-pro
 import { SubscriptionStatusProvider } from "@/components/providers/subscription-context";
 import { SidebarProvider } from "@/components/providers/sidebar-context";
 import { TeamProvider, TeamContextValue } from "@/components/providers/team-context";
+import { PresenceProvider } from "@/components/providers/presence-provider";
 import { getUserBillingInfo } from "@/lib/billing";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardWrapper } from "@/components/layout/dashboard-wrapper";
@@ -93,9 +94,11 @@ export default async function DashboardLayout({
       <TimeTrackerProvider>
         <SubscriptionStatusProvider value={subscriptionValue}>
           <TeamProvider value={teamContextValue}>
-            <DashboardWrapper upcomingRenewals={upcomingRenewals}>
-              {children}
-            </DashboardWrapper>
+            <PresenceProvider userId={user?.id}>
+              <DashboardWrapper upcomingRenewals={upcomingRenewals}>
+                {children}
+              </DashboardWrapper>
+            </PresenceProvider>
           </TeamProvider>
         </SubscriptionStatusProvider>
       </TimeTrackerProvider>
