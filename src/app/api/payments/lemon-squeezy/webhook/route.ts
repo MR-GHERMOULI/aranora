@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
                 const customerId = attributes.customer_id;
                 const status = attributes.status; // active, trialing, past_due, cancelled, expired
                 const endsAt = attributes.ends_at;
-                const renwesAt = attributes.renews_at;
+                const renewsAt = attributes.renews_at;
 
                 if (userId) {
                     const statusMap: Record<string, string> = {
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
                         plan_type: customData?.plan_type || 'monthly',
                         status: dbStatus,
                         current_period_start: new Date().toISOString(), // Approximation
-                        current_period_end: renwesAt || endsAt,
+                        current_period_end: renewsAt || endsAt,
                         cancel_at_period_end: status === 'cancelled',
                     }, { onConflict: 'lemon_squeezy_subscription_id' });
 

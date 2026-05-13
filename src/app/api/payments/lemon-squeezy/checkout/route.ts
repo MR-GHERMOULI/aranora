@@ -90,20 +90,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No checkout URL received' }, { status: 500 });
         }
 
-        const response = NextResponse.json({ url: checkoutUrl });
-
-        // Clear the referral cookie after checkout setup
-        if (affiliateCode) {
-            response.cookies.set('aranora_ref', '', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 0,
-                path: '/',
-            });
-        }
-
-        return response;
+        return NextResponse.json({ url: checkoutUrl });
     } catch (error) {
         console.error('Checkout error:', error);
         return NextResponse.json(

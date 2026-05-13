@@ -119,6 +119,21 @@ export function BillingClient({ billing, history }: BillingClientProps) {
             }
         };
         fetchBranding();
+
+        // Handle success redirect from Lemon Squeezy
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('success') === 'true') {
+            import('sonner').then(({ toast }) => {
+                toast.success('Subscription updated successfully!', {
+                    description: 'Your account has been upgraded. It may take a few seconds to reflect the changes.',
+                });
+            });
+            // Clear the referral cookie on the client side as well
+            document.cookie = "aranora_ref=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            
+            // Clean up URL
+            window.history.replaceState({}, '', window.location.pathname);
+        }
     }, []);
 
     const handleManageBilling = async () => {
