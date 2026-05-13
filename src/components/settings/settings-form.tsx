@@ -9,10 +9,11 @@ import { Loader2, Upload, X, ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { updateProfile, updateLogo } from "@/app/(dashboard)/settings/actions"
+import { updateProfile, updateLogo, updateAvatar } from "@/app/(dashboard)/settings/actions"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import Image from "next/image"
+import { User as UserIcon } from "lucide-react"
 
 const profileSchema = z.object({
     username: z.string()
@@ -38,9 +39,11 @@ interface SettingsFormProps {
         full_name: string;
         company_name: string;
         company_email: string;
+        email: string;
         address: string;
         currency: string;
         logo_url: string | null;
+        avatar_url: string | null;
         bio?: string;
         portfolio_url?: string;
         default_paper_size: string;
@@ -51,9 +54,12 @@ interface SettingsFormProps {
 export function SettingsForm({ profile }: SettingsFormProps) {
     const [loading, setLoading] = useState(false)
     const [logoLoading, setLogoLoading] = useState(false)
+    const [avatarLoading, setAvatarLoading] = useState(false)
     const [serverError, setServerError] = useState<string | null>(null)
     const [logoUrl, setLogoUrl] = useState<string | null>(profile.logo_url)
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url)
     const logoInputRef = useRef<HTMLInputElement>(null)
+    const avatarInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
     const {
@@ -135,6 +141,54 @@ export function SettingsForm({ profile }: SettingsFormProps) {
             setServerError(error.message || 'Failed to remove logo')
         } finally {
             setLogoLoading(false)
+        }
+    }
+
+    async function handleAvatarUpload(file: File) {
+        if (file.size > 2 * 1024 * 1024) {
+            setServerError("File size must be less than 2MB.");
+            return;
+        }
+
+        setAvatarLoading(true)
+        setServerError(null)
+
+        try {
+            const supabase = createClient()
+            const fileExt = file.name.split('.').pop()
+            const fileName = `${profile.id}-avatar-${Date.now()}.${fileExt}`
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, file, { upsert: true })
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName)
+
+            await updateAvatar(publicUrl)
+            setAvatarUrl(publicUrl)
+            router.refresh()
+        } catch (error: any) {
+            console.error('Avatar upload error:', error)
+            setServerError(error.message || 'Failed to upload avatar')
+        } finally {
+            setAvatarLoading(false)
+        }
+    }
+
+    async function handleAvatarRemove() {
+        setAvatarLoading(true)
+        try {
+            await updateAvatar(null)
+            setAvatarUrl(null)
+            router.refresh()
+        } catch (error: any) {
+            setServerError(error.message || 'Failed to remove avatar')
+        } finally {
+            setAvatarLoading(false)
         }
     }
 
@@ -227,6 +281,67 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                 </div>
             </div>
 
+            {/* Avatar Upload Section */}
+            <div className="space-y-4 pb-6 border-b">
+                <Label className="text-lg font-semibold">Personal Photo</Label>
+                <p className="text-sm text-muted-foreground">
+                    Upload your personal profile picture. (Max 2MB. Recommended: 256x256px. PNG, JPG, or WEBP)
+                </p>
+                <div className="flex items-center gap-6">
+                    <div className="relative h-24 w-24 rounded-full border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden bg-muted/50">
+                        {avatarUrl ? (
+                            <Image
+                                src={avatarUrl}
+                                alt="Personal Avatar"
+                                fill
+                                className="object-cover"
+                            />
+                        ) : (
+                            <UserIcon className="h-8 w-8 text-muted-foreground/50" />
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <input
+                            ref={avatarInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleAvatarUpload(file)
+                            }}
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => avatarInputRef.current?.click()}
+                            disabled={avatarLoading}
+                        >
+                            {avatarLoading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Upload className="mr-2 h-4 w-4" />
+                            )}
+                            {avatarUrl ? 'Change Photo' : 'Upload Photo'}
+                        </Button>
+                        {avatarUrl && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleAvatarRemove}
+                                disabled={avatarLoading}
+                                className="text-destructive hover:text-destructive"
+                            >
+                                <X className="mr-2 h-4 w-4" />
+                                Remove
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* Profile Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                 {serverError && (
@@ -254,6 +369,19 @@ export function SettingsForm({ profile }: SettingsFormProps) {
                                 Your unique public handle. 3-20 characters, alphanumeric and underscores.
                             </p>
                         )}
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label>Account Email (Gmail)</Label>
+                        <Input
+                            type="email"
+                            value={profile.email}
+                            disabled
+                            className="bg-muted/50 cursor-not-allowed"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            This is the email you registered with. It cannot be changed.
+                        </p>
                     </div>
 
                     <div className="grid gap-2">

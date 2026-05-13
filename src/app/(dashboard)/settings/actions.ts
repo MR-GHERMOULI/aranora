@@ -30,6 +30,7 @@ export async function getProfile() {
 
     return {
         id: user.id,
+        email: user.email || '',
         username: data?.username || '',
         full_name: data?.full_name || '',
         company_name: data?.company_name || '',
@@ -37,6 +38,7 @@ export async function getProfile() {
         address: data?.address || '',
         currency: data?.currency || 'USD',
         logo_url: data?.logo_url || null,
+        avatar_url: data?.avatar_url || null,
         default_paper_size: data?.default_paper_size || 'A4',
         default_tax_rate: data?.default_tax_rate || 0,
         bio: data?.bio || '',
@@ -125,6 +127,27 @@ export async function updateLogo(logoUrl: string | null) {
     if (error) {
         console.error('Error updating logo:', error);
         throw new Error('Failed to update logo');
+    }
+
+    revalidatePath('/settings');
+}
+
+export async function updateAvatar(avatarUrl: string | null) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+        .eq('id', user.id);
+
+    if (error) {
+        console.error('Error updating avatar:', error);
+        throw new Error('Failed to update avatar');
     }
 
     revalidatePath('/settings');
