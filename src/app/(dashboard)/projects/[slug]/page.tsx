@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddCollaboratorDialog } from "@/components/projects/add-collaborator-dialog";
 import { RemoveCollaboratorButton } from "@/components/projects/remove-collaborator-button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer, FileSignature, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowLeft, Calendar, User, DollarSign, CheckSquare, File, FileText, Timer, FileSignature, Workflow, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
@@ -91,7 +91,7 @@ export default async function ProjectPage({
                 <div className="flex gap-1">
                     <Button asChild variant="outline" className="gap-1.5 px-3 border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-700 font-semibold shadow-sm transition-all active:scale-95">
                         <Link href={`/nexus?project=${project.id}&name=${encodeURIComponent(project.title)}`}>
-                            <Sparkles className="h-4 w-4 text-blue-500" />
+                            <Workflow className="h-4 w-4 text-blue-500" />
                             Nexus
                         </Link>
                     </Button>
