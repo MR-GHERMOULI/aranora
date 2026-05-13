@@ -6,7 +6,8 @@ import { createServerClient } from "@supabase/ssr";
 const PUBLIC_ROUTES = [
     '/', '/about', '/contact', '/privacy', '/terms', '/refund', '/blog',
     '/login', '/signup', '/forgot-password', '/verify-otp',
-    '/pricing', '/error', '/become-affiliate',
+    '/pricing', '/error', '/affiliates',
+
 ];
 
 // Route prefixes that don't require subscription
@@ -178,11 +179,12 @@ export async function proxy(request: NextRequest) {
     // 3. Add Security Headers
     const cspHeader = `
         default-src 'self' blob: data:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://tagassistant.google.com https://js.stripe.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://tagassistant.google.com https://js.stripe.com https://lmsqueezy.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://*.stripe.com;
+        img-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://*.stripe.com https://*.lemonsqueezy.com;
         font-src 'self' data: https://fonts.gstatic.com;
-        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://tagassistant.google.com https://api.stripe.com https://get.geojs.io;
+        connect-src 'self' blob: data: https://*.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://tagassistant.google.com https://api.stripe.com https://get.geojs.io https://lmsqueezy.com;
+
         frame-src 'self' https://js.stripe.com https://hooks.stripe.com;
         worker-src 'self' blob:;
         object-src 'none';

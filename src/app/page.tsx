@@ -395,6 +395,8 @@ export default async function LandingPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
+
+
               <Button
                 size="lg"
                 variant="outline"
@@ -870,7 +872,8 @@ export default async function LandingPage() {
           {/* CTA */}
           <div className="text-center">
             <Link
-              href="/become-affiliate"
+              href="/affiliates"
+
               className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-primary to-brand-primary-light text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-brand-primary-light hover:to-brand-primary transition-all shadow-lg shadow-brand-primary/25 hover:shadow-brand-primary/40 hover:scale-105"
             >
               Become an Affiliate Partner{" "}

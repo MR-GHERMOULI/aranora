@@ -167,7 +167,8 @@ export function Footer({ simple = false }: FooterProps) {
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/about" className="hover:text-brand-primary transition-colors">About</Link></li>
                             <li><Link href="/contact" className="hover:text-brand-primary transition-colors">Contact</Link></li>
-                            <li><Link href="/become-affiliate" className="hover:text-brand-primary transition-colors text-teal-600 dark:text-teal-400 font-medium">Affiliates</Link></li>
+                            <li><Link href="/affiliates" className="hover:text-brand-primary transition-colors text-teal-600 dark:text-teal-400 font-medium">Affiliates</Link></li>
+
                         </ul>
                     </div>
                     <div>

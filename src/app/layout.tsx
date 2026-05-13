@@ -35,6 +35,8 @@ import { Toaster } from "@/components/ui/sonner"
 import SupabaseProvider from "@/components/providers/supabase-provider";
 import { DynamicBranding } from "@/components/providers/dynamic-branding";
 import { GoogleHeadIntegrations, GoogleBodyIntegrations } from "@/components/providers/google-integrations";
+import { LemonSqueezyAffiliate } from "@/components/providers/lemon-squeezy-affiliate";
+
 
 export default function RootLayout({
   children,
@@ -47,7 +49,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <GoogleHeadIntegrations />
+        <LemonSqueezyAffiliate />
       </head>
+
       <body className="antialiased font-sans" suppressHydrationWarning>
         <GoogleBodyIntegrations />
         <DynamicBranding />
