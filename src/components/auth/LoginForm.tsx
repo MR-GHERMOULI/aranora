@@ -48,6 +48,17 @@ export default function LoginForm() {
             const result = await login(formData)
             if (result?.error) {
                 setError(result.error)
+            } else {
+                // Check for redirect param
+                if (typeof window !== 'undefined') {
+                    const params = new URLSearchParams(window.location.search)
+                    const redirectTo = params.get('redirect')
+                    if (redirectTo) {
+                        window.location.href = redirectTo
+                        return
+                    }
+                }
+                // Default redirect is handled by the action, but we can force it here if needed
             }
         })
     }

@@ -55,13 +55,17 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
         try {
             // Pre-check: ensure user is authenticated before calling API
             const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: authData, error: authError } = await supabase.auth.getUser();
+            const user = authData?.user;
 
-            if (!user) {
-                // Not logged in — send to login with redirect back to pricing
-                window.location.href = `/login?redirect=/pricing`;
+            if (authError || !user) {
+                console.log('[Pricing] No user session found, redirecting to login');
+                // Use a direct path for now to ensure it works
+                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }
+
+            console.log('[Pricing] User found:', user.id, 'hitting checkout API...');
 
             const res = await fetch('/api/payments/lemon-squeezy/checkout', {
                 method: 'POST',
@@ -70,22 +74,24 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
             });
 
             // Safely parse the JSON — the response could be HTML if there's a server-side redirect
-            let json: { url?: string; error?: string } = {};
+            let json: any = {};
+            const text = await res.text();
             try {
-                json = await res.json();
+                json = JSON.parse(text);
             } catch {
-                setCheckoutError('Server error. Please try again in a moment.');
+                console.error('[Pricing] Failed to parse response as JSON:', text.substring(0, 100));
+                setCheckoutError(`Server error (${res.status}). Please try again.`);
                 return;
             }
 
             if (json.url) {
                 window.location.href = json.url;
             } else if (res.status === 401) {
-                window.location.href = `/login?redirect=/pricing`;
+                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
             } else {
-                const msg = json.error || 'Failed to start checkout.';
-                setCheckoutError(msg);
-                console.error('[Checkout error]', msg, 'status:', res.status);
+                const msg = json.error || json.message || 'Failed to start checkout.';
+                setCheckoutError(`${msg} (Status: ${res.status})`);
+                console.error('[Checkout error]', msg, 'status:', res.status, 'full response:', json);
             }
         } catch (err) {
             setCheckoutError('Network error. Please check your connection and try again.');
