@@ -27,28 +27,41 @@ export async function POST(request: NextRequest) {
 
         const variantId = LEMONSQUEEZY_VARIANTS[planType as keyof typeof LEMONSQUEEZY_VARIANTS];
 
+        console.log('[LS Checkout] Attempting checkout for:', {
+            userId: user.id,
+            email: user.email,
+            planType,
+            storeId: LEMONSQUEEZY_STORE_ID,
+            variantId: variantId
+        });
+
         if (!variantId) {
-            return NextResponse.json({ error: 'Variant not configured' }, { status: 500 });
+            console.error('[LS Checkout] Variant ID missing for plan:', planType);
+            return NextResponse.json({ error: `Plan variant '${planType}' not configured in environment variables.` }, { status: 500 });
         }
 
         if (!LEMONSQUEEZY_STORE_ID) {
-            return NextResponse.json({ error: 'Store ID not configured' }, { status: 500 });
+            console.error('[LS Checkout] Store ID missing');
+            return NextResponse.json({ error: 'Lemon Squeezy Store ID not configured in environment variables.' }, { status: 500 });
         }
 
         // Get profile for full name and email
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('full_name, email')
             .eq('id', user.id)
             .single();
 
-        console.log('[LS Checkout] Store ID:', LEMONSQUEEZY_STORE_ID, '| Variant ID:', variantId);
-        console.log('[LS Checkout] Store ID type:', typeof LEMONSQUEEZY_STORE_ID, '| Variant ID type:', typeof variantId);
+        if (profileError) {
+            console.warn('[LS Checkout] Profile fetch error (non-fatal):', profileError);
+        }
 
         // Create Lemon Squeezy Checkout
+        // Note: Ensure IDs are strings as expected by the newer SDK versions, 
+        // but cast to any if necessary to handle internal validation.
         const checkoutResult = await createCheckout(
-            LEMONSQUEEZY_STORE_ID,
-            variantId,
+            LEMONSQUEEZY_STORE_ID.toString(),
+            variantId.toString(),
             {
                 checkoutData: {
                     email: user.email,
@@ -71,25 +84,24 @@ export async function POST(request: NextRequest) {
             }
         );
 
-        console.log('[LS Checkout] Full result statusCode:', checkoutResult.statusCode);
-        console.log('[LS Checkout] Error:', JSON.stringify(checkoutResult.error, null, 2));
-        console.log('[LS Checkout] Data:', JSON.stringify(checkoutResult.data, null, 2)?.substring(0, 500));
+        const { data: checkout, error: lsError } = checkoutResult;
 
-        const { data: checkout, error } = checkoutResult;
-
-        if (error) {
-            console.error('Lemon Squeezy error:', JSON.stringify(error, null, 2));
-            return NextResponse.json({ error: typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : 'Checkout creation failed' }, { status: 500 });
+        if (lsError) {
+            console.error('[LS Checkout] Lemon Squeezy SDK Error:', JSON.stringify(lsError, null, 2));
+            return NextResponse.json({ 
+                error: lsError.message || 'Lemon Squeezy checkout creation failed',
+                details: process.env.NODE_ENV === 'development' ? lsError : undefined
+            }, { status: 500 });
         }
 
         const checkoutUrl = checkout?.data?.attributes?.url;
-        console.log('[LS Checkout] Checkout URL:', checkoutUrl);
 
         if (!checkoutUrl) {
-            console.error('[LS Checkout] No URL in checkout response. Full checkout:', JSON.stringify(checkout, null, 2));
-            return NextResponse.json({ error: 'No checkout URL received' }, { status: 500 });
+            console.error('[LS Checkout] No URL in checkout response. Full response:', JSON.stringify(checkout, null, 2));
+            return NextResponse.json({ error: 'Lemon Squeezy returned a success response but no checkout URL was found.' }, { status: 500 });
         }
 
+        console.log('[LS Checkout] Success! URL:', checkoutUrl);
         return NextResponse.json({ url: checkoutUrl });
     } catch (error) {
         console.error('Checkout error:', error);
