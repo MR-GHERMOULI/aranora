@@ -21,8 +21,65 @@ export async function getDashboardStats() {
     const endOfPrevMonth = endOfMonth(prevMonth).toISOString();
     const sixMonthsAgo = startOfMonth(subMonths(now, 5)).toISOString();
 
+    const { data: profile } = await supabase.from('profiles').select('full_name, username, account_type, active_team_id').eq('id', user.id).single();
+
+    // Handle Team Member Dashboard
+    if (profile?.account_type === 'team_member') {
+        const [
+            { count: todoTasks },
+            { data: assignedProjectsData },
+            { data: timeEntriesThisWeek },
+            { data: activeTimerResponse },
+            { data: recentTasks }
+        ] = await Promise.all([
+            // Todo Tasks (either assigned to them OR in their assigned projects)
+            supabase.from('tasks').select('id', { count: 'exact', head: true })
+                .eq('status', 'Todo')
+                .or(`assigned_to.eq.${user.id}`), // RLS will actually limit visibility anyway, but we check assignment
+            // Assigned Projects
+            supabase.from('team_member_projects').select('project:projects(id, title, slug)')
+                .in('team_member_id', (
+                    await supabase.from("team_members").select("id").eq("user_id", user.id).eq("status", "active")
+                ).data?.map(m => m.id) || [])
+                .is('removed_at', null),
+            // Hours This Week
+            supabase.from('time_entries').select('start_time, end_time')
+                .eq('user_id', user.id)
+                .gte('start_time', new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+            // Active Timer
+            supabase.from('time_entries').select('id')
+                .eq('user_id', user.id)
+                .is('end_time', null)
+                .maybeSingle(),
+            // Recent Upcoming Tasks
+            supabase.from('tasks').select('id, title, due_date, priority, project:projects(title)')
+                .neq('status', 'Done')
+                .gte('due_date', now.toISOString())
+                .order('due_date', { ascending: true })
+                .limit(5)
+        ]);
+
+        const assignedProjects = assignedProjectsData?.map(ap => ap.project).filter(Boolean) || [];
+
+        const totalSecondsThisWeek = (timeEntriesThisWeek || []).reduce((sum: number, entry: any) => {
+            if (!entry.start_time || !entry.end_time) return sum;
+            return sum + (new Date(entry.end_time).getTime() - new Date(entry.start_time).getTime()) / 1000;
+        }, 0);
+
+        return {
+            isTeamMember: true,
+            profile: { full_name: profile?.full_name || user.email, username: profile?.username },
+            todoTasks: todoTasks || 0,
+            assignedProjects: assignedProjects.length,
+            recentProjects: assignedProjects.slice(0, 5),
+            recentTasks: recentTasks || [],
+            weeklySeconds: totalSecondsThisWeek,
+            hasActiveTimer: !!activeTimerResponse
+        };
+    }
+
+    // Handle Freelancer / Owner Dashboard
     const [
-        profile,
         { count: totalClients },
         { count: activeProjects },
         { count: pendingInvoices },
@@ -38,11 +95,6 @@ export async function getDashboardStats() {
         timeEntriesResponse,
         activeTimerResponse
     ] = await Promise.all([
-        // Profile data
-        (async () => {
-            const { data } = await supabase.from('profiles').select('full_name, username').eq('id', user.id).single();
-            return data;
-        })(),
         supabase.from('clients').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('projects').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'In Progress'),
         supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('user_id', user.id).in('status', ['Sent', 'Overdue']),
@@ -56,7 +108,7 @@ export async function getDashboardStats() {
             .eq('user_id', user.id)
             .eq('status', 'Paid')
             .gte('issue_date', sixMonthsAgo),
-        supabase.from('projects').select('id, title, created_at, status').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+        supabase.from('projects').select('id, title, created_at, status, slug').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
         supabase.from('invoices').select('id, invoice_number, created_at, total, status').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
         supabase.from('projects').select('status').eq('user_id', user.id),
         supabase.from('tasks').select('id, title, due_date, project:projects(title)')
@@ -131,6 +183,7 @@ export async function getDashboardStats() {
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
     return {
+        isTeamMember: false,
         profile: { full_name: profile?.full_name || user.email, username: profile?.username },
         totalClients: totalClients || 0,
         activeProjects: activeProjects || 0,

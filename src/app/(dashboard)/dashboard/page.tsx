@@ -12,6 +12,7 @@ import { SmartRemindersWidget } from "@/components/dashboard/smart-reminders";
 import { ClientGreeting } from "@/components/dashboard/client-greeting";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { TimeSummaryWidget } from "@/components/dashboard/time-summary";
+import { MemberDashboard } from "@/components/dashboard/member-dashboard";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -48,31 +49,38 @@ export default async function DashboardPage() {
                                 <ClientGreeting fallback="Hello" />, {getDisplayName()}! 👋
                             </h1>
                             <p className="text-white/80">
-                                Here's what's happening with your business today.
+                                {stats.isTeamMember 
+                                    ? "Here's what's on your plate today."
+                                    : "Here's what's happening with your business today."}
                             </p>
                         </div>
-                        <div className="flex flex-wrap gap-3">
-                            <Button variant="secondary" asChild>
-                                <Link href="/clients">
-                                    <Plus className="mr-2 h-4 w-4" /> New Client
-                                </Link>
-                            </Button>
-                            <Button variant="secondary" asChild>
-                                <Link href="/projects">
-                                    <Plus className="mr-2 h-4 w-4" /> New Project
-                                </Link>
-                            </Button>
-                            <Button variant="secondary" asChild>
-                                <Link href="/invoices/new">
-                                    <Plus className="mr-2 h-4 w-4" /> New Invoice
-                                </Link>
-                            </Button>
-                        </div>
+                        {!stats.isTeamMember && (
+                            <div className="flex flex-wrap gap-3">
+                                <Button variant="secondary" asChild>
+                                    <Link href="/clients">
+                                        <Plus className="mr-2 h-4 w-4" /> New Client
+                                    </Link>
+                                </Button>
+                                <Button variant="secondary" asChild>
+                                    <Link href="/projects">
+                                        <Plus className="mr-2 h-4 w-4" /> New Project
+                                    </Link>
+                                </Button>
+                                <Button variant="secondary" asChild>
+                                    <Link href="/invoices/new">
+                                        <Plus className="mr-2 h-4 w-4" /> New Invoice
+                                    </Link>
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-
-                {/* Smart Reminders */}
+                {stats.isTeamMember ? (
+                    <MemberDashboard stats={stats} />
+                ) : (
+                    <>
+                        {/* Smart Reminders */}
                 <Suspense fallback={<Skeleton className="h-[200px] w-full rounded-2xl" />}>
                     <SmartRemindersWidget />
                 </Suspense>
@@ -88,15 +96,15 @@ export default async function DashboardPage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</div>
+                            <div className="text-3xl font-bold text-primary">{formatCurrency(stats.totalRevenue || 0)}</div>
                             <p className="text-xs text-muted-foreground flex items-center mt-1">
-                                {stats.monthlyRevenue >= stats.prevMonthRevenue ? (
+                                {(stats.monthlyRevenue || 0) >= (stats.prevMonthRevenue || 0) ? (
                                     <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
                                 ) : (
                                     <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
                                 )}
-                                <span className={stats.monthlyRevenue >= stats.prevMonthRevenue ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                                    {formatCurrency(stats.monthlyRevenue)}
+                                <span className={(stats.monthlyRevenue || 0) >= (stats.prevMonthRevenue || 0) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                                    {formatCurrency(stats.monthlyRevenue || 0)}
                                 </span>
                                 <span className="ml-1">this month</span>
                             </p>
@@ -146,8 +154,8 @@ export default async function DashboardPage() {
                     </Card>
 
                     <TimeSummaryWidget
-                        totalSeconds={stats.totalSecondsThisWeek}
-                        hasActiveTimer={stats.hasActiveTimer}
+                        totalSeconds={stats.totalSecondsThisWeek || 0}
+                        hasActiveTimer={stats.hasActiveTimer || false}
                     />
                 </div>
 
@@ -165,7 +173,7 @@ export default async function DashboardPage() {
                             </Button>
                         </CardHeader>
                         <CardContent>
-                            <RevenueChart data={stats.revenueChartData} />
+                            <RevenueChart data={stats.revenueChartData || []} />
                         </CardContent>
                     </Card>
 
@@ -175,29 +183,38 @@ export default async function DashboardPage() {
                             <CardTitle>Project Status</CardTitle>
                             <CardDescription>Distribution of your projects</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            {Object.entries(stats.projectStatusCounts).map(([status, count]) => {
-                                const colors: Record<string, string> = {
-                                    'Planning': 'bg-slate-500',
-                                    'In Progress': 'bg-blue-500',
-                                    'On Hold': 'bg-yellow-500',
-                                    'Completed': 'bg-green-500',
-                                    'Cancelled': 'bg-red-500'
-                                };
-                                const total = Object.values(stats.projectStatusCounts).reduce((a, b) => a + b, 0);
-                                const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-                                return (
-                                    <div key={status} className="space-y-1">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-muted-foreground">{status}</span>
-                                            <span className="font-medium">{count}</span>
-                                        </div>
-                                        <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                                            <div className={`h-full rounded-full ${colors[status]}`} style={{ width: `${percentage}%` }} />
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                        <CardContent className="flex items-center justify-center p-6 h-[250px]">
+                            {Object.values(stats.projectStatusCounts || {}).reduce((a, b) => a + b, 0) === 0 ? (
+                                <div className="text-center text-muted-foreground flex flex-col items-center">
+                                    <Briefcase className="h-8 w-8 mb-2 opacity-20" />
+                                    <p className="text-sm">No projects yet.</p>
+                                </div>
+                            ) : (
+                                <div className="w-full space-y-4">
+                                    {Object.entries(stats.projectStatusCounts || {}).map(([status, count]) => {
+                                        const colors: Record<string, string> = {
+                                            'Planning': 'bg-slate-500',
+                                            'In Progress': 'bg-blue-500',
+                                            'On Hold': 'bg-yellow-500',
+                                            'Completed': 'bg-green-500',
+                                            'Cancelled': 'bg-red-500'
+                                        };
+                                        const total = Object.values(stats.projectStatusCounts || {}).reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+                                        return (
+                                            <div key={status} className="space-y-1">
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-muted-foreground">{status}</span>
+                                                    <span className="font-medium">{count}</span>
+                                                </div>
+                                                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                                    <div className={`h-full rounded-full ${colors[status] || 'bg-slate-400'}`} style={{ width: `${percentage}%` }} />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -264,8 +281,8 @@ export default async function DashboardPage() {
                             </Button>
                         </CardHeader>
                         <CardContent>
-                            {stats.upcomingDeadlines.length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground">
+                            {(stats.upcomingDeadlines || []).length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                                     <div className="h-16 w-16 rounded-2xl bg-green-100 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-3">
                                         <CheckCircle2 className="h-8 w-8 text-green-500 dark:text-green-400" />
                                     </div>
@@ -276,8 +293,8 @@ export default async function DashboardPage() {
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    {stats.upcomingDeadlines.map((task: any) => {
+                                <div className="space-y-4 mt-2">
+                                    {(stats.upcomingDeadlines || []).map((task: any) => {
                                         const dueDate = new Date(task.due_date);
                                         const isUrgent = dueDate.getTime() - Date.now() < 24 * 60 * 60 * 1000;
                                         return (
@@ -318,8 +335,8 @@ export default async function DashboardPage() {
                         </Button>
                     </CardHeader>
                     <CardContent>
-                        {stats.recentInvoices.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
+                        {(stats.recentInvoices || []).length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                                 <div className="h-16 w-16 rounded-2xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mx-auto mb-3">
                                     <FileText className="h-8 w-8 text-orange-500 dark:text-orange-400" />
                                 </div>
@@ -342,7 +359,7 @@ export default async function DashboardPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {stats.recentInvoices.map((invoice: any) => (
+                                        {(stats.recentInvoices || []).map((invoice: any) => (
                                             <tr key={invoice.id} className="border-b last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                                 <td className="py-3 font-medium">{invoice.invoice_number}</td>
                                                 <td className="py-3 text-muted-foreground">{new Date(invoice.created_at).toLocaleDateString('en-US')}</td>
@@ -367,7 +384,9 @@ export default async function DashboardPage() {
                 </Card>
 
                 {/* Activity Feed */}
-                <ActivityFeed activities={stats.activities} />
+                <ActivityFeed activities={stats.activities || []} />
+                    </>
+                )}
             </div>
         </div>
     );
