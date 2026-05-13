@@ -6,7 +6,8 @@ import { createServerClient } from "@supabase/ssr";
 const PUBLIC_ROUTES = [
     '/', '/about', '/contact', '/privacy', '/terms', '/refund', '/blog',
     '/login', '/signup', '/forgot-password', '/verify-otp',
-    '/pricing', '/error', '/affiliates',
+    '/pricing', '/error', '/become-affiliate',
+
 
 ];
 
