@@ -62,15 +62,15 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
         try {
             // 2. Client-side Session Check (extra safety layer)
             const supabase = createClient();
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { user: clientUser }, error: authError } = await supabase.auth.getUser();
             
-            if (!session?.user) {
-                console.log('[Pricing] No active session, redirecting to login');
+            if (authError || !clientUser) {
+                console.log('[Pricing] No valid active user found, redirecting to login');
                 window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }
 
-            console.log('[Pricing] Authenticated user initiating checkout:', session.user.id);
+            console.log('[Pricing] Authenticated user initiating checkout:', clientUser.id);
 
             // 3. Call Checkout API
             const res = await fetch('/api/payments/lemon-squeezy/checkout', {
@@ -242,21 +242,36 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
                                     <p className="text-muted-foreground mt-3 text-sm">Billed monthly. Cancel anytime seamlessly.</p>
                                 </div>
 
-                                <Button
-                                    size="lg"
-                                    onClick={() => handleSubscribe('monthly')}
-                                    disabled={loading !== null}
-                                    className={`w-full py-6 text-base rounded-xl font-bold transition-all duration-200 group flex items-center justify-center gap-2 ${!isAnnual
-                                        ? 'bg-brand-primary hover:bg-brand-primary-light text-white shadow-xl shadow-brand-primary/25'
-                                        : 'bg-muted hover:bg-brand-primary hover:text-white border border-border hover:border-brand-primary text-foreground'
-                                        }`}
-                                >
-                                    {loading === 'monthly' ? (
-                                        <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                    {!isLoggedIn ? (
+                                        <Button
+                                            size="lg"
+                                            asChild
+                                            className={`w-full py-6 text-base rounded-xl font-bold transition-all duration-200 group flex items-center justify-center gap-2 ${!isAnnual
+                                                ? 'bg-brand-primary hover:bg-brand-primary-light text-white shadow-xl shadow-brand-primary/25'
+                                                : 'bg-muted hover:bg-brand-primary hover:text-white border border-border hover:border-brand-primary text-foreground'
+                                                }`}
+                                        >
+                                            <Link href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}>
+                                                Get Started <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" />
+                                            </Link>
+                                        </Button>
                                     ) : (
-                                        <>Get Started <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" /></>
+                                        <Button
+                                            size="lg"
+                                            onClick={() => handleSubscribe('monthly')}
+                                            disabled={loading !== null}
+                                            className={`w-full py-6 text-base rounded-xl font-bold transition-all duration-200 group flex items-center justify-center gap-2 ${!isAnnual
+                                                ? 'bg-brand-primary hover:bg-brand-primary-light text-white shadow-xl shadow-brand-primary/25'
+                                                : 'bg-muted hover:bg-brand-primary hover:text-white border border-border hover:border-brand-primary text-foreground'
+                                                }`}
+                                        >
+                                            {loading === 'monthly' ? (
+                                                <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                            ) : (
+                                                <>Get Started <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" /></>
+                                            )}
+                                        </Button>
                                     )}
-                                </Button>
                             </div>
                         </ScaleIn>
 
@@ -295,21 +310,36 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
                                     </p>
                                 </div>
 
-                                <Button
-                                    size="lg"
-                                    onClick={() => handleSubscribe('yearly')}
-                                    disabled={loading !== null}
-                                    className={`w-full py-6 text-base rounded-xl font-bold transition-all duration-200 group flex items-center justify-center gap-2 ${isAnnual
-                                        ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:opacity-90 text-white shadow-xl shadow-brand-primary/25'
-                                        : 'bg-muted hover:bg-gradient-to-r hover:from-brand-primary hover:to-brand-secondary hover:text-white border border-border text-foreground hover:border-transparent'
-                                        }`}
-                                >
-                                    {loading === 'yearly' ? (
-                                        <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                    {!isLoggedIn ? (
+                                        <Button
+                                            size="lg"
+                                            asChild
+                                            className={`w-full py-6 text-base rounded-xl font-bold transition-all duration-200 group flex items-center justify-center gap-2 ${isAnnual
+                                                ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:opacity-90 text-white shadow-xl shadow-brand-primary/25'
+                                                : 'bg-muted hover:bg-gradient-to-r hover:from-brand-primary hover:to-brand-secondary hover:text-white border border-border text-foreground hover:border-transparent'
+                                                }`}
+                                        >
+                                            <Link href={`/login?redirect=${encodeURIComponent(window.location.pathname)}`}>
+                                                Get Started <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" />
+                                            </Link>
+                                        </Button>
                                     ) : (
-                                        <>Get Started <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" /></>
+                                        <Button
+                                            size="lg"
+                                            onClick={() => handleSubscribe('yearly')}
+                                            disabled={loading !== null}
+                                            className={`w-full py-6 text-base rounded-xl font-bold transition-all duration-200 group flex items-center justify-center gap-2 ${isAnnual
+                                                ? 'bg-gradient-to-r from-brand-primary to-brand-secondary hover:opacity-90 text-white shadow-xl shadow-brand-primary/25'
+                                                : 'bg-muted hover:bg-gradient-to-r hover:from-brand-primary hover:to-brand-secondary hover:text-white border border-border text-foreground hover:border-transparent'
+                                                }`}
+                                        >
+                                            {loading === 'yearly' ? (
+                                                <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                            ) : (
+                                                <>Get Started <ArrowRight className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" /></>
+                                            )}
+                                        </Button>
                                     )}
-                                </Button>
                             </div>
                         </ScaleIn>
                     </div>
