@@ -64,8 +64,8 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
             const supabase = createClient();
             const { data: { user: clientUser }, error: authError } = await supabase.auth.getUser();
             
-            if (authError || !clientUser) {
-                console.log('[Pricing] No valid active user found, redirecting to login');
+            if (authError || !clientUser || !clientUser.email) {
+                console.log('[Pricing] No valid active user with email found, redirecting to login');
                 window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }

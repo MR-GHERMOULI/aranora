@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 export default async function PricingPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const isLoggedIn = !!user;
+    // A user is only considered fully logged in for pricing if they have an email (required by Lemon Squeezy)
+    const isLoggedIn = !!(user && user.email);
 
     const { data: pricingSetting } = await supabase
         .from("platform_settings")
