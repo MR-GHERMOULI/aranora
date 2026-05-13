@@ -126,7 +126,10 @@ export async function POST(request: NextRequest) {
         const digest = hmac.update(rawBody).digest('hex');
         const signature = request.headers.get('x-signature');
 
-        if (signature !== digest) {
+        if (!signature || !crypto.timingSafeEqual(
+            Buffer.from(signature),
+            Buffer.from(digest)
+        )) {
             return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
         }
 
@@ -210,10 +213,11 @@ export async function POST(request: NextRequest) {
                 break;
             }
 
-            case 'subscription_cancelled':
-            case 'subscription_expired': {
+            case 'subscription_cancelled': {
+                // User cancelled but is still active until the billing period ends.
+                // Do NOT cut off access — just flag it.
                 const subscriptionId = payload.data.id;
-                
+
                 const { data: sub } = await supabase
                     .from('billing_subscriptions')
                     .select('user_id')
@@ -223,7 +227,29 @@ export async function POST(request: NextRequest) {
                 if (sub) {
                     await supabase
                         .from('billing_subscriptions')
-                        .update({ status: 'expired' })
+                        .update({ status: 'canceled', cancel_at_period_end: true })
+                        .eq('lemon_squeezy_subscription_id', subscriptionId.toString());
+
+                    // Keep subscription_status as 'active' until it actually expires
+                    // The subscription_expired event will revoke access
+                }
+                break;
+            }
+
+            case 'subscription_expired': {
+                // Billing period is fully over — revoke access now.
+                const subscriptionId = payload.data.id;
+
+                const { data: sub } = await supabase
+                    .from('billing_subscriptions')
+                    .select('user_id')
+                    .eq('lemon_squeezy_subscription_id', subscriptionId.toString())
+                    .single();
+
+                if (sub) {
+                    await supabase
+                        .from('billing_subscriptions')
+                        .update({ status: 'expired', cancel_at_period_end: false })
                         .eq('lemon_squeezy_subscription_id', subscriptionId.toString());
 
                     await supabase
@@ -231,12 +257,85 @@ export async function POST(request: NextRequest) {
                         .update({ subscription_status: 'expired' })
                         .eq('id', sub.user_id);
 
+                    // Mark affiliate referrals as churned only on full expiry
                     await supabase
                         .from('affiliate_referrals')
                         .update({ status: 'churned' })
                         .eq('referred_user_id', sub.user_id)
                         .eq('status', 'subscribed');
                 }
+                break;
+            }
+
+            case 'subscription_payment_success': {
+                // Recurring payment received — generate commission for months 2-12
+                const subscriptionId = payload.data.id;
+                const invoiceTotal = (attributes.total || attributes.subtotal || 0) / 100;
+
+                if (invoiceTotal <= 0) break;
+
+                // Look up the subscription to find the user
+                const { data: sub } = await supabase
+                    .from('billing_subscriptions')
+                    .select('user_id, plan_type')
+                    .eq('lemon_squeezy_subscription_id', subscriptionId.toString())
+                    .single();
+
+                if (!sub) break;
+
+                // Check if user was referred by an affiliate
+                const { data: referral } = await supabase
+                    .from('affiliate_referrals')
+                    .select('id, affiliate_id, commission_eligible_until')
+                    .eq('referred_user_id', sub.user_id)
+                    .eq('status', 'subscribed')
+                    .single();
+
+                if (!referral) break;
+
+                // Check if still within the 12-month commission window
+                if (referral.commission_eligible_until && new Date(referral.commission_eligible_until) < new Date()) {
+                    break; // Commission period has ended
+                }
+
+                // Count existing commissions to determine the month number
+                const { count: existingCount } = await supabase
+                    .from('affiliate_commissions')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('referral_id', referral.id);
+
+                const commissionMonth = (existingCount || 0) + 1;
+
+                // Cap at 12 months
+                if (commissionMonth > COMMISSION_MONTHS) break;
+
+                const commissionAmount = Number((invoiceTotal * COMMISSION_RATE).toFixed(2));
+
+                await supabase.from('affiliate_commissions').insert({
+                    affiliate_id: referral.affiliate_id,
+                    referral_id: referral.id,
+                    invoice_stripe_id: subscriptionId.toString(),
+                    subscription_type: sub.plan_type || 'monthly',
+                    invoice_amount: invoiceTotal,
+                    commission_amount: commissionAmount,
+                    commission_month: commissionMonth,
+                    status: 'pending',
+                });
+
+                // Update affiliate total_earned
+                const { data: aff } = await supabase
+                    .from('affiliates')
+                    .select('total_earned')
+                    .eq('id', referral.affiliate_id)
+                    .single();
+
+                await supabase
+                    .from('affiliates')
+                    .update({
+                        total_earned: Number(aff?.total_earned || 0) + commissionAmount,
+                    })
+                    .eq('id', referral.affiliate_id);
+
                 break;
             }
         }

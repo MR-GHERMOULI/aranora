@@ -30,7 +30,7 @@ export async function GET(
         .from('affiliates')
         .select('id')
         .eq('affiliate_code', code)
-        .eq('status', 'active')
+        .in('status', ['active', 'pending']) // consistent with ?via= middleware
         .single();
 
     if (!affiliate) {
@@ -38,10 +38,19 @@ export async function GET(
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    // Set a referral cookie that expires in 30 days
+    // Set referral cookies that expire in 30 days
     const response = NextResponse.redirect(new URL('/', request.url));
+    // httpOnly cookie for server-side usage (checkout, webhooks)
     response.cookies.set('aranora_ref', code, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        path: '/',
+    });
+    // JS-readable cookie for client-side form submissions (signup tracking)
+    response.cookies.set('aranora_ref_code', code, {
+        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60, // 30 days

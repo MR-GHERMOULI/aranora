@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServerClient } from '@supabase/ssr';
+import { sendEmail } from '@/lib/email';
 
 function createServiceClient() {
     return createServerClient(
@@ -181,6 +182,85 @@ export async function PATCH(request: NextRequest) {
             .eq('id', affiliateId);
 
         if (error) throw error;
+
+        // --- Send approval email when affiliate is approved ---
+        if (action === 'approve') {
+            try {
+                // Fetch affiliate details + their profile email
+                const { data: aff } = await serviceClient
+                    .from('affiliates')
+                    .select('affiliate_code, company_name, user_id')
+                    .eq('id', affiliateId)
+                    .single();
+
+                if (aff) {
+                    const { data: profile } = await serviceClient
+                        .from('profiles')
+                        .select('company_email, full_name')
+                        .eq('id', aff.user_id)
+                        .single();
+
+                    const affiliateEmail = profile?.company_email;
+                    const affiliateName = profile?.full_name || aff.company_name;
+                    const referralLink = `https://www.aranora.com/?via=${aff.affiliate_code}`;
+
+                    if (affiliateEmail) {
+                        await sendEmail({
+                            to: affiliateEmail,
+                            subject: '🎉 You\'re approved! Your Aranora affiliate link is ready',
+                            html: `
+                                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+                                    <div style="background: linear-gradient(135deg, #6366f1 0%, #0ea5e9 100%); padding: 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">
+                                        <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 0;">You're Approved! 🎉</h1>
+                                        <p style="color: rgba(255,255,255,0.85); margin: 12px 0 0; font-size: 16px;">Welcome to the Aranora Partner Program</p>
+                                    </div>
+
+                                    <div style="padding: 36px 32px; border: 1px solid #e5e7eb; border-top: 0; border-radius: 0 0 12px 12px;">
+                                        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 24px;">Hi <strong>${affiliateName}</strong>,</p>
+                                        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 24px;">
+                                            Great news! Your affiliate application for <strong>${aff.company_name}</strong> has been approved.
+                                            You can now start earning <strong>30% commission</strong> on every referral for up to 12 months.
+                                        </p>
+
+                                        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px 24px; margin: 0 0 28px;">
+                                            <p style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px;">Your Referral Link</p>
+                                            <p style="color: #4f46e5; font-size: 15px; font-family: monospace; word-break: break-all; margin: 0; font-weight: 600;">${referralLink}</p>
+                                        </div>
+
+                                        <div style="margin: 0 0 28px;">
+                                            <p style="color: #374151; font-size: 15px; font-weight: 600; margin: 0 0 12px;">Quick Start Guide:</p>
+                                            <ol style="color: #6b7280; font-size: 14px; line-height: 1.8; padding-left: 20px; margin: 0;">
+                                                <li>Share your link on social media, your website, or via email</li>
+                                                <li>When someone signs up and subscribes, you earn 30% commission</li>
+                                                <li>Track your earnings and referrals in your <a href="https://www.aranora.com/affiliates" style="color: #4f46e5;">affiliate dashboard</a></li>
+                                                <li>Request a payout once your balance reaches $50</li>
+                                            </ol>
+                                        </div>
+
+                                        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); border: 1px solid #a7f3d0; border-radius: 10px; padding: 16px 20px; margin: 0 0 28px;">
+                                            <p style="color: #065f46; font-size: 14px; margin: 0;">
+                                                💡 <strong>Pro tip:</strong> Annual plan referrals earn you <strong>$57 upfront</strong>. Monthly plan referrals earn <strong>$5.70/month × 12</strong>.
+                                            </p>
+                                        </div>
+
+                                        <a href="https://www.aranora.com/affiliates" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #0ea5e9); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 15px;">
+                                            Go to My Dashboard →
+                                        </a>
+
+                                        <p style="color: #9ca3af; font-size: 13px; margin: 28px 0 0; line-height: 1.5;">
+                                            Questions? Reply to this email or contact us at <a href="mailto:support@aranora.com" style="color: #4f46e5;">support@aranora.com</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            `,
+                        });
+                    }
+                }
+            } catch (emailErr) {
+                // Non-critical — don't fail the approval if email fails
+                console.error('[Affiliate Approval] Email notification failed:', emailErr);
+            }
+        }
 
         return NextResponse.json({ success: true, status: newStatus });
     } catch (error) {
