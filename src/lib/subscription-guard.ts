@@ -44,13 +44,12 @@ export async function requireActiveSubscription(): Promise<void> {
 
     const { data: profile, error } = await supabase
         .from('profiles')
-        .select('trial_ends_at, subscription_status, is_admin')
+        .select('trial_ends_at, subscription_status, is_admin, account_type, active_team_id')
         .eq('id', user.id)
         .single();
 
     if (error) {
         console.error('Error fetching profile in subscription guard:', error);
-        // If there's a DB error (like missing table), don't just say "subscription expired"
         throw new Error(`Profile check failed: ${error.message}`);
     }
 
@@ -63,6 +62,39 @@ export async function requireActiveSubscription(): Promise<void> {
         throw new SubscriptionExpiredError('User profile not found. Please contact support.');
     }
 
+    // ── Team members: inherit owner's subscription ──
+    if (profile.account_type === 'team_member' && profile.active_team_id) {
+        const { data: ownerMembership } = await supabase
+            .from('team_members')
+            .select('user_id')
+            .eq('team_id', profile.active_team_id)
+            .eq('role', 'owner')
+            .single();
+
+        if (ownerMembership) {
+            const { data: ownerProfile } = await supabase
+                .from('profiles')
+                .select('trial_ends_at, subscription_status, is_admin')
+                .eq('id', ownerMembership.user_id)
+                .single();
+
+            if (ownerProfile?.is_admin) return;
+
+            if (ownerProfile) {
+                const ownerStatus = ownerProfile.subscription_status;
+                if (ownerStatus === 'active') return;
+                if (ownerStatus === 'trialing' && ownerProfile.trial_ends_at) {
+                    if (new Date(ownerProfile.trial_ends_at) > new Date()) return;
+                }
+            }
+        }
+
+        throw new SubscriptionExpiredError(
+            'The workspace owner\'s subscription has expired. Please contact the team owner.'
+        );
+    }
+
+    // ── Standard freelancer subscription check ──
     const status = profile.subscription_status;
     const trialEndsAt = profile.trial_ends_at;
 

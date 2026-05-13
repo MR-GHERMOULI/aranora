@@ -8,6 +8,7 @@ import {
     LayoutDashboard,
     ListTodo,
     Users,
+    UsersRound,
     Briefcase,
     FileText,
     Calendar,
@@ -37,13 +38,16 @@ import { useEffect } from "react"
 import { getUnreadBroadcastsCount } from "./notifications/actions"
 import { SubscriptionDisclaimer } from "./subscription-disclaimer"
 import { useSidebar } from "@/components/providers/sidebar-context"
+import { useTeam } from "@/components/providers/team-context"
 import { FeedbackModal } from "@/components/clients/feedback-modal"
+import { WorkspaceSwitcher } from "./workspace-switcher"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname()
     const { isCollapsed } = useSidebar();
+    const { isOwner, isManager, isMember, isTeamMember } = useTeam();
     const [isOpen, setIsOpen] = useState(false)
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false)
     const [broadcastsCount, setBroadcastsCount] = useState(0)
@@ -102,6 +106,54 @@ export function Sidebar({ className }: SidebarProps) {
         routes: Route[];
     };
 
+    // Build route groups based on team role
+    const managementRoutes: Route[] = [
+        {
+            label: "Projects",
+            icon: Briefcase,
+            href: "/projects",
+            color: "text-pink-700",
+        },
+    ];
+
+    // Only owners and managers can see Clients
+    if (isOwner || isManager) {
+        managementRoutes.push({
+            label: "Clients",
+            icon: Users,
+            href: "/clients",
+            color: "text-violet-500",
+        });
+    }
+
+    // Only owners see Intake Forms and Collaborators
+    if (isOwner) {
+        managementRoutes.push(
+            {
+                label: "Intake Forms",
+                icon: ClipboardList,
+                href: "/intake-forms",
+                color: "text-rose-500",
+            },
+            {
+                label: "Collaborators",
+                icon: UserCog,
+                href: "/collaborators",
+                color: "text-cyan-500",
+            },
+        );
+    }
+
+    // Owner sees Team management
+    if (isOwner) {
+        managementRoutes.push({
+            label: "Team",
+            icon: UsersRound,
+            href: "/team",
+            color: "text-blue-500",
+        });
+    }
+
     const routeGroups: RouteGroup[] = [
         {
             title: "Overview",
@@ -116,32 +168,7 @@ export function Sidebar({ className }: SidebarProps) {
         },
         {
             title: "Management",
-            routes: [
-                {
-                    label: "Projects",
-                    icon: Briefcase,
-                    href: "/projects",
-                    color: "text-pink-700",
-                },
-                {
-                    label: "Clients",
-                    icon: Users,
-                    href: "/clients",
-                    color: "text-violet-500",
-                },
-                {
-                    label: "Intake Forms",
-                    icon: ClipboardList,
-                    href: "/intake-forms",
-                    color: "text-rose-500",
-                },
-                {
-                    label: "Collaborators",
-                    icon: UserCog,
-                    href: "/collaborators",
-                    color: "text-cyan-500",
-                },
-            ]
+            routes: managementRoutes,
         },
         {
             title: "Workspace",
@@ -172,7 +199,8 @@ export function Sidebar({ className }: SidebarProps) {
                 },
             ]
         },
-        {
+        // Finance section: only visible to owners
+        ...(isOwner ? [{
             title: "Finance",
             routes: [
                 {
@@ -200,8 +228,9 @@ export function Sidebar({ className }: SidebarProps) {
                     color: "text-green-700",
                 },
             ]
-        },
-        {
+        }] : []),
+        // Account section: only visible to owners
+        ...(isOwner ? [{
             title: "Account",
             routes: [
                 {
@@ -217,7 +246,7 @@ export function Sidebar({ className }: SidebarProps) {
                     color: "text-purple-500",
                 },
             ]
-        }
+        }] : []),
     ];
 
     // ── Affiliate-only sidebar ──
@@ -358,6 +387,8 @@ export function Sidebar({ className }: SidebarProps) {
                             {siteName}
                         </div>
                     </Link>
+
+                    <WorkspaceSwitcher />
 
                     <div className="shrink-0 mb-2">
                         <GlobalSearch />

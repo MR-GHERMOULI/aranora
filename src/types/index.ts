@@ -287,3 +287,49 @@ export interface IntakeSubmission {
     created_at: string;
     form?: IntakeForm;
 }
+
+// ── Team Management ─────────────────────────────────
+
+export type TeamRole = 'owner' | 'manager' | 'member';
+export type TeamMemberStatus = 'active' | 'invited' | 'suspended';
+export type AccountType = 'freelancer' | 'team_member' | 'affiliate';
+
+export interface Team {
+    id: string;
+    name: string;
+    owner_id: string;
+    created_at: string;
+}
+
+export interface TeamMember {
+    id: string;
+    team_id: string;
+    user_id: string;
+    role: TeamRole;
+    status: TeamMemberStatus;
+    base_salary?: number;
+    salary_currency?: string;
+    salary_notes?: string | null;
+    invited_at: string;
+    joined_at: string;
+    invite_token?: string;
+    profile?: {
+        full_name: string;
+        username?: string;
+        email?: string;
+        company_email?: string;
+        avatar_url?: string;
+        account_type?: AccountType;
+    };
+}
+
+export interface TeamMemberProject {
+    id: string;
+    team_member_id: string;
+    project_id: string;
+    assigned_at: string;
+    removed_at?: string | null;
+    assigned_by?: string;
+    project?: { title: string; status: string };
+    member?: TeamMember;
+}
