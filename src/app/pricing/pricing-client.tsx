@@ -3,10 +3,11 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, Sparkles, Star, ArrowRight, ArrowLeft, Zap, ChevronRight, Globe, TrendingUp, DollarSign, Shield, Clock, Briefcase, Plus, Minus } from 'lucide-react';
+import { CheckCircle2, Sparkles, Star, ArrowRight, ArrowLeft, Zap, AlertCircle, Clock, Briefcase, Plus, Minus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { FadeIn, ScaleIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
 import { Footer } from "@/components/layout/footer";
+import { createClient } from '@/lib/supabase/client';
 
 export interface PricingPageData {
     hero_title: string
@@ -42,30 +43,53 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
 function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData; siteName?: string }) {
     const [isAnnual, setIsAnnual] = useState(true);
     const [loading, setLoading] = useState<string | null>(null);
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
     const searchParams = useSearchParams();
     const expired = searchParams.get('expired') === 'true';
     const canceled = searchParams.get('canceled') === 'true';
 
     const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
         setLoading(planType);
+        setCheckoutError(null);
+
         try {
+            // Pre-check: ensure user is authenticated before calling API
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                // Not logged in — send to login with redirect back to pricing
+                window.location.href = `/login?redirect=/pricing`;
+                return;
+            }
+
             const res = await fetch('/api/payments/lemon-squeezy/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ planType }),
             });
 
-            const data = await res.json();
-
-            if (data.url) {
-                window.location.href = data.url;
-            } else if (res.status === 401) {
-                window.location.href = '/signup';
-            } else {
-                alert('Failed to start checkout. Please try again.');
+            // Safely parse the JSON — the response could be HTML if there's a server-side redirect
+            let json: { url?: string; error?: string } = {};
+            try {
+                json = await res.json();
+            } catch {
+                setCheckoutError('Server error. Please try again in a moment.');
+                return;
             }
-        } catch {
-            alert('Something went wrong. Please try again.');
+
+            if (json.url) {
+                window.location.href = json.url;
+            } else if (res.status === 401) {
+                window.location.href = `/login?redirect=/pricing`;
+            } else {
+                const msg = json.error || 'Failed to start checkout.';
+                setCheckoutError(msg);
+                console.error('[Checkout error]', msg, 'status:', res.status);
+            }
+        } catch (err) {
+            setCheckoutError('Network error. Please check your connection and try again.');
+            console.error('[Checkout network error]', err);
         } finally {
             setLoading(null);
         }
@@ -83,6 +107,21 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
                 </div>
 
                 <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+
+                    {/* Checkout error banner */}
+                    {checkoutError && (
+                        <FadeIn className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 max-w-4xl mx-auto flex items-center gap-3">
+                            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                            <div className="flex-1">
+                                <p className="text-red-700 dark:text-red-300 font-medium text-sm">{checkoutError}</p>
+                                <p className="text-red-600/70 dark:text-red-400/70 text-xs mt-0.5">
+                                    If this persists, please <a href="mailto:support@aranora.com" className="underline">contact support</a>.
+                                </p>
+                            </div>
+                            <button onClick={() => setCheckoutError(null)} className="text-red-400 hover:text-red-300 text-lg leading-none">&times;</button>
+                        </FadeIn>
+                    )}
+
                     {/* Trial expired banner */}
                     {expired && (
                         <FadeIn className="mb-8 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center max-w-4xl mx-auto shadow-md">
