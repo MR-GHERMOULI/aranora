@@ -40,7 +40,7 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
     );
 }
 
-function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData; siteName?: string }) {
+function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: PricingPageData; siteName?: string, isLoggedIn: boolean }) {
     const [isAnnual, setIsAnnual] = useState(true);
     const [loading, setLoading] = useState<string | null>(null);
     const [checkoutError, setCheckoutError] = useState<string | null>(null);
@@ -49,16 +49,22 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
     const canceled = searchParams.get('canceled') === 'true';
 
     const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
+        // 1. Immediate Visitor Check (Server-backed)
+        if (!isLoggedIn) {
+            console.log('[Pricing] Visitor detected (isLoggedIn=false), redirecting to login');
+            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            return;
+        }
+
         setLoading(planType);
         setCheckoutError(null);
 
         try {
-            // 1. Aggressive Auth Check
+            // 2. Extra safety check for session
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session?.user) {
-                console.log('[Pricing] Visitor detected, redirecting to login');
                 window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }
@@ -353,7 +359,7 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
     );
 }
 
-export function PricingPageClientWrap({ data, siteName }: { data: PricingPageData; siteName?: string }) {
+export function PricingPageClientWrap({ data, siteName, isLoggedIn }: { data: PricingPageData; siteName?: string, isLoggedIn: boolean }) {
     return (
         <Suspense fallback={
             <div className="min-h-screen bg-background flex flex-col pt-16">
@@ -366,7 +372,7 @@ export function PricingPageClientWrap({ data, siteName }: { data: PricingPageDat
                 </main>
             </div>
         }>
-            <PricingContent data={data} siteName={siteName} />
+            <PricingContent data={data} siteName={siteName} isLoggedIn={isLoggedIn} />
         </Suspense>
     );
 }

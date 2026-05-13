@@ -4,6 +4,8 @@ import PublicNavbar from "@/components/layout/public-navbar";
 
 export default async function PricingPage() {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const isLoggedIn = !!user;
 
     const { data: pricingSetting } = await supabase
         .from("platform_settings")
@@ -66,7 +68,7 @@ export default async function PricingPage() {
     return (
         <>
             <PublicNavbar />
-            <PricingPageClientWrap data={content} siteName={siteName} />
+            <PricingPageClientWrap data={content} siteName={siteName} isLoggedIn={isLoggedIn} />
         </>
     );
 }
