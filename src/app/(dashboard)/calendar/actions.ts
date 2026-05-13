@@ -15,27 +15,7 @@ export interface Task {
     project?: { title: string };
 }
 
-export async function getTasks() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        redirect('/login');
-    }
-
-    const { data, error } = await supabase
-        .from('tasks')
-        .select('*, project:projects(title)')
-        .eq('user_id', user.id)
-        .order('due_date', { ascending: true });
-
-    if (error) {
-        console.error('Error fetching tasks:', error);
-        return [];
-    }
-
-    return data as Task[];
-}
 
 export async function createTask(formData: FormData) {
     const supabase = await createClient();
@@ -167,28 +147,48 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
         redirect('/login');
     }
 
-    const [
-        { data: tasks },
-        { data: projects },
-        { data: invoices }
-    ] = await Promise.all([
-        supabase.from('tasks')
-            .select('id, title, due_date, status, priority, description, project:projects(title)')
-            .eq('user_id', user.id)
-            .not('due_date', 'is', null),
-        supabase.from('projects')
-            .select('id, title, end_date, status, slug')
-            .eq('user_id', user.id)
-            .not('end_date', 'is', null),
-        supabase.from('invoices')
-            .select('id, invoice_number, due_date, status, total, client:clients(name)')
-            .eq('user_id', user.id)
-            .not('due_date', 'is', null)
-    ]);
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('account_type, active_team_id')
+        .eq('id', user.id)
+        .single();
+
+    const isTeamMember = profile?.account_type === 'team_member' && profile?.active_team_id;
+
+    let tasksQuery = supabase
+        .from('tasks')
+        .select('id, title, due_date, status, priority, description, project:projects(title)')
+        .not('due_date', 'is', null);
+
+    let projectsQuery = supabase
+        .from('projects')
+        .select('id, title, end_date, status, slug')
+        .not('end_date', 'is', null);
+
+    let invoicesQuery = supabase
+        .from('invoices')
+        .select('id, invoice_number, due_date, status, total, client:clients(name)')
+        .not('due_date', 'is', null);
+
+    if (!isTeamMember) {
+        tasksQuery = tasksQuery.or(`user_id.eq.${user.id},assigned_to.eq.${user.id}`);
+        projectsQuery = projectsQuery.eq('user_id', user.id);
+        invoicesQuery = invoicesQuery.eq('user_id', user.id);
+    }
+
+    const promises: any[] = [tasksQuery, projectsQuery];
+    if (!isTeamMember) {
+        promises.push(invoicesQuery);
+    }
+
+    const results = await Promise.all(promises);
+    const tasks = results[0].data as any[];
+    const projects = results[1].data as any[];
+    const invoices = !isTeamMember ? (results[2].data as any[]) : [];
 
     const events: CalendarEvent[] = [];
 
-    tasks?.forEach(task => {
+    tasks?.forEach((task: any) => {
         const priorityColors: Record<string, string> = {
             High: '#ef4444',
             Medium: '#f59e0b',
@@ -207,7 +207,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
         });
     });
 
-    projects?.forEach(project => {
+    projects?.forEach((project: any) => {
         events.push({
             id: `project-${project.id}`,
             title: `📁 ${project.title} — Deadline`,
@@ -219,7 +219,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
         });
     });
 
-    invoices?.forEach(invoice => {
+    invoices?.forEach((invoice: any) => {
         const clientData = invoice.client as { name: string } | { name: string }[] | null;
         const clientName = Array.isArray(clientData) ? clientData[0]?.name : clientData?.name;
 

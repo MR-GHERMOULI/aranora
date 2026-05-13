@@ -1,5 +1,5 @@
-import { getTasks } from "./actions";
 import { getCalendarEvents } from "./actions";
+import { getTasks } from "@/app/(dashboard)/tasks/actions";
 import { getProjects } from "@/app/(dashboard)/projects/actions";
 import { CalendarClient } from "@/components/calendar/calendar-client";
 

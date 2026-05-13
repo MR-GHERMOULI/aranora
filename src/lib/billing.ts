@@ -42,9 +42,24 @@ export async function getUserBillingInfo(userId: string): Promise<UserBillingInf
     // Get profile billing info (including is_admin to identify Owner accounts)
     const { data: profile } = await supabase
         .from('profiles')
-        .select('trial_ends_at, subscription_status, stripe_customer_id, lemon_squeezy_customer_id, is_admin')
+        .select('trial_ends_at, subscription_status, stripe_customer_id, lemon_squeezy_customer_id, is_admin, account_type, active_team_id')
         .eq('id', userId)
         .single();
+
+    // ── TIER 0: Team members inherit owner's billing ──
+    if (profile?.account_type === 'team_member' && profile?.active_team_id) {
+        const { data: ownerMembership } = await supabase
+            .from('team_members')
+            .select('user_id')
+            .eq('team_id', profile.active_team_id)
+            .eq('role', 'owner')
+            .single();
+
+        if (ownerMembership) {
+            // Recursively get the owner's billing info
+            return getUserBillingInfo(ownerMembership.user_id);
+        }
+    }
 
     // ── TIER 1: Owner accounts (is_admin = true) ──
     // Lifetime access, no trial, no subscription, no payment ever required.

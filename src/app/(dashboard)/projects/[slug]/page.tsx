@@ -26,6 +26,7 @@ import { getProjectCollaborators } from "../collaborator-actions";
 import { getProfile } from "../../settings/actions";
 import { getIntakeForms, getSubmissions } from "../../intake-forms/actions";
 import { ProjectIntakeTab } from "@/components/projects/project-intake-tab";
+import { AssignTeamMember } from "@/components/team/assign-team-member";
 import { ClipboardList } from "lucide-react";
 
 export default async function ProjectPage({
@@ -100,6 +101,7 @@ export default async function ProjectPage({
                     <ShareProgressDialog projectId={project.id} projectTitle={project.title} />
                     {isOwner && (
                         <>
+                            <AssignTeamMember projectId={project.id} />
                             <EditProjectDialog project={project} />
                             <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
                         </>

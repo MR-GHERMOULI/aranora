@@ -21,57 +21,97 @@ export async function getProjects(clientId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // 1. Fetch projects owned by the current user
-  let ownedQuery = supabase
-    .from('projects')
-    .select('*, client:clients(name)')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const { data: profile } = await supabase
+      .from('profiles')
+      .select('account_type, active_team_id')
+      .eq('id', user.id)
+      .single();
 
-  if (clientId) {
-    ownedQuery = ownedQuery.eq('client_id', clientId);
+  let allProjects: any[] = [];
+
+  if (profile?.account_type === 'team_member' && profile?.active_team_id) {
+      // 1. Fetch assigned projects for this team member
+      const { data: membership } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('team_id', profile.active_team_id)
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+      if (membership) {
+          const { data: assignments } = await supabase
+              .from('team_member_projects')
+              .select('project_id')
+              .eq('team_member_id', membership.id)
+              .is('removed_at', null);
+
+          if (assignments && assignments.length > 0) {
+              const projectIds = assignments.map(a => a.project_id);
+              let query = supabase
+                  .from('projects')
+                  .select('*, client:clients(name)')
+                  .in('id', projectIds)
+                  .order('created_at', { ascending: false });
+
+              if (clientId) query = query.eq('client_id', clientId);
+              
+              const { data: p } = await query;
+              allProjects = p || [];
+          }
+      }
+  } else {
+      // 1. Fetch projects owned by the current user
+      let ownedQuery = supabase
+        .from('projects')
+        .select('*, client:clients(name)')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (clientId) {
+        ownedQuery = ownedQuery.eq('client_id', clientId);
+      }
+
+      const { data: ownedProjects, error: ownedError } = await ownedQuery;
+
+      if (ownedError) {
+        console.error('Error fetching owned projects:', ownedError);
+      }
+
+      // 2. Fetch projects where the user is an active collaborator
+      const { data: collabRecords } = await supabase
+        .from('project_collaborators')
+        .select('project_id')
+        .eq('collaborator_email', user.email)
+        .eq('status', 'active');
+
+      let collabProjects: any[] = [];
+      if (collabRecords && collabRecords.length > 0) {
+        const collabProjectIds = collabRecords.map(c => c.project_id);
+        let collabQuery = supabase
+          .from('projects')
+          .select('*, client:clients(name)')
+          .in('id', collabProjectIds)
+          .order('created_at', { ascending: false });
+
+        if (clientId) {
+          collabQuery = collabQuery.eq('client_id', clientId);
+        }
+
+        const { data: cp, error: cpError } = await collabQuery;
+        if (cpError) {
+          console.error('Error fetching collaborator projects:', cpError);
+        }
+        collabProjects = cp || [];
+      }
+
+      // 3. Merge and deduplicate
+      const ownedIds = new Set((ownedProjects || []).map(p => p.id));
+      allProjects = [
+        ...(ownedProjects || []),
+        ...collabProjects.filter(p => !ownedIds.has(p.id)),
+      ];
   }
-
-  const { data: ownedProjects, error: ownedError } = await ownedQuery;
-
-  if (ownedError) {
-    console.error('Error fetching owned projects:', ownedError);
-  }
-
-  // 2. Fetch projects where the user is an active collaborator
-  //    First get their collaborator records (matched by email)
-  const { data: collabRecords } = await supabase
-    .from('project_collaborators')
-    .select('project_id')
-    .eq('collaborator_email', user.email)
-    .eq('status', 'active');
-
-  let collabProjects: any[] = [];
-  if (collabRecords && collabRecords.length > 0) {
-    const collabProjectIds = collabRecords.map(c => c.project_id);
-    let collabQuery = supabase
-      .from('projects')
-      .select('*, client:clients(name)')
-      .in('id', collabProjectIds)
-      .order('created_at', { ascending: false });
-
-    if (clientId) {
-      collabQuery = collabQuery.eq('client_id', clientId);
-    }
-
-    const { data: cp, error: cpError } = await collabQuery;
-    if (cpError) {
-      console.error('Error fetching collaborator projects:', cpError);
-    }
-    collabProjects = cp || [];
-  }
-
-  // 3. Merge and deduplicate (owned projects first)
-  const ownedIds = new Set((ownedProjects || []).map(p => p.id));
-  const allProjects = [
-    ...(ownedProjects || []),
-    ...collabProjects.filter(p => !ownedIds.has(p.id)),
-  ];
 
   // 4. Fetch task counts for all visible projects
   const projectIds = allProjects.map(p => p.id);

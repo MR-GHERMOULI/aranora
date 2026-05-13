@@ -70,6 +70,14 @@ function revalidateAll(extra?: string) {
 export async function getTasks(filters?: TaskFilters) {
     noStore();
     const { supabase, user } = await getAuthUser();
+    
+    // Check if team member
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('account_type, active_team_id')
+        .eq('id', user.id)
+        .single();
+
     let query = supabase
         .from('tasks')
         .select(`
@@ -78,8 +86,16 @@ export async function getTasks(filters?: TaskFilters) {
             creator:profiles!tasks_user_id_fkey(full_name, username),
             assignee:profiles!tasks_assigned_to_fkey(full_name, username)
         `)
-        .eq('user_id', user.id)
         .is('subtask_of', null); // Only top-level tasks by default
+
+    if (profile?.account_type === 'team_member' && profile?.active_team_id) {
+        // Team member: Rely on RLS to filter tasks they have access to 
+        // (tasks of assigned projects, or directly assigned to them).
+        // No strict user_id filter needed.
+    } else {
+        // Freelancer: Show their created tasks OR tasks assigned to them
+        query = query.or(`user_id.eq.${user.id},assigned_to.eq.${user.id}`);
+    }
 
     if (filters?.projectId) {
         // Project-specific view: show all tasks in project
@@ -165,11 +181,25 @@ export async function getSubtasks(parentId: string) {
 export async function getTaskStats(): Promise<TaskStats> {
     noStore();
     const { supabase, user } = await getAuthUser();
-    const { data: tasks, error } = await supabase
+    
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('account_type, active_team_id')
+        .eq('id', user.id)
+        .single();
+
+    let query = supabase
         .from('tasks')
         .select('status, priority, due_date')
-        .eq('user_id', user.id)
         .is('subtask_of', null);
+
+    if (profile?.account_type === 'team_member' && profile?.active_team_id) {
+        // RLS handles visibility
+    } else {
+        query = query.or(`user_id.eq.${user.id},assigned_to.eq.${user.id}`);
+    }
+
+    const { data: tasks, error } = await query;
 
     if (error || !tasks) {
         return {

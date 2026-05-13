@@ -336,7 +336,20 @@ export async function getProjectTimeEntries(projectId: string) {
             .eq("status", "active")
             .maybeSingle();
 
-        if (!collabCheck) throw new Error("Access denied");
+        if (!collabCheck) {
+            // Check if they are a team member assigned to this project
+            const { data: teamCheck } = await adminSupabase
+                .from("team_member_projects")
+                .select("id")
+                .eq("project_id", projectId)
+                .is("removed_at", null)
+                .in("team_member_id", (
+                    await adminSupabase.from("team_members").select("id").eq("user_id", user.id).eq("status", "active")
+                ).data?.map(m => m.id) || [])
+                .maybeSingle();
+
+            if (!teamCheck) throw new Error("Access denied");
+        }
     }
 
     // Fetch ALL time entries for this project from every user

@@ -222,28 +222,6 @@ export async function inviteTeamMember(formData: FormData) {
         throw new Error('Failed to invite team member');
     }
 
-    // If the user exists on the platform, send them an in-app notification
-    if (existingUser) {
-        const { data: inviterProfile } = await supabase
-            .from('profiles')
-            .select('full_name, username')
-            .eq('id', user.id)
-            .single();
-
-        await supabase.from('notifications').insert({
-            user_id: existingUser.id,
-            type: 'team_invite',
-            payload: {
-                teamId,
-                teamMemberId: newMember.id,
-                inviterName: inviterProfile?.full_name || user.email,
-                inviterUsername: inviterProfile?.username,
-                role,
-                inviteToken: newMember.invite_token
-            }
-        });
-    }
-
     revalidatePath('/team');
 
     return {
