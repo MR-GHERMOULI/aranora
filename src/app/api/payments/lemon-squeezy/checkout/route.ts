@@ -42,8 +42,11 @@ export async function POST(request: NextRequest) {
             .eq('id', user.id)
             .single();
 
+        console.log('[LS Checkout] Store ID:', LEMONSQUEEZY_STORE_ID, '| Variant ID:', variantId);
+        console.log('[LS Checkout] Store ID type:', typeof LEMONSQUEEZY_STORE_ID, '| Variant ID type:', typeof variantId);
+
         // Create Lemon Squeezy Checkout
-        const { data: checkout, error } = await createCheckout(
+        const checkoutResult = await createCheckout(
             LEMONSQUEEZY_STORE_ID,
             variantId,
             {
@@ -68,12 +71,26 @@ export async function POST(request: NextRequest) {
             }
         );
 
+        console.log('[LS Checkout] Full result statusCode:', checkoutResult.statusCode);
+        console.log('[LS Checkout] Error:', JSON.stringify(checkoutResult.error, null, 2));
+        console.log('[LS Checkout] Data:', JSON.stringify(checkoutResult.data, null, 2)?.substring(0, 500));
+
+        const { data: checkout, error } = checkoutResult;
+
         if (error) {
-            console.error('Lemon Squeezy error:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+            console.error('Lemon Squeezy error:', JSON.stringify(error, null, 2));
+            return NextResponse.json({ error: typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : 'Checkout creation failed' }, { status: 500 });
         }
 
-        const response = NextResponse.json({ url: checkout?.data.attributes.url });
+        const checkoutUrl = checkout?.data?.attributes?.url;
+        console.log('[LS Checkout] Checkout URL:', checkoutUrl);
+
+        if (!checkoutUrl) {
+            console.error('[LS Checkout] No URL in checkout response. Full checkout:', JSON.stringify(checkout, null, 2));
+            return NextResponse.json({ error: 'No checkout URL received' }, { status: 500 });
+        }
+
+        const response = NextResponse.json({ url: checkoutUrl });
 
         // Clear the referral cookie after checkout setup
         if (affiliateCode) {
