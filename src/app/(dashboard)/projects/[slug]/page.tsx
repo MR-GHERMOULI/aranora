@@ -62,6 +62,7 @@ export default async function ProjectPage({
 
     const projectContracts = allContracts.filter(c => c.project_id === project.id);
     const linkedSubmissions = allSubmissions.filter(s => s.converted_project_id === project.id);
+    const isOwner = project.user_id === profile?.id;
 
     return (
         <div className="px-4 lg:px-8 space-y-6 pt-8 pb-10">
@@ -97,8 +98,12 @@ export default async function ProjectPage({
                     </Button>
                     <ProjectTimerButton projectId={project.id} projectTitle={project.title} />
                     <ShareProgressDialog projectId={project.id} projectTitle={project.title} />
-                    <EditProjectDialog project={project} />
-                    <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
+                    {isOwner && (
+                        <>
+                            <EditProjectDialog project={project} />
+                            <DeleteProjectDialog projectId={project.id} projectTitle={project.title} />
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -132,7 +137,7 @@ export default async function ProjectPage({
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center justify-between">
                                             <p className="text-sm font-medium">Collaborators</p>
-                                            <AddCollaboratorDialog projectId={project.id} />
+                                            {isOwner && <AddCollaboratorDialog projectId={project.id} />}
                                         </div>
                                         <div className="mt-2 space-y-2">
                                             {collaborators.map((coll) => (
@@ -151,7 +156,7 @@ export default async function ProjectPage({
                                                             </span>
                                                         ) : null}
                                                     </div>
-                                                    <RemoveCollaboratorButton collaboratorId={coll.id} projectId={project.id} email={coll.collaborator_email} />
+                                                    {isOwner && <RemoveCollaboratorButton collaboratorId={coll.id} projectId={project.id} email={coll.collaborator_email} />}
                                                 </div>
                                             ))}
                                         </div>
@@ -160,15 +165,15 @@ export default async function ProjectPage({
                             )}
 
                             {collaborators.length === 0 && (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
-                                            <User className="h-4 w-4 text-blue-600" />
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center">
+                                                <User className="h-4 w-4 text-blue-600" />
+                                            </div>
+                                            <p className="text-sm font-medium">Collaborators</p>
                                         </div>
-                                        <p className="text-sm font-medium">Collaborators</p>
+                                        {isOwner && <AddCollaboratorDialog projectId={project.id} />}
                                     </div>
-                                    <AddCollaboratorDialog projectId={project.id} />
-                                </div>
                             )}
 
                             <div className="flex items-center gap-3">
@@ -205,17 +210,19 @@ export default async function ProjectPage({
                         <TabsList className="w-full justify-start">
                             <TabsTrigger value="tasks">Tasks</TabsTrigger>
                             <TabsTrigger value="files">Files</TabsTrigger>
-                            <TabsTrigger value="invoices">Invoices</TabsTrigger>
+                            {isOwner && <TabsTrigger value="invoices">Invoices</TabsTrigger>}
                             <TabsTrigger value="time-tracking">Time Tracking</TabsTrigger>
-                            <TabsTrigger value="contracts" className="gap-1.5">
-                                <FileSignature className="h-3.5 w-3.5" />
-                                Contracts
-                                {projectContracts.length > 0 && (
-                                    <span className="ml-1 h-4 min-w-4 rounded-full bg-brand-primary/10 text-brand-primary text-[9px] font-bold flex items-center justify-center px-1">
-                                        {projectContracts.length}
-                                    </span>
-                                )}
-                            </TabsTrigger>
+                            {isOwner && (
+                                <TabsTrigger value="contracts" className="gap-1.5">
+                                    <FileSignature className="h-3.5 w-3.5" />
+                                    Contracts
+                                    {projectContracts.length > 0 && (
+                                        <span className="ml-1 h-4 min-w-4 rounded-full bg-brand-primary/10 text-brand-primary text-[9px] font-bold flex items-center justify-center px-1">
+                                            {projectContracts.length}
+                                        </span>
+                                    )}
+                                </TabsTrigger>
+                            )}
                             <TabsTrigger value="intake" className="gap-1.5">
                                 <ClipboardList className="h-3.5 w-3.5" />
                                 Intake Forms
@@ -233,16 +240,18 @@ export default async function ProjectPage({
                             <ProjectFileList files={files} projectId={project.id} />
                         </TabsContent>
                         <TabsContent value="time-tracking" className="mt-4">
-                            <ProjectTimeTrackingTab entries={allTimeEntries} projectId={project.id} isOwner={project.user_id === profile?.id} />
+                            <ProjectTimeTrackingTab entries={allTimeEntries} projectId={project.id} isOwner={isOwner} />
                         </TabsContent>
-                        <TabsContent value="contracts" className="mt-4">
-                            <ProjectContractsTab
-                                contracts={projectContracts}
-                                projectId={project.id}
-                                projectTitle={project.title}
-                                profile={profile}
-                            />
-                        </TabsContent>
+                        {isOwner && (
+                            <TabsContent value="contracts" className="mt-4">
+                                <ProjectContractsTab
+                                    contracts={projectContracts}
+                                    projectId={project.id}
+                                    projectTitle={project.title}
+                                    profile={profile}
+                                />
+                            </TabsContent>
+                        )}
                         <TabsContent value="intake" className="mt-4">
                             <ProjectIntakeTab
                                 submissions={linkedSubmissions}
@@ -253,56 +262,58 @@ export default async function ProjectPage({
                             />
                         </TabsContent>
 
-                        <TabsContent value="invoices" className="mt-4 space-y-4">
-                            {invoices.length === 0 ? (
-                                <Card>
-                                    <CardContent>
-                                        <div className="text-center py-8 text-muted-foreground">
-                                            No invoices found.
-                                            <div className="mt-4">
-                                                <Button variant="outline" size="sm" asChild>
-                                                    <Link href="/invoices/new">Create Invoice</Link>
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ) : (
-                                invoices.map((invoice) => (
-                                    <Card key={invoice.id} className="hover:shadow-sm transition-shadow">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-md font-semibold truncate">
-                                                {invoice.invoice_number}
-                                            </CardTitle>
-                                            <div className={`px-2 py-0.5 rounded-full text-xs font-medium 
-                                                ${invoice.status === 'Paid' ? 'bg-green-100 text-green-700' :
-                                                    invoice.status === 'Sent' ? 'bg-blue-100 text-blue-700' :
-                                                        invoice.status === 'Overdue' ? 'bg-red-100 text-red-700' :
-                                                            'bg-gray-100 text-gray-700'}`}>
-                                                {invoice.status}
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="space-y-1 mt-2">
-                                            <div className="flex items-center text-sm text-muted-foreground">
-                                                <DollarSign className="mr-2 h-4 w-4" />
-                                                ${invoice.total.toLocaleString()}
-                                            </div>
-                                            {invoice.due_date && (
-                                                <div className="flex items-center text-sm text-muted-foreground">
-                                                    <Calendar className="mr-2 h-4 w-4" />
-                                                    Due {format(new Date(invoice.due_date), 'MMM d, yyyy')}
+                        {isOwner && (
+                            <TabsContent value="invoices" className="mt-4 space-y-4">
+                                {invoices.length === 0 ? (
+                                    <Card>
+                                        <CardContent>
+                                            <div className="text-center py-8 text-muted-foreground">
+                                                No invoices found.
+                                                <div className="mt-4">
+                                                    <Button variant="outline" size="sm" asChild>
+                                                        <Link href="/invoices/new">Create Invoice</Link>
+                                                    </Button>
                                                 </div>
-                                            )}
+                                            </div>
                                         </CardContent>
-                                        <CardFooter className="justify-end py-3">
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <Link href={`/invoices/${invoice.invoice_number}`}>View Details</Link>
-                                            </Button>
-                                        </CardFooter>
                                     </Card>
-                                ))
-                            )}
-                        </TabsContent>
+                                ) : (
+                                    invoices.map((invoice) => (
+                                        <Card key={invoice.id} className="hover:shadow-sm transition-shadow">
+                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                                <CardTitle className="text-md font-semibold truncate">
+                                                    {invoice.invoice_number}
+                                                </CardTitle>
+                                                <div className={`px-2 py-0.5 rounded-full text-xs font-medium 
+                                                    ${invoice.status === 'Paid' ? 'bg-green-100 text-green-700' :
+                                                        invoice.status === 'Sent' ? 'bg-blue-100 text-blue-700' :
+                                                            invoice.status === 'Overdue' ? 'bg-red-100 text-red-700' :
+                                                                'bg-gray-100 text-gray-700'}`}>
+                                                    {invoice.status}
+                                                </div>
+                                            </CardHeader>
+                                            <CardContent className="space-y-1 mt-2">
+                                                <div className="flex items-center text-sm text-muted-foreground">
+                                                    <DollarSign className="mr-2 h-4 w-4" />
+                                                    ${invoice.total.toLocaleString()}
+                                                </div>
+                                                {invoice.due_date && (
+                                                    <div className="flex items-center text-sm text-muted-foreground">
+                                                        <Calendar className="mr-2 h-4 w-4" />
+                                                        Due {format(new Date(invoice.due_date), 'MMM d, yyyy')}
+                                                    </div>
+                                                )}
+                                            </CardContent>
+                                            <CardFooter className="justify-end py-3">
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <Link href={`/invoices/${invoice.invoice_number}`}>View Details</Link>
+                                                </Button>
+                                            </CardFooter>
+                                        </Card>
+                                    ))
+                                )}
+                            </TabsContent>
+                        )}
                     </Tabs>
                 </div>
             </div>

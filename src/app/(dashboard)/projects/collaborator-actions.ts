@@ -226,6 +226,22 @@ export async function removeCollaborator(collaboratorId: string, projectId: stri
         redirect('/login');
     }
 
+    // First check if the user is the project owner
+    const { data: project } = await supabase
+        .from('projects')
+        .select('user_id, slug')
+        .eq('id', projectId)
+        .single();
+
+    if (!project) {
+        throw new Error('Project not found');
+    }
+
+    // Only owner can remove collaborators
+    if (project.user_id !== user.id) {
+        throw new Error('Unauthorized: Only the project owner can remove collaborators');
+    }
+
     const { error } = await supabase
         .from('project_collaborators')
         .delete()
@@ -236,7 +252,10 @@ export async function removeCollaborator(collaboratorId: string, projectId: stri
         throw new Error('Failed to remove collaborator');
     }
 
-    revalidatePath(`/dashboard/projects/${projectId}`);
+    revalidatePath('/projects');
+    if (project.slug) {
+        revalidatePath(`/projects/${project.slug}`);
+    }
 }
 
 export async function getProjectMembers(projectId: string) {

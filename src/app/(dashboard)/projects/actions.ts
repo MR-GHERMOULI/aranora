@@ -320,13 +320,43 @@ export async function deleteProject(projectId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { error } = await supabase
+  // Verify ownership
+  const { data: project, error: fetchError } = await supabase
+    .from('projects')
+    .select('user_id')
+    .eq('id', projectId)
+    .single();
+
+  if (fetchError || !project) {
+    console.error('Error fetching project for deletion:', fetchError);
+    throw new Error('Project not found');
+  }
+
+  if (project.user_id !== user.id) {
+    throw new Error('Unauthorized: Only the project owner can delete this project');
+  }
+
+  // Delete associated data manually to avoid foreign key constraints if not cascaded
+  // 1. Delete collaborators
+  await supabase.from('project_collaborators').delete().eq('project_id', projectId);
+  
+  // 2. Delete tasks
+  await supabase.from('tasks').delete().eq('project_id', projectId);
+  
+  // 3. Delete files
+  await supabase.from('project_files').delete().eq('project_id', projectId);
+
+  // 4. Delete time entries
+  await supabase.from('time_entries').delete().eq('project_id', projectId);
+
+  // 5. Delete the project itself
+  const { error: deleteError } = await supabase
     .from('projects')
     .delete()
     .eq('id', projectId);
 
-  if (error) {
-    console.error('Error deleting project:', error);
+  if (deleteError) {
+    console.error('Error deleting project:', deleteError);
     throw new Error('Failed to delete project');
   }
 
