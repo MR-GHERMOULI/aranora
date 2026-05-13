@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { PricingPageData, PricingPageClientWrap } from "./pricing-client";
 import PublicNavbar from "@/components/layout/public-navbar";
 
+export const dynamic = 'force-dynamic';
+
 export default async function PricingPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

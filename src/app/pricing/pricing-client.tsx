@@ -49,7 +49,7 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
     const canceled = searchParams.get('canceled') === 'true';
 
     const handleSubscribe = async (planType: 'monthly' | 'yearly') => {
-        // 1. Immediate Visitor Check (Server-backed)
+        // 1. Immediate Visitor Check (from server-side prop)
         if (!isLoggedIn) {
             console.log('[Pricing] Visitor detected (isLoggedIn=false), redirecting to login');
             window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
@@ -60,31 +60,38 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
         setCheckoutError(null);
 
         try {
-            // 2. Extra safety check for session
+            // 2. Client-side Session Check (extra safety layer)
             const supabase = createClient();
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session?.user) {
+                console.log('[Pricing] No active session, redirecting to login');
                 window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }
 
-            const user = session.user;
-            console.log('[Pricing] Authenticated user:', user.id);
+            console.log('[Pricing] Authenticated user initiating checkout:', session.user.id);
 
-            // 2. Call Checkout API
+            // 3. Call Checkout API
             const res = await fetch('/api/payments/lemon-squeezy/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ planType }),
             });
 
+            // Handle Unauthorized explicitly
+            if (res.status === 401) {
+                console.warn('[Pricing] API returned 401 Unauthorized, redirecting to login');
+                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                return;
+            }
+
             const text = await res.text();
             let json: any = {};
             try {
                 json = JSON.parse(text);
             } catch {
-                setCheckoutError(`Server returned non-JSON response (Status: ${res.status})`);
+                setCheckoutError(`Server returned an unexpected response (Status: ${res.status})`);
                 return;
             }
 
@@ -92,12 +99,12 @@ function PricingContent({ data, siteName = "Aranora", isLoggedIn }: { data: Pric
                 window.location.href = json.url;
             } else {
                 // Show the specific error message from the server if available
-                const errorDetail = json.details?.message || json.error || 'Unknown error';
+                const errorDetail = json.error || 'Failed to initialize checkout';
                 setCheckoutError(`${errorDetail} (Status: ${res.status})`);
                 console.error('[Checkout Error]', json);
             }
         } catch (err) {
-            setCheckoutError('Connection failed. Please check your network.');
+            setCheckoutError('Connection failed. Please check your network and try again.');
             console.error('[Checkout Network Error]', err);
         } finally {
             setLoading(null);

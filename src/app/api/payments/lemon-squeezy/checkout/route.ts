@@ -87,9 +87,19 @@ export async function POST(request: NextRequest) {
         const { data: checkout, error: lsError } = checkoutResult;
 
         if (lsError) {
-            console.error('[LS Checkout] Lemon Squeezy SDK Error:', JSON.stringify(lsError, null, 2));
+            console.error('[LS Checkout] Lemon Squeezy SDK Error:', {
+                message: lsError.message,
+                cause: lsError.cause,
+            });
+            
+            // Map specific LS errors to user-friendly messages if needed
+            let userMessage = lsError.message || 'Lemon Squeezy checkout creation failed';
+            if (userMessage.includes('Unprocessable Entity')) {
+                userMessage = 'We could not process the checkout request. Please ensure your profile details (name/email) are complete in your account settings.';
+            }
+
             return NextResponse.json({ 
-                error: lsError.message || 'Lemon Squeezy checkout creation failed',
+                error: userMessage,
                 details: process.env.NODE_ENV === 'development' ? lsError : undefined
             }, { status: 500 });
         }
@@ -98,15 +108,15 @@ export async function POST(request: NextRequest) {
 
         if (!checkoutUrl) {
             console.error('[LS Checkout] No URL in checkout response. Full response:', JSON.stringify(checkout, null, 2));
-            return NextResponse.json({ error: 'Lemon Squeezy returned a success response but no checkout URL was found.' }, { status: 500 });
+            return NextResponse.json({ error: 'Checkout session created but no URL was returned. Please contact support.' }, { status: 500 });
         }
 
         console.log('[LS Checkout] Success! URL:', checkoutUrl);
         return NextResponse.json({ url: checkoutUrl });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Checkout error:', error);
         return NextResponse.json(
-            { error: 'Failed to create checkout session' },
+            { error: error.message || 'An unexpected error occurred while creating your checkout session.' },
             { status: 500 }
         );
     }
