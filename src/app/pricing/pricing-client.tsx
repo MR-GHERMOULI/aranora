@@ -53,49 +53,46 @@ function PricingContent({ data, siteName = "Aranora" }: { data: PricingPageData;
         setCheckoutError(null);
 
         try {
-            // Pre-check: ensure user is authenticated before calling API
+            // 1. Aggressive Auth Check
             const supabase = createClient();
-            const { data: authData, error: authError } = await supabase.auth.getUser();
-            const user = authData?.user;
-
-            if (authError || !user) {
-                console.log('[Pricing] No user session found, redirecting to login');
-                // Use a direct path for now to ensure it works
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session?.user) {
+                console.log('[Pricing] Visitor detected, redirecting to login');
                 window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
                 return;
             }
 
-            console.log('[Pricing] User found:', user.id, 'hitting checkout API...');
+            const user = session.user;
+            console.log('[Pricing] Authenticated user:', user.id);
 
+            // 2. Call Checkout API
             const res = await fetch('/api/payments/lemon-squeezy/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ planType }),
             });
 
-            // Safely parse the JSON — the response could be HTML if there's a server-side redirect
-            let json: any = {};
             const text = await res.text();
+            let json: any = {};
             try {
                 json = JSON.parse(text);
             } catch {
-                console.error('[Pricing] Failed to parse response as JSON:', text.substring(0, 100));
-                setCheckoutError(`Server error (${res.status}). Please try again.`);
+                setCheckoutError(`Server returned non-JSON response (Status: ${res.status})`);
                 return;
             }
 
             if (json.url) {
                 window.location.href = json.url;
-            } else if (res.status === 401) {
-                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
             } else {
-                const msg = json.error || json.message || 'Failed to start checkout.';
-                setCheckoutError(`${msg} (Status: ${res.status})`);
-                console.error('[Checkout error]', msg, 'status:', res.status, 'full response:', json);
+                // Show the specific error message from the server if available
+                const errorDetail = json.details?.message || json.error || 'Unknown error';
+                setCheckoutError(`${errorDetail} (Status: ${res.status})`);
+                console.error('[Checkout Error]', json);
             }
         } catch (err) {
-            setCheckoutError('Network error. Please check your connection and try again.');
-            console.error('[Checkout network error]', err);
+            setCheckoutError('Connection failed. Please check your network.');
+            console.error('[Checkout Network Error]', err);
         } finally {
             setLoading(null);
         }
