@@ -52,7 +52,8 @@ export function TimeLogTable({ entries, showMember = false }: TimeLogTableProps)
             {Object.entries(groupedEntries).map(([date, dayEntries]) => {
                 const totalSeconds = dayEntries.reduce((sum, entry) => {
                     if (!entry.end_time) return sum;
-                    return sum + differenceInSeconds(new Date(entry.end_time), new Date(entry.start_time));
+                    const diff = differenceInSeconds(new Date(entry.end_time), new Date(entry.start_time));
+                    return sum + Math.max(0, diff || 0);
                 }, 0);
 
                 return (
@@ -81,7 +82,7 @@ export function TimeLogTable({ entries, showMember = false }: TimeLogTableProps)
                                 <TableBody>
                                     {dayEntries.map((entry) => {
                                         const duration = entry.end_time
-                                            ? differenceInSeconds(new Date(entry.end_time), new Date(entry.start_time))
+                                            ? Math.max(0, differenceInSeconds(new Date(entry.end_time), new Date(entry.start_time)) || 0)
                                             : 0;
 
                                         return (

@@ -29,7 +29,7 @@ export default async function TimeTrackingPage() {
             getTimeTrackingStats()
         ]);
         entries = fetchedEntries || [];
-        stats = fetchedStats;
+        stats = fetchedStats || stats;
     } catch (e: any) {
         console.error("Error loading time tracking data:", e);
         error = e.message || "An unexpected error occurred while loading your data.";
@@ -47,7 +47,7 @@ export default async function TimeTrackingPage() {
 
     const diff = (stats?.totalSecondsThisWeek || 0) - (stats?.totalSecondsLastWeek || 0);
     const percentage = (stats?.totalSecondsLastWeek || 0) > 0
-        ? Math.round((Math.abs(diff) / stats.totalSecondsLastWeek) * 100)
+        ? Math.round((Math.abs(diff) / (stats?.totalSecondsLastWeek || 1)) * 100)
         : 0;
 
     return (
@@ -81,7 +81,7 @@ export default async function TimeTrackingPage() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{getHAndM(stats.totalSecondsThisWeek)}</div>
+                        <div className="text-2xl font-bold">{getHAndM(stats?.totalSecondsThisWeek || 0)}</div>
                         <div className="flex items-center mt-1">
                             {diff >= 0 ? (
                                 <TrendingUp className="h-3.5 w-3.5 mr-1 text-green-500" />
@@ -105,7 +105,7 @@ export default async function TimeTrackingPage() {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(stats.unbilledRevenue)}</div>
+                        <div className="text-2xl font-bold">{formatCurrency(stats?.unbilledRevenue || 0)}</div>
                         <p className="text-xs text-muted-foreground mt-1">Ready to be invoiced</p>
                     </CardContent>
                 </Card>
@@ -117,7 +117,7 @@ export default async function TimeTrackingPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {stats.weeklyChartData.filter(d => d.hours > 0).length} Days
+                            {(stats?.weeklyChartData || []).filter(d => d.hours > 0).length} Days
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Worked this week</p>
                     </CardContent>
@@ -131,7 +131,7 @@ export default async function TimeTrackingPage() {
                         <CardDescription>Hours logged over the last 7 days</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <TimeTrackingChart data={stats.weeklyChartData} />
+                        <TimeTrackingChart data={stats?.weeklyChartData || []} />
                     </CardContent>
                 </Card>
 

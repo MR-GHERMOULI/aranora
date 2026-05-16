@@ -58,7 +58,8 @@ export async function getTimeTrackingStats() {
 
         const start = new Date(entry.start_time);
         const end = new Date(entry.end_time);
-        const durationSeconds = differenceInSeconds(end, start);
+        const diff = differenceInSeconds(end, start);
+        const durationSeconds = Math.max(0, diff || 0);
         const durationHours = durationSeconds / 3600;
 
         // Bucket into This Week vs Last Week
