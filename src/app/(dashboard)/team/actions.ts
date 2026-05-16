@@ -211,31 +211,43 @@ export async function inviteTeamMember(formData: FormData) {
         }
     }
 
-    // Create the team member record
-    const { data: newMember, error: insertError } = await supabase
-        .from('team_members')
-        .insert({
-            team_id: teamId,
-            user_id: existingUser?.id || null,
-            email: email, // Save the email!
-            role: role as TeamRole,
-            status: 'invited',
-        })
-        .select()
-        .single();
+    try {
+        // Create the team member record
+        const { data: newMember, error: insertError } = await supabase
+            .from('team_members')
+            .insert({
+                team_id: teamId,
+                user_id: existingUser?.id || null,
+                email: email,
+                role: role as TeamRole,
+                status: 'invited',
+            })
+            .select()
+            .single();
 
-    if (insertError) {
-        console.error('Error inviting team member:', insertError);
-        throw new Error('Failed to invite team member');
+        if (insertError) {
+            console.error('Database error inviting team member:', insertError);
+            if (insertError.code === '23502') {
+                throw new Error('Database schema mismatch: Please run the SQL fix script in Supabase.');
+            }
+            throw new Error(`Failed to invite member: ${insertError.message}`);
+        }
+
+        if (!newMember) {
+            throw new Error('Failed to generate invitation: No data returned from database.');
+        }
+
+        revalidatePath('/team');
+
+        return {
+            inviteToken: newMember.invite_token,
+            isExistingUser: !!existingUser,
+            memberName: existingUser?.full_name || email,
+        };
+    } catch (error: any) {
+        console.error('Action error [inviteTeamMember]:', error);
+        throw new Error(error.message || 'An unexpected error occurred during invitation.');
     }
-
-    revalidatePath('/team');
-
-    return {
-        inviteToken: newMember.invite_token,
-        isExistingUser: !!existingUser,
-        memberName: existingUser?.full_name || email,
-    };
 }
 
 // ═══════════════════════════════════════════════
