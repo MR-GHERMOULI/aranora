@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { InviteTeamMemberDialog } from "@/components/team/invite-member-dialog";
 import { TeamMemberCard } from "@/components/team/team-member-card";
 import { SubscriptionGate } from "@/components/billing/subscription-gate";
+import { TeamMember } from "@/types";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default async function TeamPage() {
 
     // Fetch stats for each member
     const memberStats = await Promise.all(
-        members.map(async (m) => {
+        members.map(async (m: TeamMember) => {
             const stats = await getTeamMemberStats(m.id);
             return { memberId: m.id, stats };
         })

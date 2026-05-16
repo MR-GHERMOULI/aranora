@@ -78,7 +78,7 @@ export async function getTeamMembers() {
     return members.map(m => ({
         ...m,
         profile: profiles.find(p => p.id === m.user_id) || (m.email ? { email: m.email } : null)
-    })) as any;
+    })) as TeamMember[];
 }
 
 export async function getTeamMemberCount() {
