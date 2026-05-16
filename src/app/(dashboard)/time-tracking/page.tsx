@@ -10,7 +10,12 @@ import { cn, formatDuration } from "@/lib/utils";
 
 export default async function TimeTrackingPage() {
     let entries: any[] = [];
-    let stats: any = {
+    let stats: {
+        totalSecondsThisWeek: number;
+        totalSecondsLastWeek: number;
+        unbilledRevenue: number;
+        weeklyChartData: { name: string; hours: number }[];
+    } = {
         totalSecondsThisWeek: 0,
         totalSecondsLastWeek: 0,
         unbilledRevenue: 0,
