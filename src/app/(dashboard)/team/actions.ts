@@ -5,20 +5,67 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireActiveSubscription } from "@/lib/subscription-guard";
 import { TeamMember, TeamMemberProject, TeamRole } from "@/types";
+import { randomBytes } from 'crypto';
 
 const MAX_TEAM_MEMBERS = 5;
+
+// ═══════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════
+
+/**
+ * Generate a cryptographically secure, short invite token.
+ * Produces a 16-character URL-safe string (96 bits of entropy).
+ * Example output: "xK4mN9pL2qR7wT8s"
+ */
+function generateSecureToken(): string {
+    return randomBytes(12).toString('base64url');
+}
+
+/**
+ * Validate email format to prevent filter injection in PostgREST queries.
+ */
+function isValidEmail(email: string): boolean {
+    return /^[^\s@,()]+@[^\s@,()]+\.[^\s@,()]+$/.test(email) && email.length <= 254;
+}
+
+/**
+ * Verify the current user is the owner of a team.
+ * Returns the team_id or throws.
+ */
+async function verifyTeamOwnership(userId: string): Promise<string> {
+    const adminSupabase = createAdminClient();
+    const { data: ownerMembership } = await adminSupabase
+        .from('team_members')
+        .select('team_id')
+        .eq('user_id', userId)
+        .eq('role', 'owner')
+        .maybeSingle();
+
+    if (!ownerMembership) throw new Error('You are not a team owner.');
+    return ownerMembership.team_id;
+}
+
+/**
+ * Verify user is authenticated, returns user object.
+ */
+async function requireAuth() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+    return user;
+}
 
 // ═══════════════════════════════════════════════
 // GET TEAM INFO
 // ═══════════════════════════════════════════════
 
 export async function getMyTeam() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
     // Find the team where the current user is the owner
-    const { data: ownerMembership } = await supabase
+    const { data: ownerMembership } = await adminSupabase
         .from('team_members')
         .select('team_id')
         .eq('user_id', user.id)
@@ -27,7 +74,7 @@ export async function getMyTeam() {
 
     if (!ownerMembership) return null;
 
-    const { data: team } = await supabase
+    const { data: team } = await adminSupabase
         .from('teams')
         .select('*')
         .eq('id', ownerMembership.team_id)
@@ -37,12 +84,11 @@ export async function getMyTeam() {
 }
 
 export async function getTeamMembers() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
     // Find the team where the current user is the owner
-    const { data: ownerMembership } = await supabase
+    const { data: ownerMembership } = await adminSupabase
         .from('team_members')
         .select('team_id')
         .eq('user_id', user.id)
@@ -51,14 +97,14 @@ export async function getTeamMembers() {
 
     if (!ownerMembership) return [];
 
-    const adminSupabase = createAdminClient();
-
-    // Get all members of this team
-    const { data: members, error } = await supabase
+    // Get active and invited members (exclude owner row and suspended)
+    const { data: members, error } = await adminSupabase
         .from('team_members')
         .select('*')
         .eq('team_id', ownerMembership.team_id)
         .neq('role', 'owner')
+        .in('status', ['active', 'invited'])
+        .order('status', { ascending: true })
         .order('joined_at', { ascending: true });
 
     if (error || !members) return [];
@@ -86,7 +132,9 @@ export async function getTeamMemberCount() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return 0;
 
-    const { data: ownerMembership } = await supabase
+    const adminSupabase = createAdminClient();
+
+    const { data: ownerMembership } = await adminSupabase
         .from('team_members')
         .select('team_id')
         .eq('user_id', user.id)
@@ -95,7 +143,7 @@ export async function getTeamMemberCount() {
 
     if (!ownerMembership) return 0;
 
-    const { count } = await supabase
+    const { count } = await adminSupabase
         .from('team_members')
         .select('id', { count: 'exact', head: true })
         .eq('team_id', ownerMembership.team_id)
@@ -111,18 +159,29 @@ export async function getTeamMemberCount() {
 
 export async function inviteTeamMember(formData: FormData) {
     await requireActiveSubscription();
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
 
     const email = (formData.get('email') as string)?.trim().toLowerCase();
     const role = (formData.get('role') as string) || 'member';
 
     if (!email) throw new Error('Email is required');
-    if (!['manager', 'member'].includes(role)) throw new Error('Invalid role');
+    if (!isValidEmail(email)) throw new Error('Please enter a valid email address.');
+    if (!['manager', 'member'].includes(role)) throw new Error('Invalid role. Only "manager" or "member" roles can be assigned.');
+
+    // Prevent owner from inviting themselves
+    const adminSupabase = createAdminClient();
+    const { data: selfProfile } = await adminSupabase
+        .from('profiles')
+        .select('email, company_email')
+        .eq('id', user.id)
+        .single();
+
+    if (selfProfile?.email === email || selfProfile?.company_email === email) {
+        throw new Error('You cannot invite yourself to your own team.');
+    }
 
     // Find or create the owner's team
-    let { data: ownerMembership } = await supabase
+    let { data: ownerMembership } = await adminSupabase
         .from('team_members')
         .select('team_id')
         .eq('user_id', user.id)
@@ -133,7 +192,7 @@ export async function inviteTeamMember(formData: FormData) {
 
     if (!teamId) {
         // Create a team for this owner
-        const { data: profile } = await supabase
+        const { data: profile } = await adminSupabase
             .from('profiles')
             .select('full_name, company_name')
             .eq('id', user.id)
@@ -143,7 +202,7 @@ export async function inviteTeamMember(formData: FormData) {
             ? `${profile?.company_name || profile?.full_name}'s Team`
             : 'My Team';
 
-        const { data: newTeam, error: teamError } = await supabase
+        const { data: newTeam, error: teamError } = await adminSupabase
             .from('teams')
             .insert({ name: teamName, owner_id: user.id })
             .select()
@@ -157,16 +216,17 @@ export async function inviteTeamMember(formData: FormData) {
         teamId = newTeam.id;
 
         // Add owner as a team member
-        await supabase.from('team_members').insert({
+        await adminSupabase.from('team_members').insert({
             team_id: teamId,
             user_id: user.id,
             role: 'owner',
-            status: 'active'
+            status: 'active',
+            invite_token: generateSecureToken(),
         });
     }
 
     // Check team size limit
-    const { count } = await supabase
+    const { count } = await adminSupabase
         .from('team_members')
         .select('id', { count: 'exact', head: true })
         .eq('team_id', teamId)
@@ -178,33 +238,63 @@ export async function inviteTeamMember(formData: FormData) {
     }
 
     // Check if platform user exists
-    const adminSupabase = createAdminClient();
     const { data: existingUser } = await adminSupabase
         .from('profiles')
         .select('id, full_name, username')
         .or(`email.eq.${email},company_email.eq.${email}`)
         .maybeSingle();
 
-    // Check if already a team member or invited
-    const { data: existing } = await supabase
+    // Check if already a team member or invited (safe query — no string interpolation for email)
+    let existingQuery = adminSupabase
         .from('team_members')
         .select('id, status, invite_token')
-        .eq('team_id', teamId)
-        .or(`email.eq.${email}${existingUser ? `,user_id.eq.${existingUser.id}` : ''}`)
-        .maybeSingle();
+        .eq('team_id', teamId);
+
+    if (existingUser) {
+        existingQuery = existingQuery.or(`email.eq.${email},user_id.eq.${existingUser.id}`);
+    } else {
+        existingQuery = existingQuery.eq('email', email);
+    }
+
+    const { data: existing } = await existingQuery.maybeSingle();
 
     if (existing) {
-        if (existing.status === 'active') throw new Error('This person is already an active team member.');
-        if (existing.status === 'invited') throw new Error('This person has already been invited.');
-        if (existing.status === 'suspended') {
-            // Re-invite suspended member
-            await supabase
-                .from('team_members')
-                .update({ status: 'invited', invited_at: new Date().toISOString() })
-                .eq('id', existing.id);
-            
+        if (existing.status === 'active') {
+            throw new Error('This person is already an active team member.');
+        }
+        if (existing.status === 'invited') {
+            // Return existing token for re-sharing, regenerate if missing
+            let token = existing.invite_token;
+            if (!token) {
+                token = generateSecureToken();
+                await adminSupabase
+                    .from('team_members')
+                    .update({ invite_token: token })
+                    .eq('id', existing.id);
+            }
             return {
-                inviteToken: existing.invite_token,
+                inviteToken: token,
+                isExistingUser: !!existingUser,
+                memberName: existingUser?.full_name || email,
+            };
+        }
+        if (existing.status === 'suspended') {
+            // Re-invite suspended member with a fresh secure token
+            const freshToken = generateSecureToken();
+            await adminSupabase
+                .from('team_members')
+                .update({
+                    status: 'invited',
+                    invited_at: new Date().toISOString(),
+                    invite_token: freshToken,
+                    role: role as TeamRole,
+                    user_id: existingUser?.id || null,
+                })
+                .eq('id', existing.id);
+
+            revalidatePath('/team');
+            return {
+                inviteToken: freshToken,
                 isExistingUser: !!existingUser,
                 memberName: existingUser?.full_name || email,
             };
@@ -212,8 +302,10 @@ export async function inviteTeamMember(formData: FormData) {
     }
 
     try {
+        const newToken = generateSecureToken();
+
         // Create the team member record
-        const { data: newMember, error: insertError } = await supabase
+        const { data: newMember, error: insertError } = await adminSupabase
             .from('team_members')
             .insert({
                 team_id: teamId,
@@ -221,14 +313,15 @@ export async function inviteTeamMember(formData: FormData) {
                 email: email,
                 role: role as TeamRole,
                 status: 'invited',
+                invite_token: newToken,
             })
             .select()
             .single();
 
         if (insertError) {
             console.error('Database error inviting team member:', insertError);
-            if (insertError.code === '23502') {
-                throw new Error('Database schema mismatch: Please run the SQL fix script in Supabase.');
+            if (insertError.code === '23505') {
+                throw new Error('An invitation for this email already exists.');
             }
             throw new Error(`Failed to invite member: ${insertError.message}`);
         }
@@ -256,24 +349,27 @@ export async function inviteTeamMember(formData: FormData) {
 
 export async function updateTeamMemberRole(memberId: string, newRole: TeamRole) {
     await requireActiveSubscription();
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
     if (!['manager', 'member'].includes(newRole)) {
-        throw new Error('Invalid role');
+        throw new Error('Invalid role. Only "manager" or "member" can be assigned.');
     }
 
-    // Verify ownership
-    const { data: member } = await supabase
+    // Verify member exists
+    const { data: member } = await adminSupabase
         .from('team_members')
-        .select('team_id')
+        .select('team_id, role')
         .eq('id', memberId)
         .single();
 
     if (!member) throw new Error('Member not found');
 
-    const { data: ownerCheck } = await supabase
+    // Cannot change owner role
+    if (member.role === 'owner') throw new Error('Cannot modify the owner role.');
+
+    // Verify caller is the team owner
+    const { data: ownerCheck } = await adminSupabase
         .from('team_members')
         .select('id')
         .eq('team_id', member.team_id)
@@ -281,9 +377,9 @@ export async function updateTeamMemberRole(memberId: string, newRole: TeamRole) 
         .eq('role', 'owner')
         .maybeSingle();
 
-    if (!ownerCheck) throw new Error('Unauthorized');
+    if (!ownerCheck) throw new Error('Unauthorized: Only the team owner can change roles.');
 
-    await supabase
+    await adminSupabase
         .from('team_members')
         .update({ role: newRole })
         .eq('id', memberId);
@@ -293,12 +389,11 @@ export async function updateTeamMemberRole(memberId: string, newRole: TeamRole) 
 
 export async function updateTeamMemberSalary(memberId: string, salary: number, currency: string, notes?: string) {
     await requireActiveSubscription();
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
-    // Verify ownership
-    const { data: member } = await supabase
+    // Verify member exists
+    const { data: member } = await adminSupabase
         .from('team_members')
         .select('team_id')
         .eq('id', memberId)
@@ -306,7 +401,8 @@ export async function updateTeamMemberSalary(memberId: string, salary: number, c
 
     if (!member) throw new Error('Member not found');
 
-    const { data: ownerCheck } = await supabase
+    // Verify caller is the team owner
+    const { data: ownerCheck } = await adminSupabase
         .from('team_members')
         .select('id')
         .eq('team_id', member.team_id)
@@ -314,9 +410,9 @@ export async function updateTeamMemberSalary(memberId: string, salary: number, c
         .eq('role', 'owner')
         .maybeSingle();
 
-    if (!ownerCheck) throw new Error('Unauthorized');
+    if (!ownerCheck) throw new Error('Unauthorized: Only the team owner can edit salaries.');
 
-    await supabase
+    await adminSupabase
         .from('team_members')
         .update({
             base_salary: salary,
@@ -330,20 +426,23 @@ export async function updateTeamMemberSalary(memberId: string, salary: number, c
 
 export async function removeTeamMember(memberId: string) {
     await requireActiveSubscription();
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
-    // Verify ownership
-    const { data: member } = await supabase
+    // Verify member exists
+    const { data: member } = await adminSupabase
         .from('team_members')
-        .select('team_id, user_id')
+        .select('team_id, user_id, role')
         .eq('id', memberId)
         .single();
 
     if (!member) throw new Error('Member not found');
 
-    const { data: ownerCheck } = await supabase
+    // Cannot remove the owner
+    if (member.role === 'owner') throw new Error('Cannot remove the team owner.');
+
+    // Verify caller is the team owner
+    const { data: ownerCheck } = await adminSupabase
         .from('team_members')
         .select('id')
         .eq('team_id', member.team_id)
@@ -351,16 +450,16 @@ export async function removeTeamMember(memberId: string) {
         .eq('role', 'owner')
         .maybeSingle();
 
-    if (!ownerCheck) throw new Error('Unauthorized');
+    if (!ownerCheck) throw new Error('Unauthorized: Only the team owner can remove members.');
 
     // Suspend the member (soft delete to preserve history)
-    await supabase
+    await adminSupabase
         .from('team_members')
-        .update({ status: 'suspended' })
+        .update({ status: 'suspended', invite_token: null })
         .eq('id', memberId);
 
     // Mark all project assignments as removed
-    await supabase
+    await adminSupabase
         .from('team_member_projects')
         .update({ removed_at: new Date().toISOString() })
         .eq('team_member_id', memberId)
@@ -368,7 +467,7 @@ export async function removeTeamMember(memberId: string) {
 
     // If the member has no other active teams, revert their account_type
     if (member.user_id) {
-        const { count } = await supabase
+        const { count } = await adminSupabase
             .from('team_members')
             .select('id', { count: 'exact', head: true })
             .eq('user_id', member.user_id)
@@ -376,7 +475,6 @@ export async function removeTeamMember(memberId: string) {
             .neq('id', memberId);
 
         if (!count || count === 0) {
-            const adminSupabase = createAdminClient();
             await adminSupabase
                 .from('profiles')
                 .update({ account_type: 'freelancer', active_team_id: null })
@@ -393,12 +491,11 @@ export async function removeTeamMember(memberId: string) {
 
 export async function assignMemberToProject(memberId: string, projectId: string) {
     await requireActiveSubscription();
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
-    // Verify ownership
-    const { data: member } = await supabase
+    // Verify member exists and is active
+    const { data: member } = await adminSupabase
         .from('team_members')
         .select('team_id, status')
         .eq('id', memberId)
@@ -406,7 +503,8 @@ export async function assignMemberToProject(memberId: string, projectId: string)
 
     if (!member || member.status !== 'active') throw new Error('Member not found or inactive');
 
-    const { data: ownerCheck } = await supabase
+    // Verify caller is the team owner
+    const { data: ownerCheck } = await adminSupabase
         .from('team_members')
         .select('id')
         .eq('team_id', member.team_id)
@@ -417,7 +515,7 @@ export async function assignMemberToProject(memberId: string, projectId: string)
     if (!ownerCheck) throw new Error('Unauthorized');
 
     // Check if already assigned
-    const { data: existing } = await supabase
+    const { data: existing } = await adminSupabase
         .from('team_member_projects')
         .select('id, removed_at')
         .eq('team_member_id', memberId)
@@ -430,12 +528,12 @@ export async function assignMemberToProject(memberId: string, projectId: string)
 
     if (existing && existing.removed_at) {
         // Re-activate the assignment
-        await supabase
+        await adminSupabase
             .from('team_member_projects')
             .update({ removed_at: null, assigned_at: new Date().toISOString() })
             .eq('id', existing.id);
     } else {
-        await supabase
+        await adminSupabase
             .from('team_member_projects')
             .insert({
                 team_member_id: memberId,
@@ -450,11 +548,10 @@ export async function assignMemberToProject(memberId: string, projectId: string)
 
 export async function unassignMemberFromProject(memberId: string, projectId: string) {
     await requireActiveSubscription();
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
-    await supabase
+    await adminSupabase
         .from('team_member_projects')
         .update({ removed_at: new Date().toISOString() })
         .eq('team_member_id', memberId)
@@ -466,9 +563,9 @@ export async function unassignMemberFromProject(memberId: string, projectId: str
 }
 
 export async function getProjectTeamMembers(projectId: string) {
-    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
         .from('team_member_projects')
         .select('*, team_member:team_members(id, user_id, role, status)')
         .eq('project_id', projectId)
@@ -477,7 +574,6 @@ export async function getProjectTeamMembers(projectId: string) {
     if (error || !data) return [];
 
     // Enrich with profile data
-    const adminSupabase = createAdminClient();
     const userIds = data
         .map(d => (d.team_member as any)?.user_id)
         .filter(Boolean);
@@ -506,7 +602,9 @@ export async function getMyWorkspaces() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data: memberships } = await supabase
+    const adminSupabase = createAdminClient();
+
+    const { data: memberships } = await adminSupabase
         .from('team_members')
         .select('team_id, role, status, teams(id, name, owner_id)')
         .eq('user_id', user.id)
@@ -514,7 +612,6 @@ export async function getMyWorkspaces() {
 
     if (!memberships) return [];
 
-    const adminSupabase = createAdminClient();
     const ownerIds = memberships
         .map(m => (m.teams as any)?.owner_id)
         .filter(Boolean);
@@ -542,12 +639,11 @@ export async function getMyWorkspaces() {
 }
 
 export async function switchWorkspace(teamId: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
-    // Verify the user is a member of this team
-    const { data: membership } = await supabase
+    // Verify the user is an active member of this team
+    const { data: membership } = await adminSupabase
         .from('team_members')
         .select('id')
         .eq('team_id', teamId)
@@ -557,7 +653,7 @@ export async function switchWorkspace(teamId: string) {
 
     if (!membership) throw new Error('You are not a member of this team');
 
-    await supabase
+    await adminSupabase
         .from('profiles')
         .update({ active_team_id: teamId })
         .eq('id', user.id);
@@ -570,11 +666,10 @@ export async function switchWorkspace(teamId: string) {
 // ═══════════════════════════════════════════════
 
 export async function getTeamMemberStats(memberId: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect('/login');
+    const user = await requireAuth();
+    const adminSupabase = createAdminClient();
 
-    const { data: member } = await supabase
+    const { data: member } = await adminSupabase
         .from('team_members')
         .select('team_id, user_id')
         .eq('id', memberId)
@@ -582,8 +677,8 @@ export async function getTeamMemberStats(memberId: string) {
 
     if (!member) return null;
 
-    // Verify ownership
-    const { data: ownerCheck } = await supabase
+    // Verify caller is the team owner
+    const { data: ownerCheck } = await adminSupabase
         .from('team_members')
         .select('id')
         .eq('team_id', member.team_id)
@@ -594,7 +689,7 @@ export async function getTeamMemberStats(memberId: string) {
     if (!ownerCheck) return null;
 
     // Get assigned projects count
-    const { count: projectCount } = await supabase
+    const { count: projectCount } = await adminSupabase
         .from('team_member_projects')
         .select('id', { count: 'exact', head: true })
         .eq('team_member_id', memberId)
@@ -609,6 +704,8 @@ export async function getTeamMemberStats(memberId: string) {
     let totalHours = 0;
 
     if (member.user_id) {
+        const supabase = await createClient();
+
         const { count: taskCount } = await supabase
             .from('tasks')
             .select('id', { count: 'exact', head: true })

@@ -36,13 +36,13 @@ export function AcceptInviteClient({ invite, token }: AcceptInviteClientProps) {
                 return;
             }
             if (result.error) {
-                setError(
-                    result.error === 'already_accepted'
-                        ? 'This invitation has already been accepted.'
-                        : result.error === 'invalid_invite'
-                            ? 'This invitation link is invalid or has expired.'
-                            : 'Failed to accept the invitation. Please try again.'
-                );
+                const errorMessages: Record<string, string> = {
+                    already_accepted: 'This invitation has already been accepted.',
+                    invalid_invite: 'This invitation link is invalid or has expired.',
+                    already_member: 'You are already an active member of this team.',
+                    failed: 'Failed to accept the invitation. Please try again.',
+                };
+                setError(errorMessages[result.error] || 'An unexpected error occurred.');
                 return;
             }
             setAccepted(true);

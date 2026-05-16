@@ -8,6 +8,8 @@ import { Timer, TrendingUp, TrendingDown, DollarSign, Clock } from "lucide-react
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { cn, formatDuration } from "@/lib/utils";
 
+export const dynamic = 'force-dynamic';
+
 export default async function TimeTrackingPage() {
     let entries: any[] = [];
     let stats: {

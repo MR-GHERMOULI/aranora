@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Crown, Shield, User, MoreVertical, Briefcase, Clock, CheckCircle2, DollarSign, Loader2, UserMinus, Pencil, Copy } from "lucide-react";
+import { Crown, Shield, User, MoreVertical, Briefcase, Clock, CheckCircle2, DollarSign, Loader2, UserMinus, Pencil, Copy, Check } from "lucide-react";
 import { TeamMember } from "@/types";
 import { updateTeamMemberRole, updateTeamMemberSalary, removeTeamMember } from "@/app/(dashboard)/team/actions";
 import { useRouter } from "next/navigation";
@@ -45,6 +45,7 @@ const statusColors = {
 export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
     const [salaryDialogOpen, setSalaryDialogOpen] = useState(false);
     const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false);
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
     const { isOnline } = usePresence();
@@ -129,14 +130,15 @@ export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
                                     <Shield className="h-4 w-4 mr-2" />
                                     {member.role === 'manager' ? 'Demote to Member' : 'Promote to Manager'}
                                 </DropdownMenuItem>
-                                {member.status === 'invited' && (
+                                {member.status === 'invited' && member.invite_token && (
                                     <DropdownMenuItem onClick={() => {
                                         const link = `${window.location.origin}/team-invite/${member.invite_token}`;
                                         navigator.clipboard.writeText(link);
-                                        // We could add a toast here if available, but for now we'll just use a simple feedback
+                                        setLinkCopied(true);
+                                        setTimeout(() => setLinkCopied(false), 2000);
                                     }}>
-                                        <Copy className="h-4 w-4 mr-2" />
-                                        Copy Invite Link
+                                        {linkCopied ? <Check className="h-4 w-4 mr-2 text-green-500" /> : <Copy className="h-4 w-4 mr-2" />}
+                                        {linkCopied ? 'Link Copied!' : 'Copy Invite Link'}
                                     </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem onClick={() => setSalaryDialogOpen(true)}>
