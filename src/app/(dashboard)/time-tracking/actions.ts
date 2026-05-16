@@ -13,9 +13,13 @@ export async function getTimeEntries(filters?: {
     endDate?: string;
 }) {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    const user = authData?.user;
 
-    if (!user) throw new Error("Unauthorized");
+    if (!user || authError) {
+        console.warn("Auth check failed in getTimeEntries:", authError);
+        return [];
+    }
 
     let query = supabase
         .from("time_entries")
@@ -47,7 +51,8 @@ export async function getTimeEntries(filters?: {
 
 export async function getActiveTimer() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
 
     if (!user) return null;
 

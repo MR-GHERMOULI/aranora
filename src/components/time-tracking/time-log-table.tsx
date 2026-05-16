@@ -40,7 +40,8 @@ export function TimeLogTable({ entries, showMember = false }: TimeLogTableProps)
     };
 
     const groupedEntries = entries.reduce((acc, entry) => {
-        const date = format(new Date(entry.start_time), "yyyy-MM-dd");
+        const startDate = new Date(entry.start_time);
+        const date = !isNaN(startDate.getTime()) ? format(startDate, "yyyy-MM-dd") : "Unknown Date";
         if (!acc[date]) acc[date] = [];
         acc[date].push(entry);
         return acc;
@@ -58,7 +59,7 @@ export function TimeLogTable({ entries, showMember = false }: TimeLogTableProps)
                     <div key={date} className="space-y-4">
                         <div className="flex items-center justify-between border-b pb-2">
                             <h3 className="text-lg font-semibold">
-                                {format(new Date(date), "EEEE, MMM d, yyyy")}
+                                {date === "Unknown Date" ? date : format(new Date(date), "EEEE, MMM d, yyyy")}
                             </h3>
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Clock className="h-4 w-4" />

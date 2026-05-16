@@ -5,9 +5,10 @@ import { differenceInSeconds, subDays, startOfDay, endOfDay, format } from "date
 
 export async function getTimeTrackingStats() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    const user = authData?.user;
 
-    if (!user) {
+    if (!user || authError) {
         return {
             totalSecondsThisWeek: 0,
             totalSecondsLastWeek: 0,
@@ -65,8 +66,8 @@ export async function getTimeTrackingStats() {
             totalSecondsThisWeek += durationSeconds;
 
             // Add to chart data
-            const dayName = format(start, "EEE");
-            if (chartDataMap.has(dayName)) {
+            const dayName = start && !isNaN(start.getTime()) ? format(start, "EEE") : null;
+            if (dayName && chartDataMap.has(dayName)) {
                 chartDataMap.set(dayName, chartDataMap.get(dayName)! + durationHours);
             }
 

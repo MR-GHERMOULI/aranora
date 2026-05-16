@@ -9,20 +9,39 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { cn, formatDuration } from "@/lib/utils";
 
 export default async function TimeTrackingPage() {
-    const entries = await getTimeEntries();
-    const stats = await getTimeTrackingStats();
+    let entries: any[] = [];
+    let stats: any = {
+        totalSecondsThisWeek: 0,
+        totalSecondsLastWeek: 0,
+        unbilledRevenue: 0,
+        weeklyChartData: [],
+    };
+    let error: string | null = null;
+
+    try {
+        const [fetchedEntries, fetchedStats] = await Promise.all([
+            getTimeEntries(),
+            getTimeTrackingStats()
+        ]);
+        entries = fetchedEntries || [];
+        stats = fetchedStats;
+    } catch (e: any) {
+        console.error("Error loading time tracking data:", e);
+        error = e.message || "An unexpected error occurred while loading your data.";
+    }
 
     const formatCurrency = (amount: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
 
     const getHAndM = (seconds: number) => {
+        if (!seconds || isNaN(seconds)) return "0h 0m";
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         return `${h}h ${m}m`;
     };
 
-    const diff = stats.totalSecondsThisWeek - stats.totalSecondsLastWeek;
-    const percentage = stats.totalSecondsLastWeek > 0
+    const diff = (stats?.totalSecondsThisWeek || 0) - (stats?.totalSecondsLastWeek || 0);
+    const percentage = (stats?.totalSecondsLastWeek || 0) > 0
         ? Math.round((Math.abs(diff) / stats.totalSecondsLastWeek) * 100)
         : 0;
 
@@ -42,6 +61,13 @@ export default async function TimeTrackingPage() {
                     <ManualEntryDialog />
                 </SubscriptionGate>
             </div>
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                    <p className="text-sm font-medium">{error}</p>
+                </div>
+            )}
 
             <div className="grid gap-6 md:grid-cols-3">
                 <Card className="relative overflow-hidden group border-l-4 border-l-indigo-500">
