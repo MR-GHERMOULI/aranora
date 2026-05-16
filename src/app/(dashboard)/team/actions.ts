@@ -77,8 +77,8 @@ export async function getTeamMembers() {
 
     return members.map(m => ({
         ...m,
-        profile: profiles.find(p => p.id === m.user_id) || null
-    })) as TeamMember[];
+        profile: profiles.find(p => p.id === m.user_id) || (m.email ? { email: m.email } : null)
+    })) as any;
 }
 
 export async function getTeamMemberCount() {
@@ -177,26 +177,6 @@ export async function inviteTeamMember(formData: FormData) {
         throw new Error(`Maximum team size reached (${MAX_TEAM_MEMBERS}/${MAX_TEAM_MEMBERS}). Remove a member before adding a new one.`);
     }
 
-    // Check if already a team member
-    const { data: existing } = await supabase
-        .from('team_members')
-        .select('id, status')
-        .eq('team_id', teamId)
-        .eq('user_id', (await (async () => {
-            const adminSupabase = createAdminClient();
-            const { data: p } = await adminSupabase
-                .from('profiles')
-                .select('id')
-                .or(`email.eq.${email},company_email.eq.${email}`)
-                .maybeSingle();
-            return p?.id || '__none__';
-        })()))
-        .maybeSingle();
-
-    if (existing && existing.status === 'active') {
-        throw new Error('This person is already an active team member.');
-    }
-
     // Check if platform user exists
     const adminSupabase = createAdminClient();
     const { data: existingUser } = await adminSupabase
@@ -205,12 +185,39 @@ export async function inviteTeamMember(formData: FormData) {
         .or(`email.eq.${email},company_email.eq.${email}`)
         .maybeSingle();
 
+    // Check if already a team member or invited
+    const { data: existing } = await supabase
+        .from('team_members')
+        .select('id, status, invite_token')
+        .eq('team_id', teamId)
+        .or(`email.eq.${email}${existingUser ? `,user_id.eq.${existingUser.id}` : ''}`)
+        .maybeSingle();
+
+    if (existing) {
+        if (existing.status === 'active') throw new Error('This person is already an active team member.');
+        if (existing.status === 'invited') throw new Error('This person has already been invited.');
+        if (existing.status === 'suspended') {
+            // Re-invite suspended member
+            await supabase
+                .from('team_members')
+                .update({ status: 'invited', invited_at: new Date().toISOString() })
+                .eq('id', existing.id);
+            
+            return {
+                inviteToken: existing.invite_token,
+                isExistingUser: !!existingUser,
+                memberName: existingUser?.full_name || email,
+            };
+        }
+    }
+
     // Create the team member record
     const { data: newMember, error: insertError } = await supabase
         .from('team_members')
         .insert({
             team_id: teamId,
             user_id: existingUser?.id || null,
+            email: email, // Save the email!
             role: role as TeamRole,
             status: 'invited',
         })

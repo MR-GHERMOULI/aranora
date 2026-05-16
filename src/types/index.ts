@@ -304,7 +304,8 @@ export interface Team {
 export interface TeamMember {
     id: string;
     team_id: string;
-    user_id: string;
+    user_id: string | null;
+    email?: string | null;
     role: TeamRole;
     status: TeamMemberStatus;
     base_salary?: number;

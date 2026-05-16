@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserPlus, Copy, Check, Loader2 } from "lucide-react";
+import { UserPlus, Copy, Check, Loader2, Shield } from "lucide-react";
 import { inviteTeamMember } from "@/app/(dashboard)/team/actions";
 import { useRouter } from "next/navigation";
 
@@ -129,29 +129,46 @@ export function InviteTeamMemberDialog({ currentCount, maxCount }: InviteTeamMem
                 ) : (
                     <>
                         <DialogHeader>
-                            <DialogTitle>🎉 Invitation Sent!</DialogTitle>
+                            <DialogTitle>🔗 Invitation Link Ready</DialogTitle>
                             <DialogDescription>
                                 {inviteResult.isExisting
-                                    ? `${inviteResult.name} already has an Aranora account. They'll receive an in-app notification.`
-                                    : `Share this invite link with ${inviteResult.name} to join your team.`
+                                    ? `A link has been generated for ${inviteResult.name}. Since they have an account, they can also accept via their dashboard.`
+                                    : `The professional invitation link for ${inviteResult.name} is ready. Copy and send it to them manually.`
                                 }
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="space-y-4 pt-2">
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    readOnly
-                                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/team-invite/${inviteResult.token}`}
-                                    className="font-mono text-xs"
-                                />
-                                <Button variant="outline" size="icon" onClick={handleCopyLink}>
-                                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                </Button>
+                        <div className="space-y-4 pt-4">
+                            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-2">Shareable Invite Link</p>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        readOnly
+                                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/team-invite/${inviteResult.token}`}
+                                        className="font-mono text-sm bg-white dark:bg-black border-none ring-1 ring-slate-200 dark:ring-slate-800 focus-visible:ring-blue-500"
+                                    />
+                                    <Button 
+                                        variant={copied ? "default" : "outline"} 
+                                        size="icon" 
+                                        onClick={handleCopyLink}
+                                        className={copied ? "bg-green-500 hover:bg-green-600 border-none text-white" : ""}
+                                    >
+                                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-start gap-3 border border-blue-100 dark:border-blue-900/30">
+                                <div className="p-1 bg-blue-500 rounded text-white mt-0.5">
+                                    <Shield className="h-3 w-3" />
+                                </div>
+                                <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                                    <strong>Note:</strong> We don&apos;t send emails automatically to protect your privacy and resources. You have full control over who receives this link.
+                                </p>
                             </div>
 
                             <DialogFooter>
-                                <Button onClick={handleClose}>Done</Button>
+                                <Button onClick={handleClose} className="w-full">Done</Button>
                             </DialogFooter>
                         </div>
                     </>

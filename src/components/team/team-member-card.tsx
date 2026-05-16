@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Crown, Shield, User, MoreVertical, Briefcase, Clock, CheckCircle2, DollarSign, Loader2, UserMinus, Pencil } from "lucide-react";
+import { Crown, Shield, User, MoreVertical, Briefcase, Clock, CheckCircle2, DollarSign, Loader2, UserMinus, Pencil, Copy } from "lucide-react";
 import { TeamMember } from "@/types";
 import { updateTeamMemberRole, updateTeamMemberSalary, removeTeamMember } from "@/app/(dashboard)/team/actions";
 import { useRouter } from "next/navigation";
@@ -50,13 +50,16 @@ export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
     const { isOnline } = usePresence();
 
     const RoleIcon = roleIcons[member.role] || User;
-    const displayName = member.profile?.full_name || member.profile?.username || member.profile?.email || 'Invited User';
-    const initials = displayName
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .substring(0, 2)
-        .toUpperCase();
+    const displayName = member.profile?.full_name || member.profile?.username || member.profile?.email || member.email || 'Invited User';
+    const isEmail = displayName.includes('@');
+    const initials = isEmail 
+        ? displayName.split('@')[0].substring(0, 2).toUpperCase()
+        : displayName
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .substring(0, 2)
+            .toUpperCase();
     
     const online = member.user_id ? isOnline(member.user_id) : false;
 
@@ -126,6 +129,16 @@ export function TeamMemberCard({ member, stats }: TeamMemberCardProps) {
                                     <Shield className="h-4 w-4 mr-2" />
                                     {member.role === 'manager' ? 'Demote to Member' : 'Promote to Manager'}
                                 </DropdownMenuItem>
+                                {member.status === 'invited' && (
+                                    <DropdownMenuItem onClick={() => {
+                                        const link = `${window.location.origin}/team-invite/${member.invite_token}`;
+                                        navigator.clipboard.writeText(link);
+                                        // We could add a toast here if available, but for now we'll just use a simple feedback
+                                    }}>
+                                        <Copy className="h-4 w-4 mr-2" />
+                                        Copy Invite Link
+                                    </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem onClick={() => setSalaryDialogOpen(true)}>
                                     <DollarSign className="h-4 w-4 mr-2" />
                                     Edit Salary
