@@ -34,6 +34,8 @@ ALTER FUNCTION public.slugify(text)
 -- Admin write access must be scoped to is_admin=true users.
 
 DROP POLICY IF EXISTS "Admins can do everything" ON public.articles;
+DROP POLICY IF EXISTS "Public can read published articles" ON public.articles;
+DROP POLICY IF EXISTS "Admins can manage all articles" ON public.articles;
 
 -- Public can read published articles (needed for /blog)
 CREATE POLICY "Public can read published articles"
@@ -120,6 +122,7 @@ DROP POLICY IF EXISTS "Service role manages OTP codes" ON public.login_otp_codes
 -- Server-side routes that insert for other users must use service/admin client.
 
 DROP POLICY IF EXISTS "Authenticated users can insert notifications" ON public.notifications;
+DROP POLICY IF EXISTS "Users can insert own notifications" ON public.notifications;
 
 CREATE POLICY "Users can insert own notifications"
     ON public.notifications FOR INSERT
@@ -149,6 +152,7 @@ CREATE POLICY "Invitees can update invitation status"
 
 -- avatars bucket
 DROP POLICY IF EXISTS "Public Access Avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Public can access specific avatar objects" ON storage.objects;
 
 -- Allow anyone to SELECT a specific avatar if they know the path
 -- (no wildcards = no listing, just direct object access)
@@ -158,6 +162,7 @@ CREATE POLICY "Public can access specific avatar objects"
 
 -- feedback-photos bucket
 DROP POLICY IF EXISTS "Allow public viewing of feedback-photos" ON storage.objects;
+DROP POLICY IF EXISTS "Public can access specific feedback-photo objects" ON storage.objects;
 
 CREATE POLICY "Public can access specific feedback-photo objects"
     ON storage.objects FOR SELECT
@@ -165,6 +170,7 @@ CREATE POLICY "Public can access specific feedback-photo objects"
 
 -- logos bucket
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Public can access specific logo objects" ON storage.objects;
 
 CREATE POLICY "Public can access specific logo objects"
     ON storage.objects FOR SELECT
@@ -172,6 +178,7 @@ CREATE POLICY "Public can access specific logo objects"
 
 -- project-files bucket (restrict to authenticated users only)
 DROP POLICY IF EXISTS "Allow authenticated viewing from project-files" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can access project files" ON storage.objects;
 
 CREATE POLICY "Authenticated users can access project files"
     ON storage.objects FOR SELECT
