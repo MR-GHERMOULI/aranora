@@ -107,9 +107,27 @@ DROP POLICY IF EXISTS "Team members can delete team time entries" ON public.time
 CREATE POLICY "Team members can delete team time entries" ON public.time_entries FOR DELETE USING (auth.uid() = user_id OR (team_id IS NOT NULL AND private.is_team_admin(team_id)));
 
 
+-- Task Comments
+DROP POLICY IF EXISTS "Users can view comments in their teams" ON public.task_comments;
+CREATE POLICY "Users can view comments in their teams" ON public.task_comments FOR SELECT USING (private.is_team_member(team_id));
+
+DROP POLICY IF EXISTS "Users can insert comments in their teams" ON public.task_comments;
+CREATE POLICY "Users can insert comments in their teams" ON public.task_comments FOR INSERT WITH CHECK (private.is_team_member(team_id));
+
+DROP POLICY IF EXISTS "Users can delete their own comments" ON public.task_comments;
+CREATE POLICY "Users can delete their own comments" ON public.task_comments FOR DELETE USING (user_id = auth.uid() OR private.is_team_admin(team_id));
+
+-- Team Member Projects
+DROP POLICY IF EXISTS "Team admins can manage assignments" ON public.team_member_projects;
+CREATE POLICY "Team admins can manage assignments" ON public.team_member_projects FOR ALL USING (private.is_team_admin((SELECT team_id FROM public.team_members WHERE id = team_member_id)));
+
+-- Team Activity
+DROP POLICY IF EXISTS "Users can view team activity" ON public.team_activity;
+CREATE POLICY "Users can view team activity" ON public.team_activity FOR SELECT USING (private.is_team_member(team_id));
+
 -- ────────────────────────────────────────────────────────────────────────
 -- 4. Safely drop the old public schema functions
 -- ────────────────────────────────────────────────────────────────────────
 
-DROP FUNCTION IF EXISTS public.is_team_admin(uuid);
-DROP FUNCTION IF EXISTS public.is_team_member(uuid);
+DROP FUNCTION IF EXISTS public.is_team_admin(uuid) CASCADE;
+DROP FUNCTION IF EXISTS public.is_team_member(uuid) CASCADE;
