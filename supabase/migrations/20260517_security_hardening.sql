@@ -130,17 +130,18 @@ CREATE POLICY "Users can insert own notifications"
     WITH CHECK (user_id = auth.uid());
 
 
--- ── 2g. team_invitations: "Invitees can update invitation status" ─────
--- The old policy used USING(true) — anyone could update any invitation.
--- Fix: only the intended invitee (matched by their auth UID) can update.
--- Note: if this table uses 'invitee_id', adjust the column name below.
-
 DROP POLICY IF EXISTS "Invitees can update invitation status" ON public.team_invitations;
 
 CREATE POLICY "Invitees can update invitation status"
     ON public.team_invitations FOR UPDATE
-    USING (invitee_id = auth.uid())
-    WITH CHECK (invitee_id = auth.uid());
+    USING (
+        email = (SELECT company_email FROM public.profiles WHERE id = auth.uid())
+        OR email = (auth.jwt() ->> 'email')
+    )
+    WITH CHECK (
+        email = (SELECT company_email FROM public.profiles WHERE id = auth.uid())
+        OR email = (auth.jwt() ->> 'email')
+    );
 
 
 -- ────────────────────────────────────────────────────────────────────────
