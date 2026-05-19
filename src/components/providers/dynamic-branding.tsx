@@ -29,20 +29,7 @@ export async function DynamicBranding() {
   return (
     <>
       {!isDefaultFont && (
-        <>
-          <link rel="preload" href={googleFontsUrl} as="style" />
-          <link 
-            href={googleFontsUrl} 
-            rel="stylesheet" 
-            media="print" 
-            onLoad={(e) => { 
-              e.currentTarget.media = "all"; 
-            }} 
-          />
-          <noscript>
-            <link href={googleFontsUrl} rel="stylesheet" />
-          </noscript>
-        </>
+        <link href={googleFontsUrl} rel="stylesheet" />
       )}
       <style dangerouslySetInnerHTML={{
         __html: `
