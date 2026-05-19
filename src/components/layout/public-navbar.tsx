@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import MobileMenu from "./mobile-menu"
 
 export default async function PublicNavbar() {
   const supabase = await createClient()
@@ -30,7 +31,7 @@ export default async function PublicNavbar() {
             <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
               <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center">
                 {logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                  <img src={logoUrl} alt={`${siteName} - Freelancer Management Platform`} className="h-full w-full object-contain" />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
                     <svg
@@ -98,12 +99,13 @@ export default async function PublicNavbar() {
             </Button>
             <Button
               asChild
-              className="bg-brand-primary hover:bg-brand-primary-light shadow-lg shadow-brand-primary/20 transition-all hover:shadow-brand-primary/30"
+              className="bg-brand-primary hover:bg-brand-primary-light shadow-lg shadow-brand-primary/20 transition-all hover:shadow-brand-primary/30 hidden sm:inline-flex"
             >
               <Link href="/signup">
                 {navCtaText}
               </Link>
             </Button>
+            <MobileMenu siteName={siteName} navCtaText={navCtaText} />
           </div>
         </div>
       </div>

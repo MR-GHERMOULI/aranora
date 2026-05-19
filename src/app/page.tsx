@@ -29,6 +29,7 @@ import { Footer } from "@/components/layout/footer";
 import { createClient } from "@/lib/supabase/server";
 import { FadeIn, ScaleIn, StaggerContainer, StaggerItem } from "@/components/ui/motion-wrapper";
 import PublicNavbar from "@/components/layout/public-navbar";
+import { unstable_cache } from "next/cache";
 
 /* ─── CMS INTERFACE ─── */
 interface HomepageContent {
@@ -183,27 +184,125 @@ const LucideIcons: Record<string, any> = {
 /* ─── HOW IT WORKS ICONS ─── */
 const stepIcons = [UserPlus, FolderOpen, Briefcase];
 
-export default async function LandingPage() {
-  const supabase = await createClient();
+/* ─── CACHED DATABASE QUERIES ─── */
+const fetchPlatformSettings = (key: string) => 
+  unstable_cache(
+    async () => {
+      const { createServerClient } = await import("@supabase/ssr");
+      const serviceClient = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { cookies: { getAll() { return [] }, setAll() { } } }
+      );
 
+      const { data: setting } = await serviceClient
+        .from("platform_settings")
+        .select("value")
+        .eq("key", key)
+        .single();
+
+      return setting?.value || null;
+    },
+    [`platform-settings-${key}`],
+    { revalidate: 600, tags: [`platform-setting-${key}`] }
+  )();
+
+const fetchPlatformStats = unstable_cache(
+  async () => {
+    const { createServerClient } = await import("@supabase/ssr");
+    const serviceClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll() { return [] }, setAll() { } } }
+    );
+
+    const [
+      { count: userCount },
+      { data: countries },
+      { count: projectsCount },
+      { count: contractsCount },
+      { data: invoicesData }
+    ] = await Promise.all([
+      serviceClient.from("profiles").select("*", { count: "exact", head: true }),
+      serviceClient.from("profiles").select("country"),
+      serviceClient.from("projects").select("*", { count: "exact", head: true }),
+      serviceClient.from("contracts").select("*", { count: "exact", head: true }).in("status", ["signed", "completed"]),
+      serviceClient.from("invoices").select("total").eq("status", "paid")
+    ]);
+
+    const uniqueCountries = new Set(
+      countries
+        ?.map((c) => c.country)
+        .filter((c) => c && c !== "Unknown" && c.trim() !== "")
+    );
+    const countryCount = Math.max(uniqueCountries.size, 1);
+    const totalInvoicesAmount = invoicesData?.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0) || 0;
+
+    return {
+      userCount: userCount || 0,
+      countryCount,
+      projectsCount: projectsCount || 0,
+      contractsCount: contractsCount || 0,
+      totalInvoicesAmount,
+    };
+  },
+  ["platform-global-stats"],
+  { revalidate: 600, tags: ["platform-stats"] }
+);
+
+const fetchHomeTestimonials = unstable_cache(
+  async () => {
+    const { createServerClient } = await import("@supabase/ssr");
+    const serviceClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll() { return [] }, setAll() { } } }
+    );
+
+    const { data: dbTestimonials } = await serviceClient
+      .from("testimonials")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    return dbTestimonials || [];
+  },
+  ["platform-home-testimonials"],
+  { revalidate: 600, tags: ["platform-testimonials"] }
+);
+
+const fetchPlatformLinks = unstable_cache(
+  async () => {
+    const { createServerClient } = await import("@supabase/ssr");
+    const serviceClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll() { return [] }, setAll() { } } }
+    );
+
+    const { data: platformLinks } = await serviceClient
+      .from("platform_links")
+      .select("*")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
+
+    return platformLinks || [];
+  },
+  ["platform-links-cache"],
+  { revalidate: 600, tags: ["platform-links"] }
+);
+
+export default async function LandingPage() {
   // Fetch branding settings
-  const { data: brandingSetting } = await supabase
-    .from("platform_settings")
-    .select("value")
-    .eq("key", "branding")
-    .single();
-  
-  const siteName = brandingSetting?.value?.site_name || "Aranora";
+  const branding = await fetchPlatformSettings("branding") || {};
+  const siteName = branding.site_name || "Aranora";
 
   // Fetch homepage content from settings
-  const { data: homepageSetting } = await supabase
-    .from("platform_settings")
-    .select("value")
-    .eq("key", "homepage")
-    .single();
+  const homepageSettingValue = await fetchPlatformSettings("homepage");
 
-  const content: HomepageContent = homepageSetting?.value
-    ? { ...defaultContent, ...homepageSetting.value }
+  const content: HomepageContent = homepageSettingValue
+    ? { ...defaultContent, ...homepageSettingValue }
     : defaultContent;
 
   // Replace placeholders in content
@@ -211,51 +310,16 @@ export default async function LandingPage() {
   content.testimonials_subtitle = processPlaceholder(content.testimonials_subtitle);
   content.cta_subtitle = processPlaceholder(content.cta_subtitle);
 
-  const branding = brandingSetting?.value || {};
   const logoUrl = branding.logo_url;
 
-  const { createServerClient } = await import("@supabase/ssr");
-  const serviceClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll() { return [] }, setAll() { } } }
-  );
-
-  // Fetch real user count for social proof
-  const { count: userCount } = await serviceClient
-    .from("profiles")
-    .select("*", { count: "exact", head: true });
-
-  // Fetch real country count
-  const { data: countries } = await serviceClient
-    .from("profiles")
-    .select("country");
-
-  const uniqueCountries = new Set(
-    countries
-      ?.map((c) => c.country)
-      .filter((c) => c && c !== "Unknown" && c.trim() !== "")
-  );
-  const countryCount = Math.max(uniqueCountries.size, 1);
-
-  // Fetch real projects created
-  const { count: projectsCount } = await serviceClient
-    .from("projects")
-    .select("*", { count: "exact", head: true });
-
-  // Fetch real contracts signed
-  const { count: contractsCount } = await serviceClient
-    .from("contracts")
-    .select("*", { count: "exact", head: true })
-    .in("status", ["signed", "completed"]);
-
-  // Fetch total invoices completed
-  const { data: invoicesData } = await serviceClient
-    .from("invoices")
-    .select("total")
-    .eq("status", "paid");
-
-  const totalInvoicesAmount = invoicesData?.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0) || 0;
+  // Fetch cached stats in parallel
+  const {
+    userCount,
+    countryCount,
+    projectsCount,
+    contractsCount,
+    totalInvoicesAmount,
+  } = await fetchPlatformStats();
 
   // Format currency for display
   const formatCurrency = (amount: number) => {
@@ -267,13 +331,8 @@ export default async function LandingPage() {
   // Smart social proof threshold check
   const showStats = (userCount || 0) >= content.stats_min_threshold;
 
-  // Fetch testimonials from DB
-  const { data: dbTestimonials } = await supabase
-    .from("testimonials")
-    .select("*")
-    .eq("is_active", true)
-    .order("created_at", { ascending: false })
-    .limit(3);
+  // Fetch testimonials from DB (cached)
+  const dbTestimonials = await fetchHomeTestimonials();
 
   const testimonials =
     dbTestimonials && dbTestimonials.length > 0
@@ -320,12 +379,8 @@ export default async function LandingPage() {
         },
       ];
 
-  // Fetch platform links from DB
-  const { data: platformLinks } = await supabase
-    .from("platform_links")
-    .select("*")
-    .eq("is_active", true)
-    .order("display_order", { ascending: true });
+  // Fetch platform links from DB (cached)
+  const platformLinks = await fetchPlatformLinks();
 
   const platforms =
     platformLinks && platformLinks.length > 0
@@ -359,7 +414,7 @@ export default async function LandingPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-primary/3 rounded-full blur-3xl animate-mesh" style={{ animationDelay: "10s" }} />
         </div>
         <div className="max-w-7xl mx-auto relative">
-          <FadeIn delay={0.2} className="text-center max-w-4xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto animate-slide-up">
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight">
               {content.hero_title.includes("Professionally") ? (
@@ -411,7 +466,7 @@ export default async function LandingPage() {
             <p className="mt-6 text-sm text-muted-foreground">
               {content.hero_microcopy}
             </p>
-          </FadeIn>
+          </div>
         </div>
       </section>
 
@@ -421,7 +476,7 @@ export default async function LandingPage() {
           {showStats ? (
             /* Full metrics — only shown when stats are meaningful */
             <FadeIn>
-              <div className="grid grid-cols-2 lg:grid-cols-6 gap-8 mb-10">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8 mb-10 max-w-5xl mx-auto">
                 {[
                   { value: `${userCount || 0}+`, label: "Registered Freelancers", icon: Users },
                   { value: `${countryCount}+`, label: "Countries", icon: Globe },
@@ -430,14 +485,14 @@ export default async function LandingPage() {
                   { value: `${formatCurrency(totalInvoicesAmount)}`, label: "Processed Invoices", icon: DollarSign },
                   { value: content.affiliate_commission_rate, label: "Affiliate Commission", icon: TrendingUp },
                 ].map((stat, i) => (
-                  <div key={i} className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <stat.icon className="h-5 w-5 text-brand-primary" />
-                      <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                  <div key={i} className="text-center p-3 sm:p-4 bg-card border border-border/40 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <stat.icon className="h-4 sm:h-5 w-4 sm:w-5 text-brand-primary" />
+                      <span className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-foreground tracking-tight">
                         {stat.value}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground font-medium">
+                    <p className="text-xs sm:text-sm text-muted-foreground font-semibold leading-tight">
                       {stat.label}
                     </p>
                   </div>
@@ -931,6 +986,137 @@ export default async function LandingPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ═══════════ FREQUENTLY ASKED QUESTIONS (FAQ) ═══════════ */}
+      <div className="section-divider" />
+      <section id="faq" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 tracking-tight">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              Everything you need to know about {siteName} and how it can help grow your freelance business.
+            </p>
+          </div>
+
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {[
+              {
+                q: `What is ${siteName}?`,
+                a: `${siteName} is a comprehensive, professional management platform designed specifically for freelancers, consultants, and independent agencies to unify their clients, projects, contracts, invoices, and time tracking in one elegant workspace.`
+              },
+              {
+                q: "Is my data secure?",
+                a: "Absolutely. We employ enterprise-grade security including row-level database policies (RLS), encrypted transaction channels, and secure credential handling so your freelance business records remain fully safe and secure."
+              },
+              {
+                q: "How does the 30-day free trial work?",
+                a: "You get full, unrestricted access to every feature—including PDF contract generation and automated invoicing reminders—for your first 30 days. No credit card is required to sign up, and you can cancel anytime."
+              },
+              {
+                q: "Can I invite clients to collaborate on projects?",
+                a: "Yes! You can invite clients directly into specific projects as external collaborators. This lets them view board progress, log feedback, check task milestones, and approve time entries with professional transparency."
+              },
+              {
+                q: "How does the Affiliate Program work?",
+                a: "Our affiliate program is free to join and does not require a paid platform subscription. You receive a unique partner link and earn a recurring 30% commission on every subscriber you refer for 12 full months."
+              },
+              {
+                q: "Can I export invoices and signed contracts?",
+                a: "Yes. You can generate legally binding digital signatures on custom contracts and instantly export both invoices and agreements as professional PDF documents with one-click."
+              }
+            ].map((faq, idx) => (
+              <details
+                key={idx}
+                className="group border border-border bg-card rounded-2xl p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300 open:shadow-lg open:shadow-brand-primary/5 hover:border-brand-primary/30"
+              >
+                <summary className="flex items-center justify-between cursor-pointer focus:outline-none">
+                  <h3 className="text-base sm:text-lg font-bold text-foreground pr-4 select-none">
+                    {faq.q}
+                  </h3>
+                  <span className="shrink-0 transition-transform duration-300 group-open:-rotate-180 flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary">
+                    <svg
+                      className="h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </summary>
+                <div className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed transition-all">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* Structured SEO Schema Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": `What is ${siteName}?`,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": `${siteName} is a comprehensive, professional management platform designed specifically for freelancers, consultants, and independent agencies to unify their clients, projects, contracts, invoices, and time tracking in one elegant workspace.`
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Is my data secure?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Absolutely. We employ enterprise-grade security including row-level database policies (RLS), encrypted transaction channels, and secure credential handling so your freelance business records remain fully safe and secure."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How does the 30-day free trial work?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You get full, unrestricted access to every feature—including PDF contract generation and automated invoicing reminders—for your first 30 days. No credit card is required to sign up, and you can cancel anytime."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I invite clients to collaborate on projects?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! You can invite clients directly into specific projects as external collaborators. This lets them view board progress, log feedback, check task milestones, and approve time entries with professional transparency."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How does the Affiliate Program work?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our affiliate program is free to join and does not require a paid platform subscription. You receive a unique partner link and earn a recurring 30% commission on every subscriber you refer for 12 full months."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I export invoices and signed contracts?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. You can generate legally binding digital signatures on custom contracts and instantly export both invoices and agreements as professional PDF documents with one-click."
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </section>
 
       {/* ═══════════ FOOTER ═══════════ */}

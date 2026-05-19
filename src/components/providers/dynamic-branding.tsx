@@ -18,6 +18,8 @@ export async function DynamicBranding() {
   const secondaryColor = branding.secondary_color || "#4ADE80";
   const fontFamily = branding.font_family || "Inter";
 
+  const isDefaultFont = fontFamily.toLowerCase() === "inter";
+
   // Google Fonts URL string based on selected font
   const googleFontsUrl = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(
     /\s+/g,
@@ -26,13 +28,17 @@ export async function DynamicBranding() {
 
   return (
     <>
-      <link href={googleFontsUrl} rel="stylesheet" />
+      {!isDefaultFont && <link href={googleFontsUrl} rel="stylesheet" />}
       <style dangerouslySetInnerHTML={{
         __html: `
           :root {
             --brand-primary: ${primaryColor};
             --brand-secondary: ${secondaryColor};
-            --font-sans: "${fontFamily}", ui-sans-serif, system-ui, sans-serif;
+            --font-sans: ${
+              isDefaultFont 
+                ? "var(--font-inter), ui-sans-serif, system-ui, sans-serif" 
+                : `"${fontFamily}", ui-sans-serif, system-ui, sans-serif`
+            };
           }
           
           .dark {
