@@ -33,10 +33,10 @@ export default async function ToolsDirectoryPage() {
 
   // Category mapping for quick badges
   const getCategory = (slug: string) => {
-    if (["client-management", "client-intake-forms", "team-collaboration"].includes(slug)) {
-      return { name: "Client & Team", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" };
+    if (["dashboard", "nexus", "team", "collaborators"].includes(slug)) {
+      return { name: "Workspace & Team", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" };
     }
-    if (["project-tracking", "task-management", "calendar-scheduling"].includes(slug)) {
+    if (["projects", "tasks", "calendar", "intake-forms", "clients"].includes(slug)) {
       return { name: "Management", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20" };
     }
     return { name: "Finance & Time", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" };

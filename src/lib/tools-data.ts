@@ -1,15 +1,18 @@
 import {
+  LayoutDashboard,
+  FolderKanban,
   Users,
+  FileInput,
   Briefcase,
-  FileText,
-  Shield,
-  Clock,
+  UsersRound,
+  Network,
   CheckSquare,
   CalendarDays,
-  UserPlus,
-  FileInput,
-  BarChart3,
-  LucideIcon
+  Clock,
+  Shield,
+  FileText,
+  CreditCard,
+  BarChart3
 } from "lucide-react";
 
 export interface ToolFeature {
@@ -41,303 +44,407 @@ export interface ToolData {
 
 export const toolsRegistry: ToolData[] = [
   {
-    slug: "client-management",
-    title: "Client Management",
-    iconName: "Users",
-    shortDesc: "A centralized CRM designed specifically for freelancers to organize contacts, track communication histories, and build long-lasting professional relationships.",
-    fullDesc: "Managing client relationships shouldn't mean digging through chaotic email chains or scattered notes. Our Client CRM gives independent professionals a unified hub to manage everything about their clients. Track contact details, note communication histories, centralize project files, and maintain clean audit trails of every interaction. Start operating like a fully-fledged enterprise with structured onboarding details, private client notes, and real-time activity indicators.",
+    slug: "dashboard",
+    title: "Dashboard",
+    iconName: "LayoutDashboard",
+    shortDesc: "A centralized command center designed to give you a complete high-level snapshot of your freelance operations, tasks, finances, and active schedules.",
+    fullDesc: "Your freelance business deserves a proper home screen. The central Dashboard brings together all critical elements of your active operations in one elegant workspace. See pending client payments, active task counters, upcoming delivery schedules, recent activity streams, and quick-action shortcuts. Save time by bypassing complex navigation and start each day with absolute clarity on what requires your attention.",
     detailedPoints: [
-      "Keep all client contact details, timezones, and preferred billing methods in one organized database.",
-      "Track every milestone, transaction, and email correspondence without leaving your workspace.",
-      "Store private notes and dynamic intake responses to prepare yourself perfectly for every call.",
-      "Seamlessly transition prospects from new leads to active accounts with automated onboarding triggers."
+      "Track active task percentages and outstanding project milestones at a glance.",
+      "Monitor monthly revenue streams, pending invoices, and upcoming payment schedules.",
+      "Stay updated on subcontractor and client portals through integrated recent activity feeds.",
+      "Launch quick-action modals to add clients, start new contracts, or issue invoices instantly."
     ],
     features: [
       {
-        title: "Unified Client Profiles",
-        desc: "Access active projects, past invoices, signed contracts, and outstanding balances from a single dashboard."
+        title: "Unified Snapshot Grid",
+        desc: "View active projects, upcoming deadlines, outstanding balances, and recent work history side-by-side."
       },
       {
-        title: "Interaction Timelines",
-        desc: "Chronologically track email exchanges, deliverables sent, feedback received, and scheduled check-ins."
+        title: "Dynamic Metrics Counters",
+        desc: "Stay informed on exactly how many tasks are active, invoices are overdue, or contracts are awaiting signature."
       },
       {
-        title: "Secure Private Notes",
-        desc: "Save personal preferences, project guidelines, key constraints, and specific style sheets directly inside the CRM."
+        title: "Activity Stream Ledger",
+        desc: "Review a chronological timeline detailing client views, subcontractor uploads, and milestone updates."
       },
       {
-        title: "Self-Serve Client Portals",
-        desc: "Grant clients clean read-only access to view active milestones, share files, and pay invoices instantly."
+        title: "Quick-Action Shortcuts",
+        desc: "Create new invoices, log manual time entries, or launch new client forms in a single click."
       }
     ],
     useCases: [
       {
-        role: "Independent Web Designer",
-        scenario: "Keeps track of multiple client design guidelines, style directions, and brand assets in dedicated client portals, ensuring that revisions never get lost."
+        role: "Freelance Creative Lead",
+        scenario: "Starts every morning by checking the central dashboard to review team tasks completed overnight, check pending invoice payments, and outline the day's delivery focus."
       },
       {
-        role: "Freelance Copywriter",
-        scenario: "Reviews past messaging logs and client preference notes to maintain a consistent brand tone across campaigns and deliver tailored draft variations."
+        role: "Independent Consultant",
+        scenario: "Uses the dashboard's instant summaries to keep client metrics in check, ensuring no active proposals or signed contracts get lost in the shuffle."
       }
     ],
     testimonial: {
-      quote: "Before using this CRM, my client notes were scattered across notebooks and Google Docs. Now, I have a single point of truth that keeps me looking incredibly professional.",
-      author: "Sarah Jenkins",
-      role: "Brand Identity Designer"
+      quote: "The dashboard is the first page I load when I log in. It tells me exactly where my business stands financially and operationally within five seconds.",
+      author: "Nadia Rahmani",
+      role: "Creative Director"
     },
     benefits: [
-      "99% Reduction in lost client project notes",
-      "Saves an average of 4 hours of admin work every week",
-      "Increases client retention rate through systematic touchpoints",
-      "Supports global currency and custom tax settings per client profile"
+      "Provides complete operational visibility on a single screen",
+      "Eliminates hours of hunting through scattered project sub-menus",
+      "Offers instant visual warnings for overdue invoices or missed deadlines",
+      "Tailors its view dynamic layout based on active workspace permissions"
     ]
   },
   {
-    slug: "project-tracking",
-    title: "Project Tracking",
-    iconName: "Briefcase",
-    shortDesc: "Manage and deliver complex projects on schedule with real-time milestones, interactive gantt-style timelines, and progress indicators.",
-    fullDesc: "Deliver your freelance work with professional confidence. Our project tracking dashboard is engineered to provide end-to-end visibility into every contract. Define precise project scopes, break milestones down into executable items, track deadlines, and share real-time progress indicators with your clients. Prevent scope creep by housing deliverables and active guidelines in one shared portal that automatically keeps stakeholders aligned.",
+    slug: "projects",
+    title: "Projects",
+    iconName: "FolderKanban",
+    shortDesc: "Organize client deliverables with high-fidelity milestone timelines, drag-and-drop workflow boards, and shareable client progress portals.",
+    fullDesc: "Deliver premium results on schedule. The Projects module is engineered to give you and your clients end-to-end transparency. Construct detailed project phases, tie milestones to contract payments, organize internal assets, and share live read-only progress views with client stakeholders. Protect your project margins and defend against scope creep by housing all deliverables, active feedback logs, and task cards in one clean visual board.",
     detailedPoints: [
-      "Deconstruct massive initiatives into structured phases, milestones, and daily checklist items.",
-      "Create client-facing project trackers that demonstrate your value transparently.",
-      "Protect your delivery margin by comparing planned scope against active task logs.",
-      "Centralize feedback loops directly on active milestones to avoid communication delays."
+      "Construct detailed project outlines, milestones, and phases matching your signed scope.",
+      "Grant clients secure read-only portal links to showcase live project delivery streams.",
+      "Organize assets, attachments, visual mockups, and spreadsheets inside specific phases.",
+      "Connect time logs directly to projects to track total engineering or design effort."
     ],
     features: [
       {
-        title: "Interactive Milestones",
-        desc: "Set clear payment-tied milestones so clients know exactly when stages are completed and payments are triggered."
+        title: "Milestone-Tied Payments",
+        desc: "Establish structured milestones that automatically prompt invoicing or update client status sheets when reached."
       },
       {
-        title: "Client-Facing Portals",
-        desc: "Reduce email status inquiries by giving clients a beautiful, clean timeline view of active progress."
+        title: "Client Tracking Portals",
+        desc: "Minimize endless progress updates by sharing clean, secure dashboards showing real-time milestone completions."
       },
       {
-        title: "Centralized Resource Vault",
-        desc: "Upload project deliverables, brand assets, mockups, and spreadsheets directly to specific phases."
+        title: "Scope-Creep Controls",
+        desc: "Contrast actual project tasks against original contract statements to capture out-of-scope requests."
       },
       {
-        title: "Scope Creep Defense",
-        desc: "Log baseline features and contrast them against new client feature requests to manage budget expansions."
+        title: "Phase Asset Archives",
+        desc: "Store and access brand guides, content calendars, source code repos, and deliverable files per phase."
       }
     ],
     useCases: [
       {
         role: "Software Developer",
-        scenario: "Presents code milestones and database schema rollouts to client non-technical teams via a clean, high-fidelity visual roadmap."
+        scenario: "Maps database design, API implementation, and deployment phases onto clear payment-linked milestones for client transparency."
       },
       {
-        role: "Marketing Specialist",
-        scenario: "Coordinates multiple social media launch campaigns, displaying live progress indicators and tracking draft asset review stages."
+        role: "Brand Identity Agency",
+        scenario: "Invites contract designers and content creators to work under unified project scopes, managing creative asset reviews in one place."
       }
     ],
     testimonial: {
-      quote: "Clients constantly compliment me on the project portal. They love seeing real-time progress, and it completely stopped their late-night 'how's it going?' emails.",
-      author: "David Chen",
-      role: "Full-Stack Engineer"
+      quote: "Before, I was constantly answering client emails asking for status. Now, I just share their project portal. They love the transparency, and it keeps them aligned.",
+      author: "Jonathan Cole",
+      role: "Web Application Developer"
     },
     benefits: [
-      "Eliminates up to 90% of status check-in emails from clients",
-      "Boosts on-time project completion rates to over 95%",
-      "Provides transparent proof-of-work to expedite milestone payments",
-      "Adaptable layouts suitable for agile, waterfall, or retainer-based structures"
+      "90% reduction in client check-in emails and communication friction",
+      "Keeps project files and deliverables structured chronologically",
+      "Verifies and displays proof of execution for faster milestone payouts",
+      "Scales beautifully from simple freelance retainers to complex agency phases"
     ]
   },
   {
-    slug: "smart-invoicing",
-    title: "Smart Invoicing",
-    iconName: "FileText",
-    shortDesc: "Generate beautiful, compliant invoices, automate late payment follow-ups, and get paid faster with secure payment gateway integrations.",
-    fullDesc: "Get paid on time, every time. Smart Invoicing combines high-quality PDF invoice generation with payment automations. Hook up your payment processors to accept credit cards, bank transfers, and local payment methods with ease. Avoid uncomfortable conversations by setting up automated reminder campaigns that gently prompt clients about upcoming or overdue payments.",
+    slug: "clients",
+    title: "Clients",
+    iconName: "Users",
+    shortDesc: "A centralized CRM designed specifically for freelancers to manage client profiles, communications, billing histories, and onboarding data.",
+    fullDesc: "Your client relationships are your most valuable asset. The Clients CRM compiles active contact information, interaction timelines, billing profiles, contract files, and personal preferences in one secure vault. Build professional trust from day one with structured CRM onboarding details, transaction ledgers, and secure client-facing portals that make collaborating feel premium and effortless.",
     detailedPoints: [
-      "Create and send professional-grade invoices tailored with your logo and brand colors in seconds.",
-      "Connect seamlessly with popular payment processors to accept global credit cards and direct deposits.",
-      "Set custom tax rates, multi-currency lines, early payment discounts, and automatic late fees.",
-      "Set up recurring retainers that automatically bill clients monthly and notify you upon payment."
+      "Access active contracts, past invoices, outstanding balances, and active timelines from one profile.",
+      "Record comprehensive notes, project style preferences, brand assets, and tax specifications.",
+      "Automatically populate client records through custom dynamic onboarding forms.",
+      "Accept global credit cards and local payment methods with custom currency settings per client."
     ],
     features: [
       {
-        title: "Automated Reminders",
-        desc: "Configure automated emails that follow up on pending bills at custom intervals: 3 days before, on the due date, or weekly after."
+        title: "Client-Centric Timeline",
+        desc: "See a chronological feed of invoices sent, contracts signed, messages exchanged, and project stages completed."
       },
       {
-        title: "Recurring Subscriptions",
-        desc: "Perfect for retainers. Automatically generate and mail monthly or quarterly invoices to recurring clients."
+        title: "Interactive Client Portals",
+        desc: "Give clients a dedicated login to pay outstanding bills, sign new contracts, and check live milestones."
       },
       {
-        title: "One-Click Quick Pay",
-        desc: "Include secure online payment links directly inside your invoice emails for instant credit card settlement."
+        title: "Workspace CRM Sync",
+        desc: "New leads and onboarding briefs feed straight into active CRM profiles, keeping you organized."
       },
       {
-        title: "Clean Tax Reporting",
-        desc: "Export comprehensive spreadsheets compiling standard taxes collected, billings by client, and unpaid invoices."
+        title: "Custom Tax & Currency rules",
+        desc: "Set specific tax profiles, VAT rules, and local currency rules for every individual client account."
       }
     ],
     useCases: [
       {
-        role: "Creative Consultant",
-        scenario: "Bills monthly retainer fees automatically using recurring invoices, leaving billing entirely on autopilot while focusing on project delivery."
+        role: "Independent Copywriter",
+        scenario: "Keeps detailed profiles on their ongoing clients, tracking individual tone guidelines, editing style sheets, and past payment histories."
       },
       {
-        role: "Videographer",
-        scenario: "Generates quick multi-part itemized deposit invoices for high-budget productions right from their mobile device on-set."
+        role: "SEO Consultant",
+        scenario: "Reviews client-submitted SEO access keys and past search performance audits saved inside the CRM before every kickoff call."
       }
     ],
     testimonial: {
-      quote: "The automated payment reminders are a godsend. My average payment time dropped from 22 days down to just 3. No more chasing late invoices manually!",
-      author: "Marcus Aurelius",
-      role: "Motion Graphics Designer"
+      quote: "I used to have client notes in Notion, contracts in my inbox, and billing in spreadsheets. Bringing it all under one CRM profile made my operations 10x simpler.",
+      author: "Sophia Sterling",
+      role: "SEO Consultant"
     },
     benefits: [
-      "Average invoice settlement time reduced to under 72 hours",
-      "Fully automates recurring billing cycles for monthly retainer clients",
-      "Seamless support for over 135 global currencies and regional VAT/tax profiles",
-      "Clean financial exports compatible with standard accounting software"
+      "95% reduction in scattered admin records and manual CRM updates",
+      "Boosts long-term client retention rates through organized touchpoints",
+      "Supports multi-currency billing and compliance profiles per record",
+      "Protects privacy with enterprise-grade data security guidelines"
     ]
   },
   {
-    slug: "contracts-signatures",
-    title: "Contracts & E-Signatures",
-    iconName: "Shield",
-    shortDesc: "Generate legally binding freelance contracts, capture secure digital signatures, and export professional PDFs without leaving your dashboard.",
-    fullDesc: "Protect your intellectual property, clarify project scopes, and secure your income with airtight agreements. Our Contracts module eliminates the need for expensive third-party electronic signature tools. Generate comprehensive freelance agreements, customize legal clauses, collect legally binding electronic signatures, and securely archive completed documents inside your workspace. Work with complete peace of mind knowing that every agreement includes detailed audit trails.",
+    slug: "intake-forms",
+    title: "Intake Forms",
+    iconName: "FileInput",
+    shortDesc: "Build beautiful onboarding questionnaires and intake briefs to gather files, requirements, and scope metrics professionally.",
+    fullDesc: "onboard your clients like a top-tier agency. The Intake Forms builder replaces chaotic email chains with structured questionnaires. Construct drag-and-drop forms to collect project briefs, aesthetic guidelines, target budgets, and brand assets before coding or designing even begins. Once a client completes the form, the system automatically builds their CRM profile and organizes files in their project folder.",
     detailedPoints: [
-      "Draft, customize, and issue comprehensive freelance service agreements in less than 5 minutes.",
-      "Gather secure, legally binding electronic signatures that are fully compliant with global standards.",
-      "Automatically lock project parameters once a contract is signed to prevent modifications.",
-      "Maintain a transparent audit trail detailing exact timestamps and IP addresses of signees."
+      "Design customized onboarding forms matching your branding in less than 5 minutes.",
+      "Add file upload boxes, select checkboxes, budget dropdowns, and target due dates.",
+      "Auto-sync form responses to create client CRM records and launch active project spaces.",
+      "Share forms via custom links or embed them on your pricing pages or email signatures."
     ],
     features: [
       {
-        title: "E-Signature Engine",
-        desc: "Fully secure digital signing tools allow clients to review and sign agreements on any desktop or mobile device."
+        title: "Drag-and-Drop Form Builder",
+        desc: "Easily design fields to collect text guidelines, logo assets, brand colors, or legal agreements."
       },
       {
-        title: "Smart Placeholders",
-        desc: "Insert dynamic placeholders that pull client names, project prices, and start dates directly from your CRM data."
+        title: "Secure File Uploads",
+        desc: "Allow clients to drag and drop heavy zip folders, design files, or spreadsheets directly into the form."
       },
       {
-        title: "Legally Secure Templates",
-        desc: "Access ready-to-use template outlines for popular creative, technical, and consulting freelance roles."
+        title: "Instant CRM Automation",
+        desc: "Responses immediately generate client entries and project templates, removing all manual copy-pasting."
       },
       {
-        title: "Audit Trail Ledger",
-        desc: "Each signed contract includes an official audit page documenting email invites, viewings, signatures, and IP addresses."
+        title: "Branded Share Links",
+        desc: "Share polished, custom-branded intake links that look highly professional and build client confidence."
       }
     ],
     useCases: [
       {
-        role: "Freelance Translator",
-        scenario: "Issues standard non-disclosure agreements (NDAs) and project terms to new clients, securing sign-offs before translating sensitive materials."
+        role: "Identity Designer",
+        scenario: "Uses an intake form to collect target audiences, color preferences, and visual benchmarks from a brand client before sketch phase."
       },
       {
-        role: "SEO Strategist",
-        scenario: "Protects their ongoing search optimization services with structured annual retainer contracts and clear payment schedules."
+        role: "Growth Marketer",
+        scenario: "Onboards new accounts by gathering Google Analytics, pixel tracking tags, and product catalogs automatically via the form."
       }
     ],
     testimonial: {
-      quote: "I used to pay a fortune for digital signature platforms. Having professional contracts and legally binding signatures built right in saves me money and looks highly cohesive.",
-      author: "Elena Petrova",
-      role: "SEO Specialist"
+      quote: "The intake forms saved me three hours per client. I no longer have to chase people for their assets and brand briefs. I just send them a link and get to work.",
+      author: "Amelie Laurent",
+      role: "Visual Identity Designer"
     },
     benefits: [
-      "100% Secure digital signatures fully compliant with modern e-sign directives",
-      "Saves up to $40/month by replacing third-party digital signature tools",
-      "Ensures zero work begins without an active signed contract in place",
-      "Beautiful exportable PDFs with complete audit certificates attached"
+      "Eliminates on average 5 back-and-forth emails per client kickoff",
+      "Organizes brand briefs and logins in one centralized folder",
+      "Increases customer onboarding conversion rates with a sleek interface",
+      "Allows simple customization for technical, creative, or consulting niches"
     ]
   },
   {
-    slug: "time-tracking",
-    title: "Time Tracking",
-    iconName: "Clock",
-    shortDesc: "Log billable hours in real-time, organize timer entries by project milestones, and instantly convert tracked time into accurate invoices.",
-    fullDesc: "Maximize your earning potential and bill for every single minute of hard work. Our integrated Time Tracker bridges the gap between active work and invoicing. Launch timers inside your browser, log manual entries, categorize hours by project, and attach descriptive notes. When billing cycles end, compile those logged hours directly onto professional invoices with a single click, providing clients with immediate itemized transparency.",
+    slug: "collaborators",
+    title: "Collaborators",
+    iconName: "Briefcase",
+    shortDesc: "Bring in subcontractors and specialists, coordinate tasks, log hours, and manage contractor payroll securely.",
+    fullDesc: "Scale your capabilities beyond your personal hours. Collaborators makes it simple to hire subcontractors and invite external specialists into specific client workspaces. Assign roles with customized security access, delegate tasks, log collaborative hours, and manage subcontractor payouts. Keep sensitive financial details private while building a powerful, distributed freelance delivery network.",
     detailedPoints: [
-      "Record every minute of project work with an elegant, responsive timer that stays out of your way.",
-      "Classify entries as billable or non-billable to analyze your real hourly return on investment.",
-      "Add detailed notes to time entries so clients see exactly what value was generated during those hours.",
-      "Automatically group logged hours by project phase and generate itemized invoices in seconds."
+      "Invite niche specialists to specific client projects while protecting other workspace profiles.",
+      "Delegate tasks with clear guidelines, checklists, due dates, and priorities.",
+      "Allow collaborators to log billable time against tasks for simple payroll checks.",
+      "Maintain a unified ledger detailing subcontractor invoices, payouts, and overall margins."
     ],
     features: [
       {
-        title: "Seamless Active Timers",
-        desc: "Start and pause timers in your workspace as you transition between active client tasks."
+        title: "Granular Sub-Access",
+        desc: "Control exactly what clients, invoices, or dashboards external collaborators can view in your workspace."
       },
       {
-        title: "Itemized Time Logs",
-        desc: "Provide comprehensive breakdowns detailing dates, specific tasks, durations, and detailed notes on invoices."
+        title: "Collaborator Time Logs",
+        desc: "Track the precise billable hours logged by subcontractors to ensure payroll accuracy and protect margins."
       },
       {
-        title: "Manual Adjustments",
-        desc: "Easily log offline brainstorms, client phone calls, or on-site visits with intuitive manual entry controls."
+        title: "Sub-Agency Task Routing",
+        desc: "Route and assign complex tasks to specialists while monitoring their execution streams."
       },
       {
-        title: "Hourly Analytics Dashboard",
-        desc: "Review visual charts showing hours logged per day, high-value clients, and productive time trends."
+        title: "Margin Calculation Tools",
+        desc: "Compare client payments against subcontractor costs to verify your real freelance project margins."
       }
     ],
     useCases: [
       {
-        role: "Web Developer",
-        scenario: "Logs precise system engineering hours for active clients, detailing bug fixes, API integrations, and code reviews for complete invoice backing."
+        role: "Freelance Agency Founder",
+        scenario: "Invites a freelance copywriter and SEO specialist to work on a major web design account, coordinating drafts without exposing client financials."
       },
       {
-        role: "Virtual Assistant",
-        scenario: "Tracks multi-task administrative activities for diverse clients, compiling daily timesheet logs for simple weekly invoice creation."
+        role: "Development Lead",
+        scenario: "Coordinates code reviews and system deployments with a distributed engineering contractor, monitoring tasks in real-time."
       }
     ],
     testimonial: {
-      quote: "Converting hours to invoices is literally one click. It used to take me hours at the end of the month to calculate my timesheets. Now, it takes five seconds.",
-      author: "Jordan Miller",
-      role: "Technical Consultant"
+      quote: "Hiring subcontractors used to be a logistical headache. Bringing them into my workspace with custom permissions lets me scale my freelance business like a real agency.",
+      author: "Derrick Vance",
+      role: "SEO & Growth Studio Director"
     },
     benefits: [
-      "Reduces timesheet disputes by providing clear itemized breakdowns",
-      "Increases billed hours by capturing previously forgotten tasks",
-      "Integrates directly with project milestones and client portal logs",
-      "Fully responsive tracker works seamlessly on desktop and mobile browsers"
+      "Allows frictionless onboarding of freelance delivery specialists",
+      "Maintains absolute client and accounting data privacy",
+      "Saves hours of payroll math by unifying contractor timesheets",
+      "Protects project delivery timelines with centralized activity feeds"
     ]
   },
   {
-    slug: "task-management",
-    title: "Task Management",
+    slug: "team",
+    title: "Team",
+    iconName: "UsersRound",
+    shortDesc: "Invite internal staff and partners to coordinate tasks, balance workloads, and track team-wide activity streams.",
+    fullDesc: "Run your freelance business together with your partners. The Team panel is built for growing agencies and co-working groups that need a unified operational hub. Invite full team members, assign global roles, coordinate task boards across multiple active client accounts, and track team-wide activity streams. Ensure workloads are balanced sustainably and no deliverables fall behind.",
+    detailedPoints: [
+      "Invite internal co-founders, assistants, or project managers with shared workspace roles.",
+      "Coordinate high-level task boards across dozens of active client projects.",
+      "Analyze team capacity to distribute tasks sustainably and prevent employee burnout.",
+      "Review collaborative activity streams detailing tasks completed and assets uploaded."
+    ],
+    features: [
+      {
+        title: "Global Team Roles",
+        desc: "Assign Administrator, Project Manager, or Member permissions to manage global settings and data access."
+      },
+      {
+        title: "Cross-Project Task Boards",
+        desc: "View, filter, and prioritize tasks assigned to different team members across all clients."
+      },
+      {
+        title: "Unified Team Activity",
+        desc: "A centralized, searchable ledger detailing all actions taken by team members inside the workspace."
+      },
+      {
+        title: "Capacity Assessment Tools",
+        desc: "Analyze active time tracking logs and task counts to balance workloads across your organization."
+      }
+    ],
+    useCases: [
+      {
+        role: "Boutique Design Studio Owners",
+        scenario: "Co-manage their shared agency workspace, assigning tasks, analyzing monthly revenue curves, and tracking client feedback side-by-side."
+      },
+      {
+        role: "Freelance Copy Group",
+        scenario: "Coordinates draft writing, editing, and publishing stages for key accounts, tracking team task handoffs in one feed."
+      }
+    ],
+    testimonial: {
+      quote: "Our boutique agency runs on this tool. We co-manage our client list, track team tasks, and review our project timelines in one highly collaborative, beautiful space.",
+      author: "Clara & Leo",
+      role: "Design Studio Founders"
+    },
+    benefits: [
+      "Streamlines cross-project workflows and team task coordination",
+      "Unifies client operations and files in one collaborative workspace",
+      "Improves capacity planning to scale your business sustainably",
+      "Eliminates duplicate software costs for team task boards"
+    ]
+  },
+  {
+    slug: "nexus",
+    title: "Nexus",
+    iconName: "Network",
+    shortDesc: "An interactive, visual whiteboard workspace to map out workflows, plan project dependencies, and auto-convert drawings into active task lists.",
+    fullDesc: "Welcome to the future of project planning. Nexus is an advanced, fully interactive visual canvas engineered to bridge the gap between creative brainstorming and task execution. Map out complex workflow diagrams, connect project dependencies, sketch freehand ideas, and link deliverables. With our integrated task converter, select your visual whiteboard shapes and instantly convert them into executable task checklists within your active project dashboards.",
+    detailedPoints: [
+      "Brainstorm and plan complex project architectures on an infinite interactive whiteboard.",
+      "Map out task dependencies, user flows, database structures, and design sitemaps visually.",
+      "Convert your visual canvas shapes and connections into live tasks with a single click.",
+      "Collaborate visually with team members on a premium, smooth vector canvas."
+    ],
+    features: [
+      {
+        title: "Interactive Canvas Whiteboard",
+        desc: "Create vector shapes, draw freehand paths, and write notes on an infinite visual planning canvas."
+      },
+      {
+        title: "Task Conversion Engine",
+        desc: "Instantly convert visual shapes and connections into actionable tasks with assigned priorities and due dates."
+      },
+      {
+        title: "Visual Dependency Mapping",
+        desc: "Draw connection lines between tasks to visually represent workflows and plan delivery pipelines."
+      },
+      {
+        title: "Canvas Minimap & Grid Snapping",
+        desc: "Navigate complex diagrams easily with minimaps and keep layouts perfectly aligned with smart grid snapping."
+      }
+    ],
+    useCases: [
+      {
+        role: "Technical Architect",
+        scenario: "Maps out complex software integration components and data flows on the Nexus whiteboard, instantly converting the diagram into a 20-step project task checklist."
+      },
+      {
+        role: "UX/UI Designer",
+        scenario: "Brainstorms client website sitemaps and user flows visually with a partner, keeping design concepts linked directly to active project milestones."
+      }
+    ],
+    testimonial: {
+      quote: "Nexus is completely revolutionary. I can draw a project workflow diagram and convert the entire board into active, prioritized tasks in one click. It saves me hours of planning.",
+      author: "Evelyn Moreau",
+      role: "Product Strategy Consultant"
+    },
+    benefits: [
+      "Saves up to 80% of project planning and task creation time",
+      "Bridges the gap between creative visual thinking and task execution",
+      "Provides clients with highly impressive, visual project sitemaps",
+      "Supports smooth vector rendering and dark mode canvas styling"
+    ]
+  },
+  {
+    slug: "tasks",
+    title: "Tasks",
     iconName: "CheckSquare",
-    shortDesc: "Organize project deliverables into nested checklists, set priorities, establish due dates, and track task completion.",
-    fullDesc: "Clarity is the secret to timely deliveries. The Task Management engine helps you dissect complex project briefs into manageable daily checklists. Organize tasks by milestone, set priority tiers (Low, Medium, High), add due dates, write detailed task instructions, and monitor progress. If you work with other freelancers, delegate tasks instantly and receive alerts as they move to completion.",
+    shortDesc: "Dissect project briefs into manageable daily checklists, set priorities, establish due dates, and track task completion ratios.",
+    fullDesc: "Clarity is the secret to timely project delivery. The Tasks engine helps you break down massive client briefs into manageable daily checklists. Organize tasks by milestone, set priority tiers (Low, Medium, High), add due dates, write detailed task instructions, and monitor progress. If you work with other team members or subcontractors, delegate tasks instantly and receive real-time alerts as they move to completion.",
     detailedPoints: [
-      "Transform long client briefs into structured, interactive task lists grouped by milestones.",
-      "Set absolute due dates and priority levels to manage your focus and daily workflow.",
-      "Attach custom links, instructions, and asset references directly inside specific task cards.",
-      "Monitor real-time task completion ratios across all active client projects."
+      "Deconstruct complex briefs into structured, interactive task lists grouped by milestones.",
+      "Establish priority tiers and due dates to organize your focus and daily workflows.",
+      "Attach custom links, file references, and guidelines directly inside specific task cards.",
+      "Monitor task completion percentages across all active client projects in real-time."
     ],
     features: [
       {
-        title: "Milestone-Grouped Tasks",
-        desc: "Structure your workflows so that completing tasks systematically drives the overall project milestone percentage."
+        title: "Milestone-Linked Tasks",
+        desc: "Structure workflows so that completing daily checklists systematically drives overall project milestone completion."
       },
       {
-        title: "Visual Priority Tiers",
-        desc: "Clearly tag tasks with custom priorities so you always tackle critical bottlenecks first."
+        title: "Priority Tagging Systems",
+        desc: "Highlight critical path tasks with custom colors and priorities so you always tackle bottlenecks first."
       },
       {
-        title: "Active Collaborator Assigns",
-        desc: "Delegate specific tasks to team members or sub-contractors, complete with custom guidelines."
+        title: "Subcontractor Assignments",
+        desc: "Delegate specific tasks to collaborators or team members, complete with instructions and feedback logs."
       },
       {
-        title: "Real-Time Activity Feeds",
-        desc: "Receive instant notifications as tasks are created, updated, commented on, or completed."
+        title: "Integrated Checklist Cards",
+        desc: "Add sub-tasks and step-by-step checklists to individual tasks to track microscopic progress details."
       }
     ],
     useCases: [
       {
-        role: "Graphic Design Agency Lead",
-        scenario: "Dissects a massive brand overhaul into visual tasks, assigning illustration, layout, and copy phases to specialized team members."
+        role: "Marketing Manager",
+        scenario: "Breaks a campaign launch down into copywriting, asset design, and email scheduling tasks, assigning them to different specialists."
       },
       {
-        role: "E-commerce Specialist",
-        scenario: "Tracks step-by-step store setup checklists, ensuring payment gateways, product feeds, and shipping rates are fully validated before launching."
+        role: "E-commerce Consultant",
+        scenario: "Follows a strict store setup checklist, verifying payment gateways, shipping rules, and product feeds before project handoff."
       }
     ],
     testimonial: {
@@ -346,17 +453,17 @@ export const toolsRegistry: ToolData[] = [
       role: "Digital Project Manager"
     },
     benefits: [
-      "98% Improvement in team task accountability and visibility",
-      "Allows simple task delegation to sub-contractors with custom priorities",
-      "Keeps delivery teams focused on highest-value tasks first",
-      "Seamless integration with visual calendars and active timeline boards"
+      "98% improvement in team task accountability and visibility",
+      "Reduces project delivery delays through clear milestone tracking",
+      "Provides contractors with absolute clarity on active due dates",
+      "Integrates seamlessly with visual calendars and master schedules"
     ]
   },
   {
-    slug: "calendar-scheduling",
-    title: "Calendar & Scheduling",
+    slug: "calendar",
+    title: "Calendar",
     iconName: "CalendarDays",
-    shortDesc: "A centralized master calendar uniting your project deadlines, milestones, tasks, and client appointments in one responsive interface.",
+    shortDesc: "A unified master calendar bringing together your project deadlines, milestones, tasks, and client appointments in one visual interface.",
     fullDesc: "Take complete control of your timeline. The unified Calendar brings together every time-sensitive element of your freelance operations. View project launch dates, contract sign-offs, payment due dates, and scheduled tasks in a clean grid layout. Prevent calendar collisions and double-booking, ensuring you maintain a sustainable workflow that allows you to deliver premium results without burning out.",
     detailedPoints: [
       "Visualize your entire work week or month at a glance, highlighting key deadlines and deliverables.",
@@ -370,8 +477,8 @@ export const toolsRegistry: ToolData[] = [
         desc: "Bring milestones, invoice due dates, task deadlines, and client meetings together in a single view."
       },
       {
-        title: "Dynamic Timeline Balancing",
-        desc: "Easily drag and drop tasks on the calendar to adjust due dates and balance your week's commitments."
+        title: "Dynamic Drag-and-Drop",
+        desc: "Easily adjust task due dates and balance your week's commitments directly on the calendar grid."
       },
       {
         title: "Color-Coded Projects",
@@ -405,159 +512,263 @@ export const toolsRegistry: ToolData[] = [
     ]
   },
   {
-    slug: "team-collaboration",
-    title: "Team Collaboration",
-    iconName: "UserPlus",
-    shortDesc: "Invite subcontractors, designers, or client stakeholders to collaborate on projects, share tasks, and coordinate in real-time.",
-    fullDesc: "Scale your freelance operations beyond your personal hours. Team Collaboration enables you to bring in specialist support when projects grow. Seamlessly invite other freelancers, subcontractors, or specialists into specific client workspaces. Assign roles with customized security access, delegate tasks, log collaborative hours, and coordinate deliveries with ease.",
+    slug: "time-tracking",
+    title: "Time Tracking",
+    iconName: "Clock",
+    shortDesc: "Log billable hours in real-time, organize timer entries by project milestones, and convert tracked time into itemized invoices.",
+    fullDesc: "Maximize your earning potential and bill for every single minute of hard work. Our integrated Time Tracker bridges the gap between active work and invoicing. Launch timers inside your browser, log manual entries, categorize hours by project, and attach descriptive notes. When billing cycles end, compile those logged hours directly onto professional invoices with a single click, providing clients with immediate itemized transparency.",
     detailedPoints: [
-      "Invite key specialists to collaborate on specific projects while maintaining complete security.",
-      "Delegate tasks with clear responsibilities, deadlines, and project context.",
-      "Track team activity logs in real-time to monitor progress across workstreams.",
-      "Manage subcontractor payouts and time logs in one centralized workspace."
+      "Record every minute of project work with an elegant, responsive timer that stays out of your way.",
+      "Classify entries as billable or non-billable to analyze your real hourly return on investment.",
+      "Add detailed notes to time entries so clients see exactly what value was generated during those hours.",
+      "Automatically group logged hours by project phase and generate itemized invoices in seconds."
     ],
     features: [
       {
-        title: "Granular Team Roles",
-        desc: "Configure role-based access to keep sensitive financial details private while sharing task boards."
+        title: "Active Browser Timers",
+        desc: "Start and pause timers instantly in your workspace as you transition between active client tasks."
       },
       {
-        title: "Collaborator Activity Feeds",
-        desc: "View chronologically compiled updates on task completions, file uploads, and team discussions."
+        title: "One-Click Invoicing",
+        desc: "Convert logged hours directly into itemized invoices, pulling task descriptions and hourly rates automatically."
       },
       {
-        title: "Subcontractor Timesheets",
-        desc: "Allow invited specialists to track time directly against tasks for transparent payroll verification."
+        title: "Timesheet Logs",
+        desc: "Review detailed lists of time entries with dates, durations, specific tasks, and descriptive notes."
       },
       {
-        title: "Shared Resource Vaults",
-        desc: "Provide team members with direct access to design guidelines, code repositories, and asset libraries."
+        title: "Billable Hour Analytics",
+        desc: "Analyze visual charts showing your productive hours per day, high-value clients, and project time splits."
       }
     ],
     useCases: [
       {
-        role: "Agency Founder",
-        scenario: "Invites contract designers and content writers to collaborate on a large-scale client project, keeping client communication centralized."
+        role: "Web Designer",
+        scenario: "Tracks precise design revision hours, detailing client change requests to ensure out-of-scope work is billed accurately."
       },
       {
-        role: "Technical Team Lead",
-        scenario: "Coordinates code reviews and system deployments with distributed engineers, tracking task handoffs in real-time."
+        role: "Virtual Assistant",
+        scenario: "Logs daily administrative tasks for multiple clients, generating clean weekly timesheets for instant billing."
       }
     ],
     testimonial: {
-      quote: "Being able to bring subcontractors directly into a project workspace has changed how I scale my business. I can delegate tasks, verify timesheets, and deliver fast.",
-      author: "Amina Yusuf",
-      role: "Studio Director"
+      quote: "Converting hours to invoices is literally one click. It used to take me hours at the end of the month to calculate my timesheets. Now, it takes five seconds.",
+      author: "Jordan Miller",
+      role: "Technical Consultant"
     },
     benefits: [
-      "Reduces administrative friction when scaling freelance teams",
-      "Maintains absolute client data privacy with granular permissions",
-      "Expedites team delivery cycles by keeping tasks and assets unified",
-      "Provides real-time activity tracking to keep everyone aligned"
+      "Reduces timesheet disputes by providing clear itemized breakdowns",
+      "Increases billed hours by capturing previously forgotten tasks",
+      "Integrates directly with project milestones and client portal logs",
+      "Fully responsive tracker works seamlessly on desktop and mobile browsers"
     ]
   },
   {
-    slug: "client-intake-forms",
-    title: "Client Intake Forms",
-    iconName: "FileInput",
-    shortDesc: "Build customized onboarding forms and questionnaires to collect project requirements, files, and briefs professionally.",
-    fullDesc: "Ditch the tedious email onboarding threads. Client Intake Forms help you collect detailed project parameters, design preferences, and brand assets before the project even kicks off. Design beautiful onboarding questionnaires, share secure links, and let new clients submit their briefs directly. Submitted data is automatically populated into your CRM, letting you launch projects instantly.",
+    slug: "contracts",
+    title: "Contracts",
+    iconName: "Shield",
+    shortDesc: "Draft legally binding freelance agreements, collect secure e-signatures, and export professional PDFs in minutes.",
+    fullDesc: "Protect your intellectual property, clarify project scopes, and secure your income with airtight agreements. The Contracts module eliminates the need for expensive third-party electronic signature tools. Generate comprehensive freelance agreements, customize legal clauses, collect legally binding electronic signatures, and securely archive completed documents inside your workspace. Work with complete peace of mind knowing that every agreement includes detailed audit trails.",
     detailedPoints: [
-      "Create professional onboarding forms that match your brand identity in minutes.",
-      "Request project guidelines, design inspirations, assets, and budgets in a single link.",
-      "Automatically generate structured client profiles in your CRM upon form completion.",
-      "Eliminate repetitive discovery calls by gathering critical details upfront."
+      "Draft, customize, and issue comprehensive freelance service agreements in less than 5 minutes.",
+      "Gather secure, legally binding electronic signatures that are fully compliant with global standards.",
+      "Automatically lock project parameters once a contract is signed to prevent modifications.",
+      "Maintain a transparent audit trail detailing exact timestamps and IP addresses of signees."
     ],
     features: [
       {
-        title: "Drag-and-Drop Builders",
-        desc: "Easily add text areas, select dropdowns, checklist options, and file upload fields to your forms."
+        title: "Legally Binding E-Signatures",
+        desc: "Fully secure digital signing tools allow clients to review and sign agreements on any desktop or mobile device."
       },
       {
-        title: "Secure Asset Uploads",
-        desc: "Allow clients to upload high-resolution brand assets, logo files, and creative briefs directly to their profiles."
+        title: "Clause Customization Builder",
+        desc: "Add custom payment terms, liability limits, copyright transfers, and NDA clauses matching your project requirements."
       },
       {
-        title: "CRM Auto-Sync",
-        desc: "Onboarding form responses immediately sync with new client records, keeping details ready for delivery."
+        title: "Dynamic Placeholders",
+        desc: "Insert dynamic placeholders that pull client names, project prices, and start dates directly from your CRM data."
       },
       {
-        title: "Direct Share Links",
-        desc: "Embed intake form links directly on your website, pricing pages, or email signature blocks."
+        title: "Audit Trail Certificates",
+        desc: "Each signed contract includes an official audit page documenting email invites, viewings, signatures, and IP addresses."
       }
     ],
     useCases: [
       {
-        role: "Identity Designer",
-        scenario: "Sends a custom aesthetic questionnaire to new clients, gathering color preferences and design benchmarks before sketching."
+        role: "Independent Web Designer",
+        scenario: "Drafts standard design service contracts, securing intellectual property rights transfer only after full invoice settlement."
+      },
+      {
+        role: "Marketing Agency",
+        scenario: "Onboards consulting clients with standard retainer contracts, setting up ongoing marketing scope boundaries legally."
+      }
+    ],
+    testimonial: {
+      quote: "Having contract templates and legally binding signatures built right in looks incredibly professional and has saved me thousands in legal software subscriptions.",
+      author: "Elena Rostova",
+      role: "Brand Consultant"
+    },
+    benefits: [
+      "100% secure digital signatures compliant with modern e-sign directives",
+      "Ensures zero project work begins without active signed agreements in place",
+      "Saves on average $40/month by replacing third-party signature platforms",
+      "Exports beautiful, print-ready PDF contract documents with audit details"
+    ]
+  },
+  {
+    slug: "invoices",
+    title: "Invoices",
+    iconName: "FileText",
+    shortDesc: "Generate beautiful, compliant invoices, connect global payment gateways, and automate late payment follow-ups.",
+    fullDesc: "Get paid on time, every time. The Invoices system combines high-quality billing generation with powerful payment automations. Connect popular payment processors to accept credit cards, bank transfers, and local payment methods with ease. Avoid uncomfortable conversations by setting up automated reminder campaigns that gently prompt clients about upcoming or overdue payments.",
+    detailedPoints: [
+      "Create and send professional-grade invoices tailored with your logo and brand colors in seconds.",
+      "Connect seamlessly with popular payment processors to accept global credit cards and direct deposits.",
+      "Set custom tax rates, multi-currency lines, early payment discounts, and automatic late fees.",
+      "Access clean financial reports detailing revenue collected, pending balances, and unpaid accounts."
+    ],
+    features: [
+      {
+        title: "One-Click Quick Pay",
+        desc: "Include secure online payment links directly inside your invoice emails for instant credit card settlement."
+      },
+      {
+        title: "Automated Payment Reminders",
+        desc: "Configure automated emails that follow up on pending bills at custom intervals: 3 days before, on the due date, or weekly after."
+      },
+      {
+        title: "Multi-Currency Support",
+        desc: "Bill global clients in their local currency while receiving payouts in your preferred account."
+      },
+      {
+        title: "Itemized Billing Inputs",
+        desc: "Add standard flat fees, hourly timesheet groups, or recurring subscription items onto invoices in seconds."
+      }
+    ],
+    useCases: [
+      {
+        role: "Freelance Photographer",
+        scenario: "Issues itemized deposit and final balance invoices for high-budget productions right from their mobile device on-set."
       },
       {
         role: "SEO Consultant",
-        scenario: "Collects target search keywords, competitor URLs, and analytics access details automatically during onboarding."
+        scenario: "Bills monthly consulting services, attaching time logs and search analytics sheets to verify invoice details."
       }
     ],
     testimonial: {
-      quote: "Onboarding clients used to take a dozen emails back and forth. Now, they fill out my custom intake form, and I have everything I need to start building immediately.",
-      author: "Chloe Dubois",
-      role: "Brand Identity Designer"
+      quote: "My average payment time dropped from 24 days to under 3 days after setting up the automated payment reminders. It's a absolute game-changer.",
+      author: "Marcus Vance",
+      role: "Motion Graphics Designer"
     },
     benefits: [
-      "Saves an average of 3 hours per client during onboarding",
-      "Gathers all essential brand assets and credentials in one step",
-      "Reduces scope ambiguity by capturing initial project briefs securely",
-      "Professional client presentation that builds trust from day one"
+      "Reduces late payments by up to 80% through automated reminders",
+      "Accepts credit cards and direct deposits globally in over 135 currencies",
+      "Maintains tax-ready financial ledger summaries for simple tax filing",
+      "Presents clients with clean, professional, branded invoicing sheets"
     ]
   },
   {
-    slug: "reports-analytics",
-    title: "Reports & Analytics",
-    iconName: "BarChart3",
-    shortDesc: "Get a clear view of your business health with real-time reports tracking revenue, outstanding invoices, and productive hour distributions.",
-    fullDesc: "Run your freelance career like a seasoned business owner. Reports & Analytics gives you instant access to your financial health and team productivity metrics. Review outstanding invoice accounts, track revenue growth trends, evaluate your average hourly return on investment, and audit your most profitable clients. Visual dashboards convert complex business data into simple, actionable insights.",
+    slug: "subscriptions",
+    title: "Subscriptions",
+    iconName: "CreditCard",
+    shortDesc: "Manage monthly retainer billing packages, set up automated recurring plans, and receive automatic payment alerts.",
+    fullDesc: "Put your freelance income on autopilot. Subscriptions is the ultimate tool for managing retainer packages, design-productized billing, or ongoing service plans. Create custom billing tiers, set up automated monthly or annual recurring schedules, collect client credit cards securely, and let the billing system generate invoices and process payouts on autopilot.",
     detailedPoints: [
-      "Monitor your net income, tax-ready expense logs, and unpaid invoices in a unified dashboard.",
-      "Identify your highest-paying clients and analyze your most profitable project structures.",
-      "Track billable vs non-billable hour ratios to optimize your daily focus.",
-      "Export clean financial balance sheets and tax-ready summaries with a single click."
+      "Configure custom monthly, quarterly, or annual recurring retainer billing tiers.",
+      "Collect and save client card profiles securely to process ongoing retainers automatically.",
+      "Auto-generate and email matching invoices to clients upon every subscription renewal.",
+      "Track active subscriber counts, MRR (Monthly Recurring Revenue), and plan distributions."
     ],
     features: [
       {
-        title: "Revenue Tracking Bars",
-        desc: "Monitor paid, pending, and overdue invoices month-by-month to optimize cash flow management."
+        title: "Automated Recurring Billing",
+        desc: "Set the package price, choose the billing interval, and let the system bill client cards automatically."
       },
       {
-        title: "Client Value Charts",
-        desc: "Analyze revenue by client to pinpoint your best partnerships and guide marketing goals."
+        title: "Sleek Retainer Packages",
+        desc: "Offer productized service packages (e.g. 10 design hours per month) that clients can subscribe to directly."
       },
       {
-        title: "Hourly Yield Metrics",
-        desc: "Review your actual hourly earnings by dividing total milestone payouts by hours tracked."
+        title: "Secure Card Vaulting",
+        desc: "Save and update client payment card credentials safely via integrated payment compliance systems."
       },
       {
-        title: "Tax-Ready Reporting",
-        desc: "Export itemized revenue summaries and tax calculations to hand to your accountant in seconds."
+        title: "MRR Growth Charts",
+        desc: "Visualize your predictable recurring income stream over time to pace future business expansions."
       }
     ],
     useCases: [
       {
-        role: "Studio Owner",
-        scenario: "Reviews quarterly revenue reports to assess growth, set future pricing tiers, and allocate investment budgets."
+        role: "Retainer-based Marketer",
+        scenario: "Bills monthly content creation services automatically via a recurring subscription, maintaining steady cash flow on autopilot."
       },
       {
-        role: "Freelance Marketer",
-        scenario: "Compares time invested against retainer revenue to optimize monthly service scopes and increase margins."
+        role: "Productized Designer",
+        scenario: "Offers unlimited graphic design plans (e.g. $1,999/month), inviting clients to subscribe directly via their website."
       }
     ],
     testimonial: {
-      quote: "The analytics tools showed me that one client took up 50% of my time but only generated 15% of my revenue. That single insight completely changed how I price my services.",
-      author: "Tyler Vance",
-      role: "Content Strategist"
+      quote: "Moving my clients onto recurring monthly subscriptions gave me predictable monthly revenue for the first time in my freelance career. It completely changed my business.",
+      author: "Julien Mercer",
+      role: "Productized Web Designer"
     },
     benefits: [
-      "Provides absolute clarity on freelance business health and growth",
-      "Highlights your most profitable services and clients to maximize income",
-      "Saves days of manual spreadsheet math at the end of the fiscal year",
-      "Clean visual graphics suitable for business performance reviews"
+      "Secures predictable, recurring monthly income streams for freelancers",
+      "Removes the administrative hassle of manual invoicing every month",
+      "Secures client credit cards securely under strict payment compliance",
+      "Presents agency retainers in clear, premium package subscription plans"
+    ]
+  },
+  {
+    slug: "reports",
+    title: "Reports",
+    iconName: "BarChart3",
+    shortDesc: "Access deep financial and operational analytics, track net revenues, audit client profits, and export tax summaries.",
+    fullDesc: "Run your freelance career with complete financial clarity. The Reports module provides real-time visibility into your operational health and margins. Analyze monthly net income, trace accounts receivable, compare billable vs non-billable hours, identify your most profitable clients, and export comprehensive tax-ready spreadsheets. Convert complex business data into clean, visual graphs that guide your future pricing and growth decisions.",
+    detailedPoints: [
+      "Monitor paid, pending, and overdue revenues month-by-month in a unified ledger.",
+      "Measure your actual hourly yield by dividing project payouts by hours tracked.",
+      "Trace client profitability metrics to identify your best partnerships and guide business goals.",
+      "Export clean financial statements and tax-ready summaries to hand to your accountant in seconds."
+    ],
+    features: [
+      {
+        title: "Revenue Ledger Bars",
+        desc: "Track total revenue received, pending amounts, and outstanding invoices to manage business cash flow."
+      },
+      {
+        title: "Hourly Yield Calculators",
+        desc: "Understand your real earning rate per hour across active contracts to optimize project pricing."
+      },
+      {
+        title: "Client Profitability Charts",
+        desc: "Identify exactly which clients yield the highest returns compared to time and resource investments."
+      },
+      {
+        title: "One-Click Tax Exports",
+        desc: "Compile and download spreadsheets detailing invoices, taxes collected, and billings for simple tax compliance."
+      }
+    ],
+    useCases: [
+      {
+        role: "Studio Director",
+        scenario: "Analyzes quarterly revenue growth to adjust pricing structures, assess hiring needs, and plan studio goals."
+      },
+      {
+        role: "Independent Consultant",
+        scenario: "Compares time tracker logs against flat-rate milestone payments to optimize future consulting packages and increase margins."
+      }
+    ],
+    testimonial: {
+      quote: "The hourly yield report showed me that one of my flat-rate clients paid less than minimum wage when time was accounted for. That insight saved me from massive losses.",
+      author: "Vance Caldwell",
+      role: "Growth Strategy Advisor"
+    },
+    benefits: [
+      "Provides complete operational and financial visibility in one place",
+      "Saves days of manual financial spreadsheet math at the end of the year",
+      "Identifies your most profitable services and clients to maximize income",
+      "Generates clear, print-ready reports perfect for business performance audits"
     ]
   }
 ];

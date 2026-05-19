@@ -166,11 +166,11 @@ export function Footer({ simple = false }: FooterProps) {
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Tools</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="/tools/client-management" className="hover:text-brand-primary transition-colors">Client CRM</Link></li>
-                            <li><Link href="/tools/project-tracking" className="hover:text-brand-primary transition-colors">Project Tracking</Link></li>
-                            <li><Link href="/tools/smart-invoicing" className="hover:text-brand-primary transition-colors">Smart Invoicing</Link></li>
-                            <li><Link href="/tools/contracts-signatures" className="hover:text-brand-primary transition-colors">Contracts & E-Signs</Link></li>
-                            <li><Link href="/tools/time-tracking" className="hover:text-brand-primary transition-colors">Time Tracking</Link></li>
+                            <li><Link href="/tools/nexus" className="hover:text-brand-primary transition-colors">Nexus Whiteboard</Link></li>
+                            <li><Link href="/tools/clients" className="hover:text-brand-primary transition-colors">Client CRM</Link></li>
+                            <li><Link href="/tools/projects" className="hover:text-brand-primary transition-colors">Project Tracking</Link></li>
+                            <li><Link href="/tools/invoices" className="hover:text-brand-primary transition-colors">Smart Invoicing</Link></li>
+                            <li><Link href="/tools/contracts" className="hover:text-brand-primary transition-colors">Contracts & E-Signs</Link></li>
                         </ul>
                     </div>
                     <div>
