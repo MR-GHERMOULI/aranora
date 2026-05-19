@@ -52,6 +52,12 @@ export default async function PublicNavbar() {
           </div>
           <div className="hidden md:flex items-center gap-8">
             <Link
+              href="/tools"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+            >
+              Tools
+            </Link>
+            <Link
               href="/#features"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
             >

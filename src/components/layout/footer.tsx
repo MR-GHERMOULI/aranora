@@ -123,8 +123,8 @@ export function Footer({ simple = false }: FooterProps) {
     return (
         <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border bg-muted/30 mt-12">
             <div className="max-w-7xl mx-auto">
-                <div className="grid md:grid-cols-4 gap-8 mb-8">
-                    <div>
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+                    <div className="col-span-2 lg:col-span-1">
                         <Link href="/">
                             <Logo />
                         </Link>
@@ -138,7 +138,7 @@ export function Footer({ simple = false }: FooterProps) {
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="h-8 w-8 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-brand-primary hover:border-brand-primary transition-all duration-300"
-                                >
+                                  >
                                     <Twitter className="h-4 w-4" />
                                 </a>
                             )}
@@ -157,9 +157,20 @@ export function Footer({ simple = false }: FooterProps) {
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Product</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li><Link href="/tools" className="hover:text-brand-primary transition-colors">Tools Directory</Link></li>
                             <li><Link href="/#features" className="hover:text-brand-primary transition-colors">Features</Link></li>
                             <li><Link href="/pricing" className="hover:text-brand-primary transition-colors">Pricing</Link></li>
                             <li><Link href="/blog" className="hover:text-brand-primary transition-colors">Blog</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-foreground mb-4">Tools</h4>
+                        <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li><Link href="/tools/client-management" className="hover:text-brand-primary transition-colors">Client CRM</Link></li>
+                            <li><Link href="/tools/project-tracking" className="hover:text-brand-primary transition-colors">Project Tracking</Link></li>
+                            <li><Link href="/tools/smart-invoicing" className="hover:text-brand-primary transition-colors">Smart Invoicing</Link></li>
+                            <li><Link href="/tools/contracts-signatures" className="hover:text-brand-primary transition-colors">Contracts & E-Signs</Link></li>
+                            <li><Link href="/tools/time-tracking" className="hover:text-brand-primary transition-colors">Time Tracking</Link></li>
                         </ul>
                     </div>
                     <div>
