@@ -77,7 +77,13 @@ export function Footer({ simple = false }: FooterProps) {
         <div className="flex items-center gap-2 mb-4 transition-transform hover:scale-105 active:scale-95 origin-left">
             <div className="h-8 w-8 rounded-lg overflow-hidden flex items-center justify-center">
                 {logoUrl ? (
-                    <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                    <img 
+                        src={logoUrl} 
+                        alt="Logo" 
+                        className="h-full w-full object-contain" 
+                        width={32}
+                        height={32}
+                    />
                 ) : (
                     <div className="h-full w-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
                         <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -156,7 +162,7 @@ export function Footer({ simple = false }: FooterProps) {
                     </div>
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Product</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
+                        <ul className="space-y-3 sm:space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/tools" className="hover:text-brand-primary transition-colors">Tools Directory</Link></li>
                             <li><Link href="/#features" className="hover:text-brand-primary transition-colors">Features</Link></li>
                             <li><Link href="/pricing" className="hover:text-brand-primary transition-colors">Pricing</Link></li>
@@ -165,7 +171,7 @@ export function Footer({ simple = false }: FooterProps) {
                     </div>
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Tools</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
+                        <ul className="space-y-3 sm:space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/tools/nexus" className="hover:text-brand-primary transition-colors">Nexus Whiteboard</Link></li>
                             <li><Link href="/tools/clients" className="hover:text-brand-primary transition-colors">Client CRM</Link></li>
                             <li><Link href="/tools/projects" className="hover:text-brand-primary transition-colors">Project Tracking</Link></li>
@@ -175,7 +181,7 @@ export function Footer({ simple = false }: FooterProps) {
                     </div>
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Company</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
+                        <ul className="space-y-3 sm:space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/about" className="hover:text-brand-primary transition-colors">About</Link></li>
                             <li><Link href="/contact" className="hover:text-brand-primary transition-colors">Contact</Link></li>
                             <li><Link href="/become-affiliate" className="hover:text-brand-primary transition-colors text-teal-600 dark:text-teal-400 font-medium">Affiliates</Link></li>
@@ -185,7 +191,7 @@ export function Footer({ simple = false }: FooterProps) {
                     </div>
                     <div>
                         <h4 className="font-semibold text-foreground mb-4">Legal</h4>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
+                        <ul className="space-y-3 sm:space-y-2 text-sm text-muted-foreground">
                             <li><Link href="/privacy" className="hover:text-brand-primary transition-colors">Privacy Policy</Link></li>
                             <li><Link href="/terms" className="hover:text-brand-primary transition-colors">Terms of Service</Link></li>
                             <li><Link href="/refund" className="hover:text-brand-primary transition-colors">Refund Policy</Link></li>

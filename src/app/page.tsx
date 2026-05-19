@@ -64,7 +64,7 @@ interface HomepageContent {
 const defaultContent: HomepageContent = {
   hero_title: "Your Freelance Business, Professionally Managed",
   hero_subtitle:
-    "The all-in-one platform to manage clients, projects, invoices, contracts, time tracking, and team collaboration. Built by freelancers, for freelancers.",
+    "The all-in-one freelancer management platform to manage clients, projects, invoices, contracts, time tracking, and team collaboration. Built by freelancers, for freelancers.",
   hero_cta_text: "Start Free — No Card Required",
   hero_badge_text: "Built for Freelancers, by Freelancers",
   hero_microcopy: "First month free • No credit card required • Cancel anytime",
@@ -415,7 +415,10 @@ export default async function LandingPage() {
         </div>
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center max-w-4xl mx-auto animate-slide-up">
-
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs sm:text-sm font-semibold mb-6 tracking-wide animate-pulse-glow">
+              <Sparkles className="h-4 w-4 text-brand-secondary" />
+              The Professional Freelancer Management Platform
+            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-foreground leading-[1.1] mb-6 tracking-tight">
               {content.hero_title.includes("Professionally") ? (
                 <>
@@ -524,7 +527,7 @@ export default async function LandingPage() {
             <p className="text-center text-xs text-muted-foreground mb-5 uppercase tracking-wider font-semibold">
               Ideal for freelancers working on the world&apos;s top platforms
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 opacity-50 hover:opacity-70 transition-opacity">
+            <div className="flex flex-wrap justify-center items-center gap-x-6 sm:gap-x-10 gap-y-4 opacity-50 hover:opacity-70 transition-opacity">
               {platforms.map((platform) => (
                 <span
                   key={platform}
@@ -629,7 +632,7 @@ export default async function LandingPage() {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12">
             {/* Monthly Card */}
-            <ScaleIn delay={0.1} className="relative rounded-2xl border border-border bg-card p-8 card-brand-hover group">
+            <ScaleIn delay={0.1} className="relative rounded-2xl border border-border bg-card p-6 sm:p-8 card-brand-hover group">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 rounded-xl bg-brand-primary/10">
                   <Star className="h-6 w-6 text-brand-primary" />
@@ -659,7 +662,7 @@ export default async function LandingPage() {
             </ScaleIn>
 
             {/* Annual Card */}
-            <ScaleIn delay={0.2} className="relative rounded-2xl border-2 border-brand-primary/50 bg-card p-8 shadow-xl shadow-brand-primary/10">
+            <ScaleIn delay={0.2} className="relative rounded-2xl border-2 border-brand-primary/50 bg-card p-6 sm:p-8 shadow-xl shadow-brand-primary/10">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                 <span className="inline-flex items-center gap-1 text-xs font-bold bg-gradient-to-r from-brand-primary to-brand-primary-light text-white px-4 py-1.5 rounded-full shadow-lg">
                   <Zap className="h-3 w-3" />
@@ -767,6 +770,8 @@ export default async function LandingPage() {
                       src={testimonial.avatarUrl}
                       alt={testimonial.name}
                       className="h-10 w-10 rounded-full object-cover shadow-md"
+                      width={40}
+                      height={40}
                     />
                   ) : (
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center text-white font-semibold text-sm shadow-md">
@@ -817,7 +822,7 @@ export default async function LandingPage() {
 
           {/* Commission Cards */}
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-16">
-            <div className="relative group rounded-2xl border border-border bg-card p-8 card-brand-hover">
+            <div className="relative group rounded-2xl border border-border bg-card p-6 sm:p-8 card-brand-hover">
               <div className="absolute top-4 right-4">
                 <span className="text-xs bg-brand-primary/10 text-brand-primary border border-brand-primary/20 px-2.5 py-1 rounded-full font-medium">
                   Monthly
@@ -839,7 +844,7 @@ export default async function LandingPage() {
                 Up to $68.40 per referral
               </div>
             </div>
-            <div className="relative group rounded-2xl border border-border bg-card p-8 card-brand-hover">
+            <div className="relative group rounded-2xl border border-border bg-card p-6 sm:p-8 card-brand-hover">
               <div className="absolute top-4 right-4">
                 <span className="text-xs bg-brand-secondary/10 text-brand-secondary-dark dark:text-brand-secondary border border-brand-secondary/20 px-2.5 py-1 rounded-full font-medium">
                   Annual
@@ -1005,11 +1010,11 @@ export default async function LandingPage() {
             {[
               {
                 q: `What is ${siteName}?`,
-                a: `${siteName} is a comprehensive, professional management platform designed specifically for freelancers, consultants, and independent agencies to unify their clients, projects, contracts, invoices, and time tracking in one elegant workspace.`
+                a: `${siteName} is the ultimate freelancer management platform. It unites your clients, projects, contracts, invoices, and time tracking in one elegant workspace built to help you run a successful independent business.`
               },
               {
                 q: "Is my data secure?",
-                a: "Absolutely. We employ enterprise-grade security including row-level database policies (RLS), encrypted transaction channels, and secure credential handling so your freelance business records remain fully safe and secure."
+                a: "Yes, your data is completely secure. We use advanced database policies, encrypted payment channels, and industry-standard protection to ensure your business files and client records are safe."
               },
               {
                 q: "How does the 30-day free trial work?",
@@ -1030,7 +1035,7 @@ export default async function LandingPage() {
             ].map((faq, idx) => (
               <details
                 key={idx}
-                className="group border border-border bg-card rounded-2xl p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300 open:shadow-lg open:shadow-brand-primary/5 hover:border-brand-primary/30"
+                className="group border border-border bg-card rounded-2xl p-5 sm:p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-300 open:shadow-lg open:shadow-brand-primary/5 hover:border-brand-primary/30"
               >
                 <summary className="flex items-center justify-between cursor-pointer focus:outline-none">
                   <h3 className="text-base sm:text-lg font-bold text-foreground pr-4 select-none">
@@ -1070,7 +1075,7 @@ export default async function LandingPage() {
                   "name": `What is ${siteName}?`,
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": `${siteName} is a comprehensive, professional management platform designed specifically for freelancers, consultants, and independent agencies to unify their clients, projects, contracts, invoices, and time tracking in one elegant workspace.`
+                    "text": `${siteName} is the ultimate freelancer management platform. It unites your clients, projects, contracts, invoices, and time tracking in one elegant workspace built to help you run a successful independent business.`
                   }
                 },
                 {
@@ -1078,7 +1083,7 @@ export default async function LandingPage() {
                   "name": "Is my data secure?",
                   "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Absolutely. We employ enterprise-grade security including row-level database policies (RLS), encrypted transaction channels, and secure credential handling so your freelance business records remain fully safe and secure."
+                    "text": "Yes, your data is completely secure. We use advanced database policies, encrypted payment channels, and industry-standard protection to ensure your business files and client records are safe."
                   }
                 },
                 {

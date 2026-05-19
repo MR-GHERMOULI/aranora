@@ -31,7 +31,13 @@ export default async function PublicNavbar() {
             <Link href="/" className="flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
               <div className="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center">
                 {logoUrl ? (
-                  <img src={logoUrl} alt={`${siteName} - Freelancer Management Platform`} className="h-full w-full object-contain" />
+                  <img 
+                    src={logoUrl} 
+                    alt={`${siteName} - Freelancer Management Platform`} 
+                    className="h-full w-full object-contain" 
+                    width={36}
+                    height={36}
+                  />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-brand-primary to-brand-primary-light flex items-center justify-center shadow-lg shadow-brand-primary/20">
                     <svg

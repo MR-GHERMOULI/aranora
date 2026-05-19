@@ -47,7 +47,7 @@ export default function MobileMenu({ siteName, navCtaText }: MobileMenuProps) {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-label="Toggle main menu"
-        className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary"
+        className="p-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary"
       >
         {isOpen ? <X className="h-6 w-6 animate-in fade-in zoom-in-50 duration-200" /> : <Menu className="h-6 w-6 animate-in fade-in duration-200" />}
       </button>

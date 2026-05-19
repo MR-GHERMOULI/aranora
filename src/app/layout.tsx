@@ -101,11 +101,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <DynamicBranding />
-        <GoogleHeadIntegrations />
-        <LemonSqueezyAffiliate />
       </head>
 
       <body className="antialiased font-sans" suppressHydrationWarning>
+        <GoogleHeadIntegrations />
+        <LemonSqueezyAffiliate />
         <GoogleBodyIntegrations />
         <SupabaseProvider>
           <ThemeProvider
