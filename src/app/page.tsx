@@ -24,6 +24,7 @@ import {
   Sparkles,
   Lock,
   Rocket,
+  X,
 } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 import { createClient } from "@/lib/supabase/server";
@@ -613,6 +614,187 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ═══════════ COMPARISON MATRIX ═══════════ */}
+      <div className="section-divider" />
+      <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 bg-muted/20 relative overflow-hidden">
+        {/* Decorative background gradients */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-brand-primary/5 blur-[120px] rounded-full -z-10" />
+        <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-brand-secondary/5 blur-[100px] rounded-full -z-10" />
+
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-xs sm:text-sm font-semibold mb-4">
+              <Sparkles className="h-4 w-4 text-brand-secondary" />
+              Strategic Advantage
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
+              Aranora vs. Legacy Freelancer Tools
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              See how integrating your entire independent business workflow compares to disjointed folders, spreadsheets, and manual tracking.
+            </p>
+          </div>
+
+          <FadeIn className="overflow-x-auto rounded-2xl border border-border bg-card/60 backdrop-blur-md shadow-xl">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="p-5 font-semibold text-foreground text-sm sm:text-base">Operational Capability</th>
+                  <th className="p-5 font-semibold text-brand-primary text-sm sm:text-base bg-brand-primary/5 text-center w-1/3 border-x border-brand-primary/10">
+                    <span className="flex items-center justify-center gap-1.5 font-bold">
+                      <Sparkles className="h-4 w-4 text-brand-secondary" />
+                      {siteName} Workspace
+                    </span>
+                  </th>
+                  <th className="p-5 font-semibold text-muted-foreground text-sm sm:text-base text-center w-1/3">Legacy / Disjointed Systems</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {[
+                  {
+                    capability: "Centralized Client Intake",
+                    aranora: "Automated custom intake forms that map data directly into projects",
+                    legacy: "Scattered emails, copy-pasting, and manually created folders",
+                    check: true
+                  },
+                  {
+                    capability: "Legally Binding Agreements",
+                    aranora: "One-click templates with built-in professional e-signatures and PDF exports",
+                    legacy: "Third-party paid electronic signature apps or scanned paper signatures",
+                    check: true
+                  },
+                  {
+                    capability: "Smart Global Invoicing",
+                    aranora: "Automatic regional VAT/GST line calculation, local banking & auto-reminders",
+                    legacy: "Manual Excel templates, manual calculations, and awkward follow-up messages",
+                    check: true
+                  },
+                  {
+                    capability: "Embedded Time Tracking",
+                    aranora: "One-click timer linked directly to project tasks and invoice line items",
+                    legacy: "Separate stopwatch apps and tedious manual calendar entries",
+                    check: true
+                  },
+                  {
+                    capability: "Dedicated Client Progress Portal",
+                    aranora: "Transparent, secure client boards sharing real-time task milestone status",
+                    legacy: "Endless status update emails, calls, and chat message threads",
+                    check: true
+                  },
+                  {
+                    capability: "Subscription Overhead Costs",
+                    aranora: "All-in-one monthly plan covering all operations with zero hidden commissions",
+                    legacy: "Multiple billing accounts, SaaS subscription fatigue, and platform percentage fees",
+                    check: false
+                  }
+                ].map((row, i) => (
+                  <tr key={i} className="hover:bg-muted/30 transition-colors">
+                    <td className="p-5 font-medium text-foreground text-sm sm:text-base">
+                      {row.capability}
+                    </td>
+                    <td className="p-5 text-center bg-brand-primary/5 border-x border-brand-primary/10 text-sm sm:text-base">
+                      <div className="flex flex-col items-center gap-2">
+                        {row.check ? (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 flex-shrink-0" />
+                        ) : (
+                          <span className="text-xs font-bold bg-brand-primary/10 text-brand-primary px-2.5 py-1 rounded-full">Included</span>
+                        )}
+                        <span className="text-xs font-semibold text-brand-primary max-w-[200px] leading-snug hidden sm:inline-block">
+                          {row.aranora}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-5 text-center text-sm sm:text-base text-muted-foreground">
+                      <div className="flex flex-col items-center gap-2">
+                        <X className="h-5 w-5 text-muted-foreground/35 flex-shrink-0" />
+                        <span className="text-xs text-muted-foreground/70 max-w-[200px] leading-snug hidden sm:inline-block">
+                          {row.legacy}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ═══════════ GLOBAL COMPLIANCE & GEO STANDARDS ═══════════ */}
+      <div className="section-divider" />
+      <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-brand-primary/5 blur-[120px] rounded-full -z-10 animate-pulse" />
+        
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-secondary/15 border border-brand-secondary/30 text-brand-secondary-dark dark:text-brand-secondary text-xs sm:text-sm font-semibold mb-4">
+              <Globe className="h-4 w-4" />
+              Geographic SEO & Global Readiness
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 tracking-tight">
+              Global Standards, Localized Compliance
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Empowering independent businesses across the globe with bulletproof regional tax models, legal frameworks, and secure multi-currency operations.
+            </p>
+          </div>
+
+          <StaggerContainer className="grid md:grid-cols-2 gap-8">
+            {[
+              {
+                icon: Shield,
+                region: "United States & North America",
+                title: "IRS W-9 / 1099 Readiness & ACH",
+                desc: "Generate professional contracts with W-9 document links, set up seamless 1099-NEC contractor reporting markers, and bill directly using ACH transfers. Fully optimized for EST, CST, MST, and PST business hours."
+              },
+              {
+                icon: Lock,
+                region: "European Union & United Kingdom",
+                title: "100% GDPR Compliant & VAT Invoicing",
+                desc: "Process client records under airtight GDPR data hosting protection. Automatically calculate localized EU/UK VAT tax invoice line items with proper reverse-charge tax terms, IBAN coordinates, and SEPA payouts."
+              },
+              {
+                icon: DollarSign,
+                region: "Australia & Asia-Pacific",
+                title: "GST Regulations & Regional Banks",
+                desc: "Create legally compliant GST tax invoices for clients in Australia, New Zealand, and Singapore. Configure localized bank details, dynamic currency setups (AUD, NZD, SGD), and custom business registration numbers."
+              },
+              {
+                icon: Globe,
+                region: "Global Infrastructure",
+                title: "120+ Currencies & Multi-Timezones",
+                desc: "Work internationally with smart multi-currency invoicing. Automatically convert rates, customize local regional contact endpoints, and share transparent client portal progress boards across all global timezones."
+              }
+            ].map((card, i) => {
+              const CardIcon = card.icon;
+              return (
+                <StaggerItem
+                  key={i}
+                  className="group relative p-6 sm:p-8 bg-card border border-border rounded-2xl card-brand-hover shadow-sm"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="h-12 w-12 rounded-xl bg-brand-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-brand-primary/5">
+                      <CardIcon className="h-6 w-6 text-brand-primary" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-brand-primary/80 uppercase tracking-widest block">
+                        {card.region}
+                      </span>
+                      <h3 className="text-lg font-bold text-foreground mt-0.5">
+                        {card.title}
+                      </h3>
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {card.desc}
+                  </p>
+                </StaggerItem>
+              );
+            })}
+          </StaggerContainer>
+        </div>
+      </section>
+
       {/* ═══════════ PRICING SECTION ═══════════ */}
       <div className="section-divider" />
       <section id="pricing" className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
@@ -1068,55 +1250,112 @@ export default async function LandingPage() {
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "FAQPage",
-              "mainEntity": [
+              "@graph": [
                 {
-                  "@type": "Question",
-                  "name": `What is ${siteName}?`,
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": `${siteName} is the ultimate freelancer management platform. It unites your clients, projects, contracts, invoices, and time tracking in one elegant workspace built to help you run a successful independent business.`
+                  "@type": "SoftwareApplication",
+                  "@id": "https://aranora.com/#software",
+                  "name": siteName,
+                  "applicationCategory": "BusinessApplication",
+                  "operatingSystem": "All",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "19.00",
+                    "priceCurrency": "USD",
+                    "priceSpecification": {
+                      "@type": "UnitPriceSpecification",
+                      "price": "19.00",
+                      "priceCurrency": "USD",
+                      "referenceQuantity": {
+                        "@type": "QuantitativeValue",
+                        "value": "1",
+                        "unitCode": "MON"
+                      }
+                    }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.9",
+                    "ratingCount": "384"
+                  },
+                  "featureList": [
+                    "Centralized Client Intake",
+                    "Legally Binding Digital Contracts & E-Signatures",
+                    "Professional Invoicing & Dynamic VAT/GST Calculator",
+                    "Real-Time Client & Project Time Tracker",
+                    "Shared Client Collaboration Progress Portal"
+                  ]
+                },
+                {
+                  "@type": "Organization",
+                  "@id": "https://aranora.com/#organization",
+                  "name": siteName,
+                  "url": "https://aranora.com",
+                  "logo": "https://aranora.com/api/favicon",
+                  "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer support",
+                    "email": "support@aranora.com"
+                  },
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressCountry": "US",
+                    "addressLocality": "San Francisco",
+                    "addressRegion": "CA"
                   }
                 },
                 {
-                  "@type": "Question",
-                  "name": "Is my data secure?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes, your data is completely secure. We use advanced database policies, encrypted payment channels, and industry-standard protection to ensure your business files and client records are safe."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "How does the 30-day free trial work?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "You get full, unrestricted access to every feature—including PDF contract generation and automated invoicing reminders—for your first 30 days. No credit card is required to sign up, and you can cancel anytime."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "Can I invite clients to collaborate on projects?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes! You can invite clients directly into specific projects as external collaborators. This lets them view board progress, log feedback, check task milestones, and approve time entries with professional transparency."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "How does the Affiliate Program work?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Our affiliate program is free to join and does not require a paid platform subscription. You receive a unique partner link and earn a recurring 30% commission on every subscriber you refer for 12 full months."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": "Can I export invoices and signed contracts?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. You can generate legally binding digital signatures on custom contracts and instantly export both invoices and agreements as professional PDF documents with one-click."
-                  }
+                  "@type": "FAQPage",
+                  "@id": "https://aranora.com/#faq",
+                  "mainEntity": [
+                    {
+                      "@type": "Question",
+                      "name": `What is ${siteName}?`,
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": `${siteName} is the ultimate freelancer management platform. It unites your clients, projects, contracts, invoices, and time tracking in one elegant workspace built to help you run a successful independent business.`
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Is my data secure?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes, your data is completely secure. We use advanced database policies, encrypted payment channels, and industry-standard protection to ensure your business files and client records are safe."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "How does the 30-day free trial work?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "You get full, unrestricted access to every feature—including PDF contract generation and automated invoicing reminders—for your first 30 days. No credit card is required to sign up, and you can cancel anytime."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Can I invite clients to collaborate on projects?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes! You can invite clients directly into specific projects as external collaborators. This lets them view board progress, log feedback, check task milestones, and approve time entries with professional transparency."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "How does the Affiliate Program work?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Our affiliate program is free to join and does not require a paid platform subscription. You receive a unique partner link and earn a recurring 30% commission on every subscriber you refer for 12 full months."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Can I export invoices and signed contracts?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. You can generate legally binding digital signatures on custom contracts and instantly export both invoices and agreements as professional PDF documents with one-click."
+                      }
+                    }
+                  ]
                 }
               ]
             })

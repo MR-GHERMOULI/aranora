@@ -44,7 +44,14 @@ export async function generateMetadata(): Promise<Metadata> {
       "smart invoicing",
       "digital contracts",
       "e-signatures",
-      "freelance dashboard"
+      "freelance dashboard",
+      "global freelance platform",
+      "GDPR compliant freelancer platform",
+      "1099 compliant freelance management",
+      "multi-currency invoicing for freelancers",
+      "UK freelancer VAT invoicing",
+      "US freelance contract creator",
+      "GST compliant invoicing software"
     ],
     metadataBase: new URL(origin),
     alternates: {

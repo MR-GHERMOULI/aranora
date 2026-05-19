@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, Target, Heart, Zap } from "lucide-react";
+import { ArrowLeft, Users, Target, Heart, Zap, Globe, ShieldCheck } from "lucide-react";
 import { Footer } from "@/components/layout/footer";
 import PublicNavbar from "@/components/layout/public-navbar";
 import { createClient } from "@/lib/supabase/server";
@@ -92,6 +92,40 @@ export default async function AboutPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </section>
+
+                {/* Global Infrastructure & Compliance */}
+                <section className="mb-16">
+                    <h2 className="text-2xl font-bold text-foreground mb-6">Global Infrastructure & Localized Trust</h2>
+                    <div className="bg-card border border-border rounded-xl p-8 relative overflow-hidden">
+                        {/* Soft subtle gradient glow inside card */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/5 blur-3xl rounded-full pointer-events-none" />
+                        
+                        <p className="text-muted-foreground leading-relaxed mb-6">
+                            Independent work has no borders. {siteName} is architected to support global teams, freelancers, and clients across the United States, Europe, the United Kingdom, Canada, Australia, and 120+ countries. We continuously adapt to localized regulatory landscapes to keep your operations compliant and seamless.
+                        </p>
+                        
+                        <div className="grid sm:grid-cols-2 gap-6">
+                            <div className="flex gap-3">
+                                <ShieldCheck className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <h4 className="font-semibold text-foreground text-sm mb-1">Airtight Data Sovereignty</h4>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        Fully GDPR and CCPA compliant data protection, running on industry-standard encrypted storage arrays with continuous backup failovers.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <Globe className="h-5 w-5 text-brand-primary flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <h4 className="font-semibold text-foreground text-sm mb-1">Localization & Localized Taxes</h4>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        Multi-currency client billing, automatic regional VAT & GST compliance, and W-9/1099 contractor reporting structures built right in.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
