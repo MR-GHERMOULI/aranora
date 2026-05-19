@@ -35,6 +35,17 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${siteName} | Freelancer Management Platform`,
     description: `Aranora is the ultimate all-in-one freelancer management platform. Streamline clients, projects, contracts, invoices, and time tracking built professionally for ${siteName}.`,
+    keywords: [
+      "freelancer platform",
+      "freelance management",
+      "client portal",
+      "project tracking",
+      "time tracking",
+      "smart invoicing",
+      "digital contracts",
+      "e-signatures",
+      "freelance dashboard"
+    ],
     metadataBase: new URL(origin),
     alternates: {
       canonical: "/",
