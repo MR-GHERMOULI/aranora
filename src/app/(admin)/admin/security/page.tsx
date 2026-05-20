@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createAdminClient } from "@/lib/supabase/server"
 import { ShieldAlert, Users, Monitor, MapPin, Ban, UserCheck } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
