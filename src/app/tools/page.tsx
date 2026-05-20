@@ -7,7 +7,10 @@ import PublicNavbar from "@/components/layout/public-navbar";
 import { createClient } from "@/lib/supabase/server";
 import { toolsRegistry } from "@/lib/tools-data";
 
-export async function generateMetadata() {
+import { headers } from "next/headers";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("platform_settings")
@@ -16,9 +19,40 @@ export async function generateMetadata() {
     .single();
   const siteName = data?.value?.site_name || "Aranora";
 
+  const headerList = await headers();
+  const host = headerList.get("host") || "aranora.com";
+  const proto = headerList.get("x-forwarded-proto") || "https";
+  const origin = `${proto}://${host}`;
+
+  const titleText = `Freelance Tools & Features Directory`;
+  const descText = `Explore ${siteName}'s complete suite of professional freelance tools: Client CRM, invoicing, project tracking, e-signatures, task lists, and reports.`;
+  const ogImage = `${origin}/api/og?type=general&badge=TOOLS+DIRECTORY&title=${encodeURIComponent(titleText)}&subtitle=${encodeURIComponent(descText)}`;
+
   return {
-    title: `Freelance Tools & Features Directory | ${siteName}`,
-    description: `Explore ${siteName}'s complete suite of professional freelance tools: Client CRM, invoicing, project tracking, e-signatures, task lists, and reports.`,
+    title: `${titleText} | ${siteName}`,
+    description: descText,
+    openGraph: {
+      title: `${titleText} | ${siteName}`,
+      description: descText,
+      url: `${origin}/tools`,
+      siteName: siteName,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `Explore Freelance Tools & Features Directory`,
+        }
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${titleText} | ${siteName}`,
+      description: descText,
+      images: [ogImage],
+    }
   };
 }
 

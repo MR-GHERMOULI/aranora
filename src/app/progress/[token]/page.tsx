@@ -69,7 +69,10 @@ async function getProjectData(token: string) {
     }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ token: string }> }) {
+import { headers } from "next/headers"
+import { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
     const { token } = await params
     const data = await getProjectData(token)
     const supabase = await createClient()
@@ -81,16 +84,73 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
     
     const siteName = brandingSetting?.value?.site_name || "Aranora"
 
+    const headerList = await headers()
+    const host = headerList.get("host") || "aranora.com"
+    const proto = headerList.get("x-forwarded-proto") || "https"
+    const origin = `${proto}://${host}`
+
     if (data) {
+        const titleText = `${data.project.title} — Project Progress`
+        const descText = `Track the progress of ${data.project.title} securely. Current completion: ${data.stats.percentage}%.`
+        const ogImage = `${origin}/api/og?type=project&badge=PROJECT+PORTAL&title=${encodeURIComponent(data.project.title)}&subtitle=${encodeURIComponent(`Current completion: ${data.stats.percentage}% done. Track tasks, files, and milestones.`)}&progress=${data.stats.percentage}`
+
         return {
-            title: `${data.project.title} — Project Progress | ${siteName}`,
-            description: `Track the progress of ${data.project.title}. ${data.stats.percentage}% complete.`,
+            title: `${titleText} | ${siteName}`,
+            description: descText,
+            openGraph: {
+                title: `${titleText} | ${siteName}`,
+                description: descText,
+                url: `${origin}/progress/${token}`,
+                siteName: siteName,
+                images: [
+                    {
+                        url: ogImage,
+                        width: 1200,
+                        height: 630,
+                        alt: `Track Project Progress: ${data.project.title}`,
+                    }
+                ],
+                locale: "en_US",
+                type: "website",
+            },
+            twitter: {
+                card: "summary_large_image",
+                title: `${titleText} | ${siteName}`,
+                description: descText,
+                images: [ogImage],
+            }
         }
     }
 
+    const defaultTitle = `Project Progress | ${siteName}`
+    const defaultDesc = 'Track project progress in real-time.'
+    const defaultOg = `${origin}/api/og?type=project&badge=PROJECT+PORTAL&title=${encodeURIComponent(defaultTitle)}&subtitle=${encodeURIComponent(defaultDesc)}&progress=0`
+
     return {
-        title: `Project Progress | ${siteName}`,
-        description: 'Track project progress in real-time.',
+        title: defaultTitle,
+        description: defaultDesc,
+        openGraph: {
+            title: defaultTitle,
+            description: defaultDesc,
+            url: `${origin}/progress/${token}`,
+            siteName: siteName,
+            images: [
+                {
+                    url: defaultOg,
+                    width: 1200,
+                    height: 630,
+                    alt: `Project Progress`,
+                }
+            ],
+            locale: "en_US",
+            type: "website",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: defaultTitle,
+            description: defaultDesc,
+            images: [defaultOg],
+        }
     }
 }
 

@@ -64,20 +64,20 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: siteName,
       images: [
         {
-          url: "/api/favicon",
-          width: 512,
-          height: 512,
-          alt: `${siteName} Platform Logo`,
+          url: `${origin}/api/og?title=${encodeURIComponent(siteName)}&subtitle=${encodeURIComponent('The ultimate all-in-one freelancer management platform.')}&badge=PLATFORM&type=general`,
+          width: 1200,
+          height: 630,
+          alt: `${siteName} Freelancer Platform`,
         }
       ],
       locale: "en_US",
       type: "website",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: `${siteName} | Freelancer Management Platform`,
       description: `Aranora is the ultimate all-in-one freelancer management platform. Streamline clients, projects, contracts, invoices, and time tracking built professionally for ${siteName}.`,
-      images: ["/api/favicon"],
+      images: [`${origin}/api/og?title=${encodeURIComponent(siteName)}&subtitle=${encodeURIComponent('The ultimate all-in-one freelancer management platform.')}&badge=PLATFORM&type=general`],
     },
     icons: {
       icon: "/api/favicon",

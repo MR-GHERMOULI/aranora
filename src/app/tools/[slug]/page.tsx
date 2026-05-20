@@ -19,6 +19,8 @@ export async function generateStaticParams() {
   }));
 }
 
+import { headers } from "next/headers";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const tool = getToolBySlug(slug);
@@ -31,13 +33,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single();
   const siteName = data?.value?.site_name || "Aranora";
 
+  const headerList = await headers();
+  const host = headerList.get("host") || "aranora.com";
+  const proto = headerList.get("x-forwarded-proto") || "https";
+  const origin = `${proto}://${host}`;
+
   if (!tool) {
     return { title: `Tool Not Found | ${siteName}` };
   }
 
+  const titleText = `${tool.title} for Freelancers | Detailed Summary & Features`;
+  const descText = tool.shortDesc;
+  const ogImage = `${origin}/api/og?type=general&badge=FREELANCE+TOOL&title=${encodeURIComponent(tool.title)}&subtitle=${encodeURIComponent(tool.shortDesc)}`;
+
   return {
-    title: `${tool.title} for Freelancers | Detailed Summary & Features | ${siteName}`,
-    description: tool.shortDesc,
+    title: `${titleText} | ${siteName}`,
+    description: descText,
+    openGraph: {
+      title: `${titleText} | ${siteName}`,
+      description: descText,
+      url: `${origin}/tools/${slug}`,
+      siteName: siteName,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${tool.title} Freelancer Tool`,
+        }
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${titleText} | ${siteName}`,
+      description: descText,
+      images: [ogImage],
+    }
   };
 }
 

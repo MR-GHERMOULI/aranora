@@ -10,13 +10,15 @@ interface PageProps {
     params: Promise<{ slug: string }>
 }
 
+import { headers } from "next/headers"
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params
     const supabase = await createClient()
 
     const { data: article } = await supabase
         .from("articles")
-        .select("title, meta_description, excerpt")
+        .select("title, meta_description, excerpt, cover_image")
         .eq("slug", slug)
         .eq("status", "published")
         .lte("published_at", new Date().toISOString())
@@ -30,13 +32,55 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     
     const siteName = brandingSetting?.value?.site_name || "Aranora";
 
+    const headerList = await headers();
+    const host = headerList.get("host") || "aranora.com";
+    const proto = headerList.get("x-forwarded-proto") || "https";
+    const origin = `${proto}://${host}`;
+
     if (!article) {
         return { title: `Article Not Found | ${siteName}` }
     }
 
+    const titleText = `${article.title} | ${siteName} Blog`;
+    const descText = article.meta_description || article.excerpt || `Read ${article.title} on the ${siteName} Blog.`;
+    
+    // Choose cover image or generate custom OG image
+    let ogImage = "";
+    if (article.cover_image) {
+        if (article.cover_image.startsWith("http")) {
+            ogImage = article.cover_image;
+        } else {
+            ogImage = `${origin}${article.cover_image.startsWith("/") ? "" : "/"}${article.cover_image}`;
+        }
+    } else {
+        ogImage = `${origin}/api/og?type=blog&badge=LATEST+BLOG&title=${encodeURIComponent(article.title)}&subtitle=${encodeURIComponent(article.excerpt || "Read our latest article on the blog.")}`;
+    }
+
     return {
-        title: `${article.title} | ${siteName} Blog`,
-        description: article.meta_description || article.excerpt || "",
+        title: titleText,
+        description: descText,
+        openGraph: {
+            title: titleText,
+            description: descText,
+            url: `${origin}/blog/${slug}`,
+            siteName: siteName,
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: article.title,
+                }
+            ],
+            locale: "en_US",
+            type: "article",
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: titleText,
+            description: descText,
+            images: [ogImage],
+        }
     }
 }
 
