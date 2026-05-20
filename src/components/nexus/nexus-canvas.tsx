@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type {
   NexusShape, NexusConnection, NexusPath, ToolMode, GeneratedTask,
   CanvasViewport, NexusCanvas as NexusCanvasData, CanvasTheme,
@@ -39,6 +40,7 @@ interface NexusCanvasProps {
 }
 
 export function NexusCanvas({ projects, userId, className, initialProjectId, initialCanvasName }: NexusCanvasProps) {
+  const router = useRouter();
   const { isCollapsed, toggleSidebar } = useSidebar();
   const [shapes, setShapes] = useState<NexusShape[]>([]);
   const [connections, setConnections] = useState<NexusConnection[]>([]);
@@ -1125,6 +1127,7 @@ export function NexusCanvas({ projects, userId, className, initialProjectId, ini
         if (r?.success) count++;
       }
       toast.success(`Created ${count} task${count !== 1 ? 's' : ''}!`);
+      router.refresh();
       setGeneratedTasks(null);
     } catch { toast.error('Failed to create some tasks.'); }
     finally { setIsPushing(false); }
